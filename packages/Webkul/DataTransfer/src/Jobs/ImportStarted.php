@@ -9,7 +9,7 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Webkul\DataTransfer\Helpers\Import as ImportHelper;
 
-class ImportCompleted implements ShouldQueue
+class ImportStarted implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
@@ -33,6 +33,6 @@ class ImportCompleted implements ShouldQueue
     {
         app(ImportHelper::class)
             ->setImport($this->import)
-            ->completed();
+            ->started();
     }
 }

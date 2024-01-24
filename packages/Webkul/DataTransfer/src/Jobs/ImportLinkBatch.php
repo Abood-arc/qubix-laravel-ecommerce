@@ -2,6 +2,7 @@
 
 namespace Webkul\DataTransfer\Jobs;
 
+use Illuminate\Bus\Batchable;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -9,19 +10,19 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Webkul\DataTransfer\Helpers\Import as ImportHelper;
 
-class ImportCompleted implements ShouldQueue
+class ImportLinkBatch implements ShouldQueue
 {
-    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+    use Batchable, Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     /**
      * Create a new job instance.
      *
-     * @param  mixed  $import
+     * @param  mixed  $importBatch
      * @return void
      */
-    public function __construct(protected $import)
+    public function __construct(protected $importBatch)
     {
-        $this->import = $import;
+        $this->importBatch = $importBatch;
     }
 
     /**
@@ -31,8 +32,10 @@ class ImportCompleted implements ShouldQueue
      */
     public function handle()
     {
-        app(ImportHelper::class)
-            ->setImport($this->import)
-            ->completed();
+        $typeImported = app(ImportHelper::class)
+            ->setImport($this->importBatch->import)
+            ->getTypeImporter();
+
+        $typeImported->importLinksBatch($this->importBatch);
     }
 }
