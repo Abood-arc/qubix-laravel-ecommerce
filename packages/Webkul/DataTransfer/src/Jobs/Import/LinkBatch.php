@@ -1,6 +1,6 @@
 <?php
 
-namespace Webkul\DataTransfer\Jobs;
+namespace Webkul\DataTransfer\Jobs\Import;
 
 use Illuminate\Bus\Batchable;
 use Illuminate\Bus\Queueable;
@@ -10,7 +10,7 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Webkul\DataTransfer\Helpers\Import as ImportHelper;
 
-class ImportLinkBatch implements ShouldQueue
+class LinkBatch implements ShouldQueue
 {
     use Batchable, Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
@@ -36,6 +36,6 @@ class ImportLinkBatch implements ShouldQueue
             ->setImport($this->importBatch->import)
             ->getTypeImporter();
 
-        $typeImported->importLinksBatch($this->importBatch);
+        $typeImported->linkBatch($this->importBatch);
     }
 }
