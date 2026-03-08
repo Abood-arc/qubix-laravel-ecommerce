@@ -3,7 +3,7 @@
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use DigitalLabs\Attribute\Models\Attribute;
-use DigitalLabs\Faker\Helpers\Product as ProductFaker;
+use Webkul\Faker\Helpers\Product as ProductFaker;
 use DigitalLabs\Product\Models\Product;
 use DigitalLabs\Product\Models\ProductAttributeValue;
 use DigitalLabs\Product\Models\ProductFlat;

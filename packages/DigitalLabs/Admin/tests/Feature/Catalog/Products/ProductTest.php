@@ -1,6 +1,6 @@
 <?php
 
-use DigitalLabs\Faker\Helpers\Product as ProductFaker;
+use Webkul\Faker\Helpers\Product as ProductFaker;
 use DigitalLabs\Product\Contracts\ProductFlat;
 
 use function Pest\Laravel\get;

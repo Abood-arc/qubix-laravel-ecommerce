@@ -6,7 +6,7 @@ use DigitalLabs\Admin\Mail\Customer\NewCustomerNotification;
 use DigitalLabs\Core\Models\CoreConfig;
 use DigitalLabs\Customer\Models\Customer;
 use DigitalLabs\Customer\Models\CustomerNote;
-use DigitalLabs\Faker\Helpers\Customer as CustomerFaker;
+use Webkul\Faker\Helpers\Customer as CustomerFaker;
 use DigitalLabs\Shop\Mail\Customer\NoteNotification;
 
 use function Pest\Laravel\get;

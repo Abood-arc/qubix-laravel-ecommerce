@@ -6,7 +6,7 @@ use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Notification;
 use DigitalLabs\Customer\Models\Customer;
 use DigitalLabs\Customer\Models\CustomerAddress;
-use DigitalLabs\Faker\Helpers\Product as ProductFaker;
+use Webkul\Faker\Helpers\Product as ProductFaker;
 use DigitalLabs\Product\Models\ProductReview;
 use DigitalLabs\Shop\Mail\Customer\ResetPasswordNotification;
 use DigitalLabs\Shop\Mail\Customer\UpdatePasswordNotification;

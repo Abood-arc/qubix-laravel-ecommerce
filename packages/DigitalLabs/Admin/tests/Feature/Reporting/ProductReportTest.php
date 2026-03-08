@@ -10,7 +10,7 @@ use DigitalLabs\Checkout\Models\CartShippingRate;
 use DigitalLabs\Customer\Models\Customer;
 use DigitalLabs\Customer\Models\CustomerAddress;
 use DigitalLabs\Customer\Models\Wishlist;
-use DigitalLabs\Faker\Helpers\Product as ProductFaker;
+use Webkul\Faker\Helpers\Product as ProductFaker;
 use DigitalLabs\Marketing\Models\SearchTerm;
 use DigitalLabs\Product\Models\ProductReview;
 use DigitalLabs\Sales\Models\Invoice;

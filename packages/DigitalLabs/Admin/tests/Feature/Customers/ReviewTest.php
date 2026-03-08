@@ -4,7 +4,7 @@ use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Storage;
 use DigitalLabs\Customer\Models\Customer;
-use DigitalLabs\Faker\Helpers\Product as ProductFaker;
+use Webkul\Faker\Helpers\Product as ProductFaker;
 use DigitalLabs\Product\Models\ProductReview;
 use DigitalLabs\Product\Models\ProductReviewAttachment;
 

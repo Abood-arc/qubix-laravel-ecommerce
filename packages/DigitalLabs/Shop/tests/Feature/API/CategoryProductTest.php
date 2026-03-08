@@ -1,7 +1,7 @@
 <?php
 
-use DigitalLabs\Faker\Helpers\Category as CategoryFaker;
-use DigitalLabs\Faker\Helpers\Product as ProductFaker;
+use Webkul\Faker\Helpers\Category as CategoryFaker;
+use Webkul\Faker\Helpers\Product as ProductFaker;
 use DigitalLabs\Product\Helpers\Toolbar;
 
 use function Pest\Laravel\getJson;

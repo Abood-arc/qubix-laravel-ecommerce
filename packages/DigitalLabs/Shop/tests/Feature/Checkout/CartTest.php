@@ -5,7 +5,7 @@ use DigitalLabs\Checkout\Models\CartAddress;
 use DigitalLabs\Checkout\Models\CartItem;
 use DigitalLabs\Core\Models\CoreConfig;
 use DigitalLabs\Customer\Models\Customer;
-use DigitalLabs\Faker\Helpers\Product as ProductFaker;
+use Webkul\Faker\Helpers\Product as ProductFaker;
 use DigitalLabs\Tax\Models\TaxCategory;
 use DigitalLabs\Tax\Models\TaxMap;
 use DigitalLabs\Tax\Models\TaxRate;

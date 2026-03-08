@@ -98,7 +98,10 @@
             "DigitalLabs\\Tax\\": "packages/DigitalLabs/Tax/src",
             "DigitalLabs\\Theme\\": "packages/DigitalLabs/Theme/src",
             "DigitalLabs\\User\\": "packages/DigitalLabs/User/src"
-        }
+        },
+        "files": [
+            "bootstrap/webkul_compat.php"
+        ]
     },
     "autoload-dev": {
         "psr-4": {

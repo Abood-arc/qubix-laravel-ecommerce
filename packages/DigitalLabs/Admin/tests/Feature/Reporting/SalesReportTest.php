@@ -9,7 +9,7 @@ use DigitalLabs\Checkout\Models\CartPayment;
 use DigitalLabs\Checkout\Models\CartShippingRate;
 use DigitalLabs\Customer\Models\Customer;
 use DigitalLabs\Customer\Models\CustomerAddress;
-use DigitalLabs\Faker\Helpers\Product as ProductFaker;
+use Webkul\Faker\Helpers\Product as ProductFaker;
 use DigitalLabs\Sales\Models\Invoice;
 use DigitalLabs\Sales\Models\InvoiceItem;
 use DigitalLabs\Sales\Models\Order;

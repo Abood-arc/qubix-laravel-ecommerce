@@ -1,7 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Hash;
-use DigitalLabs\Faker\Helpers\Customer as CustomerFaker;
+use Webkul\Faker\Helpers\Customer as CustomerFaker;
 
 use function Pest\Laravel\get;
 use function Pest\Laravel\post;

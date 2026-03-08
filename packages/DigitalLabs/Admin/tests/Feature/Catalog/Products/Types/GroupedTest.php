@@ -1,6 +1,6 @@
 <?php
 
-use DigitalLabs\Faker\Helpers\Product as ProductFaker;
+use Webkul\Faker\Helpers\Product as ProductFaker;
 use DigitalLabs\Product\Models\Product;
 use DigitalLabs\Product\Models\ProductFlat;
 use DigitalLabs\Product\Models\ProductGroupedProduct;

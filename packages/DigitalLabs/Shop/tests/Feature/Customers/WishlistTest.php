@@ -2,7 +2,7 @@
 
 use DigitalLabs\Customer\Models\Customer as ModelsCustomer;
 use DigitalLabs\Customer\Models\Wishlist;
-use DigitalLabs\Faker\Helpers\Product as ProductFaker;
+use Webkul\Faker\Helpers\Product as ProductFaker;
 
 use function Pest\Laravel\deleteJson;
 use function Pest\Laravel\get;

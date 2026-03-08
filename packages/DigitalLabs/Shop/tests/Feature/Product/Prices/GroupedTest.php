@@ -6,7 +6,7 @@ use DigitalLabs\CatalogRule\Models\CatalogRule;
 use DigitalLabs\CatalogRule\Models\CatalogRuleProductPrice;
 use DigitalLabs\Customer\Models\Customer;
 use DigitalLabs\Customer\Models\CustomerAddress;
-use DigitalLabs\Faker\Helpers\Product as ProductFaker;
+use Webkul\Faker\Helpers\Product as ProductFaker;
 use DigitalLabs\Product\Models\ProductCustomerGroupPrice;
 use DigitalLabs\Tax\Models\TaxCategory;
 use DigitalLabs\Tax\Models\TaxMap;

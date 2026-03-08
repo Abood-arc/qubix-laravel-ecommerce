@@ -12,7 +12,7 @@ use DigitalLabs\Checkout\Models\CartShippingRate;
 use DigitalLabs\Core\Models\CoreConfig;
 use DigitalLabs\Customer\Models\Customer;
 use DigitalLabs\Customer\Models\CustomerAddress;
-use DigitalLabs\Faker\Helpers\Product as ProductFaker;
+use Webkul\Faker\Helpers\Product as ProductFaker;
 use DigitalLabs\Sales\Models\Order;
 use DigitalLabs\Sales\Models\OrderAddress;
 use DigitalLabs\Sales\Models\OrderItem;

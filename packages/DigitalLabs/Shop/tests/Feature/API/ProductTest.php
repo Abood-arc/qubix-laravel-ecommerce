@@ -1,7 +1,7 @@
 <?php
 
 use Pest\Expectation;
-use DigitalLabs\Faker\Helpers\Product as ProductFaker;
+use Webkul\Faker\Helpers\Product as ProductFaker;
 
 use function Pest\Laravel\getJson;
 

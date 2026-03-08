@@ -4,7 +4,7 @@ use Illuminate\Http\UploadedFile;
 use DigitalLabs\Attribute\Models\Attribute;
 use DigitalLabs\Category\Models\Category;
 use DigitalLabs\Category\Models\CategoryTranslation;
-use DigitalLabs\Faker\Helpers\Category as CategoryFaker;
+use Webkul\Faker\Helpers\Category as CategoryFaker;
 
 use function Pest\Laravel\deleteJson;
 use function Pest\Laravel\get;

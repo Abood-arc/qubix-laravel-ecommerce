@@ -6,7 +6,7 @@ use DigitalLabs\Checkout\Models\CartItem;
 use DigitalLabs\Checkout\Models\CartPayment;
 use DigitalLabs\Customer\Models\Customer;
 use DigitalLabs\Customer\Models\CustomerAddress;
-use DigitalLabs\Faker\Helpers\Product as ProductFaker;
+use Webkul\Faker\Helpers\Product as ProductFaker;
 use DigitalLabs\Product\Models\ProductReview;
 use DigitalLabs\Sales\Models\Invoice;
 use DigitalLabs\Sales\Models\InvoiceItem;

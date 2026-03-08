@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 use DigitalLabs\Core\Models\SubscribersList;
 use DigitalLabs\Customer\Models\CompareItem;
-use DigitalLabs\Faker\Helpers\Product as ProductFaker;
+use Webkul\Faker\Helpers\Product as ProductFaker;
 use DigitalLabs\Shop\Mail\Customer\SubscriptionNotification;
 
 use function Pest\Laravel\deleteJson;

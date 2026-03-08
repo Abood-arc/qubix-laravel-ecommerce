@@ -3,7 +3,7 @@
 namespace DigitalLabs\Shop\Tests\Concerns;
 
 use DigitalLabs\Customer\Contracts\Customer as CustomerContract;
-use DigitalLabs\Faker\Helpers\Customer as CustomerFaker;
+use Webkul\Faker\Helpers\Customer as CustomerFaker;
 
 trait ShopTestBench
 {
