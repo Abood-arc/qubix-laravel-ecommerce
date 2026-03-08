@@ -2,7 +2,6 @@
 .agent*
 .claude
 .cursor
-.env
 .env.testing
 .idea
 .php_cs.cache
