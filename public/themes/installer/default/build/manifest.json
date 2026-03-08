@@ -4,13 +4,13 @@
     "src": "src/Resources/assets/css/app.css",
     "isEntry": true
   },
-  "src/Resources/assets/fonts/bagisto-installer.woff": {
-    "file": "assets/bagisto-installer-CR1_oTt2.woff",
-    "src": "src/Resources/assets/fonts/bagisto-installer.woff"
+  "src/Resources/assets/fonts/qubix-installer.woff": {
+    "file": "assets/qubix-installer-CR1_oTt2.woff",
+    "src": "src/Resources/assets/fonts/qubix-installer.woff"
   },
-  "src/Resources/assets/images/installer/bagisto-logo.svg": {
-    "file": "assets/bagisto-logo-CXf-crI0.svg",
-    "src": "src/Resources/assets/images/installer/bagisto-logo.svg"
+  "src/Resources/assets/images/installer/qubix-logo.svg": {
+    "file": "assets/qubix-logo-CXf-crI0.svg",
+    "src": "src/Resources/assets/images/installer/qubix-logo.svg"
   },
   "src/Resources/assets/images/installer/favicon.ico": {
     "file": "assets/favicon--PZ4cBiP.ico",

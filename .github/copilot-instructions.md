@@ -1,8 +1,8 @@
-# Bagisto Development Guide
+# Qubix Development Guide
 
 ## Project Overview
 
-This is a **Bagisto** e-commerce platform - an open-source Laravel-based e-commerce framework. Bagisto is built with:
+This is a **Qubix** e-commerce platform - an open-source Laravel-based e-commerce framework. Qubix is built with:
 - **PHP** (Server-side)
 - **Laravel** (PHP Framework)
 - **Vue.js** (Frontend components)
@@ -12,7 +12,7 @@ This is a **Bagisto** e-commerce platform - an open-source Laravel-based e-comme
 
 ### Modular Package Structure
 
-Bagisto follows a modular, package-based architecture. All core features are organized into Laravel packages located in `packages/Webkul/`.
+Qubix follows a modular, package-based architecture. All core features are organized into Laravel packages located in `packages/DigitalLabs/`.
 
 ### Available Packages
 
@@ -69,7 +69,7 @@ Package/src/
 
 ### Repository Pattern
 
-Bagisto uses **Prettus L5 Repository** for data access abstraction:
+Qubix uses **Prettus L5 Repository** for data access abstraction:
 - Repository Contracts define interfaces
 - Repository Implementations contain data access logic
 - Works with Eloquent models
@@ -86,7 +86,7 @@ Models use proxy classes (e.g., `ProductProxy`) for extensibility.
 
 ### Naming Conventions
 
-- **Namespace**: `Webkul\<PackageName>`
+- **Namespace**: `DigitalLabs\<PackageName>`
 - **Routes**: Separate `admin-routes.php` and `shop-routes.php`
 - **Views**: Organized in `admin/` and `shop/` folders
 - **Models**: Singular name (e.g., `Product`, `Category`)
@@ -102,26 +102,26 @@ Models use proxy classes (e.g., `ProductProxy`) for extensibility.
 
 ### Creating New Packages
 
-Use Bagisto Package Generator:
+Use Qubix Package Generator:
 ```bash
-composer require bagisto/bagisto-package-generator
-php artisan package:make Webkul/<PackageName>
+composer require qubix/qubix-package-generator
+php artisan package:make DigitalLabs/<PackageName>
 ```
 
 Or manually create:
-1. Create `packages/Webkul/<PackageName>/src/`
+1. Create `packages/DigitalLabs/<PackageName>/src/`
 2. Create Service Provider in `src/Providers/`
 3. Update composer.json and register provider
 
 ## Working with Features
 
 ### Shipping Methods
-- Extend `Webkul\Shipping\Carriers\AbstractCarrier`
+- Extend `DigitalLabs\Shipping\Carriers\AbstractCarrier`
 - Configure in `Config/system.php`
 - Register in service provider
 
 ### Payment Methods
-- Extend `Webkul\Payment\Payment\AbstractPayment`
+- Extend `DigitalLabs\Payment\Payment\AbstractPayment`
 - Configure in `Config/system.php`
 
 ### Product Types
@@ -129,7 +129,7 @@ Or manually create:
 - Configure in `Config/product_types.php`
 
 ### Themes
-- Create in `packages/Webkul/<Theme>/`
+- Create in `packages/DigitalLabs/<Theme>/`
 - Use Vite for asset bundling
 - Follow Blade templating conventions
 
@@ -148,14 +148,14 @@ Or manually create:
 
 ## Documentation References
 
-- [Architecture Overview](https://devdocs.bagisto.com/architecture/overview.html)
-- [Backend Architecture](https://devdocs.bagisto.com/architecture/backend.html)
-- [Frontend Architecture](https://devdocs.bagisto.com/architecture/frontend.html)
-- [Package Development](https://devdocs.bagisto.com/package-development/getting-started.html)
-- [Shipping Method Development](https://devdocs.bagisto.com/shipping-method-development/getting-started.html)
-- [Payment Method Development](https://devdocs.bagisto.com/payment-method-development/getting-started.html)
-- [Product Type Development](https://devdocs.bagisto.com/product-type-development/getting-started.html)
-- [Theme Development](https://devdocs.bagisto.com/theme-development/getting-started.html)
+- [Architecture Overview](https://devdocs.qubix.com/architecture/overview.html)
+- [Backend Architecture](https://devdocs.qubix.com/architecture/backend.html)
+- [Frontend Architecture](https://devdocs.qubix.com/architecture/frontend.html)
+- [Package Development](https://devdocs.qubix.com/package-development/getting-started.html)
+- [Shipping Method Development](https://devdocs.qubix.com/shipping-method-development/getting-started.html)
+- [Payment Method Development](https://devdocs.qubix.com/payment-method-development/getting-started.html)
+- [Product Type Development](https://devdocs.qubix.com/product-type-development/getting-started.html)
+- [Theme Development](https://devdocs.qubix.com/theme-development/getting-started.html)
 
 ## Important Notes
 

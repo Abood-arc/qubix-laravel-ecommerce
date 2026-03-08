@@ -1,0 +1,26 @@
+{
+    "name": "qubix/laravel-shipping",
+    "description": "Shipping Package for Shipping Method",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "rahulshukla-digitalLabs",
+            "email": "rahulshukla.symfony517@digitalLabs.com"
+        }
+    ],
+    "require": {},
+    "autoload": {
+        "psr-4": {
+            "DigitalLabs\\Shipping\\": "src/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "DigitalLabs\\Shipping\\Providers\\ShippingServiceProvider"
+            ],
+            "aliases": {}
+        }
+    },
+    "minimum-stability": "dev"
+}

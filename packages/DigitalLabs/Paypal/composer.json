@@ -1,0 +1,25 @@
+{
+    "name": "qubix/laravel-paypal",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Jitendra Singh",
+            "email": "jitendra@digitalLabs.com"
+        }
+    ],
+    "require": {},
+    "autoload": {
+        "psr-4": {
+            "DigitalLabs\\Paypal\\": "src/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "DigitalLabs\\Paypal\\Providers\\PaypalServiceProvider"
+            ],
+            "aliases": {}
+        }
+    },
+    "minimum-stability": "dev"
+}

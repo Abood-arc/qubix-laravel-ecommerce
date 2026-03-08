@@ -1,0 +1,27 @@
+{
+    "name": "qubix/laravel-attribute",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Jitendra Singh",
+            "email": "jitendra@digitalLabs.com"
+        }
+    ],
+    "require": {
+        "qubix/laravel-core": "dev-master"
+    },
+    "autoload": {
+        "psr-4": {
+            "DigitalLabs\\Attribute\\": "src/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "DigitalLabs\\Attribute\\Providers\\AttributeServiceProvider"
+            ],
+            "aliases": { }
+        }
+    },
+    "minimum-stability": "dev"
+}

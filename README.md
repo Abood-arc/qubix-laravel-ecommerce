@@ -1,4 +1,4 @@
-# Bagisto Local Development Guide
+# Qubix Local Development Guide
 
 This repository is configured to run locally with Laravel Sail (Docker).
 
@@ -55,7 +55,7 @@ cp .env.example .env
 composer install
 ./vendor/bin/sail up -d
 ./vendor/bin/sail artisan key:generate
-./vendor/bin/sail artisan bagisto:install --skip-env-check --skip-github-star
+./vendor/bin/sail artisan qubix:install --skip-env-check --skip-github-star
 ```
 
 If port `3306` is busy on your machine, set a different host port in `.env`:

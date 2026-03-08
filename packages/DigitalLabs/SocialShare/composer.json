@@ -1,0 +1,25 @@
+{
+    "name": "qubix/laravel-social-share",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Qubix",
+            "email": "support@qubix.com"
+        }
+    ],
+    "require": {},
+    "autoload": {
+        "psr-4": {
+            "DigitalLabs\\SocialShare\\": "src/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "DigitalLabs\\SocialShare\\Providers\\SocialShareServiceProvider"
+            ],
+            "aliases": {}
+        }
+    },
+    "minimum-stability": "dev"
+}

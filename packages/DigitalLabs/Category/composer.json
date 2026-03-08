@@ -1,0 +1,25 @@
+{
+    "name": "qubix/laravel-category",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Jitendra Singh",
+            "email": "jitendra@digitalLabs.com"
+        }
+    ],
+    "require": {},
+    "autoload": {
+        "psr-4": {
+            "DigitalLabs\\Category\\": "src/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "DigitalLabs\\Category\\Providers\\CategoryServiceProvider"
+            ],
+            "aliases": { }
+        }
+    },
+    "minimum-stability": "dev"
+}

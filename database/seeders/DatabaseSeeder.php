@@ -3,7 +3,7 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use Webkul\Installer\Database\Seeders\DatabaseSeeder as BagistoDatabaseSeeder;
+use DigitalLabs\Installer\Database\Seeders\DatabaseSeeder as QubixDatabaseSeeder;
 
 class DatabaseSeeder extends Seeder
 {
@@ -14,6 +14,6 @@ class DatabaseSeeder extends Seeder
      */
     public function run()
     {
-        $this->call(BagistoDatabaseSeeder::class);
+        $this->call(QubixDatabaseSeeder::class);
     }
 }

@@ -1,0 +1,28 @@
+{
+    "name": "qubix/laravel-catalog-rule",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Jitendra Singh",
+            "email": "jitendra@digitalLabs.com"
+        }
+    ],
+    "require": {
+        "qubix/laravel-core": "dev-master",
+        "qubix/laravel-rule": "dev-master"
+    },
+    "autoload": {
+        "psr-4": {
+            "DigitalLabs\\CatalogRule\\": "src/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "DigitalLabs\\CatalogRule\\Providers\\CatalogRuleServiceProvider"
+            ],
+            "aliases": {}
+        }
+    },
+    "minimum-stability": "dev"
+}

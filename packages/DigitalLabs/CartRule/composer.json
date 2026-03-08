@@ -1,0 +1,28 @@
+{
+    "name": "qubix/laravel-cart-rule",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Jitendra Singh",
+            "email": "jitendra@digitalLabs.com"
+        }
+    ],
+    "require": {
+        "qubix/laravel-core": "dev-master",
+        "qubix/laravel-rule": "dev-master"
+    },
+    "autoload": {
+        "psr-4": {
+            "DigitalLabs\\CartRule\\": "src/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "DigitalLabs\\CartRule\\Providers\\CartRuleServiceProvider"
+            ],
+            "aliases": {}
+        }
+    },
+    "minimum-stability": "dev"
+}

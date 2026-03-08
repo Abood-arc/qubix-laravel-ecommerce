@@ -19,9 +19,9 @@
     "src": "src/Resources/assets/css/app.css",
     "isEntry": true
   },
-  "src/Resources/assets/fonts/bagisto-shop.woff": {
-    "file": "assets/bagisto-shop-BHAKyv0r.woff",
-    "src": "src/Resources/assets/fonts/bagisto-shop.woff"
+  "src/Resources/assets/fonts/qubix-shop.woff": {
+    "file": "assets/qubix-shop-BHAKyv0r.woff",
+    "src": "src/Resources/assets/fonts/qubix-shop.woff"
   },
   "src/Resources/assets/images/cash-on-delivery.png": {
     "file": "assets/cash-on-delivery-Ck2rBtSq.png",

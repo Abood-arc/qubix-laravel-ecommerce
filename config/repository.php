@@ -144,7 +144,7 @@ return [
         ],
 
         'repositories' => [
-            'Webkul\Core\Repositories\CoreConfigRepository' => [
+            'DigitalLabs\Core\Repositories\CoreConfigRepository' => [
                 'enabled' => true,
 
                 // 'minutes'    => 10080,
@@ -166,23 +166,23 @@ return [
                 // ],
             ],
 
-            'Webkul\Core\Repositories\ChannelRepository' => [
+            'DigitalLabs\Core\Repositories\ChannelRepository' => [
                 'enabled' => true,
             ],
 
-            'Webkul\Core\Repositories\CountryRepository' => [
+            'DigitalLabs\Core\Repositories\CountryRepository' => [
                 'enabled' => true,
             ],
 
-            'Webkul\Core\Repositories\CountryStateRepository' => [
+            'DigitalLabs\Core\Repositories\CountryStateRepository' => [
                 'enabled' => true,
             ],
 
-            'Webkul\Core\Repositories\CurrencyRepository' => [
+            'DigitalLabs\Core\Repositories\CurrencyRepository' => [
                 'enabled' => true,
             ],
 
-            'Webkul\Core\Repositories\LocaleRepository' => [
+            'DigitalLabs\Core\Repositories\LocaleRepository' => [
                 'enabled' => true,
             ],
         ],

@@ -1,0 +1,26 @@
+{
+    "name": "qubix/laravel-customer",
+    "description": "Customers Package for themeing and various features for customers",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Qubix",
+            "email": "support@qubix.com"
+        }
+    ],
+    "require": {},
+    "autoload": {
+        "psr-4": {
+            "DigitalLabs\\Customer\\": "src/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "DigitalLabs\\Customer\\Providers\\CustomerServiceProvider"
+            ],
+            "aliases": {}
+        }
+    },
+    "minimum-stability": "dev"
+}

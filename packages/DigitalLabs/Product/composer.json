@@ -1,0 +1,27 @@
+{
+    "name": "qubix/laravel-product",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Jitendra Singh",
+            "email": "jitendra@digitalLabs.com"
+        }
+    ],
+    "require": {},
+    "autoload": {
+        "psr-4": {
+            "DigitalLabs\\Product\\": "src/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "DigitalLabs\\Product\\Providers\\ProductServiceProvider"
+            ],
+            "aliases": {
+                "Bouncer": "DigitalLabs\\Product\\Facades\\Bouncer"
+            }
+        }
+    },
+    "minimum-stability": "dev"
+}

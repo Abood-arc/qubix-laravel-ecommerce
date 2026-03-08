@@ -1,0 +1,26 @@
+{
+    "name": "qubix/laravel-shop",
+    "license": "MIT",
+    "description" : "Shop package for store front and customers",
+    "authors": [
+        {
+            "name": "Qubix",
+            "email": "support@qubix.com"
+        }
+    ],
+    "require": {},
+    "autoload": {
+        "psr-4": {
+            "DigitalLabs\\Shop\\": "src/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "DigitalLabs\\Shop\\Providers\\ShopServiceProvider"
+            ],
+            "aliases": {}
+        }
+    },
+    "minimum-stability": "dev"
+}

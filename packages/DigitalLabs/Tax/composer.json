@@ -1,0 +1,26 @@
+{
+    "name": "qubix/laravel-tax",
+    "license": "MIT",
+    "description" : "Tax package for store front and customers",
+    "authors": [
+        {
+            "name": "Qubix",
+            "email": "support@qubix.com"
+        }
+    ],
+    "require": {},
+    "autoload": {
+        "psr-4": {
+            "DigitalLabs\\Tax\\": "src/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "DigitalLabs\\Tax\\Providers\\TaxServiceProvider"
+            ],
+            "aliases": {}
+        }
+    },
+    "minimum-stability": "dev"
+}

@@ -23,7 +23,7 @@
 ## Upgrading To v2.3 From v2.2
 
 > [!NOTE]
-> We strive to document every potential breaking change. However, as some of these alterations occur in lesser-known sections of Bagisto, only a fraction of them may impact your application.
+> We strive to document every potential breaking change. However, as some of these alterations occur in lesser-known sections of Qubix, only a fraction of them may impact your application.
 
 ### Updating Dependencies
 
@@ -60,7 +60,7 @@ We have upgraded the NPM dependencies to Vite 5 and the Laravel Vite Plugin to v
 
 With Laravel 11, a new default application structure has been introduced, resulting in a leaner setup with fewer default files. This update reduces the number of service providers, middleware, and configuration files in the framework.
 
-Since Bagisto is built on top of Laravel, we have also updated Bagisto to Laravel 11 and adopted the same streamlined approach to maintain compatibility. For more detailed information, please refer to the [Laravel documentation](https://laravel.com/docs/11.x). 
+Since Qubix is built on top of Laravel, we have also updated Qubix to Laravel 11 and adopted the same streamlined approach to maintain compatibility. For more detailed information, please refer to the [Laravel documentation](https://laravel.com/docs/11.x). 
 
 ### Environment Keys Changes
 
@@ -79,7 +79,7 @@ We have synchronized most of the new .env keys introduced in Laravel's latest re
 + QUEUE_CONNECTION=database
 ```
 
-Additionally, the following keys have been removed to prevent the `.env` file from becoming unnecessarily large. These keys are not required unless the related services are being used. In a fresh installation of Bagisto, these keys will not be present by default; you will need to add them manually if you plan to use the corresponding services.
+Additionally, the following keys have been removed to prevent the `.env` file from becoming unnecessarily large. These keys are not required unless the related services are being used. In a fresh installation of Qubix, these keys will not be present by default; you will need to add them manually if you plan to use the corresponding services.
 
 ```diff
 - FIXER_API_KEY=
@@ -140,13 +140,13 @@ Use:
 OR
 
 ```diff
-+ use Webkul\Core\Facades\Core;
++ use DigitalLabs\Core\Facades\Core;
 
 + Core::getAllChannels();
 ```
 
 > [!NOTE]
-> Did you noticed, in the newer version of Bagisto, we have replaced all alias references with full namespaces.
+> Did you noticed, in the newer version of Qubix, we have replaced all alias references with full namespaces.
 
 This change applies to all our helper methods, not just `core()`. Always prefer the helper method if one is available.
 
@@ -159,7 +159,7 @@ We have removed all the publishable registries from the service provider, and we
 For instance, if you look at the **Core** package, there were previously four configuration files located in the `Config` folder of the package:
 
 ```diff
-- packages/Webkul/Core/src/Config/*.php
+- packages/DigitalLabs/Core/src/Config/*.php
 ```
 
 These configuration files have now been moved to the root `config` folder:
@@ -215,7 +215,7 @@ The following files have been removed as they are no longer needed:
 - Commands
 
 ```diff
-- src/Console/Commands/BagistoPublish.php
+- src/Console/Commands/QubixPublish.php
 - src/Console/Commands/DownChannelCommand.php
 - src/Console/Commands/UpChannelCommand.php
 ```
@@ -226,7 +226,7 @@ These files have been deemed unnecessary in the current structure, streamlining 
 
 **Impact Probability: Low**
 
-n Bagisto, we have overridden the default Laravel 11 exception handler. Since the Laravel 11 application skeleton is now empty, we need to override the core Laravel exception handler instead of using the handler within the app directory.
+n Qubix, we have overridden the default Laravel 11 exception handler. Since the Laravel 11 application skeleton is now empty, we need to override the core Laravel exception handler instead of using the handler within the app directory.
 
 Additionally, the access modifiers for some of our methods have been updated.
 
@@ -248,7 +248,7 @@ Additionally, the access modifiers for some of our methods have been updated.
 
 **Impact Probability: Low**
 
-The `CheckForMaintenanceMode` class has been removed, and a new class, `PreventRequestsDuringMaintenance`, has been introduced. In Laravel, `PreventRequestsDuringMaintenance` middleware is applied at the global level. However, in Bagisto, we have removed the middleware from the global scope and applied it at the route level.
+The `CheckForMaintenanceMode` class has been removed, and a new class, `PreventRequestsDuringMaintenance`, has been introduced. In Laravel, `PreventRequestsDuringMaintenance` middleware is applied at the global level. However, in Qubix, we have removed the middleware from the global scope and applied it at the route level.
 
 The reason for this change is that we need to display customized pages based on the current theme, and if the middleware is applied globally, the theme may not be accessible, resulting an error.
 
@@ -260,7 +260,7 @@ The reason for this change is that we need to display customized pages based on 
 
 #### DataGrid
 
-##### The `Webkul\DataGrid\DataGrid` Class
+##### The `DigitalLabs\DataGrid\DataGrid` Class
 
 **Impact Probability: Medium**
 

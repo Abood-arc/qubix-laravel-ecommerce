@@ -41,7 +41,7 @@ return [
      * This setting determines the name of the http header that contains
      * the time at which the response was cached
      */
-    'cache_time_header_name' => env('RESPONSE_CACHE_HEADER_NAME', 'Bagisto-FPC'),
+    'cache_time_header_name' => env('RESPONSE_CACHE_HEADER_NAME', 'Qubix-FPC'),
 
     /*
      * This setting determines if a http header named with the cache age
@@ -55,7 +55,7 @@ return [
      * This setting determines the name of the http header that contains
      * the age of cache
      */
-    'cache_age_header_name' => env('RESPONSE_CACHE_AGE_HEADER_NAME', 'Bagisto-FPC-Age'),
+    'cache_age_header_name' => env('RESPONSE_CACHE_AGE_HEADER_NAME', 'Qubix-FPC-Age'),
 
     /*
      * Here you may define the cache store that should be used to store
@@ -70,7 +70,7 @@ return [
      */
     'replacers' => [
         \Spatie\ResponseCache\Replacers\CsrfTokenReplacer::class,
-        \Webkul\FPC\Replacers\FlashMessagesReplacer::class,
+        \DigitalLabs\FPC\Replacers\FlashMessagesReplacer::class,
     ],
 
     /*
@@ -86,7 +86,7 @@ return [
      * This class is responsible for generating a hash for a request. This hash
      * is used to look up a cached response.
      */
-    'hasher' => \Webkul\FPC\Hasher\DefaultHasher::class,
+    'hasher' => \DigitalLabs\FPC\Hasher\DefaultHasher::class,
 
     /*
      * This class is responsible for serializing responses.

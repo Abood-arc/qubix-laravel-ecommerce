@@ -8,27 +8,27 @@
     <testsuites>
         <!-- Admin package testsuites. -->
         <testsuite name="Admin Feature Test">
-            <directory suffix="Test.php">packages/Webkul/Admin/tests/Feature</directory>
+            <directory suffix="Test.php">packages/DigitalLabs/Admin/tests/Feature</directory>
         </testsuite>
 
         <!-- Core package testsuites. -->
         <testsuite name="Core Unit Test">
-            <directory suffix="Test.php">packages/Webkul/Core/tests/Unit</directory>
+            <directory suffix="Test.php">packages/DigitalLabs/Core/tests/Unit</directory>
         </testsuite>
 
         <!-- DataGrid package testsuites. -->
         <testsuite name="DataGrid Unit Test">
-            <directory suffix="Test.php">packages/Webkul/DataGrid/tests/Unit</directory>
+            <directory suffix="Test.php">packages/DigitalLabs/DataGrid/tests/Unit</directory>
         </testsuite>
 
         <!-- Installer package testsuites. -->
         <testsuite name="Installer Feature Test">
-            <directory suffix="Test.php">packages/Webkul/Installer/tests/Feature</directory>
+            <directory suffix="Test.php">packages/DigitalLabs/Installer/tests/Feature</directory>
         </testsuite>
 
         <!-- Shop package testsuites. -->
         <testsuite name="Shop Feature Test">
-            <directory suffix="Test.php">packages/Webkul/Shop/tests/Feature</directory>
+            <directory suffix="Test.php">packages/DigitalLabs/Shop/tests/Feature</directory>
         </testsuite>
     </testsuites>
 

@@ -1,0 +1,33 @@
+<?php
+
+namespace DigitalLabs\Core\Listeners;
+
+use Spatie\ResponseCache\Events\ResponseCacheHit as ResponseCacheHitEvent;
+use DigitalLabs\Core\Jobs\UpdateCreateVisitableIndex;
+use DigitalLabs\Core\Jobs\UpdateCreateVisitIndex;
+
+class ResponseCacheHit
+{
+    /**
+     * @param  \Spatie\ResponseCache\Events\ResponseCacheHit  $request
+     * @return void
+     */
+    public function handle(ResponseCacheHitEvent $event)
+    {
+        if (! core()->getConfigData('general.general.visitor_options.enabled')) {
+            return;
+        }
+
+        $log = visitor()->getLog();
+
+        if (request()->route()->getName() == 'shop.home.index') {
+            UpdateCreateVisitIndex::dispatch(null, $log);
+
+            return;
+        }
+
+        UpdateCreateVisitableIndex::dispatch(array_merge($log, [
+            'path_info' => $event->request->getPathInfo(),
+        ]));
+    }
+}

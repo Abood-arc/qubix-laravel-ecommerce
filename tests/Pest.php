@@ -13,11 +13,11 @@ ini_set('memory_limit', '1024M');
 |
 */
 
-uses(Webkul\Admin\Tests\AdminTestCase::class)->in('../packages/Webkul/Admin/tests');
-uses(Webkul\Core\Tests\CoreTestCase::class)->in('../packages/Webkul/Core/tests');
-uses(Webkul\DataGrid\Tests\DataGridTestCase::class)->in('../packages/Webkul/DataGrid/tests');
-uses(Webkul\Installer\Tests\InstallerTestCase::class)->in('../packages/Webkul/Installer/tests');
-uses(Webkul\Shop\Tests\ShopTestCase::class)->in('../packages/Webkul/Shop/tests');
+uses(DigitalLabs\Admin\Tests\AdminTestCase::class)->in('../packages/DigitalLabs/Admin/tests');
+uses(DigitalLabs\Core\Tests\CoreTestCase::class)->in('../packages/DigitalLabs/Core/tests');
+uses(DigitalLabs\DataGrid\Tests\DataGridTestCase::class)->in('../packages/DigitalLabs/DataGrid/tests');
+uses(DigitalLabs\Installer\Tests\InstallerTestCase::class)->in('../packages/DigitalLabs/Installer/tests');
+uses(DigitalLabs\Shop\Tests\ShopTestCase::class)->in('../packages/DigitalLabs/Shop/tests');
 
 /*
 |--------------------------------------------------------------------------

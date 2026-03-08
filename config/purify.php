@@ -1,6 +1,6 @@
 <?php
 
-use Webkul\Core\Purifier\Definitions\ExtendedHtml5Definition;
+use DigitalLabs\Core\Purifier\Definitions\ExtendedHtml5Definition;
 
 return [
 

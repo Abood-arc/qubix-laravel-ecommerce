@@ -1,0 +1,26 @@
+{
+    "name": "qubix/laravel-admin",
+    "license": "MIT",
+    "description" : "Admin package",
+    "authors": [
+        {
+            "name": "Qubix",
+            "email": "support@qubix.com"
+        }
+    ],
+    "require": {},
+    "autoload": {
+        "psr-4": {
+            "DigitalLabs\\Admin\\": "src/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "DigitalLabs\\Admin\\Providers\\AdminServiceProvider"
+            ],
+            "aliases": {}
+        }
+    },
+    "minimum-stability": "dev"
+}

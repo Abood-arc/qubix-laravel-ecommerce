@@ -16,8 +16,8 @@ body:
   - type: input
     id: versioninput
     attributes:
-      label: Bagisto Version(s) affected
-      description: Please enter the Bagisto version(s) affected by this issue.
+      label: Qubix Version(s) affected
+      description: Please enter the Qubix version(s) affected by this issue.
       placeholder: 'x.y.z'
     validations:
       required: true

@@ -28,7 +28,7 @@ jobs:
         image: mysql:8.0
         env:
           MYSQL_ROOT_PASSWORD: root
-          MYSQL_DATABASE: bagisto
+          MYSQL_DATABASE: qubix
         ports:
           - 3306
         options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=5
@@ -52,20 +52,20 @@ jobs:
 
       - name: Install Node.js Dependencies
         run: npm install
-        working-directory: packages/Webkul/Admin
+        working-directory: packages/DigitalLabs/Admin
 
       - name: Install Playwright Browsers
         run: |
           sudo apt-get update --allow-releaseinfo-change
           npx playwright install --with-deps chromium
-        working-directory: packages/Webkul/Admin
+        working-directory: packages/DigitalLabs/Admin
 
       - name: Setting Environment
         run: |
           cp .env.example .env
           sed -i "s|^\(DB_HOST=\s*\).*$|\1127.0.0.1|" .env
           sed -i "s|^\(DB_PORT=\s*\).*$|\1${{ job.services.mysql.ports['3306'] }}|" .env
-          sed -i "s|^\(DB_DATABASE=\s*\).*$|\1bagisto|" .env
+          sed -i "s|^\(DB_DATABASE=\s*\).*$|\1qubix|" .env
           sed -i "s|^\(DB_USERNAME=\s*\).*$|\1root|" .env
           sed -i "s|^\(DB_PASSWORD=\s*\).*$|\1root|" .env
           sed -i "s|^\(APP_DEBUG=\s*\).*$|\1false|" .env
@@ -75,11 +75,11 @@ jobs:
       - name: Install Composer Dependencies
         run: composer install
 
-      - name: Running Bagisto Installer
-        run: php artisan bagisto:install --skip-env-check --skip-admin-creation --skip-github-star
+      - name: Running Qubix Installer
+        run: php artisan qubix:install --skip-env-check --skip-admin-creation --skip-github-star
 
       - name: Seed Product Table
-        run: php artisan db:seed --class="Webkul\\Installer\\Database\\Seeders\\ProductTableSeeder"
+        run: php artisan db:seed --class="DigitalLabs\\Installer\\Database\\Seeders\\ProductTableSeeder"
 
       - name: Start Laravel server
         run: |
@@ -92,7 +92,7 @@ jobs:
           BASE_URL: 'http://127.0.0.1:8000'
         run: |
           npx playwright test --config=tests/e2e-pw/playwright.config.ts --shard=${{ matrix.shard-index }}/${{ matrix.shard-total }}
-        working-directory: packages/Webkul/Admin
+        working-directory: packages/DigitalLabs/Admin
 
       - name: Upload Test Results
         uses: actions/upload-artifact@v4
@@ -100,7 +100,7 @@ jobs:
         with:
           name: test-results-${{ matrix.shard-index }}-${{ github.run_id }}-${{ github.run_number }}
           path: |
-            packages/Webkul/Admin/tests/e2e-pw/playwright-report
-            packages/Webkul/Admin/tests/e2e-pw/test-results
+            packages/DigitalLabs/Admin/tests/e2e-pw/playwright-report
+            packages/DigitalLabs/Admin/tests/e2e-pw/test-results
             storage/logs/laravel.log
           retention-days: 1

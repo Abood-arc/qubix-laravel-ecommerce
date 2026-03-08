@@ -1,0 +1,26 @@
+{
+    "name": "qubix/laravel-social-login",
+    "description": "Shipping Package for Shipping Method",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "rahulshukla-digitalLabs",
+            "email": "rahulshukla.symfony517@digitalLabs.com"
+        }
+    ],
+    "require": {},
+    "autoload": {
+        "psr-4": {
+            "DigitalLabs\\SocialLogin\\": "src/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "DigitalLabs\\SocialLogin\\Providers\\SocialLoginServiceProvider"
+            ],
+            "aliases": {}
+        }
+    },
+    "minimum-stability": "dev"
+}

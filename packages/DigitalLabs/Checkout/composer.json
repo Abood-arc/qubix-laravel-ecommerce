@@ -1,0 +1,24 @@
+{
+    "name": "qubix/laravel-checkout",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Qubix",
+            "email": "support@qubix.com"
+        }
+    ],
+    "require": {},
+    "autoload": {
+        "psr-4": {
+            "DigitalLabs\\Checkout\\": "src/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "DigitalLabs\\Checkout\\Providers\\CheckoutServiceProvider"
+            ]
+        }
+    },
+    "minimum-stability": "dev"
+}

@@ -1,8 +1,8 @@
-# Bagisto Contribution Guide
+# Qubix Contribution Guide
 
 **BUGS:**
 
-To encourage active collaboration, Bagisto encourages pull requests, not just bug reports. "Bug reports" may also be sent in the form of a pull request containing a negative test.
+To encourage active collaboration, Qubix encourages pull requests, not just bug reports. "Bug reports" may also be sent in the form of a pull request containing a negative test.
 
 However, when filing a bug report, your issue should contain a title and a clear description of the issue. You should also include as much relevant information as possible and a code sample that demonstrates the issue. The goal of a bug report is to make it easy for yourself - and others - to replicate the bug and develop a fix.
 
@@ -10,15 +10,15 @@ Remember, bug reports are created in the hope that others with the same problem 
 
 **Projects that you can contribute in:**
 
-1. Bagisto
+1. Qubix
 
-2. Bagisto docs
+2. Qubix docs
 
 3. Laravel-aliexpress-dropship
 
 4. Laravel-aliexpress-dropship-chrome-extension
 
-5. Bagisto-custom-style-extension
+5. Qubix-custom-style-extension
 
 **Core development ideas or discussion:**
 
@@ -32,19 +32,19 @@ All bug fixes should be sent to the latest staging branch, i.e. development bran
 
 Minor features fully backwards compatible with the current Laravel release may be sent to the latest stable branch.
 
-Major new features should always be sent to the master branch, which contains the upcoming Bagisto release.
+Major new features should always be sent to the master branch, which contains the upcoming Qubix release.
 
 **Compiling assets:**
 
-If you are submitting a change that will affect a compiled file, such as most of the files in admin/resources/assets/sass or admin/resources/assets/js of the Bagisto repository, do not commit the compiled files. Due to their large size, they cannot realistically be reviewed by a maintainer. This could be exploited as a way to inject malicious code into Bagisto. To defensively prevent this, all compiled files will be generated and committed by Bagisto maintainers.
+If you are submitting a change that will affect a compiled file, such as most of the files in admin/resources/assets/sass or admin/resources/assets/js of the Qubix repository, do not commit the compiled files. Due to their large size, they cannot realistically be reviewed by a maintainer. This could be exploited as a way to inject malicious code into Qubix. To defensively prevent this, all compiled files will be generated and committed by Qubix maintainers.
 
 **Code style:**
 
-Bagisto follows PSR-2 for coding standards and PSR-4 as of Laravel for autoloading standards.
+Qubix follows PSR-2 for coding standards and PSR-4 as of Laravel for autoloading standards.
 
 **PHPDoc:**
 
-Below is an example of a valid Bagisto doc block. Note that the @param attribute is followed by two spaces, the argument type, two more spaces, and finally, the variable name:
+Below is an example of a valid Qubix doc block. Note that the @param attribute is followed by two spaces, the argument type, two more spaces, and finally, the variable name:
   ``` php
     /**
     * Register a service with CoreServiceProvider.
