@@ -55,7 +55,7 @@
         type="text/x-template"
         id="v-topbar-template"
     >
-        <div class="flex w-full items-center justify-between border border-b border-l-0 border-r-0 border-t-0 px-16">
+        <div class="velocity-topbar flex w-full items-center justify-between border border-b border-l-0 border-r-0 border-t-0 px-16">
             {!! view_render_event('qubix.shop.components.layouts.header.desktop.top.currency_switcher.before') !!}
 
             <!-- Currency Switcher -->
@@ -63,7 +63,7 @@
                 <!-- Dropdown Toggler -->
                 <x-slot:toggle>
                     <div
-                        class="flex cursor-pointer gap-2.5 py-3"
+                        class="flex cursor-pointer items-center gap-2 py-2.5 text-xs font-medium text-[#1f4f3f]"
                         role="button"
                         tabindex="0"
                         @click="currencyToggler = ! currencyToggler"
@@ -73,7 +73,7 @@
                         </span>
 
                         <span
-                            class="text-2xl"
+                            class="text-base"
                             :class="{'icon-arrow-up': currencyToggler, 'icon-arrow-down': ! currencyToggler}"
                             role="presentation"
                         >
@@ -90,14 +90,14 @@
             {!! view_render_event('qubix.shop.components.layouts.header.desktop.top.currency_switcher.after') !!}
 
             <p
-                class="py-3 text-xs font-medium"
+                class="py-2.5 text-center text-xs font-semibold tracking-[0.02em] text-[#335f4f]"
                 v-pre
             >
                 {{ core()->getConfigData('general.content.header_offer.title') }}
                 
                 <a 
                     href="{{ core()->getConfigData('general.content.header_offer.redirection_link') }}" 
-                    class="underline"
+                    class="underline underline-offset-2"
                     role="button"
                 >
                     {{ core()->getConfigData('general.content.header_offer.redirection_title') }}
@@ -111,7 +111,7 @@
                 <x-slot:toggle>
                     <!-- Dropdown Toggler -->
                     <div
-                        class="flex cursor-pointer items-center gap-2.5 py-3"
+                        class="flex cursor-pointer items-center gap-2 py-2.5 text-xs font-medium text-[#1f4f3f]"
                         role="button"
                         tabindex="0"
                         @click="localeToggler = ! localeToggler"
@@ -132,7 +132,7 @@
                         </span>
 
                         <span
-                            class="text-2xl"
+                            class="text-base"
                             :class="{'icon-arrow-up': localeToggler, 'icon-arrow-down': ! localeToggler}"
                             role="presentation"
                         ></span>

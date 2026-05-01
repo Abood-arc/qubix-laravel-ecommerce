@@ -74,9 +74,15 @@
                         .then(response => {
                             this.isLoading = false;
 
-                            this.categories = response.data.data;
+                            this.categories = Array.isArray(response.data?.data)
+                                ? response.data.data
+                                : [];
                         }).catch(error => {
-                            console.log(error);
+                            console.error(error);
+
+                            this.isLoading = false;
+
+                            this.categories = [];
                         });
                 }
             }

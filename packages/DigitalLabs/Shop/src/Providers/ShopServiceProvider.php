@@ -67,5 +67,10 @@ class ShopServiceProvider extends ServiceProvider
             dirname(__DIR__).'/Config/menu.php',
             'menu.customer'
         );
+
+        $this->mergeConfigFrom(
+            dirname(__DIR__).'/Config/home.php',
+            'shop.home'
+        );
     }
 }

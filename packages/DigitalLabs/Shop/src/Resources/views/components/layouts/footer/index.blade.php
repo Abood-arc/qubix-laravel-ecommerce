@@ -112,8 +112,10 @@
                         <div class="relative w-full">
                             <x-shop::form.control-group.control
                                 type="email"
+                                id="footer-newsletter-email"
                                 class="block w-[420px] max-w-full rounded-xl border-2 border-[#e9decc] bg-[#F1EADF] px-5 py-4 text-base max-1060:w-full max-md:p-3.5 max-sm:mb-0 max-sm:rounded-lg max-sm:border-2 max-sm:p-2 max-sm:text-sm"
                                 name="email"
+                                autocomplete="email"
                                 rules="required|email"
                                 label="Email"
                                 :aria-label="trans('shop::app.components.layouts.footer.email')"

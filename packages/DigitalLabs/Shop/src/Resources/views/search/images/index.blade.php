@@ -54,6 +54,8 @@
             <input
                 type="file"
                 class="hidden"
+                name="image_search"
+                accept="image/*"
                 ref="imageSearchInput"
                 :id="'v-image-search-' + $.uid"
                 @change="loadLibrary()"

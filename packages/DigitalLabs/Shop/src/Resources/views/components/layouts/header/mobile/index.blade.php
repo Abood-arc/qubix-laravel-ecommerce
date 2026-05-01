@@ -27,7 +27,7 @@
                 aria-label="@lang('shop::app.components.layouts.header.mobile.qubix')"
             >
                 <img
-                    src="{{ core()->getCurrentChannel()->logo_url ?? qubix_asset('images/logo.svg') }}"
+                    src="{{ qubix_asset('images/logo.svg') }}"
                     alt="{{ config('app.name') }}"
                     width="131"
                     height="29"
@@ -205,7 +205,7 @@
     <!-- Serach Catalog Form -->
     <form action="{{ route('shop.search.index') }}" class="flex items-center w-full">
         <label
-            for="organic-search"
+            for="shop-header-search-mobile"
             class="sr-only"
         >
             @lang('shop::app.components.layouts.header.mobile.search')
@@ -215,10 +215,12 @@
             <div class="icon-search pointer-events-none absolute top-3 flex items-center text-2xl max-md:text-xl max-sm:top-2.5 ltr:left-3 rtl:right-3"></div>
 
             <input
-                type="text"
+                id="shop-header-search-mobile"
+                type="search"
                 class="block w-full rounded-xl border border-['#E3E3E3'] px-11 py-3.5 text-sm font-medium text-gray-900 max-md:rounded-lg max-md:px-10 max-md:py-3 max-md:font-normal max-sm:text-xs"
                 name="query"
                 value="{{ request('query') }}"
+                autocomplete="search"
                 placeholder="@lang('shop::app.components.layouts.header.mobile.search-text')"
                 required
             >
@@ -247,7 +249,7 @@
                 <div class="flex items-center justify-between">
                     <a href="{{ route('shop.home.index') }}">
                         <img
-                            src="{{ core()->getCurrentChannel()->logo_url ?? qubix_asset('images/logo.svg') }}"
+                            src="{{ qubix_asset('images/logo.svg') }}"
                             alt="{{ config('app.name') }}"
                             width="131"
                             height="29"
@@ -514,9 +516,14 @@
                         const stored = localStorage.getItem('categories');
 
                         if (stored) {
-                            this.categories = JSON.parse(stored);
-                            this.isLoading = false;
-                            return;
+                            const parsed = JSON.parse(stored);
+
+                            if (Array.isArray(parsed) && parsed.length > 0) {
+                                this.categories = parsed;
+                                this.isLoading = false;
+
+                                return;
+                            }
                         }
 
                     } catch (e) {}
@@ -526,12 +533,69 @@
                 getCategories() {
                     this.$axios.get("{{ route('shop.api.categories.tree') }}")
                         .then(response => {
-                            this.categories = response.data.data;
+                            const categoryTree = response.data.data;
+
+                            this.categories = Array.isArray(categoryTree) && categoryTree.length
+                                ? categoryTree
+                                : this.getFallbackCategories();
+
                             localStorage.setItem('categories', JSON.stringify(this.categories));
                         })
                         .catch(error => {
+                            this.categories = this.getFallbackCategories();
+                            localStorage.setItem('categories', JSON.stringify(this.categories));
                             console.log(error);
                         });
+                },
+
+                getFallbackCategories() {
+                    return [
+                        {
+                            id: 'fallback-1',
+                            name: 'Handbags',
+                            url: "{{ route('shop.search.index', ['query' => 'handbag']) }}",
+                            children: [
+                                {
+                                    id: 'fallback-1-1',
+                                    name: 'Sling Bags',
+                                    url: "{{ route('shop.search.index', ['query' => 'sling bag']) }}",
+                                    children: [],
+                                },
+                                {
+                                    id: 'fallback-1-2',
+                                    name: 'Tote Bags',
+                                    url: "{{ route('shop.search.index', ['query' => 'tote bag']) }}",
+                                    children: [],
+                                }
+                            ],
+                        },
+                        {
+                            id: 'fallback-2',
+                            name: 'Shopping Bags',
+                            url: "{{ route('shop.search.index', ['query' => 'shopping bag']) }}",
+                            children: [
+                                {
+                                    id: 'fallback-2-1',
+                                    name: 'Eco Bags',
+                                    url: "{{ route('shop.search.index', ['query' => 'eco bag']) }}",
+                                    children: [],
+                                }
+                            ],
+                        },
+                        {
+                            id: 'fallback-3',
+                            name: 'Stationery',
+                            url: "{{ route('shop.search.index', ['query' => 'stationery']) }}",
+                            children: [
+                                {
+                                    id: 'fallback-3-1',
+                                    name: 'Notebooks',
+                                    url: "{{ route('shop.search.index', ['query' => 'notebook']) }}",
+                                    children: [],
+                                }
+                            ],
+                        }
+                    ];
                 },
 
                 showThirdLevel(secondLevelCategory, parentCategory, event) {

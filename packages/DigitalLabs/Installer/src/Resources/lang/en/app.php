@@ -296,7 +296,7 @@ return [
                     'content' => [
                         'sub-title-1' => 'Our Collections',
                         'sub-title-2' => 'Our Collections',
-                        'title' => 'The game with our new additions!',
+                        'title' => 'Game on hai',
                     ],
 
                     'name' => 'Game Container',
@@ -352,7 +352,7 @@ return [
                         'sub-title-4' => 'Our Collections',
                         'sub-title-5' => 'Our Collections',
                         'sub-title-6' => 'Our Collections',
-                        'title' => 'The game with our new additions!',
+                        'title' => 'Game on hai',
                     ],
 
                     'name' => 'Top Collections',

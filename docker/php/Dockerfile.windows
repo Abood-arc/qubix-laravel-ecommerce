@@ -1,0 +1,22 @@
+FROM laravelsail/php83-composer:latest
+
+# Extensions required by admin/catalog:
+# - intl: NumberFormatter, locale-aware formatting, some attribute/class logic
+# - gd: image resize/thumbnails for categories and product media
+# - calendar: required by composer (khaled.alshamaa/ar-php)
+#
+# Rebuild after changing this file:
+#   docker compose build --no-cache laravel.test
+#   docker compose up -d
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
+        libicu-dev \
+        libpng-dev \
+        libjpeg-dev \
+        libfreetype6-dev \
+        libwebp-dev \
+        zlib1g-dev \
+    && docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp \
+    && docker-php-ext-install -j"$(nproc)" pdo_mysql gd intl calendar \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*

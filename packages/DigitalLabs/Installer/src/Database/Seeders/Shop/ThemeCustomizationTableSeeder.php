@@ -247,6 +247,8 @@ class ThemeCustomizationTableSeeder extends Seeder
                         'options' => json_encode([
                             'title' => trans('installer::app.seeders.shop.theme-customizations.all-products.options.title', [], $locale),
                             'filters' => [
+                                // Leaf category id from sample data (ProductTableSeeder); home carousel shows only these products.
+                                'category_id' => '3',
                                 'sort' => 'name-desc',
                                 'limit' => 12,
                             ],

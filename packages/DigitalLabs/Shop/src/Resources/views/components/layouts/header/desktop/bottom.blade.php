@@ -278,51 +278,58 @@
 
         <!-- Default category layout -->
         <div
-            class="flex items-center"
+            class="velocity-nav-category-list flex flex-wrap items-center gap-x-0.5 gap-y-1"
             v-else-if="'{{ core()->getConfigData('general.design.categories.category_view') }}' !== 'sidebar'"
         >
             <div
-                class="group relative flex h-[77px] items-center border-b-4 border-transparent hover:border-b-4 hover:border-navyBlue"
+                class="velocity-nav-category-group group relative flex h-[77px] items-center border-b-2 border-transparent pb-0.5 transition-[border-color] duration-200 hover:border-emerald-600"
                 v-for="category in categories"
             >
-                <span>
+                <span class="flex h-full items-center">
                     <a
                         :href="category.url"
-                        class="inline-block px-5 uppercase"
+                        class="velocity-nav-category-trigger inline-flex max-w-[10rem] items-center rounded-full px-3.5 py-2 text-[14px] font-semibold tracking-tight text-slate-800 ring-1 ring-transparent transition-[background-color,box-shadow,color,ring-color] duration-200 hover:bg-emerald-50 hover:text-emerald-900 hover:ring-emerald-200/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/40 sm:max-w-none sm:px-4 sm:text-[15px]"
                     >
                         @{{ category.name }}
                     </a>
                 </span>
 
                 <div
-                    class="pointer-events-none absolute top-[78px] z-[1] max-h-[580px] w-max max-w-[1260px] translate-y-1 overflow-auto overflow-x-auto border border-b-0 border-l-0 border-r-0 border-t border-[#F3F3F3] bg-white p-9 opacity-0 shadow-[0_6px_6px_1px_rgba(0,0,0,.3)] transition duration-300 ease-out group-hover:pointer-events-auto group-hover:translate-y-0 group-hover:opacity-100 group-hover:duration-200 group-hover:ease-in ltr:-left-9 rtl:-right-9"
+                    class="velocity-nav-megamenu pointer-events-none absolute top-full z-[60] max-h-[min(580px,80vh)] w-[min(94vw,1260px)] max-w-[1260px] translate-y-1 overflow-y-auto overflow-x-auto rounded-b-2xl border border-emerald-900/25 bg-[rgba(23,61,50,0.94)] px-8 py-8 opacity-0 shadow-[0_24px_50px_-12px_rgba(15,23,42,0.35)] backdrop-blur-md transition duration-300 ease-out group-hover:pointer-events-auto group-hover:translate-y-0 group-hover:opacity-100 group-hover:duration-200 group-hover:ease-in ltr:left-1/2 ltr:-translate-x-1/2 rtl:right-1/2 rtl:translate-x-1/2"
                     v-if="category.children && category.children.length"
                 >
-                    <div class="flex justify-between gap-x-[70px]">
+                    <div class="flex flex-wrap justify-start gap-x-12 gap-y-10 xl:gap-x-16">
                         <div
-                            class="grid w-full min-w-max max-w-[150px] flex-auto grid-cols-[1fr] content-start gap-5"
+                            class="velocity-nav-megamenu-col grid min-w-[140px] max-w-[180px] flex-1 grid-cols-1 content-start gap-y-8"
                             v-for="pairCategoryChildren in pairCategoryChildren(category)"
                         >
                             <template v-for="secondLevelCategory in pairCategoryChildren">
-                                <p class="font-medium text-navyBlue">
-                                    <a :href="secondLevelCategory.url">
-                                        @{{ secondLevelCategory.name }}
-                                    </a>
-                                </p>
-
-                                <ul
-                                    class="grid grid-cols-[1fr] gap-3"
-                                    v-if="secondLevelCategory.children && secondLevelCategory.children.length"
-                                >
-                                    <li
-                                        class="text-sm font-medium text-zinc-500"
-                                        v-for="thirdLevelCategory in secondLevelCategory.children"
-                                    >
-                                        <a :href="thirdLevelCategory.url">
-                                            @{{ thirdLevelCategory.name }}
+                                <div>
+                                    <p class="velocity-nav-megamenu-title font-semibold text-emerald-50">
+                                        <a
+                                            class="inline-block pb-1 transition-colors hover:text-white"
+                                            :href="secondLevelCategory.url"
+                                        >
+                                            @{{ secondLevelCategory.name }}
                                         </a>
-                                    </li>
-                                </ul>
+                                    </p>
+
+                                    <ul
+                                        class="mt-3 grid grid-cols-1 gap-1"
+                                        v-if="secondLevelCategory.children && secondLevelCategory.children.length"
+                                    >
+                                        <li
+                                            v-for="thirdLevelCategory in secondLevelCategory.children"
+                                        >
+                                            <a
+                                                class="velocity-nav-megalnk block rounded-lg px-2 py-1.5 text-[13px] font-medium text-emerald-100/90 transition-colors hover:bg-white/10 hover:text-white"
+                                                :href="thirdLevelCategory.url"
+                                            >
+                                                @{{ thirdLevelCategory.name }}
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </div>
                             </template>
                         </div>
                     </div>

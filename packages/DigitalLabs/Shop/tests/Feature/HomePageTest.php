@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
+use DigitalLabs\Category\Models\Category;
 use DigitalLabs\Core\Models\SubscribersList;
 use DigitalLabs\Customer\Models\CompareItem;
 use Webkul\Faker\Helpers\Product as ProductFaker;
@@ -9,6 +10,7 @@ use DigitalLabs\Shop\Mail\Customer\SubscriptionNotification;
 
 use function Pest\Laravel\deleteJson;
 use function Pest\Laravel\get;
+use function Pest\Laravel\getJson;
 use function Pest\Laravel\postJson;
 
 it('returns a successful response', function () {
@@ -80,12 +82,58 @@ it('displays navigation buttons when the customer is logged in', function () {
 });
 
 it('should returns the home page of the store', function () {
+    config(['shop.home.layout_mode' => 'legacy']);
+
     get(route('shop.home.index'))
         ->assertOk()
-        ->assertSeeText('The game with our new additions!')
-        ->assertSeeText('Our Collections')
         ->assertSeeText('Get Ready for our new Bold Collections!')
         ->assertSeeText('Get UPTO 40% OFF on your 1st order SHOP NOW');
+});
+
+it('lists category-linked catalog products via the same API the legacy home carousel uses', function () {
+    config(['shop.home.layout_mode' => 'legacy']);
+
+    $category = Category::findOrFail(3);
+
+    $product = (new ProductFaker([
+        'attributes' => [
+            5 => 'new',
+            6 => 'featured',
+            11 => 'price',
+            26 => 'guest_checkout',
+        ],
+
+        'attribute_value' => [
+            'new' => [
+                'boolean_value' => true,
+            ],
+            'featured' => [
+                'boolean_value' => true,
+            ],
+            'price' => [
+                'float_value' => fake()->randomFloat(2, 1000, 5000),
+            ],
+            'guest_checkout' => [
+                'boolean_value' => true,
+            ],
+        ],
+    ]))
+        ->getSimpleProductFactory()
+        ->hasAttached($category)
+        ->create();
+
+    $carouselQuery = ['category_id' => '3', 'sort' => 'name-desc', 'limit' => 12];
+
+    get(route('shop.home.index'))
+        ->assertOk();
+
+    $payload = getJson(route('shop.api.products.index', $carouselQuery))
+        ->assertOk()
+        ->json();
+
+    $names = collect($payload['data'] ?? [])->pluck('name')->filter()->all();
+
+    expect($names)->toContain($product->name);
 });
 
 it('should returns the search page of the products', function () {

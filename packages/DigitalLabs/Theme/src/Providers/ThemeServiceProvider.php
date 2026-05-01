@@ -4,6 +4,7 @@ namespace DigitalLabs\Theme\Providers;
 
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\ServiceProvider;
+use DigitalLabs\Theme\Console\Commands\SyncHomeProductCarouselCategoryCommand;
 use DigitalLabs\Theme\ThemeViewFinder;
 use DigitalLabs\Theme\ViewRenderEventManager;
 
@@ -41,5 +42,9 @@ class ThemeServiceProvider extends ServiceProvider
         Blade::directive('qubixVite', function ($expression) {
             return "<?php echo themes()->setQubixVite({$expression})->toHtml(); ?>";
         });
+
+        $this->commands([
+            SyncHomeProductCarouselCategoryCommand::class,
+        ]);
     }
 }
