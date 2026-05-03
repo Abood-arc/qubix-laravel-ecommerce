@@ -544,7 +544,24 @@ img.lazy {
     }
 
     header.sticky .velocity-nav-category-group:focus-within {
-        border-bottom-color: rgba(5, 150, 105, 0.85);
+        border-bottom-color: rgba(255, 255, 255, 0.8);
+    }
+
+    header.sticky .velocity-nav-category-list {
+        font-family: "Poppins", sans-serif;
+    }
+
+    header.sticky .velocity-nav-category-trigger {
+        letter-spacing: 0;
+        line-height: 1.2;
+    }
+
+    header.sticky .header-search > summary::-webkit-details-marker {
+        display: none;
+    }
+
+    header.sticky .header-search > summary::marker {
+        content: "";
     }
 
     @media (prefers-reduced-motion: no-preference) {
@@ -562,7 +579,7 @@ img.lazy {
             transform: scaleX(0);
             transform-origin: left;
             transition: transform 0.22s ease;
-            background: linear-gradient(90deg, #6ee7b7, #34d399 55%, transparent);
+            background: linear-gradient(90deg, rgba(255,255,255,0.6), rgba(255,255,255,0.3) 55%, transparent);
             border-radius: 2px;
         }
 

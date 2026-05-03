@@ -1,10 +1,5 @@
-<!--
-    This code needs to be refactored to reduce the amount of PHP in the Blade
-    template as much as possible.
--->
 @php
     $showCompare = (bool) core()->getConfigData('catalog.products.settings.compare_option');
-
     $showWishlist = (bool) core()->getConfigData('customer.settings.wishlist.wishlist_option');
 @endphp
 
@@ -14,7 +9,6 @@
         <div class="flex items-center gap-x-1.5">
             {!! view_render_event('qubix.shop.components.layouts.header.mobile.drawer.before') !!}
 
-            <!-- Drawer -->
             <v-mobile-drawer></v-mobile-drawer>
 
             {!! view_render_event('qubix.shop.components.layouts.header.mobile.drawer.after') !!}
@@ -23,14 +17,15 @@
 
             <a
                 href="{{ route('shop.home.index') }}"
-                class="max-h-[30px]"
+                class="inline-flex max-h-[44px] items-center rounded-lg bg-white px-2.5 py-2 shadow-[0_3px_10px_rgba(0,0,0,0.12)]"
                 aria-label="@lang('shop::app.components.layouts.header.mobile.qubix')"
             >
                 <img
-                    src="{{ qubix_asset('images/logo.svg') }}"
+                    src="{{ core()->getCurrentChannel()->logo_url ?? qubix_asset('images/logo.svg') }}"
                     alt="{{ config('app.name') }}"
                     width="131"
                     height="29"
+                    class="h-auto max-h-[28px] w-auto"
                 >
             </a>
 
@@ -38,171 +33,165 @@
         </div>
 
         <!-- Right Navigation -->
-        <div>
-            <div class="flex items-center gap-x-5 max-md:gap-x-4">
-                {!! view_render_event('qubix.shop.components.layouts.header.mobile.compare.before') !!}
+        <div class="flex items-center gap-x-5 max-md:gap-x-4">
+            {!! view_render_event('qubix.shop.components.layouts.header.mobile.compare.before') !!}
 
-                @if($showCompare)
-                    <a
-                        href="{{ route('shop.compare.index') }}"
-                        aria-label="@lang('shop::app.components.layouts.header.mobile.compare')"
-                    >
-                        <span class="text-2xl cursor-pointer icon-compare"></span>
-                    </a>
-                @endif
+            @if($showCompare)
+                <a
+                    href="{{ route('shop.compare.index') }}"
+                    aria-label="@lang('shop::app.components.layouts.header.mobile.compare')"
+                >
+                    <span class="text-2xl cursor-pointer icon-compare"></span>
+                </a>
+            @endif
 
-                {!! view_render_event('qubix.shop.components.layouts.header.mobile.compare.after') !!}
+            {!! view_render_event('qubix.shop.components.layouts.header.mobile.compare.after') !!}
 
-                {!! view_render_event('qubix.shop.components.layouts.header.mobile.mini_cart.before') !!}
+            {!! view_render_event('qubix.shop.components.layouts.header.mobile.mini_cart.before') !!}
 
-                @if(core()->getConfigData('sales.checkout.shopping_cart.cart_page'))
-                    @include('shop::checkout.cart.mini-cart')
-                @endif
+            @if(core()->getConfigData('sales.checkout.shopping_cart.cart_page'))
+                @include('shop::checkout.cart.mini-cart')
+            @endif
 
-                {!! view_render_event('qubix.shop.components.layouts.header.mobile.mini_cart.after') !!}
+            {!! view_render_event('qubix.shop.components.layouts.header.mobile.mini_cart.after') !!}
 
-                <!-- For Large screens -->
-                <div class="max-md:hidden">
-                    <x-shop::dropdown position="bottom-{{ core()->getCurrentLocale()->direction === 'ltr' ? 'right' : 'left' }}">
-                        <x-slot:toggle>
-                            <span class="text-2xl cursor-pointer icon-users"></span>
-                        </x-slot>
+            <!-- Profile — tablet (768px–1023px): dropdown -->
+            <div class="max-md:hidden">
+                <x-shop::dropdown position="bottom-{{ core()->getCurrentLocale()->direction === 'ltr' ? 'right' : 'left' }}">
+                    <x-slot:toggle>
+                        <span class="text-2xl cursor-pointer icon-users"></span>
+                    </x-slot>
 
-                        <!-- Guest Dropdown -->
-                        @guest('customer')
-                            <x-slot:content>
-                                <div class="grid gap-2.5">
-                                    <p class="text-xl font-dmserif">
-                                        @lang('shop::app.components.layouts.header.mobile.welcome-guest')
-                                    </p>
-
-                                    <p class="text-sm">
-                                        @lang('shop::app.components.layouts.header.mobile.dropdown-text')
-                                    </p>
-                                </div>
-
-                                <p class="w-full mt-3 border border-zinc-200"></p>
-
-                                {!! view_render_event('qubix.shop.components.layouts.header.mobile.index.customers_action.before') !!}
-
-                                <div class="flex gap-4 mt-6">
-                                    {!! view_render_event('qubix.shop.components.layouts.header.mobile.index.sign_in_button.before') !!}
-
-                                    <a
-                                        href="{{ route('shop.customer.session.create') }}"
-                                        class="block py-4 m-0 mx-auto text-base font-medium text-center text-white cursor-pointer w-max rounded-2xl bg-navyBlue px-7 ltr:ml-0 rtl:mr-0"
-                                    >
-                                        @lang('shop::app.components.layouts.header.mobile.sign-in')
-                                    </a>
-
-                                    <a
-                                        href="{{ route('shop.customers.register.index') }}"
-                                        class="m-0 mx-auto block w-max cursor-pointer rounded-2xl border-2 border-navyBlue bg-white px-7 py-3.5 text-center text-base font-medium text-navyBlue ltr:ml-0 rtl:mr-0"
-                                    >
-                                        @lang('shop::app.components.layouts.header.mobile.sign-up')
-                                    </a>
-
-                                    {!! view_render_event('qubix.shop.components.layouts.header.mobile.index.sign_in_button.after') !!}
-                                </div>
-
-                                {!! view_render_event('qubix.shop.components.layouts.header.mobile.index.customers_action.after') !!}
-                            </x-slot>
-                        @endguest
-
-                        <!-- Customers Dropdown -->
-                        @auth('customer')
-                            <x-slot:content class="!p-0">
-                                <div class="grid gap-2.5 p-5 pb-0">
-                                    <p class="text-xl font-dmserif" v-pre>
-                                        @lang('shop::app.components.layouts.header.mobile.welcome')’
-                                        {{ auth()->guard('customer')->user()->first_name }}
-                                    </p>
-
-                                    <p class="text-sm">
-                                        @lang('shop::app.components.layouts.header.mobile.dropdown-text')
-                                    </p>
-                                </div>
-
-                                <p class="w-full mt-3 border border-zinc-200"></p>
-
-                                <div class="mt-2.5 grid gap-1 pb-2.5">
-                                    {!! view_render_event('qubix.shop.components.layouts.header.mobile.index.profile_dropdown.links.before') !!}
-
-                                    <a
-                                        class="px-5 py-2 text-base cursor-pointer"
-                                        href="{{ route('shop.customers.account.profile.index') }}"
-                                    >
-                                        @lang('shop::app.components.layouts.header.mobile.profile')
-                                    </a>
-
-                                    <a
-                                        class="px-5 py-2 text-base cursor-pointer"
-                                        href="{{ route('shop.customers.account.orders.index') }}"
-                                    >
-                                        @lang('shop::app.components.layouts.header.mobile.orders')
-                                    </a>
-
-                                    @if ($showWishlist)
-                                        <a
-                                            class="px-5 py-2 text-base cursor-pointer"
-                                            href="{{ route('shop.customers.account.wishlist.index') }}"
-                                        >
-                                            @lang('shop::app.components.layouts.header.mobile.wishlist')
-                                        </a>
-                                    @endif
-
-                                    <!--Customers logout-->
-                                    @auth('customer')
-                                        <x-shop::form
-                                            method="DELETE"
-                                            action="{{ route('shop.customer.session.destroy') }}"
-                                            id="customerLogout"
-                                        />
-
-                                        <a
-                                            class="px-5 py-2 text-base cursor-pointer"
-                                            href="{{ route('shop.customer.session.destroy') }}"
-                                            onclick="event.preventDefault(); document.getElementById('customerLogout').submit();"
-                                        >
-                                            @lang('shop::app.components.layouts.header.mobile.logout')
-                                        </a>
-                                    @endauth
-
-                                    {!! view_render_event('qubix.shop.components.layouts.header.mobile.index.profile_dropdown.links.after') !!}
-                                </div>
-                            </x-slot>
-                        @endauth
-                    </x-shop::dropdown>
-                </div>
-
-                <!-- For Medium and small screen -->
-                <div class="md:hidden">
                     @guest('customer')
-                        <a
-                            href="{{ route('shop.customer.session.create') }}"
-                            aria-label="@lang('shop::app.components.layouts.header.mobile.account')"
-                        >
-                            <span class="text-2xl cursor-pointer icon-users"></span>
-                        </a>
+                        <x-slot:content>
+                            <div class="grid gap-2.5">
+                                <p class="text-xl font-dmserif">
+                                    @lang('shop::app.components.layouts.header.mobile.welcome-guest')
+                                </p>
+
+                                <p class="text-sm text-zinc-500">
+                                    @lang('shop::app.components.layouts.header.mobile.dropdown-text')
+                                </p>
+                            </div>
+
+                            <p class="w-full mt-3 border border-zinc-200"></p>
+
+                            {!! view_render_event('qubix.shop.components.layouts.header.mobile.index.customers_action.before') !!}
+
+                            <div class="flex gap-4 mt-6">
+                                {!! view_render_event('qubix.shop.components.layouts.header.mobile.index.sign_in_button.before') !!}
+
+                                <a
+                                    href="{{ route('shop.customer.session.create') }}"
+                                    class="primary-button rounded-2xl px-7 max-md:rounded-lg ltr:ml-0 rtl:mr-0"
+                                >
+                                    @lang('shop::app.components.layouts.header.mobile.sign-in')
+                                </a>
+
+                                <a
+                                    href="{{ route('shop.customers.register.index') }}"
+                                    class="secondary-button rounded-2xl px-7 max-md:rounded-lg max-md:py-3 ltr:ml-0 rtl:mr-0"
+                                >
+                                    @lang('shop::app.components.layouts.header.mobile.sign-up')
+                                </a>
+
+                                {!! view_render_event('qubix.shop.components.layouts.header.mobile.index.sign_in_button.after') !!}
+                            </div>
+
+                            {!! view_render_event('qubix.shop.components.layouts.header.mobile.index.customers_action.after') !!}
+                        </x-slot>
                     @endguest
 
-                    <!-- Customers Dropdown -->
                     @auth('customer')
-                        <a
-                            href="{{ route('shop.customers.account.index') }}"
-                            aria-label="@lang('shop::app.components.layouts.header.mobile.account')"
-                        >
-                            <span class="text-2xl cursor-pointer icon-users"></span>
-                        </a>
+                        <x-slot:content class="!p-0">
+                            <div class="grid gap-2.5 p-5 pb-0">
+                                <p class="text-xl font-dmserif" v-pre>
+                                    @lang('shop::app.components.layouts.header.mobile.welcome')'
+                                    {{ auth()->guard('customer')->user()->first_name }}
+                                </p>
+
+                                <p class="text-sm text-zinc-500">
+                                    @lang('shop::app.components.layouts.header.mobile.dropdown-text')
+                                </p>
+                            </div>
+
+                            <p class="w-full mt-3 border border-zinc-200"></p>
+
+                            <div class="mt-2.5 grid gap-1 pb-2.5">
+                                {!! view_render_event('qubix.shop.components.layouts.header.mobile.index.profile_dropdown.links.before') !!}
+
+                                <a
+                                    class="px-5 py-2 text-base cursor-pointer hover:bg-zinc-50"
+                                    href="{{ route('shop.customers.account.profile.index') }}"
+                                >
+                                    @lang('shop::app.components.layouts.header.mobile.profile')
+                                </a>
+
+                                <a
+                                    class="px-5 py-2 text-base cursor-pointer hover:bg-zinc-50"
+                                    href="{{ route('shop.customers.account.orders.index') }}"
+                                >
+                                    @lang('shop::app.components.layouts.header.mobile.orders')
+                                </a>
+
+                                @if ($showWishlist)
+                                    <a
+                                        class="px-5 py-2 text-base cursor-pointer hover:bg-zinc-50"
+                                        href="{{ route('shop.customers.account.wishlist.index') }}"
+                                    >
+                                        @lang('shop::app.components.layouts.header.mobile.wishlist')
+                                    </a>
+                                @endif
+
+                                @auth('customer')
+                                    <x-shop::form
+                                        method="DELETE"
+                                        action="{{ route('shop.customer.session.destroy') }}"
+                                        id="customerLogoutMobile"
+                                    />
+
+                                    <a
+                                        class="px-5 py-2 text-base cursor-pointer hover:bg-zinc-50"
+                                        href="{{ route('shop.customer.session.destroy') }}"
+                                        onclick="event.preventDefault(); document.getElementById('customerLogoutMobile').submit();"
+                                    >
+                                        @lang('shop::app.components.layouts.header.mobile.logout')
+                                    </a>
+                                @endauth
+
+                                {!! view_render_event('qubix.shop.components.layouts.header.mobile.index.profile_dropdown.links.after') !!}
+                            </div>
+                        </x-slot>
                     @endauth
-                </div>
+                </x-shop::dropdown>
+            </div>
+
+            <!-- Profile — small screen (<768px): direct link -->
+            <div class="md:hidden">
+                @guest('customer')
+                    <a
+                        href="{{ route('shop.customer.session.create') }}"
+                        aria-label="@lang('shop::app.components.layouts.header.mobile.account')"
+                    >
+                        <span class="text-2xl cursor-pointer icon-users"></span>
+                    </a>
+                @endguest
+
+                @auth('customer')
+                    <a
+                        href="{{ route('shop.customers.account.index') }}"
+                        aria-label="@lang('shop::app.components.layouts.header.mobile.account')"
+                    >
+                        <span class="text-2xl cursor-pointer icon-users"></span>
+                    </a>
+                @endauth
             </div>
         </div>
     </div>
 
     {!! view_render_event('qubix.shop.components.layouts.header.mobile.search.before') !!}
 
-    <!-- Serach Catalog Form -->
+    <!-- Search Form -->
     <form action="{{ route('shop.search.index') }}" class="flex items-center w-full">
         <label
             for="shop-header-search-mobile"
@@ -217,7 +206,7 @@
             <input
                 id="shop-header-search-mobile"
                 type="search"
-                class="block w-full rounded-xl border border-['#E3E3E3'] px-11 py-3.5 text-sm font-medium text-gray-900 max-md:rounded-lg max-md:px-10 max-md:py-3 max-md:font-normal max-sm:text-xs"
+                class="block w-full rounded-xl border border-zinc-200 bg-zinc-100 px-11 py-3.5 text-sm font-medium text-gray-900 max-md:rounded-lg max-md:px-10 max-md:py-3 max-md:font-normal max-sm:text-xs"
                 name="query"
                 value="{{ request('query') }}"
                 autocomplete="search"
@@ -249,23 +238,24 @@
                 <div class="flex items-center justify-between">
                     <a href="{{ route('shop.home.index') }}">
                         <img
-                            src="{{ qubix_asset('images/logo.svg') }}"
+                            src="{{ core()->getCurrentChannel()->logo_url ?? qubix_asset('images/logo.svg') }}"
                             alt="{{ config('app.name') }}"
                             width="131"
                             height="29"
+                            class="h-auto max-h-[28px] w-auto rounded-lg bg-white px-2.5 py-2 shadow-[0_3px_10px_rgba(0,0,0,0.12)]"
                         >
                     </a>
                 </div>
             </x-slot>
 
             <x-slot:content class="!p-0">
-                <!-- Account Profile Hero Section -->
+                <!-- Account Profile Section -->
                 <div class="p-4 border-b border-zinc-200">
                     <div class="grid grid-cols-[auto_1fr] items-center gap-4 rounded-xl border border-zinc-200 p-2.5">
                         <div>
                             <img
-                                src="{{ auth()->user()?->image_url ??  qubix_asset('images/user-placeholder.png') }}"
-                                class="h-[60px] w-[60px] rounded-full max-md:rounded-full"
+                                src="{{ auth()->user()?->image_url ?? qubix_asset('images/user-placeholder.png') }}"
+                                class="h-[60px] w-[60px] rounded-full"
                             >
                         </div>
 
@@ -285,7 +275,7 @@
                                 class="flex flex-col justify-between gap-2.5 max-md:gap-0"
                                 v-pre
                             >
-                                <p class="text-2xl break-all font-mediums max-md:text-xl">Hello! {{ auth()->user()?->first_name }}</p>
+                                <p class="text-2xl break-all font-medium max-md:text-xl">Hello! {{ auth()->user()?->first_name }}</p>
 
                                 <p class="no-underline text-zinc-500 max-md:text-sm">{{ auth()->user()?->email }}</p>
                             </div>
@@ -295,22 +285,17 @@
 
                 {!! view_render_event('qubix.shop.components.layouts.header.mobile.drawer.categories.before') !!}
 
-                <!-- Mobile category view -->
                 <v-mobile-category ref="mobileCategory"></v-mobile-category>
 
                 {!! view_render_event('qubix.shop.components.layouts.header.mobile.drawer.categories.after') !!}
             </x-slot>
 
             <x-slot:footer>
-                <!-- Localization & Currency Section -->
-                @if(core()->getCurrentChannel()->locales()->count() > 1 || core()->getCurrentChannel()->currencies()->count() > 1 )
+                <!-- Locale & Currency -->
+                @if(core()->getCurrentChannel()->locales()->count() > 1 || core()->getCurrentChannel()->currencies()->count() > 1)
                     <div class="fixed bottom-0 z-10 grid w-full max-w-full grid-cols-[1fr_auto_1fr] items-center justify-items-center border-t border-zinc-200 bg-white px-5 ltr:left-0 rtl:right-0">
-                        <!-- Filter Drawer -->
-                        <x-shop::drawer
-                            position="bottom"
-                            width="100%"
-                        >
-                            <!-- Drawer Toggler -->
+                        <!-- Currency Drawer -->
+                        <x-shop::drawer position="bottom" width="100%">
                             <x-slot:toggle>
                                 <div
                                     class="flex cursor-pointer items-center gap-x-2.5 px-2.5 py-3.5 text-lg font-medium uppercase max-md:py-3 max-sm:text-base"
@@ -321,7 +306,6 @@
                                 </div>
                             </x-slot>
 
-                            <!-- Drawer Header -->
                             <x-slot:header>
                                 <div class="flex items-center justify-between">
                                     <p class="text-lg font-semibold">
@@ -330,7 +314,6 @@
                                 </div>
                             </x-slot>
 
-                            <!-- Drawer Content -->
                             <x-slot:content class="!px-0">
                                 <div
                                     class="overflow-auto"
@@ -341,15 +324,10 @@
                             </x-slot>
                         </x-shop::drawer>
 
-                        <!-- Seperator -->
                         <span class="h-5 w-0.5 bg-zinc-200"></span>
 
-                        <!-- Sort Drawer -->
-                        <x-shop::drawer
-                            position="bottom"
-                            width="100%"
-                        >
-                            <!-- Drawer Toggler -->
+                        <!-- Locale Drawer -->
+                        <x-shop::drawer position="bottom" width="100%">
                             <x-slot:toggle>
                                 <div
                                     class="flex cursor-pointer items-center gap-x-2.5 px-2.5 py-3.5 text-lg font-medium uppercase max-md:py-3 max-sm:text-base"
@@ -361,7 +339,6 @@
                                                 ? core()->getCurrentLocale()->logo_url
                                                 : qubix_asset('images/default-language.svg')
                                             }}"
-                                        class="h-full"
                                         alt="Default locale"
                                         width="24"
                                         height="16"
@@ -371,7 +348,6 @@
                                 </div>
                             </x-slot>
 
-                            <!-- Drawer Header -->
                             <x-slot:header>
                                 <div class="flex items-center justify-between">
                                     <p class="text-lg font-semibold">
@@ -380,7 +356,6 @@
                                 </div>
                             </x-slot>
 
-                            <!-- Drawer Content -->
                             <x-slot:content class="!px-0">
                                 <div
                                     class="overflow-auto"
@@ -400,9 +375,7 @@
         type="text/x-template"
         id="v-mobile-category-template"
     >
-        <!-- Wrapper with transition effects -->
         <div class="relative h-full overflow-hidden">
-            <!-- Sliding container -->
             <div
                 class="flex h-full transition-transform duration-300"
                 :class="{
@@ -410,7 +383,7 @@
                     'ltr:-translate-x-full rtl:translate-x-full': currentViewLevel === 'third'
                 }"
             >
-                <!-- First level view -->
+                <!-- First level -->
                 <div class="flex-shrink-0 w-full h-full px-6 overflow-auto">
                     <div class="py-4">
                         <div
@@ -419,13 +392,13 @@
                             :class="{'mb-2': category.children && category.children.length}"
                         >
                             <div class="flex items-center justify-between py-2 transition-colors duration-200 cursor-pointer">
-                                <a :href="category.url" class="text-base font-medium text-black">
+                                <a :href="category.url" class="text-base font-medium text-navyBlue">
                                     @{{ category.name }}
                                 </a>
                             </div>
 
-                            <!-- Second Level Categories -->
-                            <div v-if="category.children && category.children.length" >
+                            <!-- Second level -->
+                            <div v-if="category.children && category.children.length">
                                 <div
                                     v-for="secondLevelCategory in category.children"
                                     :key="secondLevelCategory.id"
@@ -434,13 +407,13 @@
                                         class="flex items-center justify-between py-2 transition-colors duration-200 cursor-pointer"
                                         @click="showThirdLevel(secondLevelCategory, category, $event)"
                                     >
-                                        <a :href="secondLevelCategory.url" class="text-sm font-normal">
+                                        <a :href="secondLevelCategory.url" class="text-sm font-normal text-zinc-600">
                                             @{{ secondLevelCategory.name }}
                                         </a>
 
                                         <span
                                             v-if="secondLevelCategory.children && secondLevelCategory.children.length"
-                                            class="icon-arrow-right rtl:icon-arrow-left"
+                                            class="icon-arrow-right rtl:icon-arrow-left text-zinc-400"
                                         ></span>
                                     </div>
                                 </div>
@@ -449,7 +422,7 @@
                     </div>
                 </div>
 
-                <!-- Third level view -->
+                <!-- Third level -->
                 <div
                     class="flex-shrink-0 w-full h-full"
                     v-if="currentViewLevel === 'third'"
@@ -461,13 +434,12 @@
                             aria-label="Go back"
                         >
                             <span class="text-lg icon-arrow-left rtl:icon-arrow-right"></span>
-                            <div class="text-base font-medium text-black">
+                            <div class="text-base font-medium text-navyBlue">
                                 @lang('shop::app.components.layouts.header.mobile.back-button')
                             </div>
                         </button>
                     </div>
 
-                    <!-- Third Level Content -->
                     <div class="px-6 py-4">
                         <div
                             v-for="thirdLevelCategory in currentSecondLevelCategory?.children"
@@ -476,7 +448,7 @@
                         >
                             <a
                                 :href="thirdLevelCategory.url"
-                                class="block py-2 text-sm transition-colors duration-200"
+                                class="block py-2 text-sm text-zinc-600 transition-colors duration-200 hover:text-navyBlue"
                             >
                                 @{{ thirdLevelCategory.name }}
                             </a>
@@ -492,7 +464,8 @@
             template: '#v-mobile-category-template',
 
             data() {
-                return  {
+                return {
+                    isLoading: true,
                     categories: [],
                     currentViewLevel: 'main',
                     currentSecondLevelCategory: null,
@@ -530,72 +503,22 @@
 
                     this.getCategories();
                 },
+
                 getCategories() {
                     this.$axios.get("{{ route('shop.api.categories.tree') }}")
                         .then(response => {
                             const categoryTree = response.data.data;
 
-                            this.categories = Array.isArray(categoryTree) && categoryTree.length
-                                ? categoryTree
-                                : this.getFallbackCategories();
+                            this.isLoading = false;
+                            this.categories = Array.isArray(categoryTree) ? categoryTree : [];
 
                             localStorage.setItem('categories', JSON.stringify(this.categories));
                         })
                         .catch(error => {
-                            this.categories = this.getFallbackCategories();
-                            localStorage.setItem('categories', JSON.stringify(this.categories));
+                            this.isLoading = false;
+                            this.categories = [];
                             console.log(error);
                         });
-                },
-
-                getFallbackCategories() {
-                    return [
-                        {
-                            id: 'fallback-1',
-                            name: 'Handbags',
-                            url: "{{ route('shop.search.index', ['query' => 'handbag']) }}",
-                            children: [
-                                {
-                                    id: 'fallback-1-1',
-                                    name: 'Sling Bags',
-                                    url: "{{ route('shop.search.index', ['query' => 'sling bag']) }}",
-                                    children: [],
-                                },
-                                {
-                                    id: 'fallback-1-2',
-                                    name: 'Tote Bags',
-                                    url: "{{ route('shop.search.index', ['query' => 'tote bag']) }}",
-                                    children: [],
-                                }
-                            ],
-                        },
-                        {
-                            id: 'fallback-2',
-                            name: 'Shopping Bags',
-                            url: "{{ route('shop.search.index', ['query' => 'shopping bag']) }}",
-                            children: [
-                                {
-                                    id: 'fallback-2-1',
-                                    name: 'Eco Bags',
-                                    url: "{{ route('shop.search.index', ['query' => 'eco bag']) }}",
-                                    children: [],
-                                }
-                            ],
-                        },
-                        {
-                            id: 'fallback-3',
-                            name: 'Stationery',
-                            url: "{{ route('shop.search.index', ['query' => 'stationery']) }}",
-                            children: [
-                                {
-                                    id: 'fallback-3-1',
-                                    name: 'Notebooks',
-                                    url: "{{ route('shop.search.index', ['query' => 'notebook']) }}",
-                                    children: [],
-                                }
-                            ],
-                        }
-                    ];
                 },
 
                 showThirdLevel(secondLevelCategory, parentCategory, event) {

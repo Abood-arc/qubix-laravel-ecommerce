@@ -46,23 +46,6 @@
         @foreach ($customizations as $customization)
             @php ($data = $customization->options) @endphp
 
-            {{--
-                Skip legacy CMS blocks that only rendered fake “product” grids in HTML.
-                Real catalog products on the home page come from PRODUCT_CAROUSEL (API).
-            --}}
-            @if (
-                $homeLayoutMode !== 'v2'
-                && $customization->type === 'static_content'
-                && ! empty($data['html'] ?? '')
-                && (
-                    str_contains($data['html'], 'top-collection-container')
-                    || str_contains($data['html'], 'section-game')
-                    || str_contains($data['html'], 'Our Collections')
-                )
-            )
-                @continue
-            @endif
-
             <!-- Static content -->
             @switch ($customization->type)
                 @case ($customization::IMAGE_CAROUSEL)

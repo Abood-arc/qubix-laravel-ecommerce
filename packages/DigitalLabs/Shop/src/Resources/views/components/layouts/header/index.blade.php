@@ -4,11 +4,11 @@
     <x-shop::layouts.header.desktop.top />
 </div>
 
-<header class="sticky top-0 z-30 border-b border-emerald-100/70 bg-white/95 shadow-[0_8px_25px_rgba(15,23,42,0.06)] backdrop-blur max-lg:shadow-none">
+<header class="sticky top-0 z-30 border-b border-[#2f6f60] bg-[#1f5f4f] shadow-[0_8px_22px_rgba(10,30,24,0.35)] backdrop-blur max-lg:shadow-none">
     <v-header-switcher>
         <!-- Desktop Header Shimmer -->
         <div class="flex flex-wrap max-lg:hidden">
-            <div class="flex min-h-[78px] w-full justify-between border border-b border-l-0 border-r-0 border-t-0 px-[60px] max-1180:px-8">
+            <div class="flex min-h-[78px] w-full justify-between border-b border-zinc-100 px-[60px] max-1180:px-8">
                 <!-- Left Navigation Section -->
                 <div class="flex items-center gap-x-10 max-[1180px]:gap-x-5">
                     <!-- Logo Shimmer -->
