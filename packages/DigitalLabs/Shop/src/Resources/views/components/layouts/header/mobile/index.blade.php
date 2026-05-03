@@ -17,7 +17,7 @@
 
             <a
                 href="{{ route('shop.home.index') }}"
-                class="inline-flex max-h-[44px] items-center rounded-lg bg-white px-2.5 py-2 shadow-[0_3px_10px_rgba(0,0,0,0.12)]"
+                class="inline-flex items-center"
                 aria-label="@lang('shop::app.components.layouts.header.mobile.qubix')"
             >
                 <img
@@ -25,7 +25,7 @@
                     alt="{{ config('app.name') }}"
                     width="131"
                     height="29"
-                    class="h-auto max-h-[28px] w-auto"
+                    class="h-auto max-h-[38px] w-auto"
                 >
             </a>
 

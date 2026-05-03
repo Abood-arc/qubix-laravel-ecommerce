@@ -13,13 +13,13 @@
         <a
             href="{{ route('shop.home.index') }}"
             aria-label="@lang('shop::app.components.layouts.header.desktop.bottom.qubix')"
-            class="inline-flex items-center rounded-xl bg-white px-3 py-2 shadow-[0_3px_10px_rgba(0,0,0,0.12)]"
+            class="inline-flex items-center"
         >
             <img
                 src="{{ core()->getCurrentChannel()->logo_url ?? qubix_asset('images/logo.svg') }}"
                 width="131"
                 height="29"
-                class="h-auto max-h-[30px] w-auto"
+                class="h-auto max-h-[46px] w-auto"
                 alt="{{ config('app.name') }}"
             >
         </a>

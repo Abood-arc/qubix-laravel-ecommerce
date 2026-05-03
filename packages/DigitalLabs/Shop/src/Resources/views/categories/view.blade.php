@@ -25,11 +25,11 @@
 
     {!! view_render_event('qubix.shop.categories.view.banner_path.before') !!}
 
-    <!-- Hero Image -->
+    <!-- Hero Image — full-bleed, no side padding, no top gap -->
     @if ($category->banner_path)
-        <div class="container mt-8 px-[60px] max-lg:px-8 max-md:mt-4 max-md:px-4">
+        <div class="w-full overflow-hidden">
             <x-shop::media.images.lazy
-                class="aspect-[4/1] max-h-full max-w-full rounded-xl"
+                class="aspect-[4/1] w-full object-cover object-center"
                 src="{{ $category->banner_url }}"
                 alt="{{ $category->name }}"
                 width="1320"

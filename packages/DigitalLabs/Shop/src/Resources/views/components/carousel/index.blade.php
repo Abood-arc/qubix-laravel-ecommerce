@@ -1,8 +1,9 @@
 @props(['options'])
 
 <v-carousel :images="{{ json_encode($options['images'] ?? []) }}">
-    <div class="overflow-hidden">
-        <div class="shimmer aspect-[2.743/1] max-h-screen w-screen"></div>
+    {{-- SSR placeholder: same aspect ratio as the real hero --}}
+    <div class="aspect-[2.743/1] max-h-screen w-full overflow-hidden">
+        <div class="shimmer h-full w-full"></div>
     </div>
 </v-carousel>
 
@@ -11,83 +12,77 @@
         type="text/x-template"
         id="v-carousel-template"
     >
-        <div class="relative m-auto flex w-full overflow-hidden bg-[#f3eee7]">
-            <!-- Slider -->
+        <div
+            class="relative w-full overflow-hidden bg-[#f3eee7] aspect-[2.743/1] max-h-screen"
+            @touchstart.passive="touchStart"
+            @touchend.passive="touchEnd"
+        >
+            <!-- Shimmer shown until the first slide has loaded -->
             <div
-                class="inline-flex translate-x-0 cursor-pointer transition-transform duration-700 ease-out will-change-transform"
-                ref="sliderContainer"
+                v-if="!isLoaded(0)"
+                class="shimmer absolute inset-0 z-0"
+            ></div>
+
+            <!--
+                All slides are stacked via absolute inset-0.
+                Only the active slide is opacity-100; the rest are opacity-0.
+                CSS transition on opacity produces the crossfade.
+            -->
+            <div
+                v-for="(image, index) in images"
+                :key="index"
+                class="absolute inset-0"
+                :style="{
+                    zIndex: index === currentIndex ? 1 : 0,
+                    opacity: index === currentIndex && isLoaded(index) ? 1 : 0,
+                    transition: 'opacity 0.7s ease-in-out',
+                    cursor: image.link ? 'pointer' : 'default',
+                }"
+                @click="visitLink(image)"
             >
-                <div
-                    class="max-h-screen w-screen bg-cover bg-no-repeat"
-                    v-for="(image, index) in images"
-                    :key="index"
-                    @click="visitLink(image)"
-                    ref="slide"
-                >
-                    <x-shop::media.images.lazy
-                        class="aspect-[2.743/1] max-h-full w-full max-w-full select-none object-cover transition-transform duration-300 ease-in-out will-change-transform"
-                        ::lazy="index === 0 ? false : true"
-                        ::src="image.image"
-                        ::srcset="image.image + ' 1920w, ' + image.image.replace('storage', 'cache/large') + ' 1280w,' + image.image.replace('storage', 'cache/medium') + ' 1024w, ' + image.image.replace('storage', 'cache/small') + ' 525w'"
-                        ::sizes="
-                            '(max-width: 525px) 525px, ' +
-                            '(max-width: 1024px) 1024px, ' +
-                            '(max-width: 1600px) 1280px, ' +
-                            '1920px'
-                        "
-                        ::alt="image?.title || 'Carousel Image ' + (index + 1)"
-                        tabindex="0"
-                        ::fetchpriority="index === 0 ? 'high' : 'low'"
-                        ::decoding="index === 0 ? 'sync' : 'async'"
-                    />
-                </div>
+                <img
+                    class="h-full w-full select-none object-cover object-center"
+                    :src="image.image"
+                    :srcset="buildSrcset(image)"
+                    sizes="(max-width: 525px) 525px, (max-width: 1024px) 1024px, (max-width: 1600px) 1280px, 1920px"
+                    :alt="image.title || 'Hero image ' + (index + 1)"
+                    :fetchpriority="index === 0 ? 'high' : 'low'"
+                    :loading="index === 0 ? 'eager' : 'lazy'"
+                    :decoding="index === 0 ? 'sync' : 'async'"
+                    draggable="false"
+                    @load="onLoad(index)"
+                />
             </div>
 
-            <!-- Navigation -->
-            <span
-                class="icon-arrow-left absolute left-4 top-1/2 z-[1] -mt-[22px] hidden w-auto rounded-full border border-white/70 bg-white/80 p-3 text-2xl font-bold text-zinc-900 opacity-80 shadow-md backdrop-blur transition-all md:inline-block"
-                :class="{
-                    'cursor-not-allowed': direction == 'ltr' && currentIndex == 0,
-                    'cursor-pointer hover:bg-white hover:opacity-100': direction == 'ltr' ? currentIndex > 0 : currentIndex <= 0
-                }"
-                role="button"
+            <!-- Prev arrow -->
+            <button
+                v-if="images.length >= 2"
+                class="icon-arrow-left absolute left-4 top-1/2 z-[2] -translate-y-1/2 hidden rounded-full border border-white/70 bg-white/80 p-3 text-2xl font-bold text-zinc-900 opacity-80 shadow-md backdrop-blur transition-all hover:bg-white hover:opacity-100 focus:outline-none md:inline-block"
                 aria-label="@lang('shop::components.carousel.previous')"
-                tabindex="0"
-                v-if="images?.length >= 2"
                 @click="navigate('prev')"
-            >
-            </span>
+            ></button>
 
-            <span
-                class="icon-arrow-right absolute right-4 top-1/2 z-[1] -mt-[22px] hidden w-auto rounded-full border border-white/70 bg-white/80 p-3 text-2xl font-bold text-zinc-900 opacity-80 shadow-md backdrop-blur transition-all md:inline-block"
-                :class="{
-                    'cursor-not-allowed': direction == 'rtl' && currentIndex == 0,
-                    'cursor-pointer hover:bg-white hover:opacity-100': direction == 'rtl' ? currentIndex < 0 : currentIndex >= 0
-                }"
-                role="button"
+            <!-- Next arrow -->
+            <button
+                v-if="images.length >= 2"
+                class="icon-arrow-right absolute right-4 top-1/2 z-[2] -translate-y-1/2 hidden rounded-full border border-white/70 bg-white/80 p-3 text-2xl font-bold text-zinc-900 opacity-80 shadow-md backdrop-blur transition-all hover:bg-white hover:opacity-100 focus:outline-none md:inline-block"
                 aria-label="@lang('shop::components.carousel.next')"
-                tabindex="0"
-                v-if="images?.length >= 2"
                 @click="navigate('next')"
-            >
-            </span>
+            ></button>
 
-            <!-- Pagination -->
-            <div class="absolute bottom-5 left-0 flex w-full justify-center max-md:bottom-3.5 max-sm:bottom-2.5">
-                <div
+            <!-- Pagination dots -->
+            <div
+                v-if="images.length >= 2"
+                class="absolute bottom-5 left-0 z-[2] flex w-full justify-center max-md:bottom-3.5 max-sm:bottom-2.5"
+            >
+                <button
                     v-for="(image, index) in images"
-                    :key="index"
-                    class="sm:p-2.5 mx-1 h-3 w-3 cursor-pointer rounded-full border border-white/50 max-md:h-2 max-md:w-2 max-sm:h-1.5 max-sm:w-1.5
-                    p-2 focus:outline-none"
-                    :class="{ 'bg-white': index === Math.abs(currentIndex), 'bg-white/20': index !== Math.abs(currentIndex) }"
-                    role="button"
-                    tabindex="0"
+                    :key="'dot-' + index"
+                    class="mx-1 h-3 w-3 rounded-full border border-white/50 transition-colors focus:outline-none max-md:h-2 max-md:w-2 max-sm:h-1.5 max-sm:w-1.5"
+                    :class="index === currentIndex ? 'bg-white' : 'bg-white/20'"
                     :aria-label="'Go to slide ' + (index + 1)"
-                    @click="navigateByPagination(index)"
-                    @keydown.enter="navigateByPagination(index)"
-                    @keydown.space.prevent="navigateByPagination(index)"
-                >
-                </div>
+                    @click="goTo(index)"
+                ></button>
             </div>
         </div>
     </script>
@@ -100,165 +95,45 @@
 
             data() {
                 return {
-                    isDragging: false,
-                    startPos: 0,
-                    currentTranslate: 0,
-                    prevTranslate: 0,
-                    animationID: 0,
                     currentIndex: 0,
-                    slider: '',
-                    slides: [],
+                    loadedSlides: [],
                     autoPlayInterval: null,
+                    touchStartX: 0,
                     direction: 'ltr',
-                    startFrom: 1,
                 };
             },
 
             mounted() {
-                this.slider = this.$refs.sliderContainer;
+                this.direction = document.dir || 'ltr';
 
-                if (
-                    this.$refs.slide
-                    && typeof this.$refs.slide[Symbol.iterator] === 'function'
-                ) {
-                    this.slides = Array.from(this.$refs.slide);
-                }
-
-                // Use requestIdleCallback for non-critical initialization
-                if ('requestIdleCallback' in window) {
-                    requestIdleCallback(() => {
-                        this.init();
-                        setTimeout(() => {
-                            this.play();
-                        }, 4000);
-                    });
-                } else {
-                    setTimeout(() => {
-                        this.init();
-                        setTimeout(() => {
-                            this.play();
-                        }, 4000);
-                    });
-                }
+                // Delay autoplay so first image has time to settle
+                setTimeout(() => this.play(), 4000);
             },
 
             beforeUnmount() {
-                this.cleanup();
+                clearInterval(this.autoPlayInterval);
             },
 
             methods: {
-                init() {
-                    this.direction = document.dir;
-
-                    if (this.direction == 'rtl') {
-                        this.startFrom = -1;
-                    }
-
-                    this.slides.forEach((slide, index) => {
-                        slide.querySelector('img')?.addEventListener('dragstart', (e) => e.preventDefault());
-
-                        slide.addEventListener('mousedown', this.handleDragStart);
-
-                        slide.addEventListener('touchstart', this.handleDragStart, { passive: true });
-
-                        slide.addEventListener('mouseup', this.handleDragEnd);
-
-                        slide.addEventListener('mouseleave', this.handleDragEnd);
-
-                        slide.addEventListener('touchend', this.handleDragEnd, { passive: true });
-
-                        slide.addEventListener('mousemove', this.handleDrag);
-
-                        slide.addEventListener('touchmove', this.handleDrag, { passive: true });
-                    });
-
-                    window.addEventListener('resize', this.setPositionByIndex);
+                isLoaded(index) {
+                    return this.loadedSlides.includes(index);
                 },
 
-                handleDragStart(event) {
-                    this.startPos = event.type === 'mousedown' ? event.clientX : event.touches[0].clientX;
-
-                    this.isDragging = true;
-
-                    this.animationID = requestAnimationFrame(this.animation);
-                },
-
-                handleDrag(event) {
-                    if (! this.isDragging) {
-                        return;
-                    }
-
-                    const currentPosition = event.type === 'mousemove' ? event.clientX : event.touches[0].clientX;
-
-                    this.currentTranslate = this.prevTranslate + currentPosition - this.startPos;
-                },
-
-                handleDragEnd(event) {
-                    clearInterval(this.autoPlayInterval);
-
-                    cancelAnimationFrame(this.animationID);
-
-                    this.isDragging = false;
-
-                    const movedBy = this.currentTranslate - this.prevTranslate;
-
-                    if (this.direction == 'ltr') {
-                        if (
-                            movedBy < -100
-                            && this.currentIndex < this.slides.length - 1
-                        ) {
-                            this.currentIndex += 1;
-                        }
-
-                        if (
-                            movedBy > 100
-                            && this.currentIndex > 0
-                        ) {
-                            this.currentIndex -= 1;
-                        }
-                    } else {
-                        if (
-                            movedBy > 100
-                            && this.currentIndex < this.slides.length - 1
-                        ) {
-                            if (Math.abs(this.currentIndex) != this.slides.length - 1) {
-                                this.currentIndex -= 1;
-                            }
-                        }
-
-                        if (
-                            movedBy < -100
-                            && this.currentIndex < 0
-                        ) {
-                            this.currentIndex += 1;
-                        }
-                    }
-
-                    this.setPositionByIndex();
-
-                    this.play();
-                },
-
-                animation() {
-                    this.setSliderPosition();
-
-                    if (this.isDragging) {
-                        requestAnimationFrame(this.animation);
+                onLoad(index) {
+                    if (! this.isLoaded(index)) {
+                        this.loadedSlides.push(index);
                     }
                 },
 
-                setPositionByIndex() {
-                    this.currentTranslate = this.currentIndex * -window.innerWidth;
+                buildSrcset(image) {
+                    const src = image.image;
 
-                    this.prevTranslate = this.currentTranslate;
-
-                    this.setSliderPosition();
-                },
-
-                setSliderPosition() {
-                    if (this.slider) {
-                        this.slider.style.transform = `translateX(${this.currentTranslate}px)`;
-                    }
+                    return [
+                        `${src} 1920w`,
+                        `${src.replace('storage', 'cache/large')} 1280w`,
+                        `${src.replace('storage', 'cache/medium')} 1024w`,
+                        `${src.replace('storage', 'cache/small')} 525w`,
+                    ].join(', ');
                 },
 
                 visitLink(image) {
@@ -267,73 +142,49 @@
                     }
                 },
 
-                navigate(type) {
+                navigate(dir) {
                     clearInterval(this.autoPlayInterval);
 
-                    if (this.direction === 'rtl') {
-                        type === 'next' ? this.prev() : this.next();
-                    } else {
-                        type === 'next' ? this.next() : this.prev();
-                    }
+                    const len = this.images.length;
+                    const goForward = this.direction === 'rtl' ? dir === 'prev' : dir === 'next';
 
-                    this.setPositionByIndex();
+                    this.currentIndex = goForward
+                        ? (this.currentIndex + 1) % len
+                        : (this.currentIndex - 1 + len) % len;
 
                     this.play();
                 },
 
-                next() {
-                    this.currentIndex = (this.currentIndex + this.startFrom) % this.images.length;
-                },
-
-                prev() {
-                    this.currentIndex = this.direction == 'ltr'
-                        ? this.currentIndex > 0 ? this.currentIndex - 1 : 0
-                        : this.currentIndex < 0 ? this.currentIndex + 1 : 0;
-                },
-
-                navigateByPagination(index) {
-                    this.direction == 'rtl' ? index = -index : '';
-
+                goTo(index) {
                     clearInterval(this.autoPlayInterval);
-
                     this.currentIndex = index;
-
-                    this.setPositionByIndex();
-
                     this.play();
                 },
 
                 play() {
                     clearInterval(this.autoPlayInterval);
 
-                    this.autoPlayInterval = setInterval(() => {
-                        this.currentIndex = (this.currentIndex + this.startFrom) % this.images.length;
+                    if (this.images.length < 2) {
+                        return;
+                    }
 
-                        this.setPositionByIndex();
+                    this.autoPlayInterval = setInterval(() => {
+                        this.currentIndex = (this.currentIndex + 1) % this.images.length;
                     }, 5000);
                 },
 
-                cleanup() {
-                    // Clear intervals and animation frames
-                    clearInterval(this.autoPlayInterval);
-                    cancelAnimationFrame(this.animationID);
+                touchStart(e) {
+                    this.touchStartX = e.touches[0].clientX;
+                },
 
-                    // Remove event listeners
-                    if (this.slides) {
-                        this.slides.forEach(slide => {
-                            slide.removeEventListener('mousedown', this.handleDragStart);
-                            slide.removeEventListener('touchstart', this.handleDragStart);
-                            slide.removeEventListener('mouseup', this.handleDragEnd);
-                            slide.removeEventListener('mouseleave', this.handleDragEnd);
-                            slide.removeEventListener('touchend', this.handleDragEnd);
-                            slide.removeEventListener('mousemove', this.handleDrag);
-                            slide.removeEventListener('touchmove', this.handleDrag);
-                        });
+                touchEnd(e) {
+                    const delta = this.touchStartX - e.changedTouches[0].clientX;
+
+                    if (Math.abs(delta) > 50) {
+                        this.navigate(delta > 0 ? 'next' : 'prev');
                     }
-
-                    window.removeEventListener('resize', this.setPositionByIndex);
                 },
             },
         });
     </script>
-@endpushOnce
+@endPushOnce
