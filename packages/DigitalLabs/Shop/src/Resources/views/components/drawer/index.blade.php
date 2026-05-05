@@ -96,7 +96,7 @@
                         'inset-y-0 ltr:right-0 rtl:left-0': position == 'right',
                         'inset-y-0 ltr:left-0 rtl:right-0': position == 'left'
                     }"
-                    :style="'width:' + width"
+                    :style="(position === 'right' || position === 'left') ? 'width:' + width + '; top:0; bottom:0; height:100vh;' : 'width:' + width"
                     v-show="isOpen"
                 >
                     <div class="pointer-events-auto h-full w-full overflow-auto bg-white">

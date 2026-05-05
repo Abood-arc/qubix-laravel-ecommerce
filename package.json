@@ -3,6 +3,9 @@
     "type": "module",
     "scripts": {
         "dev": "vite",
+        "dev:shop": "npm run dev --prefix packages/DigitalLabs/Shop",
+        "dev:admin": "npm run dev --prefix packages/DigitalLabs/Admin",
+        "dev:installer": "npm run dev --prefix packages/DigitalLabs/Installer",
         "build": "vite build"
     },
     "devDependencies": {

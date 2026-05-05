@@ -17,9 +17,7 @@
         >
             <img
                 src="{{ core()->getCurrentChannel()->logo_url ?? qubix_asset('images/logo.svg') }}"
-                width="131"
-                height="29"
-                class="h-auto max-h-[46px] w-auto"
+                style="height: 56px; width: auto; object-fit: contain;"
                 alt="{{ config('app.name') }}"
             >
         </a>

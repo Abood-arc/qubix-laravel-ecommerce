@@ -11,10 +11,10 @@
     >
         <!-- Grid Card -->
         <div
-            class="1180:transtion-all group w-full rounded-md 1180:relative 1180:grid 1180:content-start 1180:overflow-hidden 1180:duration-300 1180:hover:shadow-[0_5px_10px_rgba(0,0,0,0.1)]"
+            class="group w-full rounded-xl 1180:relative 1180:grid 1180:content-start 1180:overflow-hidden 1180:transition-all 1180:duration-300 1180:hover:-translate-y-1 1180:hover:shadow-[0_20px_48px_rgba(0,0,0,0.13)]"
             v-if="mode != 'list'"
         >
-            <div class="relative max-h-[300px] max-w-[291px] overflow-hidden max-md:max-h-60 max-md:max-w-full max-md:rounded-lg max-sm:max-h-[200px] max-sm:max-w-full">
+            <div class="relative max-h-[300px] max-w-[291px] overflow-hidden rounded-t-xl max-md:max-h-60 max-md:max-w-full max-md:rounded-lg max-sm:max-h-[200px] max-sm:max-w-full">
                 {!! view_render_event('qubix.shop.components.products.card.image.before') !!}
 
                 <!-- Product Image -->
@@ -23,7 +23,7 @@
                     :aria-label="product.name + ' '"
                 >
                     <x-shop::media.images.lazy
-                        class="after:content-[' '] relative bg-zinc-100 transition-all duration-300 after:block after:pb-[calc(100%+9px)] group-hover:scale-105"
+                            class="after:content-[' '] relative bg-zinc-100 transition-all duration-500 ease-[cubic-bezier(0.25,0.46,0.45,0.94)] after:block after:pb-[calc(100%+9px)] group-hover:scale-110"
                         ::src="product.base_image.medium_image_url"
                         ::srcset="`
                             ${product.base_image.small_image_url} 150w,
@@ -37,6 +37,12 @@
                         ::alt="product.name"
                     />
                 </a>
+
+                <!-- Depth overlay: fades in on hover, hidden on mobile -->
+                <div
+                    class="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/30 via-black/5 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100 max-md:hidden"
+                    aria-hidden="true"
+                ></div>
 
                 {!! view_render_event('qubix.shop.components.products.card.image.after') !!}
 
@@ -118,7 +124,7 @@
             </div>
 
             <!-- Product Information Section -->
-            <div class="-mt-9 grid max-w-[291px] translate-y-9 content-start gap-2.5 bg-white p-2.5 transition-transform duration-300 ease-out group-hover:-translate-y-0 group-hover:rounded-t-lg max-md:relative max-md:mt-0 max-md:translate-y-0 max-md:gap-0 max-md:px-0 max-md:py-1.5 max-sm:min-w-[170px] max-sm:max-w-[192px]">
+            <div class="-mt-9 grid max-w-[291px] translate-y-9 content-start gap-2.5 bg-white p-2.5 transition-all duration-300 ease-[cubic-bezier(0.25,0.46,0.45,0.94)] group-hover:-translate-y-0 group-hover:rounded-t-xl group-hover:shadow-[0_-6px_20px_rgba(0,0,0,0.07)] max-md:relative max-md:mt-0 max-md:translate-y-0 max-md:gap-0 max-md:px-0 max-md:py-1.5 max-sm:min-w-[170px] max-sm:max-w-[192px]">
 
                 {!! view_render_event('qubix.shop.components.products.card.name.before') !!}
 
@@ -140,7 +146,7 @@
                 {!! view_render_event('qubix.shop.components.products.card.price.after') !!}
 
                 <!-- Product Actions Section -->
-                <div class="action-items flex items-center justify-between opacity-0 transition-all duration-300 ease-in-out group-hover:opacity-100 max-md:hidden">
+                <div class="action-items flex items-center justify-between translate-y-2 opacity-0 transition-all duration-300 ease-out group-hover:translate-y-0 group-hover:opacity-100 max-md:hidden">
                     @if (core()->getConfigData('sales.checkout.shopping_cart.cart_page'))
                         {!! view_render_event('qubix.shop.components.products.card.add_to_cart.before') !!}
 
@@ -191,16 +197,16 @@
 
         <!-- List Card -->
         <div
-            class="relative flex max-w-max grid-cols-2 gap-4 overflow-hidden rounded max-sm:flex-wrap"
+            class="relative flex max-w-max grid-cols-2 gap-4 overflow-hidden rounded-xl transition-all duration-300 hover:shadow-[0_12px_32px_rgba(0,0,0,0.10)] max-sm:flex-wrap"
             v-else
         >
-            <div class="group relative max-h-[258px] max-w-[250px] overflow-hidden">
+            <div class="group relative max-h-[258px] max-w-[250px] overflow-hidden rounded-xl">
 
                 {!! view_render_event('qubix.shop.components.products.card.image.before') !!}
 
                 <a :href="`{{ route('shop.product_or_category.index', '') }}/${product.url_key}`">
                     <x-shop::media.images.lazy
-                        class="after:content-[' '] relative min-w-[250px] bg-zinc-100 transition-all duration-300 after:block after:pb-[calc(100%+9px)] group-hover:scale-105"
+                        class="after:content-[' '] relative min-w-[250px] bg-zinc-100 transition-all duration-500 ease-[cubic-bezier(0.25,0.46,0.45,0.94)] after:block after:pb-[calc(100%+9px)] group-hover:scale-110"
                         ::src="product.base_image.medium_image_url"
                         ::key="product.id"
                         ::index="product.id"
@@ -209,6 +215,12 @@
                         ::alt="product.name"
                     />
                 </a>
+
+                <!-- Depth overlay for list card -->
+                <div
+                    class="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/25 via-transparent to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100"
+                    aria-hidden="true"
+                ></div>
 
                 {!! view_render_event('qubix.shop.components.products.card.image.after') !!}
 

@@ -1,19 +1,22 @@
 services:
     laravel.test:
         build:
-            context: ./vendor/laravel/sail/runtimes/8.3
-            dockerfile: Dockerfile
+            # Default Sail image uses ondrej PPA (Launchpad); use repo Dockerfile when that mirror is blocked.
+            context: .
+            dockerfile: docker/8.3/Dockerfile
             args:
-                WWWGROUP: '${WWWGROUP}'
+                WWWGROUP: '${WWWGROUP:-1000}'
         image: sail-8.3/app
         extra_hosts:
             - 'host.docker.internal:host-gateway'
         ports:
             - '${APP_PORT:-80}:80'
+            # Vite (Shop HMR by default); must match VITE_PORT in .env — canonical dev port is 5173.
             - '${VITE_PORT:-5173}:${VITE_PORT:-5173}'
         environment:
             WWWUSER: '${WWWUSER}'
             LARAVEL_SAIL: 1
+            SAIL_VITE_SHOP: '${SAIL_VITE_SHOP:-true}'
             XDEBUG_MODE: '${SAIL_XDEBUG_MODE:-off}'
             XDEBUG_CONFIG: '${SAIL_XDEBUG_CONFIG:-client_host=host.docker.internal}'
             IGNITION_LOCAL_SITES_PATH: '${PWD}'
@@ -75,7 +78,8 @@ services:
             - xpack.security.enabled=false
             - discovery.type=single-node
             - bootstrap.memory_lock=true
-            - "ES_JAVA_OPTS=-Xms256m -Xmx256m"
+            - 'ES_JAVA_OPTS=-Xms256m -Xmx256m'
+            - 'JDK_JAVA_OPTIONS=-XX:-UseContainerSupport'
         ulimits:
             memlock:
                 soft: -1

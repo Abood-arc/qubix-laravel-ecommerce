@@ -1,6 +1,6 @@
 {!! view_render_event('qubix.shop.layout.header.before') !!}
 
-<div class="max-lg:hidden">
+<div class="relative z-40 max-lg:hidden">
     <x-shop::layouts.header.desktop.top />
 </div>
 

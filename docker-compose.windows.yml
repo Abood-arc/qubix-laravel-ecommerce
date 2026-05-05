@@ -1,8 +1,0 @@
-services:
-  laravel.test:
-    build:
-      context: .
-      dockerfile: docker/php/Dockerfile.windows
-    image: ecommerce/php83-windows:local
-    working_dir: /var/www/html
-    command: php artisan serve --host=0.0.0.0 --port=80

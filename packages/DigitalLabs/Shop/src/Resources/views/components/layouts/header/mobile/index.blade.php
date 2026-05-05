@@ -23,9 +23,7 @@
                 <img
                     src="{{ core()->getCurrentChannel()->logo_url ?? qubix_asset('images/logo.svg') }}"
                     alt="{{ config('app.name') }}"
-                    width="131"
-                    height="29"
-                    class="h-auto max-h-[38px] w-auto"
+                    style="height: 48px; width: auto; object-fit: contain;"
                 >
             </a>
 
@@ -240,9 +238,8 @@
                         <img
                             src="{{ core()->getCurrentChannel()->logo_url ?? qubix_asset('images/logo.svg') }}"
                             alt="{{ config('app.name') }}"
-                            width="131"
-                            height="29"
-                            class="h-auto max-h-[28px] w-auto rounded-lg bg-white px-2.5 py-2 shadow-[0_3px_10px_rgba(0,0,0,0.12)]"
+                            style="height: 48px; width: auto; object-fit: contain;"
+                            class="rounded-lg bg-white px-2.5 py-2 shadow-[0_3px_10px_rgba(0,0,0,0.12)]"
                         >
                     </a>
                 </div>
