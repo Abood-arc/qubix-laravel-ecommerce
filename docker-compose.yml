@@ -7,6 +7,7 @@ services:
             args:
                 WWWGROUP: '${WWWGROUP:-1000}'
         image: sail-8.3/app
+        restart: unless-stopped
         extra_hosts:
             - 'host.docker.internal:host-gateway'
         ports:
@@ -32,6 +33,7 @@ services:
             - mailpit
     mysql:
         image: 'mysql/mysql-server:8.0'
+        restart: unless-stopped
         ports:
             - '${FORWARD_DB_PORT:-3306}:3306'
         environment:
@@ -56,6 +58,7 @@ services:
             timeout: 5s
     redis:
         image: 'redis:alpine'
+        restart: unless-stopped
         ports:
             - '${FORWARD_REDIS_PORT:-6379}:6379'
         volumes:
@@ -71,6 +74,7 @@ services:
             timeout: 5s
     elasticsearch:
         image: docker.elastic.co/elasticsearch/elasticsearch:7.17.0
+        restart: unless-stopped
         ports:
             - '9200:9200'
             - '9300:9300'
@@ -93,6 +97,7 @@ services:
             - sail
     kibana:
         image: docker.elastic.co/kibana/kibana:7.17.0
+        restart: unless-stopped
         ports:
             - 5601:5601
         environment:
@@ -103,6 +108,7 @@ services:
             - elasticsearch
     mailpit:
         image: 'axllent/mailpit:latest'
+        restart: unless-stopped
         ports:
             - '${FORWARD_MAILPIT_PORT:-1025}:1025'
             - '${FORWARD_MAILPIT_DASHBOARD_PORT:-8025}:8025'
