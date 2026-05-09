@@ -151,11 +151,26 @@
                         {!! view_render_event('qubix.shop.components.products.card.add_to_cart.before') !!}
 
                         <button
-                            class="secondary-button w-full max-w-full p-2.5 text-sm font-medium max-sm:rounded-xl max-sm:p-2"
+                            class="cart-add-btn secondary-button flex w-full max-w-full items-center justify-center gap-1.5 overflow-hidden p-2.5 text-sm font-medium max-sm:rounded-xl max-sm:p-2"
+                            :class="{ 'cart-add-btn--loading': isAddingToCart }"
                             :disabled="! product.is_saleable || isAddingToCart"
                             @click="addToCart()"
                         >
-                            @lang('shop::app.components.products.card.add-to-cart')
+                            <!-- Loading state -->
+                            <template v-if="isAddingToCart">
+                                <span class="cart-adding-text">Adding</span>
+                                <span class="cart-dots" aria-hidden="true">
+                                    <span class="cart-dot"></span>
+                                    <span class="cart-dot"></span>
+                                    <span class="cart-dot"></span>
+                                </span>
+                            </template>
+
+                            <!-- Default state -->
+                            <template v-else>
+                                <span class="icon-cart text-base leading-none"></span>
+                                <span>@lang('shop::app.components.products.card.add-to-cart')</span>
+                            </template>
                         </button>
 
                         {!! view_render_event('qubix.shop.components.products.card.add_to_cart.after') !!}
@@ -165,7 +180,7 @@
 
                     @if (core()->getConfigData('customer.settings.wishlist.wishlist_option'))
                         <span
-                            class="cursor-pointer p-2.5 text-2xl max-sm:hidden"
+                            class="cursor-pointer p-2.5 text-2xl transition-transform duration-200 hover:scale-125 active:scale-95 max-sm:hidden"
                             role="button"
                             aria-label="@lang('shop::app.components.products.card.add-to-wishlist')"
                             tabindex="0"
@@ -181,7 +196,7 @@
 
                     @if (core()->getConfigData('catalog.products.settings.compare_option'))
                         <span
-                            class="icon-compare cursor-pointer p-2.5 text-2xl max-sm:hidden"
+                            class="icon-compare cursor-pointer p-2.5 text-2xl transition-transform duration-200 hover:scale-125 active:scale-95 max-sm:hidden"
                             role="button"
                             aria-label="@lang('shop::app.components.products.card.add-to-compare')"
                             tabindex="0"

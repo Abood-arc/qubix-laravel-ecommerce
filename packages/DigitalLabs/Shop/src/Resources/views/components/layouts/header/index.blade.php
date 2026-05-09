@@ -4,7 +4,10 @@
     <x-shop::layouts.header.desktop.top />
 </div>
 
-<header class="sticky top-0 z-30 border-b border-[#2f6f60] bg-[#1f5f4f] shadow-[0_8px_22px_rgba(10,30,24,0.35)] backdrop-blur max-lg:shadow-none">
+<header
+    id="main-header"
+    class="sticky top-0 z-30 border-b border-[#2f6f60] bg-[#1f5f4f]"
+>
     <v-header-switcher>
         <!-- Desktop Header Shimmer -->
         <div class="flex flex-wrap max-lg:hidden">
@@ -138,6 +141,54 @@
 </header>
 
 {!! view_render_event('qubix.shop.layout.header.after') !!}
+
+@pushOnce('scripts')
+    <script>
+        (function () {
+            /*
+             * Re-acquire the header on EVERY call so Vue re-renders never leave
+             * us holding a detached/stale element reference.
+             *
+             * Scroll position is read from document.scrollingElement.scrollTop —
+             * the authoritative cross-browser API for the main scroll container.
+             * window.scrollY is kept as a fallback.
+             */
+            function getY() {
+                var se = document.scrollingElement;
+                if (se) return se.scrollTop;
+                return window.scrollY !== undefined
+                    ? window.scrollY
+                    : (window.pageYOffset || document.documentElement.scrollTop || 0);
+            }
+
+            function applyScrollState() {
+                var header = document.getElementById('main-header');
+                if (! header) return;
+
+                if (getY() > 80) {
+                    header.classList.add('header-scrolled');
+                } else {
+                    header.classList.remove('header-scrolled');
+                }
+            }
+
+            applyScrollState();
+
+            /* Per-frame polling: stable with document.scrollingElement + live header ref */
+            (function loop() {
+                applyScrollState();
+                requestAnimationFrame(loop);
+            }());
+
+            /* After Vue app.mount (#app on window.load), sync once post-paint */
+            window.addEventListener('load', function () {
+                requestAnimationFrame(function () {
+                    requestAnimationFrame(applyScrollState);
+                });
+            });
+        })();
+    </script>
+@endPushOnce
 
 @pushOnce('scripts')
     <script 

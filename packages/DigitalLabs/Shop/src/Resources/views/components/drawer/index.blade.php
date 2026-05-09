@@ -2,6 +2,8 @@
     'isActive' => false,
     'position' => 'right',
     'width'    => '500px',
+    /** Tailwind classes for panel surface (both layers). Empty = default bg-white. */
+    'panelClass' => '',
 ])
 
 <v-drawer
@@ -9,6 +11,7 @@
     is-active="{{ $isActive }}"
     position="{{ $position }}"
     width="{{ $width }}"
+    panel-class="{{ $panelClass }}"
 >
     @isset($toggle)
         <template v-slot:toggle>
@@ -89,17 +92,15 @@
                 :leave-to-class="enterFromLeaveToClasses"
             >
                 <div
-                    class="fixed z-[1000] overflow-hidden bg-white max-md:!w-full"
-                    :class="{
-                        'inset-x-0 top-0': position == 'top',
-                        'inset-x-0 bottom-0 max-sm:max-h-full': position == 'bottom',
-                        'inset-y-0 ltr:right-0 rtl:left-0': position == 'right',
-                        'inset-y-0 ltr:left-0 rtl:right-0': position == 'left'
-                    }"
+                    class="fixed z-[1000] overflow-hidden max-md:!w-full"
+                    :class="[positionClasses, panelSurfaceClass]"
                     :style="(position === 'right' || position === 'left') ? 'width:' + width + '; top:0; bottom:0; height:100vh;' : 'width:' + width"
                     v-show="isOpen"
                 >
-                    <div class="pointer-events-auto h-full w-full overflow-auto bg-white">
+                    <div
+                        class="pointer-events-auto h-full w-full overflow-auto"
+                        :class="panelSurfaceClass"
+                    >
                         <div class="flex h-full w-full flex-col">
                             <div class="min-h-0 min-w-0 flex-1 overflow-auto">
                                 <div class="flex h-full flex-col">
@@ -131,7 +132,8 @@
             props: [
                 'isActive',
                 'position',
-                'width'
+                'width',
+                'panelClass',
             ],
 
             data() {
@@ -147,6 +149,24 @@
             },
 
             computed: {
+                positionClasses() {
+                    var p = this.position;
+
+                    return {
+                        'inset-x-0 top-0': p === 'top',
+                        'inset-x-0 bottom-0 max-sm:max-h-full': p === 'bottom',
+                        'inset-y-0 ltr:right-0 rtl:left-0': p === 'right',
+                        'inset-y-0 ltr:left-0 rtl:right-0': p === 'left',
+                    };
+                },
+
+                panelSurfaceClass() {
+                    var raw = this.panelClass;
+                    var c = typeof raw === 'string' ? raw.trim() : '';
+
+                    return c ? c : 'bg-white';
+                },
+
                 enterFromLeaveToClasses() {
                     if (this.position == 'top') {
                         return '-translate-y-full';

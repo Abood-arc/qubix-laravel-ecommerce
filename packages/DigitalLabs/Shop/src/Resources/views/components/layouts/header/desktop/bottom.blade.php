@@ -1,6 +1,6 @@
 {!! view_render_event('qubix.shop.components.layouts.header.desktop.bottom.before') !!}
 
-<div class="flex min-h-[78px] w-full items-center justify-between gap-x-8 border-b border-[#2f6f60] bg-[#1f5f4f] px-[60px] max-1180:px-8">
+<div class="flex min-h-[78px] w-full items-center justify-between gap-x-8 border-b border-[#2f6f60] px-[60px] max-1180:px-8">
     <!--
         Categories support first, second, and third levels.
         Additional levels can be added per project requirements.
@@ -55,7 +55,7 @@
             <div class="absolute right-0 top-full z-[70] mt-3 w-[min(92vw,980px)] rounded-2xl border border-white/25 bg-[#1f5f4f] p-3 shadow-[0_14px_32px_rgba(10,30,24,0.35)]">
                 <form
                     action="{{ route('shop.search.index') }}"
-                    class="flex items-center"
+                    class="relative flex items-center text-white [&_label.icon-camera]:text-white [&_button.icon-camera]:text-white [&_svg]:text-white [&_svg.animate-spin]:!text-white [&_label.absolute]:!top-1/2 [&_label.absolute]:-translate-y-1/2 [&_label.absolute]:mt-0 [&_button.absolute]:!top-1/2 [&_button.absolute]:-translate-y-1/2 [&_button.absolute]:mt-0"
                     role="search"
                 >
                     <label
@@ -65,14 +65,20 @@
                         @lang('shop::app.components.layouts.header.desktop.bottom.search')
                     </label>
 
-                    <div class="icon-search pointer-events-none absolute top-[1.12rem] text-xl text-white ltr:left-6 rtl:right-6"></div>
+                    <div
+                        class="icon-search pointer-events-none absolute top-1/2 z-[1] -translate-y-1/2 text-xl text-white ltr:left-4 rtl:right-4"
+                    ></div>
 
                     <input
                         id="organic-search"
                         type="text"
                         name="query"
                         value="{{ request('query') }}"
-                        class="block w-full rounded-xl border border-white/30 bg-white/10 px-12 py-3 text-sm font-medium text-white placeholder:text-white/70 transition-all hover:border-white/50 focus:border-white"
+                        @class([
+                            'block w-full rounded-xl border border-white/30 bg-white/10 py-3 text-sm font-medium text-white placeholder:text-white/70 transition-all hover:border-white/50 focus:border-white',
+                            'px-11' => ! core()->getConfigData('catalog.products.settings.image_search'),
+                            'pl-11 pr-12 sm:pr-14 rtl:pl-12 rtl:pr-11' => core()->getConfigData('catalog.products.settings.image_search'),
+                        ])
                         minlength="{{ core()->getConfigData('catalog.products.search.min_query_length') }}"
                         maxlength="{{ core()->getConfigData('catalog.products.search.max_query_length') }}"
                         placeholder="@lang('shop::app.components.layouts.header.desktop.bottom.search-text')"
@@ -81,6 +87,10 @@
                         pattern="[^\\]+"
                         required
                     >
+
+                    @if (core()->getConfigData('catalog.products.settings.image_search'))
+                        @include('shop::search.images.index')
+                    @endif
 
                     <button
                         type="submit"
@@ -274,7 +284,7 @@
                 <span class="flex h-full items-center">
                     <a
                         :href="category.url"
-                        class="velocity-nav-category-trigger inline-flex max-w-[12rem] items-center justify-center rounded-full px-4 py-2.5 text-center font-poppins text-[15px] font-semibold tracking-normal text-white ring-1 ring-transparent transition-[background-color,box-shadow,color,ring-color] duration-200 hover:bg-white/10 hover:text-white hover:ring-white/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40 sm:max-w-none sm:text-[15px]"
+                        class="velocity-nav-category-trigger inline-flex max-w-[14rem] items-center px-3 py-2 text-center text-[18px] font-medium tracking-normal text-white transition-[background-color,opacity,color] duration-200 hover:bg-white/[0.08] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/45 sm:max-w-none"
                     >
                         @{{ category.name }}
                     </a>
@@ -291,9 +301,9 @@
                         >
                             <template v-for="secondLevelCategory in pairCategoryChildren">
                                 <div>
-                                    <p class="velocity-nav-megamenu-title font-semibold text-white">
+                                    <p class="velocity-nav-megamenu-title font-medium text-white">
                                         <a
-                                            class="inline-block pb-1 transition-colors hover:text-white/80"
+                                            class="velocity-nav-megamenu-title-link inline-block pb-1 text-[15px] font-medium leading-snug tracking-normal transition-colors hover:text-white/85"
                                             :href="secondLevelCategory.url"
                                         >
                                             @{{ secondLevelCategory.name }}
@@ -343,7 +353,7 @@
                     <span>
                         <a
                             :href="category.url"
-                            class="inline-block px-5 uppercase"
+                            class="velocity-nav-category-trigger-sidebar inline-block px-5 py-2 text-[18px] font-medium normal-case tracking-normal text-white hover:text-white/90"
                         >
                             @{{ category.name }}
                         </a>

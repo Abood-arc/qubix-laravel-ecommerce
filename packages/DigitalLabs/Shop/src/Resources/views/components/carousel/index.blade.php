@@ -2,7 +2,7 @@
 
 <v-carousel :images="{{ json_encode($options['images'] ?? []) }}">
     {{-- SSR placeholder: same aspect ratio as the real hero --}}
-    <div class="aspect-[2.743/1] max-h-screen w-full overflow-hidden">
+    <div class="aspect-[2.35/1] max-h-screen w-full overflow-hidden">
         <div class="shimmer h-full w-full"></div>
     </div>
 </v-carousel>
@@ -81,7 +81,7 @@
         id="v-carousel-template"
     >
         <div
-            class="relative w-full overflow-hidden bg-[#f3eee7] aspect-[2.743/1] max-h-screen"
+            class="relative w-full overflow-hidden bg-[#f3eee7] aspect-[2.35/1] max-h-screen"
             @touchstart.passive="touchStart"
             @touchend.passive="touchEnd"
             ref="heroRef"
