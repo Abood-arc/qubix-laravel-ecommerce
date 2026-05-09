@@ -41,3 +41,7 @@ skills-lock.json
 /vendor
 yarn.lock
 yarn-error.log
+
+.specstory/
+
+.specstory/
