@@ -24,23 +24,23 @@ DROP TABLE IF EXISTS `addresses`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `addresses` (
   `id` int unsigned NOT NULL AUTO_INCREMENT,
-  `address_type` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `address_type` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `parent_address_id` int unsigned DEFAULT NULL,
   `customer_id` int unsigned DEFAULT NULL COMMENT 'null if guest checkout',
   `cart_id` int unsigned DEFAULT NULL COMMENT 'only for cart_addresses',
   `order_id` int unsigned DEFAULT NULL COMMENT 'only for order_addresses',
-  `first_name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `last_name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `gender` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `company_name` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `address` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `city` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `state` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `country` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `postcode` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `email` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `phone` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `vat_id` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `first_name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `last_name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `gender` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `company_name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `address` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `city` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `state` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `country` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `postcode` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `email` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `phone` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `vat_id` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `default_address` tinyint(1) NOT NULL DEFAULT '0' COMMENT 'only for customer_addresses',
   `use_for_shipping` tinyint(1) NOT NULL DEFAULT '0',
   `additional` json DEFAULT NULL,
@@ -75,8 +75,8 @@ DROP TABLE IF EXISTS `admin_password_resets`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `admin_password_resets` (
-  `email` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `token` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `email` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `token` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   KEY `admin_password_resets_email_index` (`email`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -100,14 +100,14 @@ DROP TABLE IF EXISTS `admins`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `admins` (
   `id` int unsigned NOT NULL AUTO_INCREMENT,
-  `name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `email` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `password` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `api_token` varchar(80) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `email` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `password` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `api_token` varchar(80) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `status` tinyint(1) NOT NULL DEFAULT '0',
   `role_id` int unsigned NOT NULL,
-  `image` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `remember_token` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `image` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `remember_token` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
@@ -135,8 +135,8 @@ DROP TABLE IF EXISTS `attribute_families`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `attribute_families` (
   `id` int unsigned NOT NULL AUTO_INCREMENT,
-  `code` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `code` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `status` tinyint(1) NOT NULL DEFAULT '0',
   `is_user_defined` tinyint(1) NOT NULL DEFAULT '1',
   PRIMARY KEY (`id`)
@@ -190,9 +190,9 @@ DROP TABLE IF EXISTS `attribute_groups`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `attribute_groups` (
   `id` int unsigned NOT NULL AUTO_INCREMENT,
-  `code` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `code` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `attribute_family_id` int unsigned NOT NULL,
-  `name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `column` int NOT NULL DEFAULT '1',
   `position` int NOT NULL,
   `is_user_defined` tinyint(1) NOT NULL DEFAULT '1',
@@ -222,8 +222,8 @@ DROP TABLE IF EXISTS `attribute_option_translations`;
 CREATE TABLE `attribute_option_translations` (
   `id` int unsigned NOT NULL AUTO_INCREMENT,
   `attribute_option_id` int unsigned NOT NULL,
-  `locale` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `label` text COLLATE utf8mb4_unicode_ci,
+  `locale` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `label` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   PRIMARY KEY (`id`),
   UNIQUE KEY `attribute_option_locale_unique` (`attribute_option_id`,`locale`),
   CONSTRAINT `attribute_option_translations_attribute_option_id_foreign` FOREIGN KEY (`attribute_option_id`) REFERENCES `attribute_options` (`id`) ON DELETE CASCADE
@@ -250,9 +250,9 @@ DROP TABLE IF EXISTS `attribute_options`;
 CREATE TABLE `attribute_options` (
   `id` int unsigned NOT NULL AUTO_INCREMENT,
   `attribute_id` int unsigned NOT NULL,
-  `admin_name` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `admin_name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `sort_order` int DEFAULT NULL,
-  `swatch_value` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `swatch_value` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `attribute_options_attribute_id_foreign` (`attribute_id`),
   CONSTRAINT `attribute_options_attribute_id_foreign` FOREIGN KEY (`attribute_id`) REFERENCES `attributes` (`id`) ON DELETE CASCADE
@@ -279,8 +279,8 @@ DROP TABLE IF EXISTS `attribute_translations`;
 CREATE TABLE `attribute_translations` (
   `id` int unsigned NOT NULL AUTO_INCREMENT,
   `attribute_id` int unsigned NOT NULL,
-  `locale` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `name` text COLLATE utf8mb4_unicode_ci,
+  `locale` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `name` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   PRIMARY KEY (`id`),
   UNIQUE KEY `attribute_translations_attribute_id_locale_unique` (`attribute_id`,`locale`),
   CONSTRAINT `attribute_translations_attribute_id_foreign` FOREIGN KEY (`attribute_id`) REFERENCES `attributes` (`id`) ON DELETE CASCADE
@@ -306,12 +306,12 @@ DROP TABLE IF EXISTS `attributes`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `attributes` (
   `id` int unsigned NOT NULL AUTO_INCREMENT,
-  `code` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `admin_name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `type` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `swatch_type` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `validation` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `regex` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `code` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `admin_name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `type` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `swatch_type` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `validation` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `regex` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `position` int DEFAULT NULL,
   `is_required` tinyint(1) NOT NULL DEFAULT '0',
   `is_unique` tinyint(1) NOT NULL DEFAULT '0',
@@ -381,7 +381,7 @@ DROP TABLE IF EXISTS `booking_product_default_slots`;
 CREATE TABLE `booking_product_default_slots` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
   `booking_product_id` int unsigned NOT NULL,
-  `booking_type` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `booking_type` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `duration` int DEFAULT NULL,
   `break_time` int DEFAULT NULL,
   `slots` json DEFAULT NULL,
@@ -410,9 +410,9 @@ DROP TABLE IF EXISTS `booking_product_event_ticket_translations`;
 CREATE TABLE `booking_product_event_ticket_translations` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
   `booking_product_event_ticket_id` bigint unsigned NOT NULL,
-  `locale` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `name` text COLLATE utf8mb4_unicode_ci,
-  `description` text COLLATE utf8mb4_unicode_ci,
+  `locale` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `name` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `description` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   PRIMARY KEY (`id`),
   UNIQUE KEY `bpet_locale_unique` (`booking_product_event_ticket_id`,`locale`),
   CONSTRAINT `bpet_translations_fk` FOREIGN KEY (`booking_product_event_ticket_id`) REFERENCES `booking_product_event_tickets` (`id`) ON DELETE CASCADE
@@ -468,7 +468,7 @@ DROP TABLE IF EXISTS `booking_product_rental_slots`;
 CREATE TABLE `booking_product_rental_slots` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
   `booking_product_id` int unsigned NOT NULL,
-  `renting_type` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `renting_type` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `daily_price` decimal(12,4) DEFAULT '0.0000',
   `hourly_price` decimal(12,4) DEFAULT '0.0000',
   `same_slot_all_days` tinyint(1) DEFAULT NULL,
@@ -498,7 +498,7 @@ DROP TABLE IF EXISTS `booking_product_table_slots`;
 CREATE TABLE `booking_product_table_slots` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
   `booking_product_id` int unsigned NOT NULL,
-  `price_type` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `price_type` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `guest_limit` int NOT NULL DEFAULT '0',
   `duration` int NOT NULL,
   `break_time` int NOT NULL,
@@ -532,9 +532,9 @@ DROP TABLE IF EXISTS `booking_products`;
 CREATE TABLE `booking_products` (
   `id` int unsigned NOT NULL AUTO_INCREMENT,
   `product_id` int unsigned NOT NULL,
-  `type` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `type` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `qty` int DEFAULT '0',
-  `location` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `location` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `show_location` tinyint(1) NOT NULL DEFAULT '0',
   `available_every_week` tinyint(1) DEFAULT NULL,
   `available_from` datetime DEFAULT NULL,
@@ -604,19 +604,19 @@ DROP TABLE IF EXISTS `cart`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `cart` (
   `id` int unsigned NOT NULL AUTO_INCREMENT,
-  `customer_email` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `customer_first_name` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `customer_last_name` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `shipping_method` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `coupon_code` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `customer_email` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `customer_first_name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `customer_last_name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `shipping_method` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `coupon_code` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `is_gift` tinyint(1) NOT NULL DEFAULT '0',
   `items_count` int DEFAULT NULL,
   `items_qty` decimal(12,4) DEFAULT NULL,
   `exchange_rate` decimal(12,4) DEFAULT NULL,
-  `global_currency_code` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `base_currency_code` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `channel_currency_code` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `cart_currency_code` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `global_currency_code` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `base_currency_code` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `channel_currency_code` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `cart_currency_code` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `grand_total` decimal(12,4) DEFAULT '0.0000',
   `base_grand_total` decimal(12,4) DEFAULT '0.0000',
   `sub_total` decimal(12,4) DEFAULT '0.0000',
@@ -631,10 +631,10 @@ CREATE TABLE `cart` (
   `base_shipping_amount_incl_tax` decimal(12,4) NOT NULL DEFAULT '0.0000',
   `sub_total_incl_tax` decimal(12,4) NOT NULL DEFAULT '0.0000',
   `base_sub_total_incl_tax` decimal(12,4) NOT NULL DEFAULT '0.0000',
-  `checkout_method` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `checkout_method` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `is_guest` tinyint(1) DEFAULT NULL,
   `is_active` tinyint(1) DEFAULT '1',
-  `applied_cart_rule_ids` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `applied_cart_rule_ids` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `customer_id` int unsigned DEFAULT NULL,
   `channel_id` int unsigned NOT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
@@ -693,10 +693,10 @@ DROP TABLE IF EXISTS `cart_items`;
 CREATE TABLE `cart_items` (
   `id` int unsigned NOT NULL AUTO_INCREMENT,
   `quantity` int unsigned NOT NULL DEFAULT '0',
-  `sku` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `type` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `name` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `coupon_code` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `sku` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `type` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `coupon_code` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `weight` decimal(12,4) NOT NULL DEFAULT '0.0000',
   `total_weight` decimal(12,4) NOT NULL DEFAULT '0.0000',
   `base_total_weight` decimal(12,4) NOT NULL DEFAULT '0.0000',
@@ -715,12 +715,12 @@ CREATE TABLE `cart_items` (
   `base_price_incl_tax` decimal(12,4) NOT NULL DEFAULT '0.0000',
   `total_incl_tax` decimal(12,4) NOT NULL DEFAULT '0.0000',
   `base_total_incl_tax` decimal(12,4) NOT NULL DEFAULT '0.0000',
-  `applied_tax_rate` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `applied_tax_rate` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `parent_id` int unsigned DEFAULT NULL,
   `product_id` int unsigned NOT NULL,
   `cart_id` int unsigned NOT NULL,
   `tax_category_id` int unsigned DEFAULT NULL,
-  `applied_cart_rule_ids` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `applied_cart_rule_ids` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `additional` json DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
@@ -754,8 +754,8 @@ DROP TABLE IF EXISTS `cart_payment`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `cart_payment` (
   `id` int unsigned NOT NULL AUTO_INCREMENT,
-  `method` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `method_title` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `method` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `method_title` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `cart_id` int unsigned DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
@@ -838,7 +838,7 @@ DROP TABLE IF EXISTS `cart_rule_coupons`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `cart_rule_coupons` (
   `id` int unsigned NOT NULL AUTO_INCREMENT,
-  `code` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `code` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `usage_limit` int unsigned NOT NULL DEFAULT '0',
   `usage_per_customer` int unsigned NOT NULL DEFAULT '0',
   `times_used` int unsigned NOT NULL DEFAULT '0',
@@ -927,8 +927,8 @@ DROP TABLE IF EXISTS `cart_rule_translations`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `cart_rule_translations` (
   `id` int unsigned NOT NULL AUTO_INCREMENT,
-  `locale` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `label` text COLLATE utf8mb4_unicode_ci,
+  `locale` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `label` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `cart_rule_id` int unsigned NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `cart_rule_translations_cart_rule_id_locale_unique` (`cart_rule_id`,`locale`),
@@ -954,8 +954,8 @@ DROP TABLE IF EXISTS `cart_rules`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `cart_rules` (
   `id` int unsigned NOT NULL AUTO_INCREMENT,
-  `name` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `description` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `description` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `starts_from` datetime DEFAULT NULL,
   `ends_till` datetime DEFAULT NULL,
   `status` tinyint(1) NOT NULL DEFAULT '0',
@@ -968,10 +968,10 @@ CREATE TABLE `cart_rules` (
   `conditions` json DEFAULT NULL,
   `end_other_rules` tinyint(1) NOT NULL DEFAULT '0',
   `uses_attribute_conditions` tinyint(1) NOT NULL DEFAULT '0',
-  `action_type` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `action_type` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `discount_amount` decimal(12,4) NOT NULL DEFAULT '0.0000',
   `discount_quantity` int NOT NULL DEFAULT '1',
-  `discount_step` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '1',
+  `discount_step` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '1',
   `apply_to_shipping` tinyint(1) NOT NULL DEFAULT '0',
   `free_shipping` tinyint(1) NOT NULL DEFAULT '0',
   `sort_order` int unsigned NOT NULL DEFAULT '0',
@@ -999,11 +999,11 @@ DROP TABLE IF EXISTS `cart_shipping_rates`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `cart_shipping_rates` (
   `id` int unsigned NOT NULL AUTO_INCREMENT,
-  `carrier` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `carrier_title` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `method` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `method_title` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `method_description` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `carrier` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `carrier_title` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `method` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `method_title` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `method_description` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `price` double DEFAULT '0',
   `base_price` double DEFAULT '0',
   `discount_amount` decimal(12,4) NOT NULL DEFAULT '0.0000',
@@ -1013,7 +1013,7 @@ CREATE TABLE `cart_shipping_rates` (
   `base_tax_amount` decimal(12,4) NOT NULL DEFAULT '0.0000',
   `price_incl_tax` decimal(12,4) NOT NULL DEFAULT '0.0000',
   `base_price_incl_tax` decimal(12,4) NOT NULL DEFAULT '0.0000',
-  `applied_tax_rate` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `applied_tax_rate` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `is_calculate_tax` tinyint(1) NOT NULL DEFAULT '1',
   `cart_address_id` int unsigned DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
@@ -1136,7 +1136,7 @@ CREATE TABLE `catalog_rule_products` (
   `starts_from` datetime DEFAULT NULL,
   `ends_till` datetime DEFAULT NULL,
   `end_other_rules` tinyint(1) NOT NULL DEFAULT '0',
-  `action_type` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `action_type` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `discount_amount` decimal(12,4) NOT NULL DEFAULT '0.0000',
   `sort_order` int unsigned NOT NULL DEFAULT '0',
   `product_id` int unsigned NOT NULL,
@@ -1173,15 +1173,15 @@ DROP TABLE IF EXISTS `catalog_rules`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `catalog_rules` (
   `id` int unsigned NOT NULL AUTO_INCREMENT,
-  `name` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `description` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `description` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `starts_from` date DEFAULT NULL,
   `ends_till` date DEFAULT NULL,
   `status` tinyint(1) NOT NULL DEFAULT '0',
   `condition_type` tinyint(1) NOT NULL DEFAULT '1',
   `conditions` json DEFAULT NULL,
   `end_other_rules` tinyint(1) NOT NULL DEFAULT '0',
-  `action_type` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `action_type` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `discount_amount` decimal(12,4) NOT NULL DEFAULT '0.0000',
   `sort_order` int unsigned NOT NULL DEFAULT '0',
   `created_at` timestamp NULL DEFAULT NULL,
@@ -1209,14 +1209,14 @@ DROP TABLE IF EXISTS `categories`;
 CREATE TABLE `categories` (
   `id` int unsigned NOT NULL AUTO_INCREMENT,
   `position` int NOT NULL DEFAULT '0',
-  `logo_path` text COLLATE utf8mb4_unicode_ci,
+  `logo_path` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `status` tinyint(1) NOT NULL DEFAULT '0',
-  `display_mode` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT 'products_and_description',
+  `display_mode` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT 'products_and_description',
   `_lft` int unsigned NOT NULL DEFAULT '0',
   `_rgt` int unsigned NOT NULL DEFAULT '0',
   `parent_id` int unsigned DEFAULT NULL,
   `additional` json DEFAULT NULL,
-  `banner_path` text COLLATE utf8mb4_unicode_ci,
+  `banner_path` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
@@ -1271,15 +1271,15 @@ DROP TABLE IF EXISTS `category_translations`;
 CREATE TABLE `category_translations` (
   `id` int unsigned NOT NULL AUTO_INCREMENT,
   `category_id` int unsigned NOT NULL,
-  `name` text COLLATE utf8mb4_unicode_ci NOT NULL,
-  `slug` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `url_path` varchar(2048) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `description` text COLLATE utf8mb4_unicode_ci,
-  `meta_title` text COLLATE utf8mb4_unicode_ci,
-  `meta_description` text COLLATE utf8mb4_unicode_ci,
-  `meta_keywords` text COLLATE utf8mb4_unicode_ci,
+  `name` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `slug` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `url_path` varchar(2048) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `description` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `meta_title` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `meta_description` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `meta_keywords` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `locale_id` int unsigned DEFAULT NULL,
-  `locale` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `locale` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `category_translations_category_id_slug_locale_unique` (`category_id`,`slug`,`locale`),
   KEY `category_translations_locale_id_foreign` (`locale_id`),
@@ -1391,10 +1391,10 @@ DROP TABLE IF EXISTS `channel_translations`;
 CREATE TABLE `channel_translations` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
   `channel_id` int unsigned NOT NULL,
-  `locale` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `description` text COLLATE utf8mb4_unicode_ci,
-  `maintenance_mode_text` text COLLATE utf8mb4_unicode_ci,
+  `locale` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `description` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `maintenance_mode_text` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `home_seo` json DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
@@ -1411,7 +1411,7 @@ CREATE TABLE `channel_translations` (
 
 LOCK TABLES `channel_translations` WRITE;
 /*!40000 ALTER TABLE `channel_translations` DISABLE KEYS */;
-INSERT INTO `channel_translations` VALUES (1,1,'en','Default','','','{\"meta_title\": \"Demo store\", \"meta_keywords\": \"Demo store meta keyword\", \"meta_description\": \"Demo store meta description\"}',NULL,'2026-05-02 21:26:16');
+INSERT INTO `channel_translations` VALUES (1,1,'en','Default','','','{\"meta_title\": \"Demo store\", \"meta_keywords\": \"Demo store meta keyword\", \"meta_description\": \"Demo store meta description\"}',NULL,'2026-05-08 09:43:55');
 /*!40000 ALTER TABLE `channel_translations` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -1424,15 +1424,15 @@ DROP TABLE IF EXISTS `channels`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `channels` (
   `id` int unsigned NOT NULL AUTO_INCREMENT,
-  `code` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `timezone` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `theme` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `hostname` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `logo` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `favicon` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `code` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `timezone` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `theme` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `hostname` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `logo` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `favicon` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `home_seo` json DEFAULT NULL,
   `is_maintenance_on` tinyint(1) NOT NULL DEFAULT '0',
-  `allowed_ips` text COLLATE utf8mb4_unicode_ci,
+  `allowed_ips` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `root_category_id` int unsigned DEFAULT NULL,
   `default_locale_id` int unsigned NOT NULL,
   `base_currency_id` int unsigned NOT NULL,
@@ -1455,7 +1455,7 @@ CREATE TABLE `channels` (
 
 LOCK TABLES `channels` WRITE;
 /*!40000 ALTER TABLE `channels` DISABLE KEYS */;
-INSERT INTO `channels` VALUES (1,'default',NULL,'default','http://localhost:8000','channel/1/un2KTjHoO7a4gyoJhafekdtdIZS4Jye3BnbSxA8e.png','channel/1/LFGBoRBJ3sLa9Bch46OohGGdHDvhZeJjmRBauasB.png',NULL,0,'',1,1,2,'2026-04-28 08:26:24','2026-05-02 21:26:18');
+INSERT INTO `channels` VALUES (1,'default',NULL,'default','http://localhost:8000','channel/1/Yh4zeiALsN5RUhAnwoWMkxWOCnNl3mbrOYnb9avu.png','channel/1/LFGBoRBJ3sLa9Bch46OohGGdHDvhZeJjmRBauasB.png',NULL,1,'',1,1,2,'2026-04-28 08:26:24','2026-05-08 09:46:04');
 /*!40000 ALTER TABLE `channels` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -1495,13 +1495,13 @@ DROP TABLE IF EXISTS `cms_page_translations`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `cms_page_translations` (
   `id` int unsigned NOT NULL AUTO_INCREMENT,
-  `page_title` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `url_key` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `html_content` longtext COLLATE utf8mb4_unicode_ci,
-  `meta_title` text COLLATE utf8mb4_unicode_ci,
-  `meta_description` text COLLATE utf8mb4_unicode_ci,
-  `meta_keywords` text COLLATE utf8mb4_unicode_ci,
-  `locale` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `page_title` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `url_key` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `html_content` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `meta_title` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `meta_description` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `meta_keywords` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `locale` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `cms_page_id` int unsigned NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `cms_page_translations_cms_page_id_url_key_locale_unique` (`cms_page_id`,`url_key`,`locale`),
@@ -1528,7 +1528,7 @@ DROP TABLE IF EXISTS `cms_pages`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `cms_pages` (
   `id` int unsigned NOT NULL AUTO_INCREMENT,
-  `layout` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `layout` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`)
@@ -1584,10 +1584,10 @@ DROP TABLE IF EXISTS `core_config`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `core_config` (
   `id` int unsigned NOT NULL AUTO_INCREMENT,
-  `code` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `value` text COLLATE utf8mb4_unicode_ci NOT NULL,
-  `channel_code` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `locale_code` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `code` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `value` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `channel_code` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `locale_code` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`)
@@ -1613,8 +1613,8 @@ DROP TABLE IF EXISTS `countries`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `countries` (
   `id` int unsigned NOT NULL AUTO_INCREMENT,
-  `code` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `code` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=256 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -1639,8 +1639,8 @@ DROP TABLE IF EXISTS `country_state_translations`;
 CREATE TABLE `country_state_translations` (
   `id` int unsigned NOT NULL AUTO_INCREMENT,
   `country_state_id` int unsigned NOT NULL,
-  `locale` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `default_name` text COLLATE utf8mb4_unicode_ci,
+  `locale` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `default_name` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   PRIMARY KEY (`id`),
   KEY `country_state_translations_country_state_id_foreign` (`country_state_id`),
   CONSTRAINT `country_state_translations_country_state_id_foreign` FOREIGN KEY (`country_state_id`) REFERENCES `country_states` (`id`) ON DELETE CASCADE
@@ -1666,9 +1666,9 @@ DROP TABLE IF EXISTS `country_states`;
 CREATE TABLE `country_states` (
   `id` int unsigned NOT NULL AUTO_INCREMENT,
   `country_id` int unsigned DEFAULT NULL,
-  `country_code` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `code` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `default_name` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `country_code` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `code` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `default_name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `country_states_country_id_foreign` (`country_id`),
   CONSTRAINT `country_states_country_id_foreign` FOREIGN KEY (`country_id`) REFERENCES `countries` (`id`) ON DELETE CASCADE
@@ -1695,8 +1695,8 @@ DROP TABLE IF EXISTS `country_translations`;
 CREATE TABLE `country_translations` (
   `id` int unsigned NOT NULL AUTO_INCREMENT,
   `country_id` int unsigned NOT NULL,
-  `locale` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `name` text COLLATE utf8mb4_unicode_ci,
+  `locale` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `name` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   PRIMARY KEY (`id`),
   KEY `country_translations_country_id_foreign` (`country_id`),
   CONSTRAINT `country_translations_country_id_foreign` FOREIGN KEY (`country_id`) REFERENCES `countries` (`id`) ON DELETE CASCADE
@@ -1721,13 +1721,13 @@ DROP TABLE IF EXISTS `currencies`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `currencies` (
   `id` int unsigned NOT NULL AUTO_INCREMENT,
-  `code` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `symbol` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `code` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `symbol` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `decimal` int unsigned NOT NULL DEFAULT '2',
-  `group_separator` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT ',',
-  `decimal_separator` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '.',
-  `currency_position` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `group_separator` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT ',',
+  `decimal_separator` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '.',
+  `currency_position` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`)
@@ -1781,8 +1781,8 @@ DROP TABLE IF EXISTS `customer_groups`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `customer_groups` (
   `id` int unsigned NOT NULL AUTO_INCREMENT,
-  `code` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `code` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `is_user_defined` tinyint(1) NOT NULL DEFAULT '1',
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
@@ -1811,7 +1811,7 @@ DROP TABLE IF EXISTS `customer_notes`;
 CREATE TABLE `customer_notes` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
   `customer_id` int unsigned DEFAULT NULL,
-  `note` text COLLATE utf8mb4_unicode_ci NOT NULL,
+  `note` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `customer_notified` tinyint(1) NOT NULL DEFAULT '0',
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
@@ -1838,8 +1838,8 @@ DROP TABLE IF EXISTS `customer_password_resets`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `customer_password_resets` (
-  `email` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `token` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `email` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `token` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   KEY `customer_password_resets_email_index` (`email`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -1864,8 +1864,8 @@ DROP TABLE IF EXISTS `customer_social_accounts`;
 CREATE TABLE `customer_social_accounts` (
   `id` int unsigned NOT NULL AUTO_INCREMENT,
   `customer_id` int unsigned NOT NULL,
-  `provider_name` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `provider_id` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `provider_name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `provider_id` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
@@ -1893,23 +1893,23 @@ DROP TABLE IF EXISTS `customers`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `customers` (
   `id` int unsigned NOT NULL AUTO_INCREMENT,
-  `first_name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `last_name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `gender` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `first_name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `last_name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `gender` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `date_of_birth` date DEFAULT NULL,
-  `email` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `phone` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `image` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `email` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `phone` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `image` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `status` tinyint NOT NULL DEFAULT '1',
-  `password` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `api_token` varchar(80) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `password` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `api_token` varchar(80) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `customer_group_id` int unsigned DEFAULT NULL,
   `channel_id` int unsigned DEFAULT NULL,
   `subscribed_to_news_letter` tinyint(1) NOT NULL DEFAULT '0',
   `is_verified` tinyint(1) NOT NULL DEFAULT '0',
   `is_suspended` tinyint unsigned NOT NULL DEFAULT '0',
-  `token` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `remember_token` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `token` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `remember_token` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
@@ -1942,8 +1942,8 @@ DROP TABLE IF EXISTS `datagrid_saved_filters`;
 CREATE TABLE `datagrid_saved_filters` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
   `user_id` int unsigned NOT NULL,
-  `name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `src` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `src` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `applied` json NOT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
@@ -1970,15 +1970,15 @@ DROP TABLE IF EXISTS `downloadable_link_purchased`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `downloadable_link_purchased` (
   `id` int unsigned NOT NULL AUTO_INCREMENT,
-  `product_name` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `name` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `url` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `file` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `file_name` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `type` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `product_name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `url` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `file` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `file_name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `type` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `download_bought` int NOT NULL DEFAULT '0',
   `download_used` int NOT NULL DEFAULT '0',
-  `status` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `status` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `customer_id` int unsigned NOT NULL,
   `order_id` int unsigned NOT NULL,
   `order_item_id` int unsigned NOT NULL,
@@ -2013,11 +2013,11 @@ DROP TABLE IF EXISTS `failed_jobs`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `failed_jobs` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
-  `uuid` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `connection` text COLLATE utf8mb4_unicode_ci NOT NULL,
-  `queue` text COLLATE utf8mb4_unicode_ci NOT NULL,
-  `payload` longtext COLLATE utf8mb4_unicode_ci NOT NULL,
-  `exception` longtext COLLATE utf8mb4_unicode_ci NOT NULL,
+  `uuid` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `connection` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `queue` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `payload` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `exception` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `failed_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   UNIQUE KEY `failed_jobs_uuid_unique` (`uuid`)
@@ -2043,10 +2043,10 @@ DROP TABLE IF EXISTS `gdpr_data_request`;
 CREATE TABLE `gdpr_data_request` (
   `id` int unsigned NOT NULL AUTO_INCREMENT,
   `customer_id` int unsigned NOT NULL,
-  `email` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `status` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `type` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `message` varchar(500) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `email` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `status` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `type` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `message` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `revoked_at` timestamp NULL DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
@@ -2074,7 +2074,7 @@ DROP TABLE IF EXISTS `import_batches`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `import_batches` (
   `id` int unsigned NOT NULL AUTO_INCREMENT,
-  `state` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'pending',
+  `state` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'pending',
   `data` json NOT NULL,
   `summary` json DEFAULT NULL,
   `import_id` int unsigned NOT NULL,
@@ -2102,20 +2102,20 @@ DROP TABLE IF EXISTS `imports`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `imports` (
   `id` int unsigned NOT NULL AUTO_INCREMENT,
-  `state` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'pending',
+  `state` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'pending',
   `process_in_queue` tinyint(1) NOT NULL DEFAULT '1',
-  `type` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `action` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `validation_strategy` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `type` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `action` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `validation_strategy` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `allowed_errors` int NOT NULL DEFAULT '0',
   `processed_rows_count` int NOT NULL DEFAULT '0',
   `invalid_rows_count` int NOT NULL DEFAULT '0',
   `errors_count` int NOT NULL DEFAULT '0',
   `errors` json DEFAULT NULL,
-  `field_separator` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `file_path` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `images_directory_path` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `error_file_path` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `field_separator` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `file_path` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `images_directory_path` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `error_file_path` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `summary` json DEFAULT NULL,
   `started_at` datetime DEFAULT NULL,
   `completed_at` datetime DEFAULT NULL,
@@ -2143,18 +2143,18 @@ DROP TABLE IF EXISTS `inventory_sources`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `inventory_sources` (
   `id` int unsigned NOT NULL AUTO_INCREMENT,
-  `code` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `description` text COLLATE utf8mb4_unicode_ci,
-  `contact_name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `contact_email` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `contact_number` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `contact_fax` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `country` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `state` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `city` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `street` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `postcode` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `code` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `description` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `contact_name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `contact_email` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `contact_number` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `contact_fax` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `country` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `state` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `city` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `street` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `postcode` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `priority` int NOT NULL DEFAULT '0',
   `latitude` decimal(10,5) DEFAULT NULL,
   `longitude` decimal(10,5) DEFAULT NULL,
@@ -2186,9 +2186,9 @@ DROP TABLE IF EXISTS `invoice_items`;
 CREATE TABLE `invoice_items` (
   `id` int unsigned NOT NULL AUTO_INCREMENT,
   `parent_id` int unsigned DEFAULT NULL,
-  `name` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `description` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `sku` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `description` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `sku` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `qty` int DEFAULT NULL,
   `price` decimal(12,4) NOT NULL DEFAULT '0.0000',
   `base_price` decimal(12,4) NOT NULL DEFAULT '0.0000',
@@ -2204,7 +2204,7 @@ CREATE TABLE `invoice_items` (
   `total_incl_tax` decimal(12,4) NOT NULL DEFAULT '0.0000',
   `base_total_incl_tax` decimal(12,4) NOT NULL DEFAULT '0.0000',
   `product_id` int unsigned DEFAULT NULL,
-  `product_type` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `product_type` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `order_item_id` int unsigned DEFAULT NULL,
   `invoice_id` int unsigned DEFAULT NULL,
   `additional` json DEFAULT NULL,
@@ -2236,13 +2236,13 @@ DROP TABLE IF EXISTS `invoices`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `invoices` (
   `id` int unsigned NOT NULL AUTO_INCREMENT,
-  `increment_id` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `state` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `increment_id` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `state` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `email_sent` tinyint(1) NOT NULL DEFAULT '0',
   `total_qty` int DEFAULT NULL,
-  `base_currency_code` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `channel_currency_code` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `order_currency_code` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `base_currency_code` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `channel_currency_code` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `order_currency_code` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `sub_total` decimal(12,4) DEFAULT '0.0000',
   `base_sub_total` decimal(12,4) DEFAULT '0.0000',
   `grand_total` decimal(12,4) DEFAULT '0.0000',
@@ -2260,7 +2260,7 @@ CREATE TABLE `invoices` (
   `shipping_amount_incl_tax` decimal(12,4) NOT NULL DEFAULT '0.0000',
   `base_shipping_amount_incl_tax` decimal(12,4) NOT NULL DEFAULT '0.0000',
   `order_id` int unsigned DEFAULT NULL,
-  `transaction_id` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `transaction_id` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `reminders` int NOT NULL DEFAULT '0',
   `next_reminder_at` timestamp NULL DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
@@ -2288,13 +2288,13 @@ DROP TABLE IF EXISTS `job_batches`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `job_batches` (
-  `id` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `id` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `total_jobs` int NOT NULL,
   `pending_jobs` int NOT NULL,
   `failed_jobs` int NOT NULL,
-  `failed_job_ids` text COLLATE utf8mb4_unicode_ci NOT NULL,
-  `options` mediumtext COLLATE utf8mb4_unicode_ci,
+  `failed_job_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `options` mediumtext CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `cancelled_at` int DEFAULT NULL,
   `created_at` int NOT NULL,
   `finished_at` int DEFAULT NULL,
@@ -2320,8 +2320,8 @@ DROP TABLE IF EXISTS `jobs`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `jobs` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
-  `queue` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `payload` longtext COLLATE utf8mb4_unicode_ci NOT NULL,
+  `queue` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `payload` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `attempts` tinyint unsigned NOT NULL,
   `reserved_at` int unsigned DEFAULT NULL,
   `available_at` int unsigned NOT NULL,
@@ -2349,10 +2349,10 @@ DROP TABLE IF EXISTS `locales`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `locales` (
   `id` int unsigned NOT NULL AUTO_INCREMENT,
-  `code` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `direction` enum('ltr','rtl') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'ltr',
-  `logo_path` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `code` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `direction` enum('ltr','rtl') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'ltr',
+  `logo_path` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
@@ -2379,12 +2379,12 @@ DROP TABLE IF EXISTS `marketing_campaigns`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `marketing_campaigns` (
   `id` int unsigned NOT NULL AUTO_INCREMENT,
-  `name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `subject` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `subject` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `status` tinyint(1) NOT NULL DEFAULT '0',
-  `type` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `mail_to` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `spooling` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `type` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `mail_to` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `spooling` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `channel_id` int unsigned DEFAULT NULL,
   `customer_group_id` int unsigned DEFAULT NULL,
   `marketing_template_id` int unsigned DEFAULT NULL,
@@ -2421,8 +2421,8 @@ DROP TABLE IF EXISTS `marketing_events`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `marketing_events` (
   `id` int unsigned NOT NULL AUTO_INCREMENT,
-  `name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `description` text COLLATE utf8mb4_unicode_ci,
+  `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `description` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `date` date DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
@@ -2449,9 +2449,9 @@ DROP TABLE IF EXISTS `marketing_templates`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `marketing_templates` (
   `id` int unsigned NOT NULL AUTO_INCREMENT,
-  `name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `status` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `content` text COLLATE utf8mb4_unicode_ci NOT NULL,
+  `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `status` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `content` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`)
@@ -2476,7 +2476,7 @@ DROP TABLE IF EXISTS `migrations`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `migrations` (
   `id` int unsigned NOT NULL AUTO_INCREMENT,
-  `migration` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `migration` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `batch` int NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=164 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -2501,7 +2501,7 @@ DROP TABLE IF EXISTS `notifications`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `notifications` (
   `id` int unsigned NOT NULL AUTO_INCREMENT,
-  `type` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `type` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `read` tinyint(1) NOT NULL DEFAULT '0',
   `order_id` int unsigned NOT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
@@ -2531,7 +2531,7 @@ DROP TABLE IF EXISTS `order_comments`;
 CREATE TABLE `order_comments` (
   `id` int unsigned NOT NULL AUTO_INCREMENT,
   `order_id` int unsigned DEFAULT NULL,
-  `comment` text COLLATE utf8mb4_unicode_ci NOT NULL,
+  `comment` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `customer_notified` tinyint(1) NOT NULL DEFAULT '0',
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
@@ -2559,10 +2559,10 @@ DROP TABLE IF EXISTS `order_items`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `order_items` (
   `id` int unsigned NOT NULL AUTO_INCREMENT,
-  `sku` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `type` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `name` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `coupon_code` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `sku` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `type` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `coupon_code` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `weight` decimal(12,4) DEFAULT '0.0000',
   `total_weight` decimal(12,4) DEFAULT '0.0000',
   `qty_ordered` int DEFAULT '0',
@@ -2597,7 +2597,7 @@ CREATE TABLE `order_items` (
   `total_incl_tax` decimal(12,4) NOT NULL DEFAULT '0.0000',
   `base_total_incl_tax` decimal(12,4) NOT NULL DEFAULT '0.0000',
   `product_id` int unsigned DEFAULT NULL,
-  `product_type` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `product_type` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `order_id` int unsigned DEFAULT NULL,
   `tax_category_id` int unsigned DEFAULT NULL,
   `parent_id` int unsigned DEFAULT NULL,
@@ -2633,8 +2633,8 @@ DROP TABLE IF EXISTS `order_payment`;
 CREATE TABLE `order_payment` (
   `id` int unsigned NOT NULL AUTO_INCREMENT,
   `order_id` int unsigned DEFAULT NULL,
-  `method` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `method_title` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `method` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `method_title` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `additional` json DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
@@ -2662,11 +2662,11 @@ DROP TABLE IF EXISTS `order_transactions`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `order_transactions` (
   `id` int unsigned NOT NULL AUTO_INCREMENT,
-  `transaction_id` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `status` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `type` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `transaction_id` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `status` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `type` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `amount` decimal(12,4) DEFAULT '0.0000',
-  `payment_method` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `payment_method` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `data` json DEFAULT NULL,
   `invoice_id` int unsigned NOT NULL,
   `order_id` int unsigned NOT NULL,
@@ -2696,23 +2696,23 @@ DROP TABLE IF EXISTS `orders`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `orders` (
   `id` int unsigned NOT NULL AUTO_INCREMENT,
-  `increment_id` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `status` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `channel_name` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `increment_id` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `status` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `channel_name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `is_guest` tinyint(1) DEFAULT NULL,
-  `customer_email` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `customer_first_name` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `customer_last_name` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `shipping_method` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `shipping_title` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `shipping_description` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `coupon_code` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `customer_email` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `customer_first_name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `customer_last_name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `shipping_method` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `shipping_title` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `shipping_description` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `coupon_code` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `is_gift` tinyint(1) NOT NULL DEFAULT '0',
   `total_item_count` int DEFAULT NULL,
   `total_qty_ordered` int DEFAULT NULL,
-  `base_currency_code` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `channel_currency_code` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `order_currency_code` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `base_currency_code` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `channel_currency_code` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `order_currency_code` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `grand_total` decimal(12,4) DEFAULT '0.0000',
   `base_grand_total` decimal(12,4) DEFAULT '0.0000',
   `grand_total_invoiced` decimal(12,4) DEFAULT '0.0000',
@@ -2755,11 +2755,11 @@ CREATE TABLE `orders` (
   `shipping_amount_incl_tax` decimal(12,4) NOT NULL DEFAULT '0.0000',
   `base_shipping_amount_incl_tax` decimal(12,4) NOT NULL DEFAULT '0.0000',
   `customer_id` int unsigned DEFAULT NULL,
-  `customer_type` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `customer_type` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `channel_id` int unsigned DEFAULT NULL,
-  `channel_type` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `channel_type` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `cart_id` int DEFAULT NULL,
-  `applied_cart_rule_ids` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `applied_cart_rule_ids` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
@@ -2788,8 +2788,8 @@ DROP TABLE IF EXISTS `password_resets`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `password_resets` (
-  `email` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `token` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `email` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `token` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   KEY `password_resets_email_index` (`email`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -2813,11 +2813,11 @@ DROP TABLE IF EXISTS `personal_access_tokens`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `personal_access_tokens` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
-  `tokenable_type` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `tokenable_type` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `tokenable_id` bigint unsigned NOT NULL,
-  `name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `token` varchar(64) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `abilities` text COLLATE utf8mb4_unicode_ci,
+  `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `token` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `abilities` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `last_used_at` timestamp NULL DEFAULT NULL,
   `expires_at` timestamp NULL DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
@@ -2846,9 +2846,9 @@ DROP TABLE IF EXISTS `product_attribute_values`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `product_attribute_values` (
   `id` int unsigned NOT NULL AUTO_INCREMENT,
-  `locale` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `channel` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `text_value` text COLLATE utf8mb4_unicode_ci,
+  `locale` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `channel` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `text_value` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `boolean_value` tinyint(1) DEFAULT NULL,
   `integer_value` int DEFAULT NULL,
   `float_value` decimal(12,4) DEFAULT NULL,
@@ -2857,7 +2857,7 @@ CREATE TABLE `product_attribute_values` (
   `json_value` json DEFAULT NULL,
   `product_id` int unsigned NOT NULL,
   `attribute_id` int unsigned NOT NULL,
-  `unique_id` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `unique_id` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `chanel_locale_attribute_value_index_unique` (`channel`,`locale`,`attribute_id`,`product_id`),
   UNIQUE KEY `product_attribute_values_unique_id_unique` (`unique_id`),
@@ -2919,8 +2919,8 @@ DROP TABLE IF EXISTS `product_bundle_option_translations`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `product_bundle_option_translations` (
   `id` int unsigned NOT NULL AUTO_INCREMENT,
-  `locale` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `label` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `locale` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `label` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `product_bundle_option_id` int unsigned NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `product_bundle_option_translations_option_id_locale_unique` (`product_bundle_option_id`,`locale`),
@@ -2948,7 +2948,7 @@ DROP TABLE IF EXISTS `product_bundle_options`;
 CREATE TABLE `product_bundle_options` (
   `id` int unsigned NOT NULL AUTO_INCREMENT,
   `product_id` int unsigned NOT NULL,
-  `type` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `type` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `is_required` tinyint(1) NOT NULL DEFAULT '1',
   `sort_order` int NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
@@ -3057,13 +3057,13 @@ DROP TABLE IF EXISTS `product_customer_group_prices`;
 CREATE TABLE `product_customer_group_prices` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
   `qty` int NOT NULL DEFAULT '0',
-  `value_type` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `value_type` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `value` decimal(12,4) NOT NULL DEFAULT '0.0000',
   `product_id` int unsigned NOT NULL,
   `customer_group_id` int unsigned DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
-  `unique_id` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `unique_id` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `product_customer_group_prices_unique_id_unique` (`unique_id`),
   KEY `product_customer_group_prices_product_id_foreign` (`product_id`),
@@ -3091,7 +3091,7 @@ DROP TABLE IF EXISTS `product_customizable_option_prices`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `product_customizable_option_prices` (
   `id` int unsigned NOT NULL AUTO_INCREMENT,
-  `label` text COLLATE utf8mb4_unicode_ci,
+  `label` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `price` decimal(12,4) NOT NULL DEFAULT '0.0000',
   `product_customizable_option_id` int unsigned NOT NULL,
   `sort_order` int NOT NULL DEFAULT '0',
@@ -3119,8 +3119,8 @@ DROP TABLE IF EXISTS `product_customizable_option_translations`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `product_customizable_option_translations` (
   `id` int unsigned NOT NULL AUTO_INCREMENT,
-  `locale` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `label` text COLLATE utf8mb4_unicode_ci,
+  `locale` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `label` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `product_customizable_option_id` int unsigned NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `product_customizable_option_id_locale_unique` (`product_customizable_option_id`,`locale`),
@@ -3147,10 +3147,10 @@ DROP TABLE IF EXISTS `product_customizable_options`;
 CREATE TABLE `product_customizable_options` (
   `id` int unsigned NOT NULL AUTO_INCREMENT,
   `product_id` int unsigned NOT NULL,
-  `type` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `type` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `is_required` tinyint(1) NOT NULL DEFAULT '1',
-  `max_characters` text COLLATE utf8mb4_unicode_ci,
-  `supported_file_extensions` text COLLATE utf8mb4_unicode_ci,
+  `max_characters` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `supported_file_extensions` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `sort_order` int NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
   KEY `product_customizable_options_product_id_foreign` (`product_id`),
@@ -3177,8 +3177,8 @@ DROP TABLE IF EXISTS `product_downloadable_link_translations`;
 CREATE TABLE `product_downloadable_link_translations` (
   `id` int unsigned NOT NULL AUTO_INCREMENT,
   `product_downloadable_link_id` int unsigned NOT NULL,
-  `locale` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `title` text COLLATE utf8mb4_unicode_ci,
+  `locale` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `title` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   PRIMARY KEY (`id`),
   KEY `link_translations_link_id_foreign` (`product_downloadable_link_id`),
   CONSTRAINT `link_translations_link_id_foreign` FOREIGN KEY (`product_downloadable_link_id`) REFERENCES `product_downloadable_links` (`id`) ON DELETE CASCADE
@@ -3204,15 +3204,15 @@ DROP TABLE IF EXISTS `product_downloadable_links`;
 CREATE TABLE `product_downloadable_links` (
   `id` int unsigned NOT NULL AUTO_INCREMENT,
   `product_id` int unsigned NOT NULL,
-  `url` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `file` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `file_name` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `type` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `url` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `file` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `file_name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `type` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `price` decimal(12,4) NOT NULL DEFAULT '0.0000',
-  `sample_url` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `sample_file` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `sample_file_name` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `sample_type` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `sample_url` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `sample_file` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `sample_file_name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `sample_type` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `downloads` int NOT NULL DEFAULT '0',
   `sort_order` int DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
@@ -3242,8 +3242,8 @@ DROP TABLE IF EXISTS `product_downloadable_sample_translations`;
 CREATE TABLE `product_downloadable_sample_translations` (
   `id` int unsigned NOT NULL AUTO_INCREMENT,
   `product_downloadable_sample_id` int unsigned NOT NULL,
-  `locale` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `title` text COLLATE utf8mb4_unicode_ci,
+  `locale` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `title` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   PRIMARY KEY (`id`),
   KEY `sample_translations_sample_id_foreign` (`product_downloadable_sample_id`),
   CONSTRAINT `sample_translations_sample_id_foreign` FOREIGN KEY (`product_downloadable_sample_id`) REFERENCES `product_downloadable_samples` (`id`) ON DELETE CASCADE
@@ -3269,10 +3269,10 @@ DROP TABLE IF EXISTS `product_downloadable_samples`;
 CREATE TABLE `product_downloadable_samples` (
   `id` int unsigned NOT NULL AUTO_INCREMENT,
   `product_id` int unsigned NOT NULL,
-  `url` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `file` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `file_name` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `type` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `url` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `file` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `file_name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `type` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `sort_order` int DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
@@ -3300,27 +3300,27 @@ DROP TABLE IF EXISTS `product_flat`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `product_flat` (
   `id` int unsigned NOT NULL AUTO_INCREMENT,
-  `sku` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `type` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `product_number` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `name` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `short_description` text COLLATE utf8mb4_unicode_ci,
-  `description` text COLLATE utf8mb4_unicode_ci,
-  `url_key` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `sku` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `type` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `product_number` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `short_description` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `description` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `url_key` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `new` tinyint(1) DEFAULT NULL,
   `featured` tinyint(1) DEFAULT NULL,
   `status` tinyint(1) DEFAULT NULL,
-  `meta_title` text COLLATE utf8mb4_unicode_ci,
-  `meta_keywords` text COLLATE utf8mb4_unicode_ci,
-  `meta_description` text COLLATE utf8mb4_unicode_ci,
+  `meta_title` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `meta_keywords` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `meta_description` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `price` decimal(12,4) DEFAULT NULL,
   `special_price` decimal(12,4) DEFAULT NULL,
   `special_price_from` date DEFAULT NULL,
   `special_price_to` date DEFAULT NULL,
   `weight` decimal(12,4) DEFAULT NULL,
   `created_at` datetime DEFAULT NULL,
-  `locale` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `channel` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `locale` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `channel` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `attribute_family_id` int unsigned DEFAULT NULL,
   `product_id` int unsigned NOT NULL,
   `updated_at` datetime DEFAULT NULL,
@@ -3386,8 +3386,8 @@ DROP TABLE IF EXISTS `product_images`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `product_images` (
   `id` int unsigned NOT NULL AUTO_INCREMENT,
-  `type` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `path` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `type` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `path` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `product_id` int unsigned NOT NULL,
   `position` int unsigned NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
@@ -3574,9 +3574,9 @@ DROP TABLE IF EXISTS `product_review_attachments`;
 CREATE TABLE `product_review_attachments` (
   `id` int unsigned NOT NULL AUTO_INCREMENT,
   `review_id` int unsigned NOT NULL,
-  `type` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'image',
-  `mime_type` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `path` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `type` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'image',
+  `mime_type` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `path` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   PRIMARY KEY (`id`),
   KEY `product_review_images_review_id_foreign` (`review_id`),
   CONSTRAINT `product_review_images_review_id_foreign` FOREIGN KEY (`review_id`) REFERENCES `product_reviews` (`id`) ON DELETE CASCADE
@@ -3601,11 +3601,11 @@ DROP TABLE IF EXISTS `product_reviews`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `product_reviews` (
   `id` int unsigned NOT NULL AUTO_INCREMENT,
-  `name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '',
-  `title` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '',
+  `title` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `rating` int NOT NULL,
-  `comment` text COLLATE utf8mb4_unicode_ci,
-  `status` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `comment` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `status` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `product_id` int unsigned NOT NULL,
   `customer_id` int DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
@@ -3687,8 +3687,8 @@ DROP TABLE IF EXISTS `product_videos`;
 CREATE TABLE `product_videos` (
   `id` int unsigned NOT NULL AUTO_INCREMENT,
   `product_id` int unsigned NOT NULL,
-  `type` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `path` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `type` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `path` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `position` int unsigned NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
   KEY `prod_vid_product_id_idx` (`product_id`),
@@ -3714,8 +3714,8 @@ DROP TABLE IF EXISTS `products`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `products` (
   `id` int unsigned NOT NULL AUTO_INCREMENT,
-  `sku` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `type` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `sku` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `type` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `parent_id` int unsigned DEFAULT NULL,
   `attribute_family_id` int unsigned DEFAULT NULL,
   `additional` json DEFAULT NULL,
@@ -3750,9 +3750,9 @@ DROP TABLE IF EXISTS `refund_items`;
 CREATE TABLE `refund_items` (
   `id` int unsigned NOT NULL AUTO_INCREMENT,
   `parent_id` int unsigned DEFAULT NULL,
-  `name` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `description` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `sku` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `description` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `sku` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `qty` int DEFAULT NULL,
   `price` decimal(12,4) NOT NULL DEFAULT '0.0000',
   `base_price` decimal(12,4) NOT NULL DEFAULT '0.0000',
@@ -3768,7 +3768,7 @@ CREATE TABLE `refund_items` (
   `total_incl_tax` decimal(12,4) NOT NULL DEFAULT '0.0000',
   `base_total_incl_tax` decimal(12,4) NOT NULL DEFAULT '0.0000',
   `product_id` int unsigned DEFAULT NULL,
-  `product_type` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `product_type` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `order_item_id` int unsigned DEFAULT NULL,
   `refund_id` int unsigned DEFAULT NULL,
   `additional` json DEFAULT NULL,
@@ -3802,13 +3802,13 @@ DROP TABLE IF EXISTS `refunds`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `refunds` (
   `id` int unsigned NOT NULL AUTO_INCREMENT,
-  `increment_id` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `state` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `increment_id` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `state` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `email_sent` tinyint(1) NOT NULL DEFAULT '0',
   `total_qty` int DEFAULT NULL,
-  `base_currency_code` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `channel_currency_code` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `order_currency_code` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `base_currency_code` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `channel_currency_code` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `order_currency_code` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `adjustment_refund` decimal(12,4) DEFAULT '0.0000',
   `base_adjustment_refund` decimal(12,4) DEFAULT '0.0000',
   `adjustment_fee` decimal(12,4) DEFAULT '0.0000',
@@ -3857,9 +3857,9 @@ DROP TABLE IF EXISTS `roles`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `roles` (
   `id` int unsigned NOT NULL AUTO_INCREMENT,
-  `name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `description` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `permission_type` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `description` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `permission_type` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `permissions` json DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
@@ -3886,8 +3886,8 @@ DROP TABLE IF EXISTS `search_synonyms`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `search_synonyms` (
   `id` int unsigned NOT NULL AUTO_INCREMENT,
-  `name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `terms` text COLLATE utf8mb4_unicode_ci NOT NULL,
+  `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `terms` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`)
@@ -3912,12 +3912,12 @@ DROP TABLE IF EXISTS `search_terms`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `search_terms` (
   `id` int unsigned NOT NULL AUTO_INCREMENT,
-  `term` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `term` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `results` int NOT NULL DEFAULT '0',
   `uses` int NOT NULL DEFAULT '0',
-  `redirect_url` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `redirect_url` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `display_in_suggested_terms` tinyint(1) NOT NULL DEFAULT '0',
-  `locale` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `locale` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `channel_id` int unsigned NOT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
@@ -3946,9 +3946,9 @@ DROP TABLE IF EXISTS `shipment_items`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `shipment_items` (
   `id` int unsigned NOT NULL AUTO_INCREMENT,
-  `name` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `description` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `sku` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `description` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `sku` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `qty` int DEFAULT NULL,
   `weight` decimal(12,4) DEFAULT NULL,
   `price` decimal(12,4) DEFAULT '0.0000',
@@ -3958,7 +3958,7 @@ CREATE TABLE `shipment_items` (
   `price_incl_tax` decimal(12,4) NOT NULL DEFAULT '0.0000',
   `base_price_incl_tax` decimal(12,4) NOT NULL DEFAULT '0.0000',
   `product_id` int unsigned DEFAULT NULL,
-  `product_type` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `product_type` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `order_item_id` int unsigned DEFAULT NULL,
   `shipment_id` int unsigned NOT NULL,
   `additional` json DEFAULT NULL,
@@ -3988,19 +3988,19 @@ DROP TABLE IF EXISTS `shipments`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `shipments` (
   `id` int unsigned NOT NULL AUTO_INCREMENT,
-  `status` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `status` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `total_qty` int DEFAULT NULL,
   `total_weight` decimal(12,4) DEFAULT NULL,
-  `carrier_code` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `carrier_title` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `track_number` text COLLATE utf8mb4_unicode_ci,
+  `carrier_code` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `carrier_title` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `track_number` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `email_sent` tinyint(1) NOT NULL DEFAULT '0',
   `customer_id` int unsigned DEFAULT NULL,
-  `customer_type` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `customer_type` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `order_id` int unsigned NOT NULL,
   `order_address_id` int unsigned DEFAULT NULL,
   `inventory_source_id` int unsigned DEFAULT NULL,
-  `inventory_source_name` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `inventory_source_name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
@@ -4029,8 +4029,8 @@ DROP TABLE IF EXISTS `sitemaps`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `sitemaps` (
   `id` int unsigned NOT NULL AUTO_INCREMENT,
-  `file_name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `path` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `file_name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `path` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `additional` json DEFAULT NULL,
   `generated_at` datetime DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
@@ -4057,9 +4057,9 @@ DROP TABLE IF EXISTS `subscribers_list`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `subscribers_list` (
   `id` int unsigned NOT NULL AUTO_INCREMENT,
-  `email` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `email` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `is_subscribed` tinyint(1) NOT NULL DEFAULT '0',
-  `token` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `token` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `customer_id` int unsigned DEFAULT NULL,
   `channel_id` int unsigned NOT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
@@ -4090,9 +4090,9 @@ DROP TABLE IF EXISTS `tax_categories`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tax_categories` (
   `id` int unsigned NOT NULL AUTO_INCREMENT,
-  `code` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `description` longtext COLLATE utf8mb4_unicode_ci NOT NULL,
+  `code` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `description` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
@@ -4148,13 +4148,13 @@ DROP TABLE IF EXISTS `tax_rates`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tax_rates` (
   `id` int unsigned NOT NULL AUTO_INCREMENT,
-  `identifier` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `identifier` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `is_zip` tinyint(1) NOT NULL DEFAULT '0',
-  `zip_code` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `zip_from` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `zip_to` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `state` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `country` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `zip_code` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `zip_from` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `zip_to` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `state` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `country` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `tax_rate` decimal(12,4) NOT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
@@ -4182,7 +4182,7 @@ DROP TABLE IF EXISTS `theme_customization_translations`;
 CREATE TABLE `theme_customization_translations` (
   `id` int unsigned NOT NULL AUTO_INCREMENT,
   `theme_customization_id` int unsigned NOT NULL,
-  `locale` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `locale` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `options` json NOT NULL,
   PRIMARY KEY (`id`),
   KEY `theme_customization_id_foreign` (`theme_customization_id`),
@@ -4196,7 +4196,7 @@ CREATE TABLE `theme_customization_translations` (
 
 LOCK TABLES `theme_customization_translations` WRITE;
 /*!40000 ALTER TABLE `theme_customization_translations` DISABLE KEYS */;
-INSERT INTO `theme_customization_translations` VALUES (1,1,'en','{\"images\": [{\"link\": \"\", \"image\": \"storage/theme/1/7HxHt2vrGjVqEjA1tgg5NXPHixnri0d0nNnnZTA9.webp\", \"title\": \"Get Ready For New Collection\"}, {\"link\": \"\", \"image\": \"storage/theme/1/uAcO5AzZpMwVKgZ0Prc4mFuR0Qe6vctgqjiDlwKu.webp\", \"title\": \"Get Ready For New Collection\"}, {\"link\": \"\", \"image\": \"storage/theme/1/OWwYfglQt02NPtmwzXa0AcecjCe6PD8dkeA6IDlc.webp\", \"title\": \"Get Ready For New Collection\"}, {\"link\": \"\", \"image\": \"storage/theme/1/oVNEq5XgxqgLcVWgK0tuMbZYRzgOciCClZlT4kto.webp\", \"title\": \"Get Ready For New Collection\"}, {\"link\": \"\", \"image\": \"storage/theme/1/8U7rOMV1bdQLx39VMXnxrUjTdhqGQOUmE9bbwXSI.webp\", \"title\": \"NO 1 JUTE RETAILOR\"}]}'),(2,2,'en','{\"css\": \".home-offer h1 {display: block;font-weight: 500;text-align: center;font-size: 22px;font-family: DM Serif Display;background-color: #E8EDFE;padding-top: 20px;padding-bottom: 20px;}@media (max-width:768px){.home-offer h1 {font-size:18px;padding-top: 10px;padding-bottom: 10px;}@media (max-width:525px) {.home-offer h1 {font-size:14px;padding-top: 6px;padding-bottom: 6px;}}\", \"html\": \"<div class=\\\"home-offer\\\"><h1>Get UPTO 40% OFF on your 1st order SHOP NOW</h1></div>\"}'),(3,3,'en','{\"filters\": {\"sort\": \"asc\", \"limit\": 10, \"parent_id\": 1}}'),(4,4,'en','{\"title\": \"New Products\", \"filters\": {\"new\": \"1\", \"sort\": \"name-asc\", \"limit\": \"12\", \"category_id\": \"2\"}}'),(5,5,'en','{\"css\": \".top-collection-container {overflow: hidden;}.top-collection-header {padding-left: 15px;padding-right: 15px;text-align: center;font-size: 70px;line-height: 90px;color: #060C3B;margin-top: 80px;}.top-collection-header h2 {max-width: 595px;margin-left: auto;margin-right: auto;font-family: DM Serif Display;}.top-collection-grid {display: flex;flex-wrap: wrap;gap: 32px;justify-content: center;margin-top: 60px;width: 100%;margin-right: auto;margin-left: auto;padding-right: 90px;padding-left: 90px;}.top-collection-card {position: relative;background: #f9fafb;overflow:hidden;border-radius:20px;}.top-collection-card img {border-radius: 16px;max-width: 100%;text-indent:-9999px;transition: transform 300ms ease;transform: scale(1);}.top-collection-card:hover img {transform: scale(1.05);transition: all 300ms ease;}.top-collection-card h3 {color: #060C3B;font-size: 30px;font-family: DM Serif Display;transform: translateX(-50%);width: max-content;left: 50%;bottom: 30px;position: absolute;margin: 0;font-weight: inherit;}@media not all and (min-width: 525px) {.top-collection-header {margin-top: 28px;font-size: 20px;line-height: 1.5;}.top-collection-grid {gap: 10px}}@media not all and (min-width: 768px) {.top-collection-header {margin-top: 30px;font-size: 28px;line-height: 3;}.top-collection-header h2 {line-height:2; margin-bottom:20px;} .top-collection-grid {gap: 14px}} @media not all and (min-width: 1024px) {.top-collection-grid {padding-left: 30px;padding-right: 30px;}}@media (max-width: 768px) {.top-collection-grid { row-gap:15px; column-gap:0px;justify-content: space-between;margin-top: 0px;} .top-collection-card{width:48%} .top-collection-card img {width:100%;} .top-collection-card h3 {font-size:24px; bottom: 16px;}}@media (max-width:520px) { .top-collection-grid{padding-left: 15px;padding-right: 15px;} .top-collection-card h3 {font-size:18px; bottom: 10px;}}\", \"html\": \"<div class=\\\"top-collection-container\\\"><div class=\\\"top-collection-header\\\"><h2>Game on hai</h2></div><div class=\\\"top-collection-grid container\\\"><div class=\\\"top-collection-card\\\"><img src=\\\"\\\" data-src=\\\"storage/theme/5/SNHopUElXk3oaLG2oJfN4oeOVnEz3hmCA8Kp5Bfe.webp\\\" class=\\\"lazy\\\" width=\\\"396\\\" height=\\\"396\\\" alt=\\\"Game on hai\\\" /><h3>Our Collections</h3></div><div class=\\\"top-collection-card\\\"><img src=\\\"\\\" data-src=\\\"storage/theme/5/W4Q6tWjRUiZkeig6DAYHdfwcwQ4qhjyy8Muyq7Sn.webp\\\" class=\\\"lazy\\\" width=\\\"396\\\" height=\\\"396\\\" alt=\\\"Game on hai\\\" /><h3>Our Collections</h3></div><div class=\\\"top-collection-card\\\"><img src=\\\"\\\" data-src=\\\"storage/theme/5/TEuI5AAqYBkK8h1mlFK0vQljFEWz0LmJoW8klrPn.webp\\\" class=\\\"lazy\\\" width=\\\"396\\\" height=\\\"396\\\" alt=\\\"Game on hai\\\" /><h3>Our Collections</h3></div><div class=\\\"top-collection-card\\\"><img src=\\\"\\\" data-src=\\\"storage/theme/5/D6cdcnJObX6UsXJmi068lKhGFdYaVPtltjea1Val.webp\\\" class=\\\"lazy\\\" width=\\\"396\\\" height=\\\"396\\\" alt=\\\"Game on hai\\\" /><h3>Our Collections</h3></div><div class=\\\"top-collection-card\\\"><img src=\\\"\\\" data-src=\\\"storage/theme/5/6mbj2MQ8DHxOHENUjJzdMMZDm1kYQ5i8FEmMeX57.webp\\\" class=\\\"lazy\\\" width=\\\"396\\\" height=\\\"396\\\" alt=\\\"Game on hai\\\" /><h3>Our Collections</h3></div><div class=\\\"top-collection-card\\\"><img src=\\\"\\\" data-src=\\\"storage/theme/5/fljCKCgGdHbBNMPwh0NLlrtEp8xJjlboyqxdkXkF.webp\\\" class=\\\"lazy\\\" width=\\\"396\\\" height=\\\"396\\\" alt=\\\"Game on hai\\\" /><h3>Our Collections</h3></div></div></div>\"}'),(6,6,'en','{\"css\": \".section-gap{margin-top:80px}.direction-ltr{direction:ltr}.direction-rtl{direction:rtl}.inline-col-wrapper{display:grid;grid-template-columns:auto 1fr;grid-gap:60px;align-items:center}.inline-col-wrapper .inline-col-image-wrapper{overflow:hidden}.inline-col-wrapper .inline-col-image-wrapper img{max-width:100%;height:auto;border-radius:16px;text-indent:-9999px}.inline-col-wrapper .inline-col-content-wrapper{display:flex;flex-wrap:wrap;gap:20px;max-width:464px}.inline-col-wrapper .inline-col-content-wrapper .inline-col-title{max-width:442px;font-size:60px;font-weight:400;color:#060c3b;line-height:70px;font-family:DM Serif Display;margin:0}.inline-col-wrapper .inline-col-content-wrapper .inline-col-description{margin:0;font-size:18px;color:#6e6e6e;font-family:Poppins}@media (max-width:991px){.inline-col-wrapper{grid-template-columns:1fr;grid-gap:16px}.inline-col-wrapper .inline-col-content-wrapper{gap:10px}} @media (max-width:768px){.inline-col-wrapper .inline-col-image-wrapper img {width:100%;} .inline-col-wrapper .inline-col-content-wrapper .inline-col-title{font-size:28px !important;line-height:normal !important}} @media (max-width:525px){.inline-col-wrapper .inline-col-content-wrapper .inline-col-title{font-size:20px !important;} .inline-col-description{font-size:16px} .inline-col-wrapper{grid-gap:10px}}\", \"html\": \"<div class=\\\"section-gap bold-collections container\\\"> <div class=\\\"inline-col-wrapper\\\"> <div class=\\\"inline-col-image-wrapper\\\"> <img src=\\\"\\\" data-src=\\\"storage/theme/6/Ytw0lfijRa2VzBTyTi2uTi5GJFkJjKnOCEPwICLB.webp\\\" class=\\\"lazy\\\" width=\\\"632\\\" height=\\\"510\\\" alt=\\\"Get Ready for our new Bold Collections!\\\"> </div> <div class=\\\"inline-col-content-wrapper\\\"> <h2 class=\\\"inline-col-title\\\"> Get Ready for our new Bold Collections! </h2> <p class=\\\"inline-col-description\\\">Introducing Our New Bold Collections! Elevate your style with daring designs and vibrant statements. Explore striking patterns and bold colors that redefine your wardrobe. Get ready to embrace the extraordinary!</p> <button class=\\\"primary-button max-md:rounded-lg max-md:px-4 max-md:py-2.5 max-md:text-sm\\\">View Collections</button> </div> </div> </div>\"}'),(7,7,'en','{\"title\": \"Featured Products\", \"filters\": {\"sort\": \"name-desc\", \"limit\": 12, \"featured\": 1}}'),(9,9,'en','{\"title\": \"All Products\", \"filters\": {\"sort\": \"name-desc\", \"limit\": \"12\", \"category_id\": \"3\"}}'),(11,11,'en','{\"column_1\": [{\"url\": \"http://localhost:8000/page/about-us\", \"title\": \"About Us\", \"sort_order\": 1}, {\"url\": \"http://localhost:8000/contact-us\", \"title\": \"Contact Us\", \"sort_order\": 2}, {\"url\": \"http://localhost:8000/page/customer-service\", \"title\": \"Customer Service\", \"sort_order\": 3}, {\"url\": \"http://localhost:8000/page/whats-new\", \"title\": \"What\'s New\", \"sort_order\": 4}, {\"url\": \"http://localhost:8000/page/terms-of-use\", \"title\": \"Terms of Use\", \"sort_order\": 5}, {\"url\": \"http://localhost:8000/page/terms-conditions\", \"title\": \"Terms & Conditions\", \"sort_order\": 6}], \"column_2\": [{\"url\": \"http://localhost:8000/page/privacy-policy\", \"title\": \"Privacy Policy\", \"sort_order\": 1}, {\"url\": \"http://localhost:8000/page/payment-policy\", \"title\": \"Payment Policy\", \"sort_order\": 2}, {\"url\": \"http://localhost:8000/page/shipping-policy\", \"title\": \"Shipping Policy\", \"sort_order\": 3}, {\"url\": \"http://localhost:8000/page/refund-policy\", \"title\": \"Refund Policy\", \"sort_order\": 4}, {\"url\": \"http://localhost:8000/page/return-policy\", \"title\": \"Return Policy\", \"sort_order\": 5}]}'),(12,12,'en','{\"services\": [{\"title\": \"Free Shipping\", \"description\": \"Enjoy free shipping on all orders\", \"service_icon\": \"icon-truck\"}, {\"title\": \"Product Replace\", \"description\": \"Easy Product Replacement Available!\", \"service_icon\": \"icon-product\"}, {\"title\": \"Emi Available\", \"description\": \"No cost EMI available on all major credit cards\", \"service_icon\": \"icon-dollar-sign\"}, {\"title\": \"24/7 Support\", \"description\": \"Dedicated 24/7 support via chat and email\", \"service_icon\": \"icon-support\"}]}');
+INSERT INTO `theme_customization_translations` VALUES (1,1,'en','{\"images\": [{\"link\": \"\", \"image\": \"storage/theme/1/8U7rOMV1bdQLx39VMXnxrUjTdhqGQOUmE9bbwXSI.webp\", \"title\": \"NO 1 JUTE RETAILOR\"}, {\"link\": \"\", \"image\": \"storage/theme/1/BfIav7OQi9ikCJsBmKnMOJwF6rX88WDksJqB52kx.webp\", \"title\": \"NO 1 JUTE RETAILOR 2.0\"}, {\"link\": \"\", \"image\": \"storage/theme/1/imIdSFHUvc2irLJ7Idya4SdQcmosgs5qg6zlJ69O.webp\", \"title\": \"NO 1 JUTE RETAILOR 3.0\"}, {\"link\": \"\", \"image\": \"storage/theme/1/amWvcl4jJ6Mf4kFAHAiTgtWUTDLu5MsKhpLbvY7S.webp\", \"title\": \"NO 1 JUTE RETAILOR 4.0\"}]}'),(2,2,'en','{\"css\": \".home-offer h1 {display: block;font-weight: 500;text-align: center;font-size: 22px;font-family: DM Serif Display;background-color: #E8EDFE;padding-top: 20px;padding-bottom: 20px;}@media (max-width:768px){.home-offer h1 {font-size:18px;padding-top: 10px;padding-bottom: 10px;}@media (max-width:525px) {.home-offer h1 {font-size:14px;padding-top: 6px;padding-bottom: 6px;}}\", \"html\": \"<div class=\\\"home-offer\\\"><h1>Get UPTO 40% OFF on your 1st order SHOP NOW</h1></div>\"}'),(3,3,'en','{\"filters\": {\"sort\": \"asc\", \"limit\": 10, \"parent_id\": 1}}'),(4,4,'en','{\"title\": \"New Products\", \"filters\": {\"new\": \"1\", \"sort\": \"name-asc\", \"limit\": \"12\", \"category_id\": \"2\"}}'),(5,5,'en','{\"css\": \".top-collection-container {overflow: hidden;}.top-collection-header {padding-left: 15px;padding-right: 15px;text-align: center;font-size: 70px;line-height: 90px;color: #060C3B;margin-top: 80px;}.top-collection-header h2 {max-width: 595px;margin-left: auto;margin-right: auto;font-family: DM Serif Display;}.top-collection-grid {display: flex;flex-wrap: wrap;gap: 32px;justify-content: center;margin-top: 60px;width: 100%;margin-right: auto;margin-left: auto;padding-right: 90px;padding-left: 90px;}.top-collection-card {position: relative;background: #f9fafb;overflow:hidden;border-radius:20px;}.top-collection-card img {border-radius: 16px;max-width: 100%;text-indent:-9999px;transition: transform 300ms ease;transform: scale(1);}.top-collection-card:hover img {transform: scale(1.05);transition: all 300ms ease;}.top-collection-card h3 {color: #060C3B;font-size: 30px;font-family: DM Serif Display;transform: translateX(-50%);width: max-content;left: 50%;bottom: 30px;position: absolute;margin: 0;font-weight: inherit;}@media not all and (min-width: 525px) {.top-collection-header {margin-top: 28px;font-size: 20px;line-height: 1.5;}.top-collection-grid {gap: 10px}}@media not all and (min-width: 768px) {.top-collection-header {margin-top: 30px;font-size: 28px;line-height: 3;}.top-collection-header h2 {line-height:2; margin-bottom:20px;} .top-collection-grid {gap: 14px}} @media not all and (min-width: 1024px) {.top-collection-grid {padding-left: 30px;padding-right: 30px;}}@media (max-width: 768px) {.top-collection-grid { row-gap:15px; column-gap:0px;justify-content: space-between;margin-top: 0px;} .top-collection-card{width:48%} .top-collection-card img {width:100%;} .top-collection-card h3 {font-size:24px; bottom: 16px;}}@media (max-width:520px) { .top-collection-grid{padding-left: 15px;padding-right: 15px;} .top-collection-card h3 {font-size:18px; bottom: 10px;}}\", \"html\": \"<div class=\\\"top-collection-container\\\"><div class=\\\"top-collection-header\\\"><h2>Game on hai</h2></div><div class=\\\"top-collection-grid container\\\"><div class=\\\"top-collection-card\\\"><img src=\\\"\\\" data-src=\\\"storage/theme/5/SNHopUElXk3oaLG2oJfN4oeOVnEz3hmCA8Kp5Bfe.webp\\\" class=\\\"lazy\\\" width=\\\"396\\\" height=\\\"396\\\" alt=\\\"Game on hai\\\" /><h3>Our Collections</h3></div><div class=\\\"top-collection-card\\\"><img src=\\\"\\\" data-src=\\\"storage/theme/5/W4Q6tWjRUiZkeig6DAYHdfwcwQ4qhjyy8Muyq7Sn.webp\\\" class=\\\"lazy\\\" width=\\\"396\\\" height=\\\"396\\\" alt=\\\"Game on hai\\\" /><h3>Our Collections</h3></div><div class=\\\"top-collection-card\\\"><img src=\\\"\\\" data-src=\\\"storage/theme/5/TEuI5AAqYBkK8h1mlFK0vQljFEWz0LmJoW8klrPn.webp\\\" class=\\\"lazy\\\" width=\\\"396\\\" height=\\\"396\\\" alt=\\\"Game on hai\\\" /><h3>Our Collections</h3></div><div class=\\\"top-collection-card\\\"><img src=\\\"\\\" data-src=\\\"storage/theme/5/D6cdcnJObX6UsXJmi068lKhGFdYaVPtltjea1Val.webp\\\" class=\\\"lazy\\\" width=\\\"396\\\" height=\\\"396\\\" alt=\\\"Game on hai\\\" /><h3>Our Collections</h3></div><div class=\\\"top-collection-card\\\"><img src=\\\"\\\" data-src=\\\"storage/theme/5/6mbj2MQ8DHxOHENUjJzdMMZDm1kYQ5i8FEmMeX57.webp\\\" class=\\\"lazy\\\" width=\\\"396\\\" height=\\\"396\\\" alt=\\\"Game on hai\\\" /><h3>Our Collections</h3></div><div class=\\\"top-collection-card\\\"><img src=\\\"\\\" data-src=\\\"storage/theme/5/fljCKCgGdHbBNMPwh0NLlrtEp8xJjlboyqxdkXkF.webp\\\" class=\\\"lazy\\\" width=\\\"396\\\" height=\\\"396\\\" alt=\\\"Game on hai\\\" /><h3>Our Collections</h3></div></div></div>\"}'),(6,6,'en','{\"css\": \".section-gap{margin-top:80px}.direction-ltr{direction:ltr}.direction-rtl{direction:rtl}.inline-col-wrapper{display:grid;grid-template-columns:auto 1fr;grid-gap:60px;align-items:center}.inline-col-wrapper .inline-col-image-wrapper{overflow:hidden}.inline-col-wrapper .inline-col-image-wrapper img{max-width:100%;height:auto;border-radius:16px;text-indent:-9999px}.inline-col-wrapper .inline-col-content-wrapper{display:flex;flex-wrap:wrap;gap:20px;max-width:464px}.inline-col-wrapper .inline-col-content-wrapper .inline-col-title{max-width:442px;font-size:60px;font-weight:400;color:#060c3b;line-height:70px;font-family:DM Serif Display;margin:0}.inline-col-wrapper .inline-col-content-wrapper .inline-col-description{margin:0;font-size:18px;color:#6e6e6e;font-family:Poppins}@media (max-width:991px){.inline-col-wrapper{grid-template-columns:1fr;grid-gap:16px}.inline-col-wrapper .inline-col-content-wrapper{gap:10px}} @media (max-width:768px){.inline-col-wrapper .inline-col-image-wrapper img {width:100%;} .inline-col-wrapper .inline-col-content-wrapper .inline-col-title{font-size:28px !important;line-height:normal !important}} @media (max-width:525px){.inline-col-wrapper .inline-col-content-wrapper .inline-col-title{font-size:20px !important;} .inline-col-description{font-size:16px} .inline-col-wrapper{grid-gap:10px}}\", \"html\": \"<div class=\\\"section-gap bold-collections container\\\"> <div class=\\\"inline-col-wrapper\\\"> <div class=\\\"inline-col-image-wrapper\\\"> <img src=\\\"\\\" data-src=\\\"storage/theme/6/Ytw0lfijRa2VzBTyTi2uTi5GJFkJjKnOCEPwICLB.webp\\\" class=\\\"lazy\\\" width=\\\"632\\\" height=\\\"510\\\" alt=\\\"Get Ready for our new Bold Collections!\\\"> </div> <div class=\\\"inline-col-content-wrapper\\\"> <h2 class=\\\"inline-col-title\\\"> Get Ready for our new Bold Collections! </h2> <p class=\\\"inline-col-description\\\">Introducing Our New Bold Collections! Elevate your style with daring designs and vibrant statements. Explore striking patterns and bold colors that redefine your wardrobe. Get ready to embrace the extraordinary!</p> <button class=\\\"primary-button max-md:rounded-lg max-md:px-4 max-md:py-2.5 max-md:text-sm\\\">View Collections</button> </div> </div> </div>\"}'),(7,7,'en','{\"title\": \"Featured Products\", \"filters\": {\"sort\": \"name-desc\", \"limit\": 12, \"featured\": 1}}'),(9,9,'en','{\"title\": \"All Products\", \"filters\": {\"sort\": \"name-desc\", \"limit\": \"12\", \"category_id\": \"3\"}}'),(11,11,'en','{\"column_1\": [{\"url\": \"http://localhost:8000/page/about-us\", \"title\": \"About Us\", \"sort_order\": 1}, {\"url\": \"http://localhost:8000/contact-us\", \"title\": \"Contact Us\", \"sort_order\": 2}, {\"url\": \"http://localhost:8000/page/customer-service\", \"title\": \"Customer Service\", \"sort_order\": 3}, {\"url\": \"http://localhost:8000/page/whats-new\", \"title\": \"What\'s New\", \"sort_order\": 4}, {\"url\": \"http://localhost:8000/page/terms-of-use\", \"title\": \"Terms of Use\", \"sort_order\": 5}, {\"url\": \"http://localhost:8000/page/terms-conditions\", \"title\": \"Terms & Conditions\", \"sort_order\": 6}], \"column_2\": [{\"url\": \"http://localhost:8000/page/privacy-policy\", \"title\": \"Privacy Policy\", \"sort_order\": 1}, {\"url\": \"http://localhost:8000/page/payment-policy\", \"title\": \"Payment Policy\", \"sort_order\": 2}, {\"url\": \"http://localhost:8000/page/shipping-policy\", \"title\": \"Shipping Policy\", \"sort_order\": 3}, {\"url\": \"http://localhost:8000/page/refund-policy\", \"title\": \"Refund Policy\", \"sort_order\": 4}, {\"url\": \"http://localhost:8000/page/return-policy\", \"title\": \"Return Policy\", \"sort_order\": 5}]}'),(12,12,'en','{\"services\": [{\"title\": \"Free Shipping\", \"description\": \"Enjoy free shipping on all orders\", \"service_icon\": \"icon-truck\"}, {\"title\": \"Product Replace\", \"description\": \"Easy Product Replacement Available!\", \"service_icon\": \"icon-product\"}, {\"title\": \"Emi Available\", \"description\": \"No cost EMI available on all major credit cards\", \"service_icon\": \"icon-dollar-sign\"}, {\"title\": \"24/7 Support\", \"description\": \"Dedicated 24/7 support via chat and email\", \"service_icon\": \"icon-support\"}]}');
 /*!40000 ALTER TABLE `theme_customization_translations` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -4209,9 +4209,9 @@ DROP TABLE IF EXISTS `theme_customizations`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `theme_customizations` (
   `id` int unsigned NOT NULL AUTO_INCREMENT,
-  `theme_code` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT 'default',
-  `type` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `theme_code` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT 'default',
+  `type` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `sort_order` int NOT NULL,
   `status` tinyint(1) NOT NULL DEFAULT '0',
   `channel_id` int unsigned NOT NULL,
@@ -4229,7 +4229,7 @@ CREATE TABLE `theme_customizations` (
 
 LOCK TABLES `theme_customizations` WRITE;
 /*!40000 ALTER TABLE `theme_customizations` DISABLE KEYS */;
-INSERT INTO `theme_customizations` VALUES (1,'default','image_carousel','Image Carousel',1,1,1,'2026-04-28 08:26:24','2026-05-04 01:37:35'),(2,'default','static_content','Offer Information',2,1,1,'2026-04-28 08:26:24','2026-04-28 08:26:24'),(3,'default','category_carousel','Categories Collections',3,1,1,'2026-04-28 08:26:24','2026-04-28 08:26:24'),(4,'default','product_carousel','New Products',4,1,1,'2026-04-28 08:26:24','2026-05-01 22:00:44'),(5,'default','static_content','Top Collections',5,0,1,'2026-04-28 08:26:24','2026-05-03 20:15:06'),(6,'default','static_content','Bold Collections',6,1,1,'2026-04-28 08:26:24','2026-04-28 08:26:24'),(7,'default','product_carousel','Featured Collections',7,1,1,'2026-04-28 08:26:24','2026-04-28 08:26:24'),(9,'default','product_carousel','All Products',9,1,1,'2026-04-28 08:26:24','2026-05-01 19:47:58'),(11,'default','footer_links','Footer Links',11,1,1,'2026-04-28 08:26:24','2026-04-28 08:26:24'),(12,'default','services_content','Services Content',12,1,1,'2026-04-28 08:26:24','2026-04-28 08:26:24');
+INSERT INTO `theme_customizations` VALUES (1,'default','image_carousel','Image Carousel',1,1,1,'2026-04-28 08:26:24','2026-05-08 09:42:20'),(2,'default','static_content','Offer Information',2,1,1,'2026-04-28 08:26:24','2026-04-28 08:26:24'),(3,'default','category_carousel','Categories Collections',3,1,1,'2026-04-28 08:26:24','2026-04-28 08:26:24'),(4,'default','product_carousel','New Products',4,1,1,'2026-04-28 08:26:24','2026-05-01 22:00:44'),(5,'default','static_content','Top Collections',5,0,1,'2026-04-28 08:26:24','2026-05-03 20:15:06'),(6,'default','static_content','Bold Collections',6,1,1,'2026-04-28 08:26:24','2026-04-28 08:26:24'),(7,'default','product_carousel','Featured Collections',7,1,1,'2026-04-28 08:26:24','2026-04-28 08:26:24'),(9,'default','product_carousel','All Products',9,1,1,'2026-04-28 08:26:24','2026-05-01 19:47:58'),(11,'default','footer_links','Footer Links',11,1,1,'2026-04-28 08:26:24','2026-04-28 08:26:24'),(12,'default','services_content','Services Content',12,1,1,'2026-04-28 08:26:24','2026-04-28 08:26:24');
 /*!40000 ALTER TABLE `theme_customizations` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -4242,11 +4242,11 @@ DROP TABLE IF EXISTS `url_rewrites`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `url_rewrites` (
   `id` int unsigned NOT NULL AUTO_INCREMENT,
-  `entity_type` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `request_path` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `target_path` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `redirect_type` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `locale` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `entity_type` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `request_path` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `target_path` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `redirect_type` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `locale` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
@@ -4272,10 +4272,10 @@ DROP TABLE IF EXISTS `users`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `users` (
   `id` int unsigned NOT NULL AUTO_INCREMENT,
-  `name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `email` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `password` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `remember_token` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `email` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `password` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `remember_token` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
@@ -4301,20 +4301,20 @@ DROP TABLE IF EXISTS `visits`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `visits` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
-  `method` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `request` mediumtext COLLATE utf8mb4_unicode_ci,
-  `url` mediumtext COLLATE utf8mb4_unicode_ci,
-  `referer` mediumtext COLLATE utf8mb4_unicode_ci,
-  `languages` text COLLATE utf8mb4_unicode_ci,
-  `useragent` text COLLATE utf8mb4_unicode_ci,
-  `headers` text COLLATE utf8mb4_unicode_ci,
-  `device` text COLLATE utf8mb4_unicode_ci,
-  `platform` text COLLATE utf8mb4_unicode_ci,
-  `browser` text COLLATE utf8mb4_unicode_ci,
-  `ip` varchar(45) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `visitable_type` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `method` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `request` mediumtext CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `url` mediumtext CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `referer` mediumtext CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `languages` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `useragent` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `headers` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `device` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `platform` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `browser` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `ip` varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `visitable_type` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `visitable_id` bigint unsigned DEFAULT NULL,
-  `visitor_type` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `visitor_type` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `visitor_id` bigint unsigned DEFAULT NULL,
   `channel_id` int unsigned DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
@@ -4409,10 +4409,6 @@ LOCK TABLES `wishlist_items` WRITE;
 /*!40000 ALTER TABLE `wishlist_items` DISABLE KEYS */;
 /*!40000 ALTER TABLE `wishlist_items` ENABLE KEYS */;
 UNLOCK TABLES;
-
---
--- Dumping routines for database 'qubix'
---
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
@@ -4423,4 +4419,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-05-03 23:30:02
+-- Dump completed on 2026-05-08  4:20:14
