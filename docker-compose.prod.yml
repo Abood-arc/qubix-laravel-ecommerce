@@ -1,0 +1,137 @@
+# Qubix — production stack for the Hostinger VPS (jjbags.in).
+# STANDALONE file (do NOT layer it over docker-compose.yml): the dev compose hard-codes
+# public ports for MySQL/Redis/ES/Kibana, and Compose merges port lists additively, so an
+# override cannot remove them. This file omits those ports entirely — only Caddy is public.
+#
+# Usage (on the VPS, in /opt/qubix):
+#   docker compose -f docker-compose.prod.yml build
+#   docker compose -f docker-compose.prod.yml up -d
+#   docker compose -f docker-compose.prod.yml ps
+#
+# Requires a production .env (see .env.production.example) in the same directory.
+services:
+  # --- PHP app: `php artisan serve` on :80 (as user sail/1337), Caddy proxies to it ---
+  app:
+    build:
+      context: .
+      dockerfile: docker/8.3/Dockerfile
+      args:
+        WWWGROUP: '1000'
+    image: qubix/app
+    restart: unless-stopped
+    extra_hosts:
+      - 'host.docker.internal:host-gateway'
+    environment:
+      WWWUSER: '1337'            # start-container remaps `sail` to this uid; matches chowned dirs
+      LARAVEL_SAIL: 1
+      SAIL_VITE_SHOP: 'false'    # serve built assets; vite-shop supervisor program idles
+      XDEBUG_MODE: 'off'
+    volumes:
+      - '.:/var/www/html'
+    networks: [qubix]
+    depends_on:
+      mysql: { condition: service_healthy }
+      redis: { condition: service_started }
+      elasticsearch: { condition: service_started }
+
+  # --- Queue worker (Redis-backed jobs: emails, exports, etc.) ---
+  queue:
+    image: qubix/app                       # reuses the image built by `app`
+    restart: unless-stopped
+    command: php artisan queue:work redis --sleep=3 --tries=3 --max-time=3600
+    environment:
+      WWWUSER: '1337'
+      LARAVEL_SAIL: 1
+      SAIL_VITE_SHOP: 'false'
+    volumes:
+      - '.:/var/www/html'
+    networks: [qubix]
+    depends_on: [app, redis, mysql]
+
+  # --- Laravel scheduler (runs schedule:run every minute in-process) ---
+  scheduler:
+    image: qubix/app
+    restart: unless-stopped
+    command: php artisan schedule:work
+    environment:
+      WWWUSER: '1337'
+      LARAVEL_SAIL: 1
+      SAIL_VITE_SHOP: 'false'
+    volumes:
+      - '.:/var/www/html'
+    networks: [qubix]
+    depends_on: [app, mysql]
+
+  # --- MySQL (internal only; import via `docker compose exec -T mysql ...`) ---
+  mysql:
+    image: 'mysql/mysql-server:8.0'
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: '${DB_PASSWORD}'
+      MYSQL_ROOT_HOST: '%'
+      MYSQL_DATABASE: '${DB_DATABASE}'
+      MYSQL_USER: '${DB_USERNAME}'
+      MYSQL_PASSWORD: '${DB_PASSWORD}'
+    volumes:
+      - 'qubix-mysql:/var/lib/mysql'
+    networks: [qubix]
+    healthcheck:
+      test: ['CMD', 'mysqladmin', 'ping', '-p${DB_PASSWORD}']
+      retries: 3
+      timeout: 5s
+    # NOTE: no `ports:` — reachable only on the 'qubix' network.
+
+  # --- Redis (cache / session / queue; internal only) ---
+  redis:
+    image: 'redis:alpine'
+    restart: unless-stopped
+    volumes:
+      - 'qubix-redis:/data'
+    networks: [qubix]
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      retries: 3
+      timeout: 5s
+
+  # --- Elasticsearch 7.17 (search; internal only) ---
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.17.0
+    restart: unless-stopped
+    environment:
+      - xpack.security.enabled=false
+      - discovery.type=single-node
+      - bootstrap.memory_lock=true
+      - 'ES_JAVA_OPTS=-Xms512m -Xmx512m'    # 16 GB box: bump to 1g if search is heavy
+      - 'JDK_JAVA_OPTIONS=-XX:-UseContainerSupport'
+    ulimits:
+      memlock: { soft: -1, hard: -1 }
+      nofile: { soft: 65536, hard: 65536 }
+    volumes:
+      - 'qubix-elasticsearch:/var/lib/elasticsearch/data'
+    networks: [qubix]
+    # Requires host: sysctl -w vm.max_map_count=262144 (see DEPLOY-HOSTINGER.md Phase 2).
+
+  # --- Caddy: the ONLY public service. Auto Let's Encrypt for jjbags.in + www. ---
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    ports:
+      - '80:80'
+      - '443:443'
+    volumes:
+      - './docker/caddy/Caddyfile:/etc/caddy/Caddyfile:ro'
+      - 'caddy-data:/data'        # persists issued certificates
+      - 'caddy-config:/config'
+    networks: [qubix]
+    depends_on: [app]
+
+networks:
+  qubix:
+    driver: bridge
+
+volumes:
+  qubix-mysql: {}
+  qubix-redis: {}
+  qubix-elasticsearch: {}
+  caddy-data: {}
+  caddy-config: {}

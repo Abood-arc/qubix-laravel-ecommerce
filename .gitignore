@@ -45,3 +45,9 @@ yarn-error.log
 .specstory/
 
 .specstory/
+
+qubix-dump*.sql
+storage-public*.tar.gz
+.env.production
+CLAUDE.md
+DEPLOY-HOSTINGER.md

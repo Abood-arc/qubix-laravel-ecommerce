@@ -34,7 +34,9 @@ RUN apt-get update && apt-get upgrade -y \
 RUN userdel -r ubuntu 2>/dev/null || true \
     && groupadd --force -g ${WWWGROUP} sail \
     && useradd -ms /bin/bash --no-user-group -g ${WWWGROUP} -u 1337 sail \
-    && git config --global --add safe.directory /var/www/html
+    && git config --global --add safe.directory /var/www/html \
+    && mkdir -p /var/www/html/storage/app/public \
+    && chown -R sail:sail /var/www/html/storage
 
 COPY vendor/laravel/sail/runtimes/8.3/start-container /usr/local/bin/start-container
 COPY docker/8.3/supervisord.conf /etc/supervisor/conf.d/supervisord.conf

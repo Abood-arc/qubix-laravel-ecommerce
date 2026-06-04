@@ -1,0 +1,21 @@
+# Caddy reverse proxy for Qubix (production).
+# Auto-obtains + renews Let's Encrypt certificates. Requires:
+#   - jjbags.in        A -> 147.93.110.245
+#   - www.jjbags.in    A -> 147.93.110.245   (must resolve before the cert can be issued)
+#   - ports 80 and 443 reachable (ufw allows them)
+# Caddy reaches the app over the Docker network at app:80 (the container's artisan serve).
+
+# Redirect www -> apex (canonical host)
+www.jjbags.in {
+	redir https://jjbags.in{uri} permanent
+}
+
+jjbags.in {
+	encode gzip zstd
+	reverse_proxy app:80
+
+	# Optional: uncomment to send Caddy access logs to stdout (docker logs)
+	# log {
+	# 	output stdout
+	# }
+}
