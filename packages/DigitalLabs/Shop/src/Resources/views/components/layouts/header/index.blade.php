@@ -6,7 +6,7 @@
 
 <header
     id="main-header"
-    class="sticky top-0 z-30 border-b border-[#2f6f60] bg-[#1f5f4f]"
+    class="sticky top-0 z-10 border-b border-[#2f6f60] bg-[#1f5f4f]"
 >
     <v-header-switcher>
         <!-- Desktop Header Shimmer -->
