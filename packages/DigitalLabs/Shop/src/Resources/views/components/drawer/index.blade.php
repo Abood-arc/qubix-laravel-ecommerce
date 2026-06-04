@@ -63,34 +63,37 @@
                 <slot name="toggle"></slot>
             </div>
 
-            <!-- Overlay -->
-            <transition
-                tag="div"
-                name="drawer-overlay"
-                enter-class="duration-300 ease-out"
-                enter-from-class="opacity-0"
-                enter-to-class="opacity-100"
-                leave-class="duration-200 ease-in"
-                leave-from-class="opacity-100"
-                leave-to-class="opacity-0"
-            >
-                <div
-                    class="fixed inset-0 z-20 bg-gray-500 bg-opacity-50 transition-opacity"
-                    v-show="isOpen"
-                ></div>
-            </transition>
+            <!-- Overlay — teleported to <body> so it escapes any stacking context -->
+            <teleport to="body">
+                <transition
+                    tag="div"
+                    name="drawer-overlay"
+                    enter-class="duration-300 ease-out"
+                    enter-from-class="opacity-0"
+                    enter-to-class="opacity-100"
+                    leave-class="duration-200 ease-in"
+                    leave-from-class="opacity-100"
+                    leave-to-class="opacity-0"
+                >
+                    <div
+                        class="fixed inset-0 z-[999] bg-gray-500 bg-opacity-50 transition-opacity"
+                        v-show="isOpen"
+                    ></div>
+                </transition>
+            </teleport>
 
-            <!-- Content -->
-            <transition
-                tag="div"
-                name="drawer"
-                :enter-from-class="enterFromLeaveToClasses"
-                enter-active-class="transform transition duration-200 ease-in-out"
-                enter-to-class="translate-x-0"
-                leave-from-class="translate-x-0"
-                leave-active-class="transform transition duration-200 ease-in-out"
-                :leave-to-class="enterFromLeaveToClasses"
-            >
+            <!-- Content — teleported to <body> so it escapes any stacking context -->
+            <teleport to="body">
+                <transition
+                    tag="div"
+                    name="drawer"
+                    :enter-from-class="enterFromLeaveToClasses"
+                    enter-active-class="transform transition duration-200 ease-in-out"
+                    enter-to-class="translate-x-0"
+                    leave-from-class="translate-x-0"
+                    leave-active-class="transform transition duration-200 ease-in-out"
+                    :leave-to-class="enterFromLeaveToClasses"
+                >
                 <div
                     class="fixed z-[1000] overflow-hidden max-md:!w-full"
                     :class="[positionClasses, panelSurfaceClass]"
@@ -121,7 +124,8 @@
                         </div>
                     </div>
                 </div>
-            </transition>
+                </transition>
+            </teleport>
         </div>
     </script>
 
