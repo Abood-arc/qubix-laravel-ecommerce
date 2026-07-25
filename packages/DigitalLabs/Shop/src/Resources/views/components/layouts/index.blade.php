@@ -147,6 +147,8 @@
 
         @stack('scripts')
 
+        <script src="https://cdn.zanderio.ai/widget/loader.js" data-id="wdg_bDmt03WxuJCWokGT6wmHrX1O" defer></script>
+
         {!! view_render_event('qubix.shop.layout.vue-app-mount.before') !!}
         <script>
             /**
