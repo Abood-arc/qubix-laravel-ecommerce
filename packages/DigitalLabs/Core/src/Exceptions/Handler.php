@@ -57,7 +57,7 @@ class Handler extends BaseHandler
         $this->renderable(function (HttpException $exception, Request $request) {
             $namespace = $request->is(config('app.admin_url').'/*') ? 'admin' : 'shop';
 
-            $errorCode = in_array($exception->getStatusCode(), [401, 403, 404, 503])
+            $errorCode = in_array($exception->getStatusCode(), [401, 403, 404, 429, 503])
                 ? $exception->getStatusCode()
                 : 500;
 
