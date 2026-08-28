@@ -14,6 +14,16 @@ class Acl
     protected array $items = [];
 
     /**
+     * Memoised acl config.
+     */
+    protected ?array $aclConfigCache = null;
+
+    /**
+     * Memoised route => key map.
+     */
+    protected ?Collection $rolesCache = null;
+
+    /**
      * Add a new acl item.
      */
     public function addItem(AclItem $aclItem): void
@@ -39,32 +49,34 @@ class Acl
      */
     private function getAclConfig(): array
     {
-        static $aclConfig;
-
-        if ($aclConfig) {
-            return $aclConfig;
+        if ($this->aclConfigCache) {
+            return $this->aclConfigCache;
         }
 
-        $aclConfig = config('acl');
+        $this->aclConfigCache = config('acl');
 
-        return $aclConfig;
+        return $this->aclConfigCache;
     }
 
     /**
-     * Get all roles.
+     * Get all roles as a route => permission-key map.
+     *
+     * An entry's `route` may be a single route name or an array of them, so
+     * one permission can cover both its read screen and its mutating routes
+     * without creating a second permission key.
      */
     public function getRoles(): Collection
     {
-        static $roles;
-
-        if ($roles) {
-            return $roles;
+        if ($this->rolesCache) {
+            return $this->rolesCache;
         }
 
-        $roles = collect($this->getAclConfig())
-            ->mapWithKeys(fn ($role) => [$role['route'] => $role['key']]);
+        $this->rolesCache = collect($this->getAclConfig())
+            ->flatMap(fn ($role) => collect(Arr::wrap($role['route']))
+                ->mapWithKeys(fn ($route) => [$route => $role['key']])
+            );
 
-        return $roles;
+        return $this->rolesCache;
     }
 
     /**
@@ -86,7 +98,7 @@ class Acl
             $this->addItem(new AclItem(
                 key: $aclItemKey,
                 name: trans($aclItem['name']),
-                route: $aclItem['route'],
+                route: Arr::first(Arr::wrap($aclItem['route'])),
                 sort: $aclItem['sort'],
                 children: $subAclItems,
             ));
@@ -107,7 +119,7 @@ class Acl
                 return new AclItem(
                     key: $subAclItem['key'],
                     name: trans($subAclItem['name']),
-                    route: $subAclItem['route'],
+                    route: Arr::first(Arr::wrap($subAclItem['route'])),
                     sort: $subAclItem['sort'],
                     children: $subSubAclItems,
                 );
