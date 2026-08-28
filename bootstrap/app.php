@@ -41,7 +41,17 @@ return Application::configure(basePath: dirname(__DIR__))
          */
         $middleware->replaceInGroup('web', BaseEncryptCookies::class, EncryptCookies::class);
 
-        $middleware->trustProxies('*');
+        /**
+         * Trust only private-range proxies (Caddy on the internal Docker network).
+         * Trusting '*' would make Symfony return the leftmost, client-supplied
+         * X-Forwarded-For entry, letting anyone spoof their IP and bypass the
+         * rate limiters defined in AppServiceProvider.
+         */
+        $middleware->trustProxies(at: [
+            '10.0.0.0/8',
+            '172.16.0.0/12',
+            '192.168.0.0/16',
+        ]);
     })
     ->withSchedule(function (Schedule $schedule) {
         //
