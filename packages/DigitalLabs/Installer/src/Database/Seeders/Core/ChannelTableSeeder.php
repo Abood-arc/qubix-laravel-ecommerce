@@ -30,7 +30,10 @@ class ChannelTableSeeder extends Seeder
                 'id' => 1,
                 'code' => 'default',
                 'theme' => 'default',
-                'hostname' => config('app.url'),
+                // Left unset rather than frozen from config('app.url') at install time — Core::getCurrentChannel()
+                // already falls back to the first channel when no hostname matches the request, so an install-time
+                // dev URL never needs to be baked in here.
+                'hostname' => null,
                 'root_category_id' => 1,
                 'default_locale_id' => 1,
                 'base_currency_id' => 1,
@@ -50,9 +53,9 @@ class ChannelTableSeeder extends Seeder
                     'locale' => $locale,
                     'name' => trans('installer::app.seeders.core.channels.name', [], $locale),
                     'home_seo' => json_encode([
-                        'meta_title' => trans('installer::app.seeders.core.channels.meta-title', [], $locale),
-                        'meta_description' => trans('installer::app.seeders.core.channels.meta-description', [], $locale),
-                        'meta_keywords' => trans('installer::app.seeders.core.channels.meta-keywords', [], $locale),
+                        'meta_title' => trans('installer::app.seeders.core.channels.meta-title', ['app_name' => config('app.name')], $locale),
+                        'meta_description' => trans('installer::app.seeders.core.channels.meta-description', ['app_name' => config('app.name')], $locale),
+                        'meta_keywords' => trans('installer::app.seeders.core.channels.meta-keywords', ['app_name' => config('app.name')], $locale),
                     ]),
                 ],
             ]);

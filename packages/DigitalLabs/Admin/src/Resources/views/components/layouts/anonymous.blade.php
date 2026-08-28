@@ -27,11 +27,6 @@
         name="base-url"
         content="{{ url()->to('/') }}"
     >
-    <meta 
-        name="generator" 
-        content="Qubix"
-    >
-
     @stack('meta')
 
     @qubixVite(['src/Resources/assets/css/app.css', 'src/Resources/assets/js/app.js'])
@@ -74,7 +69,6 @@
 <body>
     {!! view_render_event('qubix.admin.layout.body.before') !!}
 
-    <!-- Built With Qubix -->
     <div id="app">
         <!-- Flash Message Blade Component -->
         <x-admin::flash-group />

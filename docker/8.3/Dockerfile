@@ -42,6 +42,7 @@ COPY vendor/laravel/sail/runtimes/8.3/start-container /usr/local/bin/start-conta
 COPY docker/8.3/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 COPY docker/8.3/run-vite-shop.sh /usr/local/bin/run-vite-shop.sh
 COPY vendor/laravel/sail/runtimes/8.3/php.ini /etc/php/8.3/cli/conf.d/99-sail.ini
+COPY docker/php/php.ini /etc/php/8.3/cli/conf.d/999-qubix.ini
 RUN chmod +x /usr/local/bin/start-container /usr/local/bin/run-vite-shop.sh
 
 EXPOSE 80/tcp

@@ -17,6 +17,14 @@
                 <img
                     class="h-8 w-auto sm:h-10"
                     src="{{ Storage::url($logo) }}"
+                    id="logo-image"
+                    alt="{{ config('app.name') }}"
+                />
+            @elseif ($logo = core()->getCurrentChannel()->logo_url)
+                <img
+                    class="h-8 w-auto sm:h-10"
+                    src="{{ $logo }}"
+                    id="logo-image"
                     alt="{{ config('app.name') }}"
                 />
             @else
@@ -151,6 +159,12 @@
             @if ($logo = core()->getConfigData('general.design.admin_logo.logo_image'))
                 <img
                     src="{{ Storage::url($logo) }}"
+                    class="h-8 w-auto sm:h-10"
+                    alt="{{ config('app.name') }}"
+                />
+            @elseif ($logo = core()->getCurrentChannel()->logo_url)
+                <img
+                    src="{{ $logo }}"
                     class="h-8 w-auto sm:h-10"
                     alt="{{ config('app.name') }}"
                 />
@@ -720,6 +734,12 @@
         });
     </script>
 
+    @php
+        $configuredLogo = core()->getConfigData('general.design.admin_logo.logo_image')
+            ? Storage::url(core()->getConfigData('general.design.admin_logo.logo_image'))
+            : core()->getCurrentChannel()->logo_url;
+    @endphp
+
     <script
         type="text/x-template"
         id="v-dark-template"
@@ -741,9 +761,9 @@
                 return {
                     isDarkMode: {{ request()->cookie('dark_mode') ?? 0 }},
 
-                    logo: "{{ qubix_asset('images/logo.svg') }}",
+                    logo: "{{ $configuredLogo ?? qubix_asset('images/logo.svg') }}",
 
-                    dark_logo: "{{ qubix_asset('images/dark-logo.svg') }}",
+                    dark_logo: "{{ $configuredLogo ?? qubix_asset('images/dark-logo.svg') }}",
                 };
             },
 

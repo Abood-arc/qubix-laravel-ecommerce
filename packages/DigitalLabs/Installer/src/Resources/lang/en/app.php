@@ -129,9 +129,9 @@ return [
 
         'core' => [
             'channels' => [
-                'meta-description' => 'Demo store meta description',
-                'meta-keywords' => 'Demo store meta keyword',
-                'meta-title' => 'Demo store',
+                'meta-description' => 'Welcome to :app_name, your online store.',
+                'meta-keywords' => '',
+                'meta-title' => ':app_name',
                 'name' => 'Default',
             ],
 

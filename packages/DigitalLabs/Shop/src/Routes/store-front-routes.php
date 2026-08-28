@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Storage;
 use DigitalLabs\Shop\Http\Controllers\BookingProductController;
 use DigitalLabs\Shop\Http\Controllers\CompareController;
 use DigitalLabs\Shop\Http\Controllers\HomeController;
@@ -9,6 +10,26 @@ use DigitalLabs\Shop\Http\Controllers\ProductController;
 use DigitalLabs\Shop\Http\Controllers\ProductsCategoriesProxyController;
 use DigitalLabs\Shop\Http\Controllers\SearchController;
 use DigitalLabs\Shop\Http\Controllers\SubscriptionController;
+
+/**
+ * Sitemap files. The Sitemap package writes generated files to the "public" disk
+ * (storage/app/public), which only resolves under /storage/... by default. A sitemap
+ * hosted there can't list root-level product/category URLs per the sitemap protocol's
+ * location scoping rule, so serve the stored files at the domain root instead.
+ */
+Route::get('sitemap.xml', function () {
+    abort_unless(Storage::disk('public')->exists('sitemap.xml'), 404);
+
+    return Storage::disk('public')->response('sitemap.xml');
+})->name('shop.sitemap.index');
+
+Route::get('sitemap-{filename}.xml', function (string $filename) {
+    $path = "sitemap-{$filename}.xml";
+
+    abort_unless(Storage::disk('public')->exists($path), 404);
+
+    return Storage::disk('public')->response($path);
+})->where('filename', '[\w\-]+')->name('shop.sitemap.file');
 
 /**
  * CMS pages.

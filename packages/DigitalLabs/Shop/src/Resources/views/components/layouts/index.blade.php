@@ -39,11 +39,6 @@
             name="currency"
             content="{{ core()->getCurrentCurrency()->toJson() }}"
         >
-        <meta 
-            name="generator" 
-            content="Qubix"
-        >
-
         @stack('meta')
 
         <link
@@ -102,7 +97,6 @@
             Skip to main content
         </a>
 
-        <!-- Built With Qubix -->
         <div id="app">
             <!-- Flash Message Blade Component -->
             <x-shop::flash-group />

@@ -13,9 +13,15 @@
                     src="{{ Storage::url($logo) }}"
                     alt="{{ config('app.name') }}"
                 />
+            @elseif ($logo = core()->getCurrentChannel()->logo_url)
+                <img
+                    class="h-10 w-[110px]"
+                    src="{{ $logo }}"
+                    alt="{{ config('app.name') }}"
+                />
             @else
                 <img
-                    class="w-max" 
+                    class="w-max"
                     src="{{ qubix_asset('images/logo.svg') }}"
                     alt="{{ config('app.name') }}"
                 />
@@ -73,8 +79,8 @@
             <!-- Powered By -->
             <div class="text-sm font-normal">
                 @lang('admin::app.users.forget-password.create.powered-by-description', [
-                    'qubix' => '<a class="text-blue-600 hover:underline" href="https://qubix.com/en/">Qubix</a>',
-                    'digitalLabs' => '<a class="text-blue-600 hover:underline" href="https://digitalLabs.com/">DigitalLabs</a>',
+                    'qubix' => 'Qubix',
+                    'digitalLabs' => '<a class="text-blue-600 hover:underline" href="https://www.digital-labs.ai/">DigitalLabs</a>',
                 ])
             </div>
         </div>

@@ -33,11 +33,6 @@
         name="currency"
         content="{{ core()->getBaseCurrency()->toJson() }}"
     >
-    <meta 
-        name="generator" 
-        content="Qubix"
-    >
-
     @stack('meta')
 
     @qubixVite(['src/Resources/assets/css/app.css', 'src/Resources/assets/js/app.js'])
@@ -86,7 +81,6 @@
 <body class="h-full dark:bg-gray-950">
     {!! view_render_event('qubix.admin.layout.body.before') !!}
 
-    <!-- Built With Qubix -->
     <div
         id="app"
         class="h-full"
@@ -131,8 +125,8 @@
                 <div class="mt-auto">
                     <div class="border-t bg-white py-2 text-center text-xs sm:text-sm dark:border-gray-800 dark:bg-gray-900 dark:text-white">
                         @lang('admin::app.components.layouts.powered-by.description', [
-                            'qubix' => '<a class="text-blue-600 hover:underline dark:text-darkBlue" href="https://qubix.com/en/">Qubix</a>',
-                            'digitalLabs' => '<a class="text-blue-600 hover:underline dark:text-darkBlue" href="https://digitalLabs.com/">DigitalLabs</a>',
+                            'qubix' => 'Qubix',
+                            'digitalLabs' => '<a class="text-blue-600 hover:underline dark:text-darkBlue" href="https://www.digital-labs.ai/">DigitalLabs</a>',
                         ])
                     </div>
                 </div>

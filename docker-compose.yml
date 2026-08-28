@@ -23,6 +23,9 @@ services:
             IGNITION_LOCAL_SITES_PATH: '${PWD}'
         volumes:
             - '.:/var/www/html'
+            # Dev-only opcache tuning (see docker/php/opcache-dev.ini) — deliberately NOT
+            # baked into the Dockerfile image so it never reaches the production build.
+            - './docker/php/opcache-dev.ini:/etc/php/8.3/cli/conf.d/9999-qubix-opcache-dev.ini:ro'
         networks:
             - sail
         depends_on:
