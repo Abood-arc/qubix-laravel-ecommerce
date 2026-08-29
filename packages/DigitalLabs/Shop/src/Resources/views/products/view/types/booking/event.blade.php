@@ -47,7 +47,7 @@
                         class="text-[#6E6E6E] max-sm:text-sm"
                     >
                         <p
-                            class="mr-1.5 line-through"
+                            class="line-through ltr:mr-1.5 rtl:ml-1.5"
                             v-text="ticket.original_formatted_price"
                         >
                         </p>

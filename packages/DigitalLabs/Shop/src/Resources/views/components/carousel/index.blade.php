@@ -144,7 +144,7 @@
             <!-- Prev arrow -->
             <button
                 v-if="images.length >= 2"
-                class="icon-arrow-left absolute left-4 top-1/2 z-[2] -translate-y-1/2 hidden rounded-full border border-white/70 bg-white/80 p-3 text-2xl font-bold text-zinc-900 opacity-80 shadow-md backdrop-blur transition-all hover:bg-white hover:opacity-100 focus:outline-none md:inline-block"
+                class="icon-arrow-left absolute top-1/2 z-[2] -translate-y-1/2 hidden rounded-full border border-white/70 bg-white/80 p-3 text-2xl font-bold text-zinc-900 opacity-80 shadow-md backdrop-blur transition-all hover:bg-white hover:opacity-100 focus:outline-none md:inline-block ltr:left-4 rtl:right-4"
                 aria-label="@lang('shop::components.carousel.previous')"
                 @click="navigate('prev')"
             ></button>
@@ -152,7 +152,7 @@
             <!-- Next arrow -->
             <button
                 v-if="images.length >= 2"
-                class="icon-arrow-right absolute right-4 top-1/2 z-[2] -translate-y-1/2 hidden rounded-full border border-white/70 bg-white/80 p-3 text-2xl font-bold text-zinc-900 opacity-80 shadow-md backdrop-blur transition-all hover:bg-white hover:opacity-100 focus:outline-none md:inline-block"
+                class="icon-arrow-right absolute top-1/2 z-[2] -translate-y-1/2 hidden rounded-full border border-white/70 bg-white/80 p-3 text-2xl font-bold text-zinc-900 opacity-80 shadow-md backdrop-blur transition-all hover:bg-white hover:opacity-100 focus:outline-none md:inline-block ltr:right-4 rtl:left-4"
                 aria-label="@lang('shop::components.carousel.next')"
                 @click="navigate('next')"
             ></button>
@@ -160,7 +160,7 @@
             <!-- Pagination dots -->
             <div
                 v-if="images.length >= 2"
-                class="absolute bottom-5 left-0 z-[2] flex w-full justify-center max-md:bottom-3.5 max-sm:bottom-2.5"
+                class="absolute bottom-5 z-[2] flex w-full justify-center max-md:bottom-3.5 max-sm:bottom-2.5 ltr:left-0 rtl:right-0"
             >
                 <button
                     v-for="(image, index) in images"

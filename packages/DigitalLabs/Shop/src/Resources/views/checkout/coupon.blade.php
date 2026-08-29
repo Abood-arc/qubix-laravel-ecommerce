@@ -11,7 +11,7 @@
         type="text/x-template"
         id="v-coupon-template"
     >
-        <div class="flex justify-between text-right">
+        <div class="flex justify-between ltr:text-right rtl:text-left">
             <p class="text-base max-md:font-normal max-sm:text-sm">
                 @{{ cart.coupon_code ? "@lang('shop::app.checkout.coupon.applied')" : "@lang('shop::app.checkout.coupon.discount')" }}
             </p>
@@ -72,7 +72,7 @@
                                 <!-- Coupon Form Action Container -->
                                 <div class="flex flex-wrap items-center gap-4 max-md:justify-between">
                                     <div class="flex items-center gap-4 max-md:block">
-                                        <p class="text-sm font-medium text-zinc-500 max-md:text-left max-md:text-xs">
+                                        <p class="text-sm font-medium text-zinc-500 max-md:text-xs max-md:ltr:text-left max-md:rtl:text-right">
                                             @lang('shop::app.checkout.coupon.subtotal')
                                         </p>
 

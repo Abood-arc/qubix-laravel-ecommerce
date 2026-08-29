@@ -145,7 +145,7 @@
                             </div>
 
                             <label 
-                                class="block cursor-pointer p-4 pl-12"
+                                class="block cursor-pointer p-4 ltr:pl-12 rtl:pr-12"
                                 :for="rate.method"
                             >
                                 <p class="text-2xl font-semibold max-md:text-lg">

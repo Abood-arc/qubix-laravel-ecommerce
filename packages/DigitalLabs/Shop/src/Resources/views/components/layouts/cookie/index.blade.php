@@ -98,10 +98,10 @@
                         'center': 'left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 max-w-[420px]',
                         'top-center': 'top-4 left-1/2 -translate-x-1/2 max-w-[420px]',
                         'bottom-center': 'bottom-4 left-1/2 -translate-x-1/2 max-w-[420px]',
-                        'bottom-right': 'bottom-4 right-0 sm:max-w-[420px]',
-                        'bottom-left': 'bottom-4 left-0 sm:max-w-[420px]',
-                        'top-right': 'top-4 right-0 sm:max-w-[420px]',
-                        'top-left': 'top-4 left-0 sm:max-w-[420px]',
+                        'bottom-right': 'bottom-4 ltr:right-0 rtl:left-0 sm:max-w-[420px]',
+                        'bottom-left': 'bottom-4 ltr:left-0 rtl:right-0 sm:max-w-[420px]',
+                        'top-right': 'top-4 ltr:right-0 rtl:left-0 sm:max-w-[420px]',
+                        'top-left': 'top-4 ltr:left-0 rtl:right-0 sm:max-w-[420px]',
                     };
 
                     return positionClasses[position] || positionClasses['center'];

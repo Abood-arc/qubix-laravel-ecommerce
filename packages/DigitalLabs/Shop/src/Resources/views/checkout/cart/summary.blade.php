@@ -24,7 +24,7 @@
         {!! view_render_event('qubix.shop.checkout.cart.summary.sub_total.before') !!}
 
         <template v-if="displayTax.subtotal == 'including_tax'">
-            <div class="flex justify-between text-right">
+            <div class="flex justify-between ltr:text-right rtl:text-left">
                 <p class="text-base max-sm:text-sm">
                     @lang('shop::app.checkout.cart.summary.sub-total')
                 </p>
@@ -36,7 +36,7 @@
         </template>
 
         <template v-else-if="displayTax.subtotal == 'both'">
-            <div class="flex justify-between text-right">
+            <div class="flex justify-between ltr:text-right rtl:text-left">
                 <p class="text-base max-sm:text-sm">
                     @lang('shop::app.checkout.cart.summary.sub-total-excl-tax')
                 </p>
@@ -46,7 +46,7 @@
                 </p>
             </div>
             
-            <div class="flex justify-between text-right">
+            <div class="flex justify-between ltr:text-right rtl:text-left">
                 <p class="text-base max-sm:text-sm">
                     @lang('shop::app.checkout.cart.summary.sub-total-incl-tax')
                 </p>
@@ -58,7 +58,7 @@
         </template>
 
         <template v-else>
-            <div class="flex justify-between text-right">
+            <div class="flex justify-between ltr:text-right rtl:text-left">
                 <p class="text-base max-sm:text-sm">
                     @lang('shop::app.checkout.cart.summary.sub-total')
                 </p>
@@ -75,7 +75,7 @@
         {!! view_render_event('qubix.shop.checkout.cart.summary.discount_amount.before') !!}
 
         <div 
-            class="flex justify-between text-right"
+            class="flex justify-between ltr:text-right rtl:text-left"
             v-if="cart.discount_amount && parseFloat(cart.discount_amount) > 0"
         >
             <p class="text-base max-sm:text-sm">
@@ -100,7 +100,7 @@
         {!! view_render_event('qubix.shop.checkout.onepage.summary.delivery_charges.before') !!}
         
         <template v-if="displayTax.shipping == 'including_tax'">
-            <div class="flex justify-between text-right">
+            <div class="flex justify-between ltr:text-right rtl:text-left">
                 <p class="text-base max-sm:text-sm">
                     @lang('shop::app.checkout.cart.summary.delivery-charges')
                 </p>
@@ -112,7 +112,7 @@
         </template>
 
         <template v-else-if="displayTax.shipping == 'both'">
-            <div class="flex justify-between text-right">
+            <div class="flex justify-between ltr:text-right rtl:text-left">
                 <p class="text-base max-sm:text-sm">
                     @lang('shop::app.checkout.cart.summary.delivery-charges-excl-tax')
                 </p>
@@ -122,7 +122,7 @@
                 </p>
             </div>
             
-            <div class="flex justify-between text-right">
+            <div class="flex justify-between ltr:text-right rtl:text-left">
                 <p class="text-base max-sm:text-sm">
                     @lang('shop::app.checkout.cart.summary.delivery-charges-incl-tax')
                 </p>
@@ -134,7 +134,7 @@
         </template>
 
         <template v-else>
-            <div class="flex justify-between text-right">
+            <div class="flex justify-between ltr:text-right rtl:text-left">
                 <p class="text-base max-sm:text-sm">
                     @lang('shop::app.checkout.cart.summary.delivery-charges')
                 </p>
@@ -151,7 +151,7 @@
         {!! view_render_event('qubix.shop.checkout.cart.summary.tax.before') !!}
 
         <div
-            class="flex justify-between text-right"
+            class="flex justify-between ltr:text-right rtl:text-left"
             v-if="! cart.tax_total"
         >
             <p class="text-base max-md:font-normal max-sm:text-sm">
@@ -168,7 +168,7 @@
             v-else
         >
             <div
-                class="flex cursor-pointer justify-between text-right"
+                class="flex cursor-pointer justify-between ltr:text-right rtl:text-left"
                 @click="cart.show_taxes = ! cart.show_taxes"
             >
                 <p class="text-base max-md:font-normal max-sm:text-sm">
@@ -190,7 +190,7 @@
                 v-show="cart.show_taxes"
             >
                 <div
-                    class="flex justify-between gap-1 text-right"
+                    class="flex justify-between gap-1 ltr:text-right rtl:text-left"
                     v-for="(amount, index) in cart.applied_taxes"
                 >
                     <p class="text-sm max-md:text-sm max-md:font-normal">
@@ -209,7 +209,7 @@
         <!-- Cart Grand Total -->
         {!! view_render_event('qubix.shop.checkout.cart.summary.grand_total.before') !!}
 
-        <div class="flex justify-between text-right">
+        <div class="flex justify-between ltr:text-right rtl:text-left">
             <p class="text-lg font-semibold max-md:text-base">
                 @lang('shop::app.checkout.cart.summary.grand-total')
             </p>

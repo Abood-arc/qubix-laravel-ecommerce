@@ -140,7 +140,7 @@
                                 <!-- Actions -->
                                 <p v-if="available.actions.length">
                                     <span
-                                        class="float-right cursor-pointer rounded-md p-1.5 text-2xl transition-all hover:bg-gray-200"
+                                        class="cursor-pointer rounded-md p-1.5 text-2xl transition-all hover:bg-gray-200 ltr:float-right rtl:float-left"
                                         :class="action.icon"
                                         v-for="action in record.actions"
                                         @click="performAction(action)"

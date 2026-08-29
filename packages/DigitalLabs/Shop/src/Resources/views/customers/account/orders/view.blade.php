@@ -104,7 +104,7 @@
 
                         <!-- Order Details -->
                         <div class="relative mt-8 overflow-x-auto rounded-xl border">
-                            <table class="w-full text-left">
+                            <table class="w-full ltr:text-left rtl:text-right">
                                 <thead class="border-b border-zinc-200 bg-zinc-100 text-sm text-black">
                                     <tr class="[&>*]:font-medium [&>*]:px-6 [&>*]:py-4">
                                         <th scope="col">
@@ -545,7 +545,7 @@
                                                     @lang('shop::app.customers.account.orders.view.information.item-status')
                                                 </span>
 
-                                                <div class="[&>*]:text-right">
+                                                <div class="ltr:[&>*]:text-right rtl:[&>*]:text-left">
                                                     @if($item->qty_ordered)
                                                         <p>
                                                             @lang('shop::app.customers.account.orders.view.information.ordered-item', ['qty_ordered' => $item->qty_ordered])
@@ -585,7 +585,7 @@
                                                     @lang('shop::app.customers.account.orders.view.information.price'):
                                                 </span>
 
-                                                <span class="[&>*]:text-right">
+                                                <span class="ltr:[&>*]:text-right rtl:[&>*]:text-left">
                                                     @if (core()->getConfigData('sales.taxes.sales.display_prices') == 'including_tax')
                                                         {{ core()->formatPrice($item->price_incl_tax, $order->order_currency_code) }}
                                                     @elseif (core()->getConfigData('sales.taxes.sales.display_prices') == 'both')
@@ -612,7 +612,7 @@
                                                     @lang('shop::app.customers.account.orders.view.invoices.subtotal'):
                                                 </span>
 
-                                                <span class="[&>*]:text-right">
+                                                <span class="ltr:[&>*]:text-right rtl:[&>*]:text-left">
                                                     @if (core()->getConfigData('sales.taxes.sales.display_prices') == 'including_tax')
                                                         {{ core()->formatPrice($item->total_incl_tax, $order->order_currency_code) }}
                                                     @elseif (core()->getConfigData('sales.taxes.sales.display_prices') == 'both')
@@ -949,7 +949,7 @@
                                                                 @lang('shop::app.customers.account.orders.view.invoices.price'):
                                                             </span>
 
-                                                            <span class="[&>*]:text-right">
+                                                            <span class="ltr:[&>*]:text-right rtl:[&>*]:text-left">
                                                                 @if (core()->getConfigData('sales.taxes.sales.display_prices') == 'including_tax')
                                                                     {{ core()->formatPrice($item->price_incl_tax, $order->order_currency_code) }}
                                                                 @elseif (core()->getConfigData('sales.taxes.sales.display_prices') == 'both')
@@ -987,7 +987,7 @@
                                                                 @lang('shop::app.customers.account.orders.view.invoices.subtotal'):
                                                             </span>
 
-                                                            <span class="[&>*]:text-right">
+                                                            <span class="ltr:[&>*]:text-right rtl:[&>*]:text-left">
                                                                 @if (core()->getConfigData('sales.taxes.sales.display_prices') == 'including_tax')
                                                                     {{ core()->formatPrice($item->total_incl_tax, $order->order_currency_code) }}
                                                                 @elseif (core()->getConfigData('sales.taxes.sales.display_prices') == 'both')
@@ -1170,7 +1170,7 @@
                                     </div>
 
                                     <div class="relative mt-8 overflow-x-auto rounded-xl border">
-                                        <table class="w-full text-left">
+                                        <table class="w-full ltr:text-left rtl:text-right">
                                             <thead class="border-b border-zinc-200 bg-zinc-100 text-sm text-black">
                                                 <tr class="[&>*]:font-medium [&>*]:px-6 [&>*]:py-4">
                                                     <th scope="col">
@@ -1429,7 +1429,7 @@
 
                                     <!-- Table of Contents -->
                                     <div class="relative mt-5 overflow-x-auto rounded-xl border max-md:hidden">
-                                        <table class="w-full text-left text-sm">
+                                        <table class="w-full ltr:text-left rtl:text-right text-sm">
                                             <thead class="border-b border-zinc-200 bg-zinc-100 text-sm text-black">
                                                 <tr class="[&>*]:font-medium [&>*]:px-6 [&>*]:py-4">
                                                     <th scope="col">
@@ -1556,7 +1556,7 @@
                                 </div>
 
                                 <div class="relative mt-8 overflow-x-auto rounded-xl border">
-                                    <table class="w-full text-left text-sm">
+                                    <table class="w-full ltr:text-left rtl:text-right text-sm">
                                         <thead class="border-b border-zinc-200 bg-zinc-100 text-sm text-black">
                                             <tr class="[&>*]:font-medium [&>*]:px-6 [&>*]:py-4">
                                                 <th scope="col">
@@ -1702,7 +1702,7 @@
                                                             @lang('shop::app.customers.account.orders.view.refunds.price'):
                                                         </span>
 
-                                                        <span class="[&>*]:text-right">
+                                                        <span class="ltr:[&>*]:text-right rtl:[&>*]:text-left">
                                                             @if (core()->getConfigData('sales.taxes.sales.display_prices') == 'including_tax')
                                                                 {{ core()->formatPrice($item->price_incl_tax, $order->order_currency_code) }}
                                                             @elseif (core()->getConfigData('sales.taxes.sales.display_prices') == 'both')
@@ -1740,7 +1740,7 @@
                                                             @lang('shop::app.customers.account.orders.view.refunds.subtotal'):
                                                         </span>
 
-                                                        <span class="[&>*]:text-right">
+                                                        <span class="ltr:[&>*]:text-right rtl:[&>*]:text-left">
                                                             @if (core()->getConfigData('sales.taxes.sales.display_prices') == 'including_tax')
                                                                 {{ core()->formatPrice($item->total_incl_tax, $order->order_currency_code) }}
                                                             @elseif (core()->getConfigData('sales.taxes.sales.display_prices') == 'both')

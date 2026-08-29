@@ -52,7 +52,7 @@
                 <span class="icon-cancel text-2xl hidden group-open:inline-block"></span>
             </summary>
 
-            <div class="absolute right-0 top-full z-[70] mt-3 w-[min(92vw,980px)] rounded-2xl border border-white/25 bg-[#1f5f4f] p-3 shadow-[0_14px_32px_rgba(10,30,24,0.35)]">
+            <div class="absolute top-full z-[70] mt-3 w-[min(92vw,980px)] rounded-2xl border border-white/25 bg-[#1f5f4f] p-3 shadow-[0_14px_32px_rgba(10,30,24,0.35)] ltr:right-0 rtl:left-0">
                 <form
                     action="{{ route('shop.search.index') }}"
                     class="relative flex items-center text-white [&_label.icon-camera]:text-white [&_button.icon-camera]:text-white [&_svg]:text-white [&_svg.animate-spin]:!text-white [&_label.absolute]:!top-1/2 [&_label.absolute]:-translate-y-1/2 [&_label.absolute]:mt-0 [&_button.absolute]:!top-1/2 [&_button.absolute]:-translate-y-1/2 [&_button.absolute]:mt-0"

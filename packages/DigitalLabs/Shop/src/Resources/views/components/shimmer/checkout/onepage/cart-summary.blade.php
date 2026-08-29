@@ -35,22 +35,22 @@
 
     <!-- Price Summary -->
     <div class="mb-8 mt-6 grid gap-4">
-        <div class="flex justify-between text-right">
+        <div class="flex justify-between ltr:text-right rtl:text-left">
             <p class="shimmer h-6 w-1/5"></p>
             <p class="shimmer h-6 w-1/4"></p>
         </div>
         
-        <div class="flex justify-between text-right">
+        <div class="flex justify-between ltr:text-right rtl:text-left">
             <p class="shimmer h-6 w-1/5"></p>
             <p class="shimmer h-6 w-[15%]"></p>
         </div>
 
-        <div class="flex justify-between text-right">
+        <div class="flex justify-between ltr:text-right rtl:text-left">
             <p class="shimmer h-6 w-1/4"></p>
             <p class="shimmer h-6 w-[35%]"></p>
         </div>
 
-        <div class="flex justify-between text-right">
+        <div class="flex justify-between ltr:text-right rtl:text-left">
             <p class="shimmer h-6 w-[35%]"></p>
             <p class="shimmer h-[38px] w-[30%]"></p>
         </div>

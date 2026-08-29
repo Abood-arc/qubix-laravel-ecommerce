@@ -79,7 +79,7 @@
                                 {!! view_render_event('qubix.shop.customers.account.compare.attribute_name.before') !!}
 
                                 <div class="min-w-[304px] max-w-full max-md:grid max-md:h-full max-md:min-w-40 max-md:items-center max-md:bg-gray-200 max-sm:min-w-[110px]">
-                                    <p class="text-sm font-medium max-md:pl-4">
+                                    <p class="text-sm font-medium max-md:ltr:pl-4 max-md:rtl:pr-4">
                                         @{{ attribute.name ?? attribute.admin_name }}
                                     </p>
                                 </div>
@@ -109,7 +109,7 @@
                                 v-else
                             >
                                 <div class="min-w-[304px] max-w-full max-md:grid max-md:h-full max-md:min-w-40 max-md:items-center max-md:bg-gray-200 max-sm:min-w-[110px]">
-                                    <p class="text-sm font-medium max-md:pl-4">
+                                    <p class="text-sm font-medium max-md:ltr:pl-4 max-md:rtl:pr-4">
                                         @{{ attribute.name ?? attribute.admin_name }}
                                     </p>
                                 </div>

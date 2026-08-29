@@ -69,25 +69,25 @@
         @endif
 
         <div class="mt-6 grid gap-4">
-            <div class="flex justify-between text-right">
+            <div class="flex justify-between ltr:text-right rtl:text-left">
                 <p class="shimmer h-6 w-[30%]"></p>
 
                 <p class="shimmer h-6 w-[30%]"></p>
             </div>
 
-            <div class="flex justify-between text-right">
+            <div class="flex justify-between ltr:text-right rtl:text-left">
                 <p class="shimmer h-6 w-2/5"></p>
 
                 <p class="shimmer h-6 w-[36%]"></p>
             </div>
 
-            <div class="flex justify-between text-right">
+            <div class="flex justify-between ltr:text-right rtl:text-left">
                 <p class="shimmer h-6 w-[30%]"></p>
 
                 <p class="shimmer h-6 w-[31%]"></p>
             </div>
 
-            <div class="flex justify-between text-right">
+            <div class="flex justify-between ltr:text-right rtl:text-left">
                 <p class="shimmer h-6 w-[33%]"></p>
                 
                 <p class="shimmer h-6 w-[38%]"></p>

@@ -62,7 +62,7 @@
 
             <!-- Pagination -->
             <div
-                class="absolute bottom-3 left-0 flex w-full justify-center max-sm:bottom-2.5"
+                class="absolute bottom-3 flex w-full justify-center max-sm:bottom-2.5 ltr:left-0 rtl:right-0"
                 v-if="options?.length > 1"
             >
                 <div

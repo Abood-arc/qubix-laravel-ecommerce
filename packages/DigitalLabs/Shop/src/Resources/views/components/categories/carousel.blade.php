@@ -24,7 +24,7 @@
                     class="scrollbar-hide flex gap-10 overflow-auto scroll-smooth max-lg:gap-4"
                 >
                     <div
-                        class="grid min-w-[120px] max-w-[120px] grid-cols-1 justify-items-center gap-4 font-medium max-md:min-w-20 max-md:max-w-20 max-md:gap-2.5 max-md:first:ml-4 max-sm:min-w-[60px] max-sm:max-w-[60px] max-sm:gap-1.5"
+                        class="grid min-w-[120px] max-w-[120px] grid-cols-1 justify-items-center gap-4 font-medium max-md:min-w-20 max-md:max-w-20 max-md:gap-2.5 max-md:first:ltr:ml-4 max-md:first:rtl:mr-4 max-sm:min-w-[60px] max-sm:max-w-[60px] max-sm:gap-1.5"
                         v-for="category in categories"
                     >
                         <a
@@ -61,7 +61,7 @@
                 </div>
 
                 <span
-                    class="icon-arrow-left-stylish absolute -left-10 top-9 flex h-[50px] w-[50px] cursor-pointer items-center justify-center rounded-full border border-black bg-white text-2xl transition hover:bg-black hover:text-white max-lg:-left-7 max-md:hidden"
+                    class="absolute top-9 flex h-[50px] w-[50px] cursor-pointer items-center justify-center rounded-full border border-black bg-white text-2xl transition hover:bg-black hover:text-white max-md:hidden ltr:icon-arrow-left-stylish ltr:-left-10 max-lg:ltr:-left-7 rtl:icon-arrow-right-stylish rtl:-right-10 max-lg:rtl:-right-7"
                     role="button"
                     aria-label="@lang('shop::components.carousel.previous')"
                     tabindex="0"
@@ -70,7 +70,7 @@
                 </span>
 
                 <span
-                    class="icon-arrow-right-stylish absolute -right-6 top-9 flex h-[50px] w-[50px] cursor-pointer items-center justify-center rounded-full border border-black bg-white text-2xl transition hover:bg-black hover:text-white max-lg:-right-7 max-md:hidden"
+                    class="absolute top-9 flex h-[50px] w-[50px] cursor-pointer items-center justify-center rounded-full border border-black bg-white text-2xl transition hover:bg-black hover:text-white max-md:hidden ltr:icon-arrow-right-stylish ltr:-right-6 max-lg:ltr:-right-7 rtl:icon-arrow-left-stylish rtl:-left-6 max-lg:rtl:-left-7"
                     role="button"
                     aria-label="@lang('shop::components.carousel.next')"
                     tabindex="0"
@@ -130,13 +130,17 @@
                 swipeLeft() {
                     const container = this.$refs.swiperContainer;
 
-                    container.scrollLeft -= this.offset;
+                    const isRtl = document.documentElement.dir === 'rtl';
+
+                    container.scrollLeft += isRtl ? this.offset : -this.offset;
                 },
 
                 swipeRight() {
                     const container = this.$refs.swiperContainer;
 
-                    container.scrollLeft += this.offset;
+                    const isRtl = document.documentElement.dir === 'rtl';
+
+                    container.scrollLeft += isRtl ? -this.offset : this.offset;
                 },
             },
         });

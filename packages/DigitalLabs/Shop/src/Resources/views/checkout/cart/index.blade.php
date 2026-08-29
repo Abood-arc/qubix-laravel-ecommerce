@@ -313,7 +313,7 @@
                                         </div>
                                     </div>
 
-                                    <div class="text-right max-md:hidden">
+                                    <div class="max-md:hidden ltr:text-right rtl:text-left">
                                         {!! view_render_event('qubix.shop.checkout.cart.total.before') !!}
 
                                         <template v-if="displayTax.prices == 'including_tax'">
