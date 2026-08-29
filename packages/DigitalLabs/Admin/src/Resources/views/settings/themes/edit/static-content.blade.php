@@ -226,7 +226,7 @@
             data() {
                 return {
                     options:{
-                        html: `{!! $theme->translate($currentLocale->code)['options']['html'] ?? '' !!}`,
+                        html: @json($theme->translate($currentLocale->code)['options']['html'] ?? ''),
                     },
 
                     cursorPointer: {},
@@ -315,7 +315,7 @@
             data() {
                 return {
                     options:{
-                        css: `{!! $theme->translate($currentLocale->code)['options']['css'] ?? '' !!}`,
+                        css: @json($theme->translate($currentLocale->code)['options']['css'] ?? ''),
                     }
                 };
             },
