@@ -138,12 +138,17 @@ return [
     ], [
         'key' => 'catalog.products.edit',
         'name' => 'admin::app.acl.edit',
-        'route' => 'admin.catalog.products.edit',
+        'route' => [
+            'admin.catalog.products.edit',
+            'admin.catalog.products.update',
+            'admin.catalog.products.mass_update',
+            'admin.catalog.products.update_inventories',
+        ],
         'sort' => 3,
     ], [
         'key' => 'catalog.products.delete',
         'name' => 'admin::app.acl.delete',
-        'route' => 'admin.catalog.products.delete',
+        'route' => ['admin.catalog.products.delete', 'admin.catalog.products.mass_delete'],
         'sort' => 4,
     ], [
         'key' => 'catalog.categories',
@@ -158,7 +163,7 @@ return [
     ], [
         'key' => 'catalog.categories.edit',
         'name' => 'admin::app.acl.edit',
-        'route' => 'admin.catalog.categories.edit',
+        'route' => ['admin.catalog.categories.edit', 'admin.catalog.categories.update'],
         'sort' => 2,
     ], [
         'key' => 'catalog.categories.delete',
@@ -178,7 +183,7 @@ return [
     ], [
         'key' => 'catalog.attributes.edit',
         'name' => 'admin::app.acl.edit',
-        'route' => 'admin.catalog.attributes.edit',
+        'route' => ['admin.catalog.attributes.edit', 'admin.catalog.attributes.update'],
         'sort' => 2,
     ], [
         'key' => 'catalog.attributes.delete',
@@ -733,7 +738,7 @@ return [
     ], [
         'key' => 'settings.users.edit',
         'name' => 'admin::app.acl.edit',
-        'route' => 'admin.settings.users.edit',
+        'route' => ['admin.settings.users.edit', 'admin.settings.users.update'],
         'sort' => 2,
     ], [
         'key' => 'settings.users.delete',
@@ -753,7 +758,7 @@ return [
     ], [
         'key' => 'settings.roles.edit',
         'name' => 'admin::app.acl.edit',
-        'route' => 'admin.settings.roles.edit',
+        'route' => ['admin.settings.roles.edit', 'admin.settings.roles.update'],
         'sort' => 2,
     ], [
         'key' => 'settings.roles.delete',
