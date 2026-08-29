@@ -224,7 +224,7 @@
                                 <x-admin::form.control-group.control
                                     type="text"
                                     name="url"
-                                    rules="required|url"
+                                    rules="required|regex:^(?:https?:\/)?\/\S*$"
                                     :label="trans('admin::app.settings.themes.edit.url')"
                                     :placeholder="trans('admin::app.settings.themes.edit.url')"
                                 />
