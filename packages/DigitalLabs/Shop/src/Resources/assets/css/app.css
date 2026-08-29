@@ -376,6 +376,10 @@ img.lazy {
         @apply box-border font-poppins;
     }
 
+    [dir="rtl"] * {
+        @apply font-arabic;
+    }
+
     .scrollbar-hide::-webkit-scrollbar {
         display: none;
     }
