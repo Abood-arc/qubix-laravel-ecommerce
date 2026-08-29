@@ -136,19 +136,27 @@
                 swipeLeft() {
                     const container = this.$refs.swiperContainer;
 
-                    container.scrollLeft -= this.offset;
+                    const isRtl = document.documentElement.dir === 'rtl';
+
+                    container.scrollLeft += isRtl ? this.offset : -this.offset;
                 },
 
                 swipeRight() {
                     const container = this.$refs.swiperContainer;
 
+                    const isRtl = document.documentElement.dir === 'rtl';
+
                     // Check if scroll reaches the end
-                    if (container.scrollLeft + container.clientWidth >= container.scrollWidth) {
+                    const atEnd = isRtl
+                        ? Math.abs(container.scrollLeft) + container.clientWidth >= container.scrollWidth
+                        : container.scrollLeft + container.clientWidth >= container.scrollWidth;
+
+                    if (atEnd) {
                         // Reset scroll to the beginning
                         container.scrollLeft = 0;
                     } else {
-                        // Scroll to the right
-                        container.scrollLeft += this.offset;
+                        // Scroll further in the reading direction
+                        container.scrollLeft += isRtl ? -this.offset : this.offset;
                     }
                 },
             },
