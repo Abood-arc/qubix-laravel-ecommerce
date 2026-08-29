@@ -21,7 +21,12 @@ class CategoryTreeResource extends JsonResource
             'slug' => $this->slug,
             'url' => $this->url,
             'status' => $this->status,
-            'children' => self::collection($this->children),
+            // Plain nested arrays — the storefront's category menu (v-desktop-category / v-mobile-category)
+            // expects iterable child nodes, not JsonResource { "data": [...] } wrappers.
+            'children' => $this->children
+                ->map(fn ($child) => (new self($child))->toArray($request))
+                ->values()
+                ->all(),
         ];
     }
 }
