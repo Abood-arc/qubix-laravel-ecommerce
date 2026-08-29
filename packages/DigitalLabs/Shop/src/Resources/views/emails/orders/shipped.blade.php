@@ -124,7 +124,7 @@
             <thead>
                 <tr style="color: #121A26;border-top: 1px solid #CBD5E1;border-bottom: 1px solid #CBD5E1;">
                     @foreach (['sku', 'name', 'price', 'qty'] as $item)
-                        <th style="text-align: left;padding: 15px">
+                        <th style="text-align: {{ core()->getCurrentLocale()->direction === 'rtl' ? 'right' : 'left' }};padding: 15px">
                             @lang('shop::app.emails.orders.' . $item)
                         </th>
                     @endforeach
@@ -134,11 +134,11 @@
             <tbody style="font-size: 16px;font-weight: 400;color: #384860;">
                 @foreach ($shipment->items as $item)
                     <tr style="vertical-align: text-top;">
-                        <td style="text-align: left;padding: 15px">
+                        <td style="text-align: {{ core()->getCurrentLocale()->direction === 'rtl' ? 'right' : 'left' }};padding: 15px">
                             {{ $item->sku }}
                         </td>
 
-                        <td style="text-align: left;padding: 15px">
+                        <td style="text-align: {{ core()->getCurrentLocale()->direction === 'rtl' ? 'right' : 'left' }};padding: 15px">
                             {{ $item->name }}
 
                             @if (isset($item->additional['attributes']))
@@ -167,7 +167,7 @@
                             @endif
                         </td>
 
-                        <td style="display: flex;flex-direction: column;text-align: left;padding: 15px">
+                        <td style="display: flex;flex-direction: column;text-align: {{ core()->getCurrentLocale()->direction === 'rtl' ? 'right' : 'left' }};padding: 15px">
                             @if (core()->getConfigData('sales.taxes.sales.display_prices') == 'including_tax')
                                 {{ core()->formatPrice($item->price_incl_tax, $shipment->order->order_currency_code) }}
                             @elseif (core()->getConfigData('sales.taxes.sales.display_prices') == 'both')
@@ -185,7 +185,7 @@
                             @endif
                         </td>
 
-                        <td style="text-align: left;padding: 15px">
+                        <td style="text-align: {{ core()->getCurrentLocale()->direction === 'rtl' ? 'right' : 'left' }};padding: 15px">
                             {{ $item->qty }}
                         </td>
                     </tr>

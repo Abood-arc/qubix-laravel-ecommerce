@@ -103,7 +103,7 @@
             <thead>
                 <tr style="color: #121A26;border-top: 1px solid #CBD5E1;border-bottom: 1px solid #CBD5E1;">
                     @foreach (['sku', 'name', 'price', 'qty'] as $item)
-                        <th style="text-align: left;padding: 15px">
+                        <th style="text-align: {{ core()->getCurrentLocale()->direction === 'rtl' ? 'right' : 'left' }};padding: 15px">
                             @lang('shop::app.emails.orders.' . $item)
                         </th>
                     @endforeach
@@ -113,11 +113,11 @@
             <tbody style="font-size: 16px;font-weight: 400;color: #384860;">
                 @foreach ($order->items as $item)
                     <tr style="vertical-align: text-top;">
-                        <td style="text-align: left;padding: 15px">
+                        <td style="text-align: {{ core()->getCurrentLocale()->direction === 'rtl' ? 'right' : 'left' }};padding: 15px">
                             {{ $item->getTypeInstance()->getOrderedItem($item)->sku }}
                         </td>
 
-                        <td style="text-align: left;padding: 15px">
+                        <td style="text-align: {{ core()->getCurrentLocale()->direction === 'rtl' ? 'right' : 'left' }};padding: 15px">
                             {{ $item->name }}
 
                             @if (isset($item->additional['attributes']))
@@ -146,7 +146,7 @@
                             @endif
                         </td>
 
-                        <td style="display: flex;flex-direction: column;text-align: left;padding: 15px">
+                        <td style="display: flex;flex-direction: column;text-align: {{ core()->getCurrentLocale()->direction === 'rtl' ? 'right' : 'left' }};padding: 15px">
                             @if (core()->getConfigData('sales.taxes.sales.display_prices') == 'including_tax')
                                 {{ core()->formatPrice($item->price_incl_tax, $order->order_currency_code) }}
                             @elseif (core()->getConfigData('sales.taxes.sales.display_prices') == 'both')
@@ -164,7 +164,7 @@
                             @endif
                         </td>
 
-                        <td style="text-align: left;padding: 15px">
+                        <td style="text-align: {{ core()->getCurrentLocale()->direction === 'rtl' ? 'right' : 'left' }};padding: 15px">
                             {{ $item->qty_ordered }}
                         </td>
                     </tr>
@@ -180,7 +180,7 @@
                     @lang('shop::app.emails.orders.subtotal')
                 </span>
 
-                <span style="text-align: right;">
+                <span style="text-align: {{ core()->getCurrentLocale()->direction === 'rtl' ? 'left' : 'right' }};">
                     {{ core()->formatPrice($order->sub_total, $order->order_currency_code_incl_tax) }}
                 </span>
             </div>
@@ -190,7 +190,7 @@
                     @lang('shop::app.emails.orders.subtotal-excl-tax')
                 </span>
 
-                <span style="text-align: right;">
+                <span style="text-align: {{ core()->getCurrentLocale()->direction === 'rtl' ? 'left' : 'right' }};">
                     {{ core()->formatPrice($order->sub_total, $order->order_currency_code) }}
                 </span>
             </div>
@@ -200,7 +200,7 @@
                     @lang('shop::app.emails.orders.subtotal-incl-tax')
                 </span>
 
-                <span style="text-align: right;">
+                <span style="text-align: {{ core()->getCurrentLocale()->direction === 'rtl' ? 'left' : 'right' }};">
                     {{ core()->formatPrice($order->sub_total, $order->order_currency_code_incl_tax) }}
                 </span>
             </div>
@@ -210,7 +210,7 @@
                     @lang('shop::app.emails.orders.subtotal')
                 </span>
 
-                <span style="text-align: right;">
+                <span style="text-align: {{ core()->getCurrentLocale()->direction === 'rtl' ? 'left' : 'right' }};">
                     {{ core()->formatPrice($order->sub_total, $order->order_currency_code) }}
                 </span>
             </div>
@@ -223,7 +223,7 @@
                         @lang('shop::app.emails.orders.shipping-handling')
                     </span>
 
-                    <span style="text-align: right;">
+                    <span style="text-align: {{ core()->getCurrentLocale()->direction === 'rtl' ? 'left' : 'right' }};">
                         {{ core()->formatPrice($order->shipping_amount_incl_tax, $order->order_currency_code) }}
                     </span>
                 </div>
@@ -233,7 +233,7 @@
                         @lang('shop::app.emails.orders.shipping-handling-excl-tax')
                     </span>
 
-                    <span style="text-align: right;">
+                    <span style="text-align: {{ core()->getCurrentLocale()->direction === 'rtl' ? 'left' : 'right' }};">
                         {{ core()->formatPrice($order->shipping_amount, $order->order_currency_code) }}
                     </span>
                 </div>
@@ -243,7 +243,7 @@
                         @lang('shop::app.emails.orders.shipping-handling-incl-tax')
                     </span>
 
-                    <span style="text-align: right;">
+                    <span style="text-align: {{ core()->getCurrentLocale()->direction === 'rtl' ? 'left' : 'right' }};">
                         {{ core()->formatPrice($order->shipping_amount_incl_tax, $order->order_currency_code) }}
                     </span>
                 </div>
@@ -253,7 +253,7 @@
                         @lang('shop::app.emails.orders.shipping-handling')
                     </span>
 
-                    <span style="text-align: right;">
+                    <span style="text-align: {{ core()->getCurrentLocale()->direction === 'rtl' ? 'left' : 'right' }};">
                         {{ core()->formatPrice($order->shipping_amount, $order->order_currency_code) }}
                     </span>
                 </div>
@@ -265,7 +265,7 @@
                 @lang('shop::app.emails.orders.tax')
             </span>
 
-            <span style="text-align: right;">
+            <span style="text-align: {{ core()->getCurrentLocale()->direction === 'rtl' ? 'left' : 'right' }};">
                 {{ core()->formatPrice($order->tax_amount, $order->order_currency_code) }}
             </span>
         </div>
@@ -276,7 +276,7 @@
                     @lang('shop::app.emails.orders.discount')
                 </span>
 
-                <span style="text-align: right;">
+                <span style="text-align: {{ core()->getCurrentLocale()->direction === 'rtl' ? 'left' : 'right' }};">
                     {{ core()->formatPrice($order->discount_amount, $order->order_currency_code) }}
                 </span>
             </div>
@@ -287,7 +287,7 @@
                 @lang('shop::app.emails.orders.grand-total')
             </span>
 
-            <span style="text-align: right;">
+            <span style="text-align: {{ core()->getCurrentLocale()->direction === 'rtl' ? 'left' : 'right' }};">
                 {{ core()->formatPrice($order->grand_total, $order->order_currency_code) }}
             </span>
         </div>
