@@ -6,7 +6,7 @@
 >
 
 <head>
-    <title>{{ $title ? $title.' | '.config('app.name') : config('app.name') }}</title>
+    <title>{{ $title ? $title.' | JJ Bags' : 'JJ Bags' }}</title>
 
     <meta charset="UTF-8">
 
