@@ -14,7 +14,7 @@
 
         {!! view_render_event('qubix.shop.layout.head.before') !!}
 
-        <title>{{ $title ? (request()->routeIs('shop.home.index') ? $title : $title.' | JJ Bags') : 'JJ Bags' }}</title>
+        <title>{{ $title ? (\Illuminate\Support\Str::startsWith($title, 'JJ Bags') ? $title : $title.' | JJ Bags') : 'JJ Bags' }}</title>
 
         <meta charset="UTF-8">
 
