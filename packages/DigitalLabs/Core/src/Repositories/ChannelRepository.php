@@ -2,8 +2,8 @@
 
 namespace DigitalLabs\Core\Repositories;
 
-use Illuminate\Support\Facades\Storage;
 use DigitalLabs\Core\Eloquent\Repository;
+use Illuminate\Support\Facades\Storage;
 
 class ChannelRepository extends Repository
 {
