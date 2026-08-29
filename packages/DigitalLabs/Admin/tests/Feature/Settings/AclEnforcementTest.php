@@ -44,3 +44,36 @@ it('should forbid a restricted admin from updating a role', function () {
 
     expect($restrictedRole->fresh()->permission_type)->toBe('custom');
 });
+
+it('should deny a restricted admin on an unmapped mutating admin route', function () {
+    $restrictedRole = Role::factory()->create([
+        'permission_type' => 'custom',
+        'permissions' => ['dashboard'],
+    ]);
+
+    $this->actingAs(AdminModel::factory()->create(['role_id' => $restrictedRole->id]), 'admin');
+
+    \Illuminate\Support\Facades\Route::put('admin/__acl_probe', fn () => 'reached')
+        ->name('admin.__acl_probe')
+        ->middleware(['web', 'admin']);
+
+    putJson('/admin/__acl_probe')->assertForbidden();
+});
+
+it('should not treat an array-valued route as a nested acl item when building the permission tree', function () {
+    config()->set('acl', [
+        [
+            'key' => 'catalog',
+            'name' => 'admin::app.acl.catalog',
+            'route' => ['admin.catalog.products.index', 'admin.catalog.products.update'],
+            'sort' => 1,
+        ],
+    ]);
+
+    $acl = new \DigitalLabs\Core\Acl;
+
+    $items = $acl->getItems();
+
+    expect($items)->toHaveCount(1)
+        ->and($items->first()->children)->toHaveCount(0);
+});

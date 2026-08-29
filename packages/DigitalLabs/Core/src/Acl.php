@@ -2,9 +2,9 @@
 
 namespace DigitalLabs\Core;
 
+use DigitalLabs\Core\Acl\AclItem;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
-use DigitalLabs\Core\Acl\AclItem;
 
 class Acl
 {
@@ -112,7 +112,7 @@ class Acl
     {
         return collect($aclItem)
             ->sortBy('sort')
-            ->filter(fn ($value) => is_array($value))
+            ->filter(fn ($value) => is_array($value) && array_key_exists('key', $value))
             ->map(function ($subAclItem) {
                 $subSubAclItems = $this->processSubAclItems($subAclItem);
 

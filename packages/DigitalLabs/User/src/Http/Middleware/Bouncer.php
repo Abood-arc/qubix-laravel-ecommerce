@@ -74,14 +74,25 @@ class Bouncer
     /**
      * Check authorization.
      *
-     * @return null
+     * Read requests stay permissive when a route has no ACL entry, matching
+     * the historical behaviour. State-changing requests fail closed instead:
+     * an unmapped POST/PUT/PATCH/DELETE is denied rather than silently
+     * allowed, so a newly added route cannot reopen the escalation hole.
      */
     public function checkIfAuthorized()
     {
         $roles = acl()->getRoles();
 
-        if (isset($roles[Route::currentRouteName()])) {
-            bouncer()->allow($roles[Route::currentRouteName()]);
+        $routeName = Route::currentRouteName();
+
+        if (isset($roles[$routeName])) {
+            bouncer()->allow($roles[$routeName]);
+
+            return;
+        }
+
+        if (! request()->isMethodSafe()) {
+            abort(403, 'This action is unauthorized.');
         }
     }
 }
