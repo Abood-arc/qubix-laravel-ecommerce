@@ -1,17 +1,17 @@
 {
-  "_veeValidate-mYcwtPXf.js": {
-    "file": "assets/veeValidate-mYcwtPXf.js",
+  "_veeValidate-CfwTb8gJ.js": {
+    "file": "assets/veeValidate-CfwTb8gJ.js",
     "name": "veeValidate",
     "imports": [
-      "_vue-ZnRn8rKq.js"
+      "_vue-BkQ1seYI.js"
     ]
   },
-  "_vendor-Cgxn4227.js": {
-    "file": "assets/vendor-Cgxn4227.js",
+  "_vendor-DdbqHu3R.js": {
+    "file": "assets/vendor-DdbqHu3R.js",
     "name": "vendor"
   },
-  "_vue-ZnRn8rKq.js": {
-    "file": "assets/vue-ZnRn8rKq.js",
+  "_vue-BkQ1seYI.js": {
+    "file": "assets/vue-BkQ1seYI.js",
     "name": "vue"
   },
   "src/Resources/assets/css/app.css": {
@@ -52,7 +52,7 @@
     "src": "src/Resources/assets/images/large-product-placeholder.webp"
   },
   "src/Resources/assets/images/logo.svg": {
-    "file": "assets/logo-CZWQQgOF.svg",
+    "file": "assets/logo-CzwojJIX.svg",
     "src": "src/Resources/assets/images/logo.svg"
   },
   "src/Resources/assets/images/medium-product-placeholder.webp": {
@@ -96,14 +96,14 @@
     "src": "src/Resources/assets/images/wishlist.png"
   },
   "src/Resources/assets/js/app.js": {
-    "file": "assets/app-CxVoxDfO.js",
+    "file": "assets/app--HtoX3dV.js",
     "name": "app",
     "src": "src/Resources/assets/js/app.js",
     "isEntry": true,
     "imports": [
-      "_vue-ZnRn8rKq.js",
-      "_vendor-Cgxn4227.js",
-      "_veeValidate-mYcwtPXf.js"
+      "_vue-BkQ1seYI.js",
+      "_vendor-DdbqHu3R.js",
+      "_veeValidate-CfwTb8gJ.js"
     ],
     "css": [
       "assets/app-DsP8OK1c.css"
