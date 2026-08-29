@@ -14,7 +14,7 @@
 
         {!! view_render_event('qubix.shop.layout.head.before') !!}
 
-        <title>{{ $title ?? '' }}</title>
+        <title>{{ $title ? $title.' | '.config('app.name') : config('app.name') }}</title>
 
         <meta charset="UTF-8">
 

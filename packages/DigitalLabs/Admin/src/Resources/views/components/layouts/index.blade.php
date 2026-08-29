@@ -9,7 +9,7 @@
 <head>
     {!! view_render_event('qubix.admin.layout.head.before') !!}
 
-    <title>{{ $title ?? '' }}</title>
+    <title>{{ $title ? $title.' | '.config('app.name') : config('app.name') }}</title>
 
     <meta charset="UTF-8">
 
