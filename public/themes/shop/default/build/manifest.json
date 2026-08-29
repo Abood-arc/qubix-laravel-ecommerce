@@ -96,7 +96,7 @@
     "src": "src/Resources/assets/images/wishlist.png"
   },
   "src/Resources/assets/js/app.js": {
-    "file": "assets/app--HtoX3dV.js",
+    "file": "assets/app-C9xZqmjc.js",
     "name": "app",
     "src": "src/Resources/assets/js/app.js",
     "isEntry": true,
@@ -106,7 +106,7 @@
       "_veeValidate-CfwTb8gJ.js"
     ],
     "css": [
-      "assets/app-DsP8OK1c.css"
+      "assets/app-BsM4JrO0.css"
     ]
   }
 }

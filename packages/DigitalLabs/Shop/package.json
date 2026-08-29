@@ -21,6 +21,7 @@
     "@vee-validate/rules": "^4.9.1",
     "@vitejs/plugin-vue": "^4.2.3",
     "dotenv": "^16.4.7",
+    "flatpickr": "^4.6.13",
     "mitt": "^3.0.0",
     "playwright": "^1.48.1",
     "readline-sync": "^1.4.10",
