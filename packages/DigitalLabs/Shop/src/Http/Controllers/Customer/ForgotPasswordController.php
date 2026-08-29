@@ -2,10 +2,10 @@
 
 namespace DigitalLabs\Shop\Http\Controllers\Customer;
 
-use Illuminate\Foundation\Auth\SendsPasswordResetEmails;
-use Illuminate\Support\Facades\Password;
 use DigitalLabs\Shop\Http\Controllers\Controller;
 use DigitalLabs\Shop\Http\Requests\Customer\ForgotPasswordRequest;
+use Illuminate\Foundation\Auth\SendsPasswordResetEmails;
+use Illuminate\Support\Facades\Password;
 
 class ForgotPasswordController extends Controller
 {
@@ -31,7 +31,10 @@ class ForgotPasswordController extends Controller
         $request->validated();
 
         try {
-            $response = $this->broker()->sendResetLink($request->only(['email']));
+            $response = $this->broker()->sendResetLink([
+                'email' => $request->input('email'),
+                'channel_id' => core()->getCurrentChannel()->id,
+            ]);
 
             if ($response == Password::RESET_LINK_SENT) {
                 session()->flash('success', trans('shop::app.customers.forgot-password.reset-link-sent'));
