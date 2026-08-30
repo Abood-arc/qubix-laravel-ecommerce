@@ -1,0 +1,123 @@
+# Qubix — Saudi Arabia storefront. STANDALONE (never layered over docker-compose.prod.yml).
+#
+# Usage on the VPS, from /opt/qubix-sa:
+#   docker compose -p qubix-sa -f docker-compose.sa.yml build
+#   docker compose -p qubix-sa -f docker-compose.sa.yml up -d
+#
+# The `qubix` network is EXTERNAL and shared with the India stack so the shared
+# Caddy can reach this app. Only app-sa joins it; the datastores stay private on
+# `qubix-sa`.
+#
+# The service is named `app-sa`, NOT `app`. Compose aliases services by name on
+# shared networks — a second `app` would collide with India's in DNS and Caddy
+# would round-robin between the two sites.
+services:
+  app-sa:
+    build:
+      context: .
+      dockerfile: docker/8.3/Dockerfile
+      args:
+        WWWGROUP: '1000'
+    image: qubix/app-sa
+    restart: unless-stopped
+    extra_hosts:
+      - 'host.docker.internal:host-gateway'
+    environment:
+      WWWUSER: '1337'
+      LARAVEL_SAIL: 1
+      SAIL_VITE_SHOP: 'false'
+      XDEBUG_MODE: 'off'
+    volumes:
+      - '.:/var/www/html'
+    networks: [qubix-sa, qubix]
+    depends_on:
+      mysql: { condition: service_healthy }
+      redis: { condition: service_started }
+      elasticsearch: { condition: service_started }
+
+  queue-sa:
+    image: qubix/app-sa
+    restart: unless-stopped
+    command: php artisan queue:work redis --sleep=3 --tries=3 --max-time=3600
+    environment:
+      WWWUSER: '1337'
+      LARAVEL_SAIL: 1
+      SAIL_VITE_SHOP: 'false'
+    volumes:
+      - '.:/var/www/html'
+    networks: [qubix-sa]
+    depends_on: [app-sa, redis, mysql]
+
+  scheduler-sa:
+    image: qubix/app-sa
+    restart: unless-stopped
+    command: php artisan schedule:work
+    environment:
+      WWWUSER: '1337'
+      LARAVEL_SAIL: 1
+      SAIL_VITE_SHOP: 'false'
+    volumes:
+      - '.:/var/www/html'
+    networks: [qubix-sa]
+    depends_on: [app-sa, mysql]
+
+  # --- MySQL (internal only; import via `docker compose -p qubix-sa exec -T mysql ...`) ---
+  mysql:
+    image: 'mysql/mysql-server:8.0'
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: '${DB_PASSWORD}'
+      MYSQL_ROOT_HOST: '%'
+      MYSQL_DATABASE: '${DB_DATABASE}'
+      MYSQL_USER: '${DB_USERNAME}'
+      MYSQL_PASSWORD: '${DB_PASSWORD}'
+    volumes:
+      - 'qubix-sa-mysql:/var/lib/mysql'
+    networks: [qubix-sa]
+    healthcheck:
+      test: ['CMD', 'mysqladmin', 'ping', '-p${DB_PASSWORD}']
+      retries: 3
+      timeout: 5s
+
+  # --- Redis (cache / session / queue; internal only) ---
+  redis:
+    image: 'redis:alpine'
+    restart: unless-stopped
+    volumes:
+      - 'qubix-sa-redis:/data'
+    networks: [qubix-sa]
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      retries: 3
+      timeout: 5s
+
+  # --- Elasticsearch 7.17 (search; internal only) — same image/tag as India, on
+  #     purpose: divergent ES versions between the two stores would produce
+  #     behaviour differences that are miserable to debug. ---
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.17.0
+    restart: unless-stopped
+    environment:
+      - xpack.security.enabled=false
+      - discovery.type=single-node
+      - bootstrap.memory_lock=true
+      - 'ES_JAVA_OPTS=-Xms512m -Xmx512m'
+      - 'JDK_JAVA_OPTIONS=-XX:-UseContainerSupport'
+    ulimits:
+      memlock: { soft: -1, hard: -1 }
+      nofile: { soft: 65536, hard: 65536 }
+    volumes:
+      - 'qubix-sa-elasticsearch:/var/lib/elasticsearch/data'
+    networks: [qubix-sa]
+    # Requires host: sysctl -w vm.max_map_count=262144 (see DEPLOY-HOSTINGER.md Phase 2).
+
+networks:
+  qubix-sa:
+    driver: bridge
+  qubix:
+    external: true
+
+volumes:
+  qubix-sa-mysql: {}
+  qubix-sa-redis: {}
+  qubix-sa-elasticsearch: {}
