@@ -119,7 +119,18 @@ services:
       - '80:80'
       - '443:443'
     volumes:
-      - './docker/caddy/Caddyfile:/etc/caddy/Caddyfile:ro'
+      # Mount the directory, not the single file. A single-file bind mount pins
+      # to that file's inode at container-creation time; `git pull` replaces
+      # files via atomic rename (a new inode each time), so a long-lived
+      # container's mount silently keeps serving whatever the file was when it
+      # was created, forever - `caddy reload` re-reads that same stale inode
+      # and reports success having changed nothing. A directory-level mount
+      # doesn't have this problem: the directory's own inode stays stable, and
+      # a replaced file inside it resolves fresh on every lookup. Verified
+      # 2026-08-31: the running container had been serving a 3-month-stale
+      # Caddyfile this way. Only docker/caddy/Caddyfile lives in this
+      # directory, so mounting the whole thing exposes nothing extra.
+      - './docker/caddy:/etc/caddy:ro'
       - 'caddy-data:/data'        # persists issued certificates
       - 'caddy-config:/config'
     networks: [qubix]
