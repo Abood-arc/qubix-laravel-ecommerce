@@ -4094,11 +4094,102 @@
       "default_name":"San Pedro",
       "country_id":176
    },
-   {  
+   {
       "id":586,
       "country_code":"PY",
       "code":"PY-12",
       "default_name":"\u00d1eembuc\u00fa",
       "country_id":176
+   },
+   {
+      "id":587,
+      "country_code":"SA",
+      "code":"SA-01",
+      "default_name":"Riyadh",
+      "country_id":191
+   },
+   {
+      "id":588,
+      "country_code":"SA",
+      "code":"SA-02",
+      "default_name":"Makkah",
+      "country_id":191
+   },
+   {
+      "id":589,
+      "country_code":"SA",
+      "code":"SA-03",
+      "default_name":"Al Madinah",
+      "country_id":191
+   },
+   {
+      "id":590,
+      "country_code":"SA",
+      "code":"SA-04",
+      "default_name":"Ash Sharqiyah (Eastern Province)",
+      "country_id":191
+   },
+   {
+      "id":591,
+      "country_code":"SA",
+      "code":"SA-05",
+      "default_name":"Al Qassim",
+      "country_id":191
+   },
+   {
+      "id":592,
+      "country_code":"SA",
+      "code":"SA-06",
+      "default_name":"Ha'il",
+      "country_id":191
+   },
+   {
+      "id":593,
+      "country_code":"SA",
+      "code":"SA-07",
+      "default_name":"Tabuk",
+      "country_id":191
+   },
+   {
+      "id":594,
+      "country_code":"SA",
+      "code":"SA-08",
+      "default_name":"Al Hudud ash Shamaliyah (Northern Borders)",
+      "country_id":191
+   },
+   {
+      "id":595,
+      "country_code":"SA",
+      "code":"SA-09",
+      "default_name":"Jazan",
+      "country_id":191
+   },
+   {
+      "id":596,
+      "country_code":"SA",
+      "code":"SA-10",
+      "default_name":"Najran",
+      "country_id":191
+   },
+   {
+      "id":597,
+      "country_code":"SA",
+      "code":"SA-11",
+      "default_name":"Al Bahah",
+      "country_id":191
+   },
+   {
+      "id":598,
+      "country_code":"SA",
+      "code":"SA-12",
+      "default_name":"Al Jawf",
+      "country_id":191
+   },
+   {
+      "id":599,
+      "country_code":"SA",
+      "code":"SA-14",
+      "default_name":"'Asir",
+      "country_id":191
    }
 ]
