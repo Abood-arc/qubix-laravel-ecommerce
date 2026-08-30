@@ -119,6 +119,15 @@ networks:
     driver: bridge
   qubix:
     external: true
+    # The real network name isn't "qubix" — Compose prefixes every
+    # non-external, non-`name:`-pinned network with its project name, so
+    # docker-compose.prod.yml's `qubix:` network (declared without a project
+    # flag, from /opt/qubix) actually comes up as `qubix_qubix`. Verified on
+    # the VPS on 2026-08-31 via `docker network ls`. Keeping the key here as
+    # `qubix` (matching how the design doc and CLAUDE.md talk about "the
+    # shared qubix network") while pointing `name:` at the real one avoids
+    # having to rename every `networks: [..., qubix]` reference below.
+    name: qubix_qubix
 
 volumes:
   qubix-sa-mysql: {}
