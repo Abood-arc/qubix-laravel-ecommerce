@@ -88,7 +88,7 @@ TRUNCATE TABLE products;
 
 -- 4. Currency: SAR becomes the base.
 INSERT INTO currencies (code, name, symbol, `decimal`, group_separator, decimal_separator)
-SELECT 'SAR', 'Saudi Riyal', 'SAR', 2, ',', '.'
+SELECT 'SAR', 'Saudi Riyal', '﷼', 2, ',', '.'
 WHERE NOT EXISTS (SELECT 1 FROM currencies WHERE code = 'SAR');
 
 -- 5. Locale: Arabic must exist and be RTL.
