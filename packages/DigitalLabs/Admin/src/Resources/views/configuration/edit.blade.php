@@ -3,7 +3,14 @@
 
     $currentChannel = core()->getRequestedChannel();
 
-    $currentLocale = core()->getRequestedLocale();
+    // When a channel has exactly one locale, the switcher below is hidden -
+    // but getRequestedLocale() still falls back to the admin's own locale
+    // (always English) rather than the channel's one actual locale, so
+    // content silently saves under the wrong language with no UI to show
+    // it. Force it onto the channel's single locale in that case.
+    $currentLocale = $currentChannel->locales->count() === 1
+        ? $currentChannel->locales->first()
+        : core()->getRequestedLocale();
 
     $activeConfiguration = system_config()->getActiveConfigurationItem();
 @endphp
