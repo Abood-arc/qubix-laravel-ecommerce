@@ -243,7 +243,11 @@
                         <!-- render html -->
                         @if (! empty($data['html']))
                             <section class="mx-auto mt-10 max-w-[1440px] px-3 md:px-6">
-                                {!! $data['html'] !!}
+                                {!! str_replace(
+                                    ['src=""', 'data-src', 'src="storage/theme/'],
+                                    ['', 'src', 'src="'.config('app.url').'/storage/theme/'],
+                                    $data['html']
+                                ) !!}
                             </section>
                         @endif
                     @endif

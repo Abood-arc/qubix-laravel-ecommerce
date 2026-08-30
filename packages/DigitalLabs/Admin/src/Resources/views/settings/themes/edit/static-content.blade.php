@@ -282,6 +282,7 @@
                     formData.append('{{ $currentLocale->code }}[options][][image]', selectedImage);
                     formData.append('id', '{{ $theme->id }}');
                     formData.append('type', 'static_content');
+                    formData.append('locale', '{{ $currentLocale->code }}');
 
                     this.$axios.post('{{ route('admin.settings.themes.store') }}', formData)
                         .then((response) => {
@@ -289,7 +290,7 @@
 
                             let cursorPointer = editor.getCursor();
 
-                            editor.replaceRange(`<img class="lazy" data-src="${response.data}">`, {
+                            editor.replaceRange(`<img src="${response.data}">`, {
                                 line: cursorPointer.line, ch: cursorPointer.ch
                             });
 
