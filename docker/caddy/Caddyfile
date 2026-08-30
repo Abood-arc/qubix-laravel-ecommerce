@@ -19,3 +19,16 @@ jjbags.in {
 	# 	output stdout
 	# }
 }
+
+# Saudi Arabia storefront — separate deployment (/opt/qubix-sa), proxied to the
+# app-sa service on the shared qubix network. Requires:
+#   - jj-bags.com        A -> 147.93.110.245
+#   - www.jj-bags.com    A -> 147.93.110.245   (must resolve before the cert can be issued)
+www.jj-bags.com {
+	redir https://jj-bags.com{uri} permanent
+}
+
+jj-bags.com {
+	encode gzip zstd
+	reverse_proxy app-sa:80
+}
