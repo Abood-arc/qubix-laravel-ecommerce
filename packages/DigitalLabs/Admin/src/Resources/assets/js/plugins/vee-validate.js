@@ -91,6 +91,24 @@ export default {
             return true;
         });
 
+        /**
+         * Accepts a relative path ("/page/about-us") or an absolute http(s) URL,
+         * while rejecting protocol-relative URLs ("//evil.com", "\\evil.com") that
+         * could otherwise be used to redirect off-site. Was previously an inline
+         * "regex:^...$" string on the field itself, which is fragile - the pattern
+         * contains colons and slashes that can corrupt vee-validate's own
+         * "ruleName:param" string-rule parser. Defined as a real named rule here
+         * instead, matching every other custom rule in this file (phone, address,
+         * postcode, decimal).
+         */
+        defineRule("relative_url", (value) => {
+            if (! value || ! value.length) {
+                return true;
+            }
+
+            return /^(?:https?:\/)?\/(?![\/\\])\S*$/.test(value.trim());
+        });
+
         defineRule("postcode", (value) => {
             if (! value || ! value.length) {
                 return true;
