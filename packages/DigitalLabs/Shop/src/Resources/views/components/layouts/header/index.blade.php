@@ -27,6 +27,94 @@
     </div>
 @endif
 
+{{--
+    Persistent mobile locale/currency switcher. Previously this UI only
+    existed inside the hamburger drawer's footer (header/mobile/index.blade.php,
+    ~line 328) — reachable, but hidden behind an extra tap. Desktop shows the
+    equivalent dropdowns directly in its always-visible top bar. For a
+    bilingual storefront (e.g. jj-bags.com, EN/AR) that extra tap to reach
+    language switching is a real gap, not a stylistic one, so this mirrors
+    the drawer footer's already-working markup (same v-currency-switcher /
+    v-locale-switcher Vue components, globally registered in
+    header/desktop/top.blade.php) in the persistent header instead of only
+    inside the drawer. Same visibility gate as the drawer version.
+--}}
+@if (core()->getCurrentChannel()->locales()->count() > 1 || core()->getCurrentChannel()->currencies()->count() > 1)
+    <div class="grid w-full grid-cols-[1fr_auto_1fr] items-center justify-items-center border-b border-[#2f6f60] bg-[#1f5f4f] px-5 text-white lg:hidden">
+        <!-- Currency Drawer -->
+        <x-shop::drawer position="bottom" width="100%">
+            <x-slot:toggle>
+                <div
+                    class="flex cursor-pointer items-center gap-x-2.5 px-2.5 py-2 text-sm font-medium uppercase"
+                    role="button"
+                    v-pre
+                >
+                    {{ core()->getCurrentCurrency()->symbol . ' ' . core()->getCurrentCurrencyCode() }}
+                </div>
+            </x-slot>
+
+            <x-slot:header>
+                <div class="flex items-center justify-between">
+                    <p class="text-lg font-semibold">
+                        @lang('shop::app.components.layouts.header.mobile.currencies')
+                    </p>
+                </div>
+            </x-slot>
+
+            <x-slot:content class="!px-0">
+                <div
+                    class="overflow-auto"
+                    :style="{ height: getCurrentScreenHeight }"
+                >
+                    <v-currency-switcher></v-currency-switcher>
+                </div>
+            </x-slot>
+        </x-shop::drawer>
+
+        <span class="h-4 w-0.5 bg-white/25"></span>
+
+        <!-- Locale Drawer -->
+        <x-shop::drawer position="bottom" width="100%">
+            <x-slot:toggle>
+                <div
+                    class="flex cursor-pointer items-center gap-x-2.5 px-2.5 py-2 text-sm font-medium uppercase"
+                    role="button"
+                    v-pre
+                >
+                    <img
+                        src="{{ ! empty(core()->getCurrentLocale()->logo_url)
+                                ? core()->getCurrentLocale()->logo_url
+                                : qubix_asset('images/default-language.svg')
+                            }}"
+                        alt="Default locale"
+                        width="20"
+                        height="14"
+                    />
+
+                    {{ core()->getCurrentChannel()->locales()->orderBy('name')->where('code', app()->getLocale())->value('name') }}
+                </div>
+            </x-slot>
+
+            <x-slot:header>
+                <div class="flex items-center justify-between">
+                    <p class="text-lg font-semibold">
+                        @lang('shop::app.components.layouts.header.mobile.locales')
+                    </p>
+                </div>
+            </x-slot>
+
+            <x-slot:content class="!px-0">
+                <div
+                    class="overflow-auto"
+                    :style="{ height: getCurrentScreenHeight }"
+                >
+                    <v-locale-switcher></v-locale-switcher>
+                </div>
+            </x-slot>
+        </x-shop::drawer>
+    </div>
+@endif
+
 <header
     id="main-header"
     class="sticky top-0 z-10 border-b border-[#2f6f60] bg-[#1f5f4f]"
