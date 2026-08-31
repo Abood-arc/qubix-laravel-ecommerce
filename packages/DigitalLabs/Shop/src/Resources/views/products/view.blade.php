@@ -385,7 +385,14 @@
                                 @include('shop::products.view.types.booking')
 
                                 <!-- Product Actions and Quantity Box -->
-                                <div class="mt-8 flex max-w-[470px] gap-4 max-sm:mt-4">
+                                {{--
+                                    max-sm:pr-20 reserves the bottom-right corner column (the
+                                    third-party Zander chat widget's launcher icon sits fixed
+                                    there, ~64px wide with a 16px margin, on every page — it has
+                                    no documented offset/position config, so the row is kept
+                                    clear of that corner instead of fighting the widget itself).
+                                --}}
+                                <div class="mt-8 flex max-w-[470px] gap-4 max-sm:mt-4 max-sm:pr-20">
 
                                     {!! view_render_event('qubix.shop.products.view.quantity.before', ['product' => $product]) !!}
 
@@ -426,7 +433,7 @@
                                     @if (core()->getConfigData('catalog.products.storefront.buy_now_button_display'))
                                         <x-shop::button
                                             type="submit"
-                                            class="primary-button mt-5 w-full max-w-[470px] max-md:py-3 max-sm:mt-3 max-sm:rounded-lg max-sm:py-1.5"
+                                            class="primary-button mt-5 w-full max-w-[470px] max-md:py-3 max-sm:mt-3 max-sm:mr-20 max-sm:rounded-lg max-sm:py-1.5"
                                             button-type="primary-button"
                                             :title="trans('shop::app.products.view.buy-now')"
                                             :disabled="! $product->isSaleable(1)"

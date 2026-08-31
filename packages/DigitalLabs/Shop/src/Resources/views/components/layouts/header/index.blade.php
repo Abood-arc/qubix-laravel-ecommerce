@@ -4,6 +4,29 @@
     <x-shop::layouts.header.desktop.top />
 </div>
 
+{{--
+    Mobile equivalent of the desktop top bar's promo message. Desktop shows
+    general.content.header_offer.title site-wide via the max-lg:hidden block
+    above; mobile previously had no equivalent at all (only the homepage's
+    unrelated CMS "static content" block happened to carry similar copy).
+--}}
+@if (core()->getConfigData('general.content.header_offer.title'))
+    <div
+        class="border-b border-[#2f6f60] bg-[#1f5f4f] px-4 py-2 text-center text-xs font-semibold tracking-[0.02em] text-white/90 lg:hidden"
+        v-pre
+    >
+        {{ core()->getConfigData('general.content.header_offer.title') }}
+
+        <a
+            href="{{ core()->getConfigData('general.content.header_offer.redirection_link') }}"
+            class="underline underline-offset-2 text-white"
+            role="button"
+        >
+            {{ core()->getConfigData('general.content.header_offer.redirection_title') }}
+        </a>
+    </div>
+@endif
+
 <header
     id="main-header"
     class="sticky top-0 z-10 border-b border-[#2f6f60] bg-[#1f5f4f]"
