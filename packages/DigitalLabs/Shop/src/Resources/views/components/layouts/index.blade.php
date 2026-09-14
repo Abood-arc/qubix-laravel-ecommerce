@@ -14,7 +14,7 @@
 
         {!! view_render_event('qubix.shop.layout.head.before') !!}
 
-        <title>{{ $title ? (\Illuminate\Support\Str::startsWith($title, 'JJ Bags') ? $title : $title.' | JJ Bags') : 'JJ Bags' }}</title>
+        <title>{{ $title ? (\Illuminate\Support\Str::startsWith($title, config('app.name')) ? $title : $title.' | '.config('app.name')) : config('app.name') }}</title>
 
         <meta charset="UTF-8">
 

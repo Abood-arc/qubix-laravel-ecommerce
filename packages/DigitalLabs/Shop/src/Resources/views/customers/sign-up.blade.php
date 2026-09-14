@@ -273,7 +273,7 @@
 		</div>
 
         <p class="mb-4 mt-8 text-center text-xs text-zinc-500">
-            @lang('shop::app.customers.signup-form.footer', ['current_year'=> date('Y') ])
+            @lang('shop::app.customers.signup-form.footer', ['current_year'=> date('Y'), 'app_name' => config('app.name') ])
         </p>
 	</div>
 
