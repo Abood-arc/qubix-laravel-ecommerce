@@ -3,17 +3,9 @@
 namespace DigitalLabs\FPC\Listeners;
 
 use Spatie\ResponseCache\Facades\ResponseCache;
-use DigitalLabs\CMS\Repositories\PageRepository;
 
 class Page
 {
-    /**
-     * Create a new listener instance.
-     *
-     * @return void
-     */
-    public function __construct(protected PageRepository $pageRepository) {}
-
     /**
      * After page update
      *
@@ -22,7 +14,7 @@ class Page
      */
     public function afterUpdate($page)
     {
-        ResponseCache::forget('/page/'.$page->url_key);
+        ResponseCache::clear();
     }
 
     /**
@@ -33,8 +25,6 @@ class Page
      */
     public function beforeDelete($pageId)
     {
-        $page = $this->pageRepository->find($pageId);
-
-        ResponseCache::forget('/page/'.$page->url_key);
+        ResponseCache::clear();
     }
 }

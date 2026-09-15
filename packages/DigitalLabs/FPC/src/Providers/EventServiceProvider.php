@@ -20,6 +20,10 @@ class EventServiceProvider extends ServiceProvider
             'DigitalLabs\FPC\Listeners\Product@beforeDelete',
         ],
 
+        'catalog.category.create.after' => [
+            'DigitalLabs\FPC\Listeners\Category@afterCreate',
+        ],
+
         'catalog.category.update.after' => [
             'DigitalLabs\FPC\Listeners\Category@afterUpdate',
         ],
@@ -82,6 +86,10 @@ class EventServiceProvider extends ServiceProvider
 
         'marketing.search_seo.url_rewrites.delete.before' => [
             'DigitalLabs\FPC\Listeners\URLRewrite@beforeDelete',
+        ],
+
+        'catalog.price_rule.reindex.after' => [
+            'DigitalLabs\FPC\Listeners\PriceRuleReindex@afterReindex',
         ],
     ];
 }

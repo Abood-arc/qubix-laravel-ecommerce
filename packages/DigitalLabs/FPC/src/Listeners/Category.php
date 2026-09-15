@@ -3,50 +3,39 @@
 namespace DigitalLabs\FPC\Listeners;
 
 use Spatie\ResponseCache\Facades\ResponseCache;
-use DigitalLabs\Category\Repositories\CategoryRepository;
 
 class Category
 {
     /**
-     * Create a new listener instance.
+     * After category create. Also covers the home page, which embeds the category tree.
      *
+     * @param  \DigitalLabs\Category\Contracts\Category  $category
      * @return void
      */
-    public function __construct(protected CategoryRepository $categoryRepository) {}
+    public function afterCreate($category)
+    {
+        ResponseCache::clear();
+    }
 
     /**
-     * After category update
+     * After category update. Also covers the home page, which embeds the category tree.
      *
      * @param  \DigitalLabs\Category\Contracts\Category  $category
      * @return void
      */
     public function afterUpdate($category)
     {
-        foreach (core()->getAllLocales() as $locale) {
-            if ($categoryTranslation = $category->translate($locale->code)) {
-                ResponseCache::forget($categoryTranslation->slug);
-            }
-
-            ResponseCache::forget($category->translate(core()->getDefaultLocaleCodeFromDefaultChannel())->slug);
-        }
+        ResponseCache::clear();
     }
 
     /**
-     * Before category delete
+     * Before category delete. Also covers the home page, which embeds the category tree.
      *
      * @param  int  $categoryId
      * @return void
      */
     public function beforeDelete($categoryId)
     {
-        $category = $this->categoryRepository->find($categoryId);
-
-        foreach (core()->getAllLocales() as $locale) {
-            if ($categoryTranslation = $category->translate($locale->code)) {
-                ResponseCache::forget($categoryTranslation->slug);
-            }
-
-            ResponseCache::forget($category->translate(core()->getDefaultLocaleCodeFromDefaultChannel())->slug);
-        }
+        ResponseCache::clear();
     }
 }

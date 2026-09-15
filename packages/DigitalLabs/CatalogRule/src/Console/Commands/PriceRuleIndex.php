@@ -3,6 +3,7 @@
 namespace DigitalLabs\CatalogRule\Console\Commands;
 
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Event;
 use DigitalLabs\CatalogRule\Helpers\CatalogRuleIndex;
 
 class PriceRuleIndex extends Command
@@ -40,5 +41,7 @@ class PriceRuleIndex extends Command
     public function handle()
     {
         $this->catalogRuleIndexHelper->reIndexComplete();
+
+        Event::dispatch('catalog.price_rule.reindex.after');
     }
 }

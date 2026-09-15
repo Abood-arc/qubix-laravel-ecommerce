@@ -3,17 +3,9 @@
 namespace DigitalLabs\FPC\Listeners;
 
 use Spatie\ResponseCache\Facades\ResponseCache;
-use DigitalLabs\Theme\Repositories\ThemeCustomizationRepository;
 
 class ThemeCustomization
 {
-    /**
-     * Create a new listener instance.
-     *
-     * @return void
-     */
-    public function __construct(protected ThemeCustomizationRepository $themeCustomizationRepository) {}
-
     /**
      * After theme customization create
      *
@@ -22,13 +14,7 @@ class ThemeCustomization
      */
     public function afterCreate($themeCustomization)
     {
-        if (in_array($themeCustomization->type, ['footer_links', 'services_content'])) {
-            ResponseCache::clear();
-        } else {
-            ResponseCache::selectCachedItems()
-                ->forUrls(config('app.url').'/')
-                ->forget();
-        }
+        ResponseCache::clear();
     }
 
     /**
@@ -39,13 +25,7 @@ class ThemeCustomization
      */
     public function afterUpdate($themeCustomization)
     {
-        if (in_array($themeCustomization->type, ['footer_links', 'services_content'])) {
-            ResponseCache::clear();
-        } else {
-            ResponseCache::selectCachedItems()
-                ->forUrls(config('app.url').'/')
-                ->forget();
-        }
+        ResponseCache::clear();
     }
 
     /**
@@ -56,14 +36,6 @@ class ThemeCustomization
      */
     public function beforeDelete($themeCustomizationId)
     {
-        $themeCustomization = $this->themeCustomizationRepository->find($themeCustomizationId);
-
-        if (in_array($themeCustomization->type, ['footer_links', 'services_content'])) {
-            ResponseCache::clear();
-        } else {
-            ResponseCache::selectCachedItems()
-                ->forUrls(config('app.url').'/')
-                ->forget();
-        }
+        ResponseCache::clear();
     }
 }

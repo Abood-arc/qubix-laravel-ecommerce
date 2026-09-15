@@ -3,17 +3,9 @@
 namespace DigitalLabs\FPC\Listeners;
 
 use Spatie\ResponseCache\Facades\ResponseCache;
-use DigitalLabs\Product\Repositories\ProductReviewRepository;
 
 class Review
 {
-    /**
-     * Create a new listener instance.
-     *
-     * @return void
-     */
-    public function __construct(protected ProductReviewRepository $productReviewRepository) {}
-
     /**
      * After review is updated
      *
@@ -22,19 +14,17 @@ class Review
      */
     public function afterUpdate($review)
     {
-        ResponseCache::forget('/'.$review->product->url_key);
+        ResponseCache::clear();
     }
 
     /**
      * Before review is deleted
      *
-     * @param  \DigitalLabs\Product\Contracts\Review  $review
+     * @param  int  $reviewId
      * @return void
      */
     public function beforeDelete($reviewId)
     {
-        $review = $this->productReviewRepository->find($reviewId);
-
-        ResponseCache::forget('/'.$review->product->url_key);
+        ResponseCache::clear();
     }
 }

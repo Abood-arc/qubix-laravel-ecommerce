@@ -4,15 +4,15 @@ namespace DigitalLabs\FPC\Listeners;
 
 use Spatie\ResponseCache\Facades\ResponseCache;
 
-class Refund
+class PriceRuleReindex
 {
     /**
-     * After refund is created, product stock/availability may change.
+     * After the daily catalog price-rule reindex, cached product/category pages may show
+     * yesterday's price.
      *
-     * @param  \DigitalLabs\Sale\Contracts\Refund  $refund
      * @return void
      */
-    public function afterCreate($refund)
+    public function afterReindex()
     {
         ResponseCache::clear();
     }
