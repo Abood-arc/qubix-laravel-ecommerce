@@ -9,6 +9,16 @@
 #   docker compose -f docker-compose.prod.yml ps
 #
 # Requires a production .env (see .env.production.example) in the same directory.
+#
+# json-file log driver has no default size cap — nginx's in-container access/error
+# logs now flow to stdout (docker/nginx/default.conf) alongside app/FPM output, so
+# every service gets a bounded rotation instead of unbounded growth on disk.
+x-logging: &default-logging
+  driver: json-file
+  options:
+    max-size: '10m'
+    max-file: '5'
+
 services:
   # --- PHP app: `php artisan serve` on :80 (as user sail/1337), Caddy proxies to it ---
   app:
@@ -29,6 +39,7 @@ services:
     volumes:
       - '.:/var/www/html'
     networks: [qubix]
+    logging: *default-logging
     depends_on:
       mysql: { condition: service_healthy }
       redis: { condition: service_started }
@@ -46,6 +57,7 @@ services:
     volumes:
       - '.:/var/www/html'
     networks: [qubix]
+    logging: *default-logging
     depends_on: [app, redis, mysql]
 
   # --- Laravel scheduler (runs schedule:run every minute in-process) ---
@@ -60,6 +72,7 @@ services:
     volumes:
       - '.:/var/www/html'
     networks: [qubix]
+    logging: *default-logging
     depends_on: [app, mysql]
 
   # --- MySQL (internal only; import via `docker compose exec -T mysql ...`) ---
@@ -75,6 +88,7 @@ services:
     volumes:
       - 'qubix-mysql:/var/lib/mysql'
     networks: [qubix]
+    logging: *default-logging
     healthcheck:
       test: ['CMD', 'mysqladmin', 'ping', '-p${DB_PASSWORD}']
       retries: 3
@@ -88,6 +102,7 @@ services:
     volumes:
       - 'qubix-redis:/data'
     networks: [qubix]
+    logging: *default-logging
     healthcheck:
       test: ['CMD', 'redis-cli', 'ping']
       retries: 3
@@ -109,6 +124,7 @@ services:
     volumes:
       - 'qubix-elasticsearch:/var/lib/elasticsearch/data'
     networks: [qubix]
+    logging: *default-logging
     # Requires host: sysctl -w vm.max_map_count=262144 (see DEPLOY-HOSTINGER.md Phase 2).
 
   # --- Caddy: the ONLY public service. Auto Let's Encrypt for jjbags.in + www. ---
@@ -134,6 +150,7 @@ services:
       - 'caddy-data:/data'        # persists issued certificates
       - 'caddy-config:/config'
     networks: [qubix]
+    logging: *default-logging
     depends_on: [app]
 
 networks:

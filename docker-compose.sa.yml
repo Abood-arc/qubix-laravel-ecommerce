@@ -11,6 +11,16 @@
 # The service is named `app-sa`, NOT `app`. Compose aliases services by name on
 # shared networks — a second `app` would collide with India's in DNS and Caddy
 # would round-robin between the two sites.
+#
+# json-file log driver has no default size cap — nginx's in-container access/error
+# logs now flow to stdout (docker/nginx/default.conf) alongside app/FPM output, so
+# every service gets a bounded rotation instead of unbounded growth on disk.
+x-logging: &default-logging
+  driver: json-file
+  options:
+    max-size: '10m'
+    max-file: '5'
+
 services:
   app-sa:
     build:
@@ -30,6 +40,7 @@ services:
     volumes:
       - '.:/var/www/html'
     networks: [qubix-sa, qubix]
+    logging: *default-logging
     depends_on:
       mysql: { condition: service_healthy }
       redis: { condition: service_started }
@@ -46,6 +57,7 @@ services:
     volumes:
       - '.:/var/www/html'
     networks: [qubix-sa]
+    logging: *default-logging
     depends_on: [app-sa, redis, mysql]
 
   scheduler-sa:
@@ -59,6 +71,7 @@ services:
     volumes:
       - '.:/var/www/html'
     networks: [qubix-sa]
+    logging: *default-logging
     depends_on: [app-sa, mysql]
 
   # --- MySQL (internal only; import via `docker compose -p qubix-sa exec -T mysql ...`) ---
@@ -74,6 +87,7 @@ services:
     volumes:
       - 'qubix-sa-mysql:/var/lib/mysql'
     networks: [qubix-sa]
+    logging: *default-logging
     healthcheck:
       test: ['CMD', 'mysqladmin', 'ping', '-p${DB_PASSWORD}']
       retries: 3
@@ -89,6 +103,7 @@ services:
     volumes:
       - 'qubix-sa-redis:/data'
     networks: [qubix-sa]
+    logging: *default-logging
     healthcheck:
       test: ['CMD', 'redis-cli', '-a', '${REDIS_PASSWORD}', 'ping']
       retries: 3
@@ -112,6 +127,7 @@ services:
     volumes:
       - 'qubix-sa-elasticsearch:/var/lib/elasticsearch/data'
     networks: [qubix-sa]
+    logging: *default-logging
     # Requires host: sysctl -w vm.max_map_count=262144 (see DEPLOY-HOSTINGER.md Phase 2).
 
 networks:
