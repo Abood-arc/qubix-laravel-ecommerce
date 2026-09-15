@@ -2,10 +2,17 @@
 
 namespace DigitalLabs\FPC\Listeners;
 
-use Spatie\ResponseCache\Facades\ResponseCache;
+use DigitalLabs\FPC\Support\CacheClearer;
 
 class Review
 {
+    /**
+     * Create a new listener instance.
+     *
+     * @return void
+     */
+    public function __construct(protected CacheClearer $cacheClearer) {}
+
     /**
      * After review is updated
      *
@@ -14,7 +21,7 @@ class Review
      */
     public function afterUpdate($review)
     {
-        ResponseCache::clear();
+        $this->cacheClearer->clearOnce();
     }
 
     /**
@@ -25,6 +32,6 @@ class Review
      */
     public function beforeDelete($reviewId)
     {
-        ResponseCache::clear();
+        $this->cacheClearer->clearOnce();
     }
 }

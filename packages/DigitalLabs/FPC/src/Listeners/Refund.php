@@ -2,10 +2,17 @@
 
 namespace DigitalLabs\FPC\Listeners;
 
-use Spatie\ResponseCache\Facades\ResponseCache;
+use DigitalLabs\FPC\Support\CacheClearer;
 
 class Refund
 {
+    /**
+     * Create a new listener instance.
+     *
+     * @return void
+     */
+    public function __construct(protected CacheClearer $cacheClearer) {}
+
     /**
      * After refund is created, product stock/availability may change.
      *
@@ -14,6 +21,6 @@ class Refund
      */
     public function afterCreate($refund)
     {
-        ResponseCache::clear();
+        $this->cacheClearer->clearOnce();
     }
 }

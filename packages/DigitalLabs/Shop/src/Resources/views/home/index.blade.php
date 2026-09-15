@@ -193,7 +193,7 @@
     </script>
 @endpush
 
-<x-shop::layouts>
+<x-shop::layouts :category-tree-stamp="$categoryTreeStamp">
     <!-- Page Title -->
     <x-slot:title>
         {{  $channel->home_seo['meta_title'] ?? '' }}

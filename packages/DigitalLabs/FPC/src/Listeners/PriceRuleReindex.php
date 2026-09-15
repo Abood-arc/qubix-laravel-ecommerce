@@ -2,10 +2,17 @@
 
 namespace DigitalLabs\FPC\Listeners;
 
-use Spatie\ResponseCache\Facades\ResponseCache;
+use DigitalLabs\FPC\Support\CacheClearer;
 
 class PriceRuleReindex
 {
+    /**
+     * Create a new listener instance.
+     *
+     * @return void
+     */
+    public function __construct(protected CacheClearer $cacheClearer) {}
+
     /**
      * After the daily catalog price-rule reindex, cached product/category pages may show
      * yesterday's price.
@@ -14,6 +21,6 @@ class PriceRuleReindex
      */
     public function afterReindex()
     {
-        ResponseCache::clear();
+        $this->cacheClearer->clearOnce();
     }
 }

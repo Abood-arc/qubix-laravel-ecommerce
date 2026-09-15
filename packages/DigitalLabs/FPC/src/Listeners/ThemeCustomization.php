@@ -2,10 +2,17 @@
 
 namespace DigitalLabs\FPC\Listeners;
 
-use Spatie\ResponseCache\Facades\ResponseCache;
+use DigitalLabs\FPC\Support\CacheClearer;
 
 class ThemeCustomization
 {
+    /**
+     * Create a new listener instance.
+     *
+     * @return void
+     */
+    public function __construct(protected CacheClearer $cacheClearer) {}
+
     /**
      * After theme customization create
      *
@@ -14,7 +21,7 @@ class ThemeCustomization
      */
     public function afterCreate($themeCustomization)
     {
-        ResponseCache::clear();
+        $this->cacheClearer->clearOnce();
     }
 
     /**
@@ -25,7 +32,7 @@ class ThemeCustomization
      */
     public function afterUpdate($themeCustomization)
     {
-        ResponseCache::clear();
+        $this->cacheClearer->clearOnce();
     }
 
     /**
@@ -36,6 +43,6 @@ class ThemeCustomization
      */
     public function beforeDelete($themeCustomizationId)
     {
-        ResponseCache::clear();
+        $this->cacheClearer->clearOnce();
     }
 }

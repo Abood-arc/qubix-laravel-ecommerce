@@ -32,6 +32,15 @@ class EventServiceProvider extends ServiceProvider
             'DigitalLabs\FPC\Listeners\Category@beforeDelete',
         ],
 
+        // Mass-update uses a differently-shaped event name than the single-item
+        // actions above (plural "categories", "mass-update" instead of "update") —
+        // easy to miss, and previously wasn't registered at all. Mass-delete
+        // already goes through catalog.category.delete.before, so it didn't need
+        // a separate entry.
+        'catalog.categories.mass-update.after' => [
+            'DigitalLabs\FPC\Listeners\Category@afterUpdate',
+        ],
+
         'customer.review.update.after' => [
             'DigitalLabs\FPC\Listeners\Review@afterUpdate',
         ],

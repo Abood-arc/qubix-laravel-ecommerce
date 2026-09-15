@@ -2,10 +2,17 @@
 
 namespace DigitalLabs\FPC\Listeners;
 
-use Spatie\ResponseCache\Facades\ResponseCache;
+use DigitalLabs\FPC\Support\CacheClearer;
 
 class Product
 {
+    /**
+     * Create a new listener instance.
+     *
+     * @return void
+     */
+    public function __construct(protected CacheClearer $cacheClearer) {}
+
     /**
      * Update or create product page cache
      *
@@ -14,7 +21,7 @@ class Product
      */
     public function afterUpdate($product)
     {
-        ResponseCache::clear();
+        $this->cacheClearer->clearOnce();
     }
 
     /**
@@ -25,6 +32,6 @@ class Product
      */
     public function beforeDelete($productId)
     {
-        ResponseCache::clear();
+        $this->cacheClearer->clearOnce();
     }
 }

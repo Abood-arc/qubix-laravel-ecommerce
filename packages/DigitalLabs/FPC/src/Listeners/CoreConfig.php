@@ -2,10 +2,17 @@
 
 namespace DigitalLabs\FPC\Listeners;
 
-use Spatie\ResponseCache\Facades\ResponseCache;
+use DigitalLabs\FPC\Support\CacheClearer;
 
 class CoreConfig
 {
+    /**
+     * Create a new listener instance.
+     *
+     * @return void
+     */
+    public function __construct(protected CacheClearer $cacheClearer) {}
+
     /**
      * After core configuration update.
      *
@@ -13,6 +20,6 @@ class CoreConfig
      */
     public function afterUpdate()
     {
-        ResponseCache::clear();
+        $this->cacheClearer->clearOnce();
     }
 }

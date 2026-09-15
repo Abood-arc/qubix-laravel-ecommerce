@@ -2,10 +2,17 @@
 
 namespace DigitalLabs\FPC\Listeners;
 
-use Spatie\ResponseCache\Facades\ResponseCache;
+use DigitalLabs\FPC\Support\CacheClearer;
 
 class Page
 {
+    /**
+     * Create a new listener instance.
+     *
+     * @return void
+     */
+    public function __construct(protected CacheClearer $cacheClearer) {}
+
     /**
      * After page update
      *
@@ -14,7 +21,7 @@ class Page
      */
     public function afterUpdate($page)
     {
-        ResponseCache::clear();
+        $this->cacheClearer->clearOnce();
     }
 
     /**
@@ -25,6 +32,6 @@ class Page
      */
     public function beforeDelete($pageId)
     {
-        ResponseCache::clear();
+        $this->cacheClearer->clearOnce();
     }
 }

@@ -2,13 +2,16 @@
 
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Facade;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\URL;
+use Spatie\ResponseCache\Events\ClearingResponseCache;
 use Spatie\ResponseCache\Facades\ResponseCache;
 use DigitalLabs\Core\Core as CoreService;
 use DigitalLabs\Attribute\Models\Attribute;
 use DigitalLabs\CMS\Models\Page;
+use DigitalLabs\FPC\Support\CacheClearer;
 use DigitalLabs\Theme\Models\ThemeCustomization;
 use DigitalLabs\User\Models\Admin;
 use Webkul\Faker\Helpers\Category as CategoryFaker;
@@ -127,6 +130,44 @@ it('clears the whole cache when a category is updated, including a second locale
 
     // Assert.
     expect(fpcCacheFileCount())->toBe(0);
+});
+
+it('clears the whole cache when categories are mass-updated from the grid', function () {
+    // Arrange. Mass-update dispatches catalog.categories.mass-update.after — a
+    // differently-shaped event name (plural "categories", "mass-update" instead
+    // of "update") than the single-item actions, and previously wasn't
+    // registered in FPC at all.
+    $categories = (new CategoryFaker)->create(3);
+
+    get('/')->assertOk();
+
+    expect(fpcCacheFileCount())->toBe(1);
+
+    // Act.
+    fpcLoginAsAdmin();
+
+    postJson(route('admin.catalog.categories.mass_update', [
+        'indices' => $categories->pluck('id')->toArray(),
+        'value' => 0,
+    ]))->assertOk();
+
+    // Assert.
+    expect(fpcCacheFileCount())->toBe(0);
+});
+
+it('collapses multiple ResponseCache::clear triggers within one request into a single clear', function () {
+    // An admin action can fire catalog.product.update.after once per line item
+    // (e.g. invoicing an order with several non-stockable, quantity-tracked
+    // items) — without this, each one would be its own synchronous full
+    // cache-directory wipe.
+    Event::fake([ClearingResponseCache::class]);
+
+    $clearer = app(CacheClearer::class);
+    $clearer->clearOnce();
+    $clearer->clearOnce();
+    $clearer->clearOnce();
+
+    Event::assertDispatchedTimes(ClearingResponseCache::class, 1);
 });
 
 it('clears the whole cache when theme customization is updated, not just the home page', function () {

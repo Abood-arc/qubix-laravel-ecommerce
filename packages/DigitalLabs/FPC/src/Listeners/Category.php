@@ -2,10 +2,17 @@
 
 namespace DigitalLabs\FPC\Listeners;
 
-use Spatie\ResponseCache\Facades\ResponseCache;
+use DigitalLabs\FPC\Support\CacheClearer;
 
 class Category
 {
+    /**
+     * Create a new listener instance.
+     *
+     * @return void
+     */
+    public function __construct(protected CacheClearer $cacheClearer) {}
+
     /**
      * After category create. Also covers the home page, which embeds the category tree.
      *
@@ -14,7 +21,7 @@ class Category
      */
     public function afterCreate($category)
     {
-        ResponseCache::clear();
+        $this->cacheClearer->clearOnce();
     }
 
     /**
@@ -25,7 +32,7 @@ class Category
      */
     public function afterUpdate($category)
     {
-        ResponseCache::clear();
+        $this->cacheClearer->clearOnce();
     }
 
     /**
@@ -36,6 +43,6 @@ class Category
      */
     public function beforeDelete($categoryId)
     {
-        ResponseCache::clear();
+        $this->cacheClearer->clearOnce();
     }
 }

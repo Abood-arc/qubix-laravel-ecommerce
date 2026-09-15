@@ -2,10 +2,17 @@
 
 namespace DigitalLabs\FPC\Listeners;
 
-use Spatie\ResponseCache\Facades\ResponseCache;
+use DigitalLabs\FPC\Support\CacheClearer;
 
 class URLRewrite
 {
+    /**
+     * Create a new listener instance.
+     *
+     * @return void
+     */
+    public function __construct(protected CacheClearer $cacheClearer) {}
+
     /**
      * After URL Rewrite update
      *
@@ -14,7 +21,7 @@ class URLRewrite
      */
     public function afterUpdate($urlRewrite)
     {
-        ResponseCache::clear();
+        $this->cacheClearer->clearOnce();
     }
 
     /**
@@ -25,6 +32,6 @@ class URLRewrite
      */
     public function beforeDelete($urlRewriteId)
     {
-        ResponseCache::clear();
+        $this->cacheClearer->clearOnce();
     }
 }
