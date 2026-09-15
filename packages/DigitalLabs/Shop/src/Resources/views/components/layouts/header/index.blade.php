@@ -1,3 +1,59 @@
+@php
+    // Cheap on every page (count + max(updated_at), no full tree query) so a
+    // category/product/search page landed on directly — not through home — can
+    // tell its cached nav is stale without waiting on a full tree fetch first.
+    $categoryTreeStamp = app(\DigitalLabs\Category\Repositories\CategoryRepository::class)->getCategoryTreeStamp();
+@endphp
+
+{{--
+    Single source of truth for the three localStorage['categories'] writers (this
+    stamp, the home page's embedded snapshot in home/index.blade.php, and the
+    v-desktop-category / v-mobile-category components below). Previously each
+    wrote an unversioned array; a stale value from a prior visit had no way to
+    know it was stale, and the desktop component lacked the mobile one's guards
+    against a malformed value or a failed fetch (permanent spinner). Centralizing
+    read/write/fetch here means both components self-heal the same way.
+--}}
+@push('scripts')
+    <script>
+        window.qubixCategoryTreeStamp = @json($categoryTreeStamp);
+
+        window.qubixCategoryNav = {
+            STORAGE_KEY: 'categories',
+
+            read(currentStamp) {
+                try {
+                    const stored = JSON.parse(localStorage.getItem(this.STORAGE_KEY) || 'null');
+
+                    if (
+                        stored
+                        && Array.isArray(stored.categories)
+                        && stored.categories.length > 0
+                        && stored.stamp === currentStamp
+                    ) {
+                        return stored.categories;
+                    }
+                } catch (e) {}
+
+                return null;
+            },
+
+            write(categories, stamp) {
+                try {
+                    localStorage.setItem(this.STORAGE_KEY, JSON.stringify({ categories, stamp }));
+                } catch (e) {}
+            },
+
+            fetchFresh(url) {
+                return axios.get(url).then((response) => ({
+                    categories: Array.isArray(response.data.data) ? response.data.data : [],
+                    stamp: response.data.stamp ?? null,
+                }));
+            },
+        };
+    </script>
+@endpush
+
 {!! view_render_event('qubix.shop.layout.header.before') !!}
 
 <div class="max-lg:hidden">

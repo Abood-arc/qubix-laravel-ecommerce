@@ -52,7 +52,8 @@ class CategoryController extends APIController
     {
         $categories = $this->categoryRepository->getVisibleCategoryTree(core()->getCurrentChannel()->root_category_id);
 
-        return CategoryTreeResource::collection($categories);
+        return CategoryTreeResource::collection($categories)
+            ->additional(['stamp' => $this->categoryRepository->getCategoryTreeStamp()]);
     }
 
     /**

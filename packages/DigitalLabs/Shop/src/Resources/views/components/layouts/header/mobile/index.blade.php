@@ -518,34 +518,24 @@
 
             methods: {
                 initCategories() {
-                    try {
-                        const stored = localStorage.getItem('categories');
+                    const stored = window.qubixCategoryNav.read(window.qubixCategoryTreeStamp);
 
-                        if (stored) {
-                            const parsed = JSON.parse(stored);
+                    if (stored) {
+                        this.categories = stored;
+                        this.isLoading = false;
 
-                            if (Array.isArray(parsed) && parsed.length > 0) {
-                                this.categories = parsed;
-                                this.isLoading = false;
-
-                                return;
-                            }
-                        }
-
-                    } catch (e) {}
+                        return;
+                    }
 
                     this.getCategories();
                 },
 
                 getCategories() {
-                    this.$axios.get("{{ route('shop.api.categories.tree') }}")
-                        .then(response => {
-                            const categoryTree = response.data.data;
-
+                    window.qubixCategoryNav.fetchFresh("{{ route('shop.api.categories.tree') }}")
+                        .then(({ categories, stamp }) => {
                             this.isLoading = false;
-                            this.categories = Array.isArray(categoryTree) ? categoryTree : [];
-
-                            localStorage.setItem('categories', JSON.stringify(this.categories));
+                            this.categories = categories;
+                            window.qubixCategoryNav.write(categories, stamp);
                         })
                         .catch(error => {
                             this.isLoading = false;

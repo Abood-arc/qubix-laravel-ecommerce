@@ -42,7 +42,9 @@ class HomeController extends Controller
 
         $categories = CategoryTreeResource::collection($categories);
 
-        return view('shop::home.index', compact('customizations', 'categories'));
+        $categoryTreeStamp = $this->categoryRepository->getCategoryTreeStamp();
+
+        return view('shop::home.index', compact('customizations', 'categories', 'categoryTreeStamp'));
     }
 
     /**

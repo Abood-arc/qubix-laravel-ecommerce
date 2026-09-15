@@ -30,7 +30,7 @@
 @push('scripts')
     @if(! empty($categories))
         <script>
-            localStorage.setItem('categories', JSON.stringify(@json($categories)));
+            window.qubixCategoryNav.write(@json($categories), @json($categoryTreeStamp));
         </script>
     @endif
 @endpush

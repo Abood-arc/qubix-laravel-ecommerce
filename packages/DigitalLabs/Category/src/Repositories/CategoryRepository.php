@@ -185,6 +185,20 @@ class CategoryRepository extends Repository
     }
 
     /**
+     * A cheap, schema-free stamp for the whole category tree. Changes on any
+     * create, update or delete — combining count and max(updated_at) so a delete
+     * of a category that isn't the most-recently-updated one still changes it,
+     * unlike max(updated_at) alone. The storefront nav caches this alongside the
+     * tree in localStorage and refetches whenever the stamp it holds differs.
+     */
+    public function getCategoryTreeStamp(): string
+    {
+        $row = $this->query()->selectRaw('count(*) as total, max(updated_at) as last_updated_at')->first();
+
+        return $row->total.'-'.$row->last_updated_at;
+    }
+
+    /**
      * Checks slug is unique or not based on locale.
      *
      * @param  int  $id

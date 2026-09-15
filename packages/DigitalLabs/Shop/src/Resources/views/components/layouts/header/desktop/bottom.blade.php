@@ -529,29 +529,28 @@
 
             methods: {
                 initCategories() {
-                    try {
-                        const stored = localStorage.getItem('categories');
+                    const stored = window.qubixCategoryNav.read(window.qubixCategoryTreeStamp);
 
-                        if (stored) {
-                            this.categories = JSON.parse(stored);
-                            this.isLoading = false;
+                    if (stored) {
+                        this.categories = stored;
+                        this.isLoading = false;
 
-                            return;
-                        }
-
-                    } catch (e) {}
+                        return;
+                    }
 
                     this.getCategories();
                 },
 
                 getCategories() {
-                    this.$axios.get("{{ route('shop.api.categories.tree') }}")
-                        .then(response => {
+                    window.qubixCategoryNav.fetchFresh("{{ route('shop.api.categories.tree') }}")
+                        .then(({ categories, stamp }) => {
                             this.isLoading = false;
-                            this.categories = response.data.data;
-                            localStorage.setItem('categories', JSON.stringify(this.categories));
+                            this.categories = categories;
+                            window.qubixCategoryNav.write(categories, stamp);
                         })
                         .catch(error => {
+                            this.isLoading = false;
+                            this.categories = [];
                             console.log(error);
                         });
                 },
