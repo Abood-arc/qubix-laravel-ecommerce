@@ -18,15 +18,43 @@ ENV PLAYWRIGHT_BROWSERS_PATH=0
 
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
-RUN apt-get update && apt-get upgrade -y \
+# php8.3-* versions below are pinned to what was actually running in the
+# fleet on 2026-09-16 (see .superpowers/sdd/2026-09-14-fleet-readiness-implementation/
+# task-2.0-pre-pin-packages.txt) so every client stack rebuilds the same PHP
+# runtime instead of whatever Ubuntu happens to ship that day. `apt-get
+# upgrade -y` is deliberately dropped (not kept): leaving it in place would
+# still let every other base-image package (openssl, curl, git, ...) drift
+# between builds weeks apart, which undermines the whole point of this pin
+# for everything except PHP, for no benefit beyond fast-forwarding
+# already-installed base packages to whatever's latest at build time.
+RUN apt-get update \
     && apt-get install -y --no-install-recommends \
         ca-certificates curl gnupg gosu git zip unzip supervisor sqlite3 \
         libcap2-bin libpng-dev mysql-client nginx \
-        php8.3-cli php8.3-common php8.3-mysql php8.3-mbstring php8.3-xml \
-        php8.3-curl php8.3-zip php8.3-bcmath php8.3-intl php8.3-gd php8.3-sqlite3 \
-        php8.3-soap php8.3-readline php8.3-ldap php8.3-redis php8.3-pgsql \
-        php8.3-imap php8.3-mongodb php8.3-imagick php8.3-msgpack php8.3-igbinary \
-        php8.3-memcached php8.3-pcov php8.3-fpm \
+        php8.3-cli=8.3.6-0ubuntu0.24.04.11 \
+        php8.3-common=8.3.6-0ubuntu0.24.04.11 \
+        php8.3-mysql=8.3.6-0ubuntu0.24.04.11 \
+        php8.3-mbstring=8.3.6-0ubuntu0.24.04.11 \
+        php8.3-xml=8.3.6-0ubuntu0.24.04.11 \
+        php8.3-curl=8.3.6-0ubuntu0.24.04.11 \
+        php8.3-zip=8.3.6-0ubuntu0.24.04.11 \
+        php8.3-bcmath=8.3.6-0ubuntu0.24.04.11 \
+        php8.3-intl=8.3.6-0ubuntu0.24.04.11 \
+        php8.3-gd=8.3.6-0ubuntu0.24.04.11 \
+        php8.3-sqlite3=8.3.6-0ubuntu0.24.04.11 \
+        php8.3-soap=8.3.6-0ubuntu0.24.04.11 \
+        php8.3-readline=8.3.6-0ubuntu0.24.04.11 \
+        php8.3-ldap=8.3.6-0ubuntu0.24.04.11 \
+        php8.3-redis=5.3.7+4.3.0-3ubuntu1 \
+        php8.3-pgsql=8.3.6-0ubuntu0.24.04.11 \
+        php8.3-imap=8.3.6-0ubuntu0.24.04.11 \
+        php8.3-mongodb=1.15.0+1.11.1+1.9.2+1.7.5-1ubuntu3 \
+        php8.3-imagick=3.7.0-4ubuntu3 \
+        php8.3-msgpack=1:2.2.0~rc2-3ubuntu1 \
+        php8.3-igbinary=3.2.13-1ubuntu3 \
+        php8.3-memcached=3.2.0+2.2.0-4ubuntu3 \
+        php8.3-pcov=1.0.11-5ubuntu1 \
+        php8.3-fpm=8.3.6-0ubuntu0.24.04.11 \
         nodejs npm \
     && curl -sLS https://getcomposer.org/installer | php -- --install-dir=/usr/bin/ --filename=composer \
     && setcap "cap_net_bind_service=+ep" /usr/bin/php8.3 \
