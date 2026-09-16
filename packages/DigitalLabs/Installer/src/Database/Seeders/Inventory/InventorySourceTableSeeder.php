@@ -19,20 +19,22 @@ class InventorySourceTableSeeder extends Seeder
 
         $defaultLocale = $parameters['default_locale'] ?? config('app.locale');
 
+        // Every field below is deliberately a "replace me" placeholder rather
+        // than a specific fake business/city: `contact_email` uses a
+        // placeholder-domain convention (not example.com — that reads as a
+        // real demo/test artifact rather than "please configure this"), and
+        // the address fields avoid implying a real US location for what will
+        // be a multi-country fleet (jj-bags.com, for instance, is Saudi
+        // Arabia). `country` is the one exception — it stays a real ISO code
+        // ('US') because Admin's country/state dropdowns look it up against
+        // core()->countries() and an invalid code would break that lookup.
         DB::table('inventory_sources')->insert([
             'id' => 1,
             'code' => 'default',
             'name' => trans('installer::app.seeders.inventory.inventory-sources.name', [], $defaultLocale),
             'contact_name' => trans('installer::app.seeders.inventory.inventory-sources.name', [], $defaultLocale),
-            // Placeholder-domain convention (not example.com — that reads as a
-            // real demo/test artifact rather than "please configure this"),
-            // and a US-specific fake address would be misleading for a
-            // multi-country fleet. `country` stays a real ISO code ('US') so
-            // Admin's country/state dropdowns (which look it up against
-            // core()->countries()) keep rendering correctly; the rest just
-            // needs to obviously read as "replace me", not imply a real place.
             'contact_email' => 'warehouse@yourdomain.com',
-            'contact_number' => 1234567899,
+            'contact_number' => '0000000000',
             'status' => 1,
             'country' => 'US',
             'state' => 'Update State',

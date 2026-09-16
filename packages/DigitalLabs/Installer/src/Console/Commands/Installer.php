@@ -391,7 +391,11 @@ class Installer extends Command
 
         $adminPassword = text(
             label    : 'Configure the password for the admin user',
-            default  : 'admin123',
+            // A fresh random default rather than a fixed literal — an
+            // operator who just presses Enter through this prompt still
+            // gets a real, install-specific password instead of a
+            // well-known string.
+            default  : Str::random(20),
             required : true,
             validate : function (string $value) {
                 if (strlen($value) < 6) {

@@ -76,6 +76,13 @@ jobs:
         run: composer install
 
       - name: Running Qubix Installer
+        env:
+          # AdminsTableSeeder falls back to a random password when this is
+          # unset, which would break every Playwright spec logging in via
+          # packages/DigitalLabs/Admin/tests/e2e-pw/utils/admin.ts's
+          # hardcoded admin@example.com / admin123 fixture — --skip-admin-creation
+          # here means nothing overwrites the seeded row.
+          QUBIX_INSTALL_ADMIN_PASSWORD: admin123
         run: php artisan qubix:install --skip-env-check --skip-admin-creation --skip-github-star
 
       - name: Seed Product Table
