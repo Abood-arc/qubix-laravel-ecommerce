@@ -71,7 +71,7 @@ return [
         'cms' => [
             'pages' => [
                 'about-us' => [
-                    'content' => 'Contenu de la page À propos de nous',
+                    'content' => 'Le contenu de cette page est en cours de finalisation. Merci de revenir bientôt.',
                     'title' => 'À propos de nous',
                 ],
 
@@ -81,47 +81,47 @@ return [
                 ],
 
                 'customer-service' => [
-                    'content' => 'Contenu de la page Service client',
+                    'content' => 'Nos informations sur le service client sont en cours de finalisation. Contactez-nous entre-temps pour toute assistance.',
                     'title' => 'Service client',
                 ],
 
                 'payment-policy' => [
-                    'content' => 'Contenu de la page Politique de paiement',
+                    'content' => 'Notre politique de paiement est actuellement en cours de finalisation. Contactez-nous entre-temps pour plus de détails.',
                     'title' => 'Politique de paiement',
                 ],
 
                 'privacy-policy' => [
-                    'content' => 'Contenu de la page Politique de confidentialité',
+                    'content' => 'Notre politique de confidentialité est actuellement en cours de finalisation. Contactez-nous entre-temps pour plus de détails.',
                     'title' => 'Politique de confidentialité',
                 ],
 
                 'refund-policy' => [
-                    'content' => 'Contenu de la page Politique de remboursement',
+                    'content' => 'Notre politique de remboursement est actuellement en cours de finalisation. Contactez-nous entre-temps pour plus de détails.',
                     'title' => 'Politique de remboursement',
                 ],
 
                 'return-policy' => [
-                    'content' => 'Contenu de la page Politique de retour',
+                    'content' => 'Notre politique de retour est actuellement en cours de finalisation. Contactez-nous entre-temps pour plus de détails.',
                     'title' => 'Politique de retour',
                 ],
 
                 'shipping-policy' => [
-                    'content' => 'Contenu de la page Politique d\'expédition',
+                    'content' => 'Notre politique d\'expédition est actuellement en cours de finalisation. Contactez-nous entre-temps pour plus de détails.',
                     'title' => 'Politique d\'expédition',
                 ],
 
                 'terms-conditions' => [
-                    'content' => 'Contenu de la page Termes et conditions',
+                    'content' => 'Nos conditions générales sont actuellement en cours de finalisation. Contactez-nous entre-temps pour plus de détails.',
                     'title' => 'Termes et conditions',
                 ],
 
                 'terms-of-use' => [
-                    'content' => 'Contenu de la page Conditions d\'utilisation',
+                    'content' => 'Nos conditions d\'utilisation sont actuellement en cours de finalisation. Contactez-nous entre-temps pour plus de détails.',
                     'title' => 'Conditions d\'utilisation',
                 ],
 
                 'whats-new' => [
-                    'content' => 'Contenu de la page Quoi de neuf',
+                    'content' => 'Cette section est en cours de mise à jour avec les dernières actualités. Merci de revenir bientôt.',
                     'title' => 'Quoi de neuf',
                 ],
             ],

@@ -71,7 +71,7 @@ return [
         'cms' => [
             'pages' => [
                 'about-us' => [
-                    'content' => 'Contenuto della Pagina Chi siamo',
+                    'content' => 'Il contenuto di questa pagina è in fase di completamento. Torna a trovarci presto.',
                     'title' => 'Chi siamo',
                 ],
 
@@ -81,47 +81,47 @@ return [
                 ],
 
                 'customer-service' => [
-                    'content' => 'Contenuto della Pagina Assistenza Clienti',
+                    'content' => 'Le informazioni sul nostro servizio clienti sono in fase di completamento. Nel frattempo contattaci per assistenza.',
                     'title' => 'Assistenza Clienti',
                 ],
 
                 'payment-policy' => [
-                    'content' => 'Contenuto della Pagina Politica di Pagamento',
+                    'content' => 'La nostra politica di pagamento è attualmente in fase di completamento. Nel frattempo contattaci per maggiori dettagli.',
                     'title' => 'Politica di Pagamento',
                 ],
 
                 'privacy-policy' => [
-                    'content' => 'Contenuto della Pagina Politica sulla Privacy',
+                    'content' => 'La nostra informativa sulla privacy è attualmente in fase di completamento. Nel frattempo contattaci per maggiori dettagli.',
                     'title' => 'Politica sulla Privacy',
                 ],
 
                 'refund-policy' => [
-                    'content' => 'Contenuto della Pagina Politica di Rimborso',
+                    'content' => 'La nostra politica di rimborso è attualmente in fase di completamento. Nel frattempo contattaci per maggiori dettagli.',
                     'title' => 'Politica di Rimborso',
                 ],
 
                 'return-policy' => [
-                    'content' => 'Contenuto della Pagina Politica di Reso',
+                    'content' => 'La nostra politica di reso è attualmente in fase di completamento. Nel frattempo contattaci per maggiori dettagli.',
                     'title' => 'Politica di Reso',
                 ],
 
                 'shipping-policy' => [
-                    'content' => 'Contenuto della Pagina Politica di Spedizione',
+                    'content' => 'La nostra politica di spedizione è attualmente in fase di completamento. Nel frattempo contattaci per maggiori dettagli.',
                     'title' => 'Politica di Spedizione',
                 ],
 
                 'terms-conditions' => [
-                    'content' => 'Contenuto della Pagina Termini e Condizioni',
+                    'content' => 'I nostri termini e condizioni sono attualmente in fase di completamento. Nel frattempo contattaci per maggiori dettagli.',
                     'title' => 'Termini e Condizioni',
                 ],
 
                 'terms-of-use' => [
-                    'content' => 'Contenuto della Pagina Termini d\'Uso',
+                    'content' => 'Le nostre condizioni d\'uso sono attualmente in fase di completamento. Nel frattempo contattaci per maggiori dettagli.',
                     'title' => 'Termini d\'Uso',
                 ],
 
                 'whats-new' => [
-                    'content' => 'Contenuto della Pagina Novità',
+                    'content' => 'Questa sezione è in fase di aggiornamento con le ultime novità. Torna a trovarci presto.',
                     'title' => 'Novità',
                 ],
             ],

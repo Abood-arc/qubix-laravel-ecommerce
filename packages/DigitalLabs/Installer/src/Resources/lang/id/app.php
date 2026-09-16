@@ -71,7 +71,7 @@ return [
         'cms' => [
             'pages' => [
                 'about-us' => [
-                    'content' => 'Konten Halaman Tentang Kami',
+                    'content' => 'Konten halaman ini sedang disempurnakan. Silakan kunjungi kembali segera.',
                     'title' => 'Tentang Kami',
                 ],
 
@@ -81,47 +81,47 @@ return [
                 ],
 
                 'customer-service' => [
-                    'content' => 'Konten Halaman Layanan Pelanggan',
+                    'content' => 'Informasi layanan pelanggan kami sedang disempurnakan. Silakan hubungi kami sementara waktu untuk bantuan.',
                     'title' => 'Layanan Pelanggan',
                 ],
 
                 'payment-policy' => [
-                    'content' => 'Konten Halaman Kebijakan Pembayaran',
+                    'content' => 'Kebijakan pembayaran kami saat ini sedang disempurnakan. Silakan hubungi kami sementara waktu untuk informasi lebih lanjut.',
                     'title' => 'Kebijakan Pembayaran',
                 ],
 
                 'privacy-policy' => [
-                    'content' => 'Konten Halaman Kebijakan Privasi',
+                    'content' => 'Kebijakan privasi kami saat ini sedang disempurnakan. Silakan hubungi kami sementara waktu untuk informasi lebih lanjut.',
                     'title' => 'Kebijakan Privasi',
                 ],
 
                 'refund-policy' => [
-                    'content' => 'Konten Halaman Kebijakan Pengembalian Dana',
+                    'content' => 'Kebijakan pengembalian dana kami saat ini sedang disempurnakan. Silakan hubungi kami sementara waktu untuk informasi lebih lanjut.',
                     'title' => 'Kebijakan Pengembalian Dana',
                 ],
 
                 'return-policy' => [
-                    'content' => 'Konten Halaman Kebijakan Pengembalian Barang',
+                    'content' => 'Kebijakan pengembalian kami saat ini sedang disempurnakan. Silakan hubungi kami sementara waktu untuk informasi lebih lanjut.',
                     'title' => 'Kebijakan Pengembalian Barang',
                 ],
 
                 'shipping-policy' => [
-                    'content' => 'Konten Halaman Kebijakan Pengiriman',
+                    'content' => 'Kebijakan pengiriman kami saat ini sedang disempurnakan. Silakan hubungi kami sementara waktu untuk informasi lebih lanjut.',
                     'title' => 'Kebijakan Pengiriman',
                 ],
 
                 'terms-conditions' => [
-                    'content' => 'Konten Halaman Syarat & Ketentuan',
+                    'content' => 'Syarat & ketentuan kami saat ini sedang disempurnakan. Silakan hubungi kami sementara waktu untuk informasi lebih lanjut.',
                     'title' => 'Syarat & Ketentuan',
                 ],
 
                 'terms-of-use' => [
-                    'content' => 'Konten Halaman Ketentuan Penggunaan',
+                    'content' => 'Ketentuan penggunaan kami saat ini sedang disempurnakan. Silakan hubungi kami sementara waktu untuk informasi lebih lanjut.',
                     'title' => 'Ketentuan Penggunaan',
                 ],
 
                 'whats-new' => [
-                    'content' => 'Konten Halaman Apa yang Baru',
+                    'content' => 'Bagian ini sedang diperbarui dengan berita terbaru. Silakan kunjungi kembali segera.',
                     'title' => 'Apa yang Baru',
                 ],
             ],

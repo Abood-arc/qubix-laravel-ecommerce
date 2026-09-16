@@ -71,7 +71,7 @@ return [
         'cms' => [
             'pages' => [
                 'about-us' => [
-                    'content' => 'Over Ons Pagina Inhoud',
+                    'content' => 'De inhoud van deze pagina wordt momenteel afgerond. Kom binnenkort terug.',
                     'title' => 'Over Ons',
                 ],
 
@@ -81,47 +81,47 @@ return [
                 ],
 
                 'customer-service' => [
-                    'content' => 'Klantenservice Pagina Inhoud',
+                    'content' => 'Onze klantenserviceinformatie wordt momenteel afgerond. Neem ondertussen contact met ons op voor hulp.',
                     'title' => 'Klantenservice',
                 ],
 
                 'payment-policy' => [
-                    'content' => 'Betalingsbeleid Pagina Inhoud',
+                    'content' => 'Ons betalingsbeleid wordt momenteel afgerond. Neem ondertussen contact met ons op voor meer informatie.',
                     'title' => 'Betalingsbeleid',
                 ],
 
                 'privacy-policy' => [
-                    'content' => 'Privacybeleid Pagina Inhoud',
+                    'content' => 'Ons privacybeleid wordt momenteel afgerond. Neem ondertussen contact met ons op voor meer informatie.',
                     'title' => 'Privacybeleid',
                 ],
 
                 'refund-policy' => [
-                    'content' => 'Retourbeleid Pagina Inhoud',
+                    'content' => 'Ons terugbetalingsbeleid wordt momenteel afgerond. Neem ondertussen contact met ons op voor meer informatie.',
                     'title' => 'Retourbeleid',
                 ],
 
                 'return-policy' => [
-                    'content' => 'Terugstuurbeleid Pagina Inhoud',
+                    'content' => 'Ons retourbeleid wordt momenteel afgerond. Neem ondertussen contact met ons op voor meer informatie.',
                     'title' => 'Terugstuurbeleid',
                 ],
 
                 'shipping-policy' => [
-                    'content' => 'Verzendingsbeleid Pagina Inhoud',
+                    'content' => 'Ons verzendbeleid wordt momenteel afgerond. Neem ondertussen contact met ons op voor meer informatie.',
                     'title' => 'Verzendingsbeleid',
                 ],
 
                 'terms-conditions' => [
-                    'content' => 'Algemene Voorwaarden Pagina Inhoud',
+                    'content' => 'Onze algemene voorwaarden worden momenteel afgerond. Neem ondertussen contact met ons op voor meer informatie.',
                     'title' => 'Algemene Voorwaarden',
                 ],
 
                 'terms-of-use' => [
-                    'content' => 'Gebruiksvoorwaarden Pagina Inhoud',
+                    'content' => 'Onze gebruiksvoorwaarden worden momenteel afgerond. Neem ondertussen contact met ons op voor meer informatie.',
                     'title' => 'Gebruiksvoorwaarden',
                 ],
 
                 'whats-new' => [
-                    'content' => 'Wat is nieuw pagina inhoud',
+                    'content' => 'Dit gedeelte wordt bijgewerkt met het laatste nieuws. Kom binnenkort terug.',
                     'title' => 'Wat is nieuw',
                 ],
             ],

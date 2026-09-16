@@ -71,7 +71,7 @@ return [
         'cms' => [
             'pages' => [
                 'about-us' => [
-                    'content' => '關於我們頁面內容',
+                    'content' => '此页面的内容正在完善中。请稍后再来查看。',
                     'title' => '關於我們',
                 ],
 
@@ -81,47 +81,47 @@ return [
                 ],
 
                 'customer-service' => [
-                    'content' => '客戶服務頁面內容',
+                    'content' => '我们的客户服务信息正在完善中。如需帮助，请立即联系我们。',
                     'title' => '客戶服務',
                 ],
 
                 'payment-policy' => [
-                    'content' => '付款政策頁面內容',
+                    'content' => '我们的付款政策目前正在完善中。如需了解详情，请联系我们。',
                     'title' => '付款政策',
                 ],
 
                 'privacy-policy' => [
-                    'content' => '隱私政策頁面內容',
+                    'content' => '我们的隐私政策目前正在完善中。如需了解详情，请联系我们。',
                     'title' => '隱私政策',
                 ],
 
                 'refund-policy' => [
-                    'content' => '退款政策頁面內容',
+                    'content' => '我们的退款政策目前正在完善中。如需了解详情，请联系我们。',
                     'title' => '退款政策',
                 ],
 
                 'return-policy' => [
-                    'content' => '退貨政策頁面內容',
+                    'content' => '我们的退货政策目前正在完善中。如需了解详情，请联系我们。',
                     'title' => '退貨政策',
                 ],
 
                 'shipping-policy' => [
-                    'content' => '運送政策頁面內容',
+                    'content' => '我们的配送政策目前正在完善中。如需了解详情，请联系我们。',
                     'title' => '運送政策',
                 ],
 
                 'terms-conditions' => [
-                    'content' => '條款和條件頁面內容',
+                    'content' => '我们的条款和条件目前正在完善中。如需了解详情，请联系我们。',
                     'title' => '條款和條件',
                 ],
 
                 'terms-of-use' => [
-                    'content' => '使用條款頁面內容',
+                    'content' => '我们的使用条款目前正在完善中。如需了解详情，请联系我们。',
                     'title' => '使用條款',
                 ],
 
                 'whats-new' => [
-                    'content' => '最新消息頁面內容',
+                    'content' => '此板块正在更新最新资讯。请稍后再来查看。',
                     'title' => '最新消息',
                 ],
             ],

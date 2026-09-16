@@ -71,7 +71,7 @@ return [
         'cms' => [
             'pages' => [
                 'about-us' => [
-                    'content' => 'About Us Page Content',
+                    'content' => 'The content on this page is being finalized. Please check back soon.',
                     'title' => 'About Us',
                 ],
 
@@ -81,47 +81,47 @@ return [
                 ],
 
                 'customer-service' => [
-                    'content' => 'Customer Service Page Content',
+                    'content' => 'Our customer service information is being finalized. Please contact us for assistance in the meantime.',
                     'title' => 'Customer Service',
                 ],
 
                 'payment-policy' => [
-                    'content' => 'Payment Policy Page Content',
+                    'content' => 'Our payment policy is currently being finalized. Please contact us for details in the meantime.',
                     'title' => 'Payment Policy',
                 ],
 
                 'privacy-policy' => [
-                    'content' => 'Privacy Policy Page Content',
+                    'content' => 'Our privacy policy is currently being finalized. Please contact us for details in the meantime.',
                     'title' => 'Privacy Policy',
                 ],
 
                 'refund-policy' => [
-                    'content' => 'Refund Policy Page Content',
+                    'content' => 'Our refund policy is currently being finalized. Please contact us for details in the meantime.',
                     'title' => 'Refund Policy',
                 ],
 
                 'return-policy' => [
-                    'content' => 'Return Policy Page Content',
+                    'content' => 'Our return policy is currently being finalized. Please contact us for details in the meantime.',
                     'title' => 'Return Policy',
                 ],
 
                 'shipping-policy' => [
-                    'content' => 'Shipping Policy Page Content',
+                    'content' => 'Our shipping policy is currently being finalized. Please contact us for details in the meantime.',
                     'title' => 'Shipping Policy',
                 ],
 
                 'terms-conditions' => [
-                    'content' => 'Terms & Conditions Page Content',
+                    'content' => 'Our terms & conditions are currently being finalized. Please contact us for details in the meantime.',
                     'title' => 'Terms & Conditions',
                 ],
 
                 'terms-of-use' => [
-                    'content' => 'Terms of Use Page Content',
+                    'content' => 'Our terms of use are currently being finalized. Please contact us for details in the meantime.',
                     'title' => 'Terms of Use',
                 ],
 
                 'whats-new' => [
-                    'content' => 'What\'s New page content',
+                    'content' => 'This section is being updated with the latest news. Please check back soon.',
                     'title' => 'What\'s New',
                 ],
             ],

@@ -71,7 +71,7 @@ return [
         'cms' => [
             'pages' => [
                 'about-us' => [
-                    'content' => 'Hakkımızda Sayfası İçeriği',
+                    'content' => 'Bu sayfanın içeriği şu anda tamamlanıyor. Lütfen yakında tekrar kontrol edin.',
                     'title' => 'Hakkımızda',
                 ],
 
@@ -81,47 +81,47 @@ return [
                 ],
 
                 'customer-service' => [
-                    'content' => 'Müşteri Hizmetleri Sayfa İçeriği',
+                    'content' => 'Müşteri hizmetleri bilgilerimiz şu anda tamamlanıyor. Bu süre zarfında yardım için bizimle iletişime geçin.',
                     'title' => 'Müşteri Hizmetleri',
                 ],
 
                 'payment-policy' => [
-                    'content' => 'Ödeme Politikası Sayfa İçeriği',
+                    'content' => 'Ödeme politikamız şu anda tamamlanıyor. Bu süre zarfında ayrıntılar için bizimle iletişime geçin.',
                     'title' => 'Ödeme Politikası',
                 ],
 
                 'privacy-policy' => [
-                    'content' => 'Gizlilik Politikası Sayfa İçeriği',
+                    'content' => 'Gizlilik politikamız şu anda tamamlanıyor. Bu süre zarfında ayrıntılar için bizimle iletişime geçin.',
                     'title' => 'Gizlilik Politikası',
                 ],
 
                 'refund-policy' => [
-                    'content' => 'İade Politikası Sayfa İçeriği',
+                    'content' => 'Para iadesi politikamız şu anda tamamlanıyor. Bu süre zarfında ayrıntılar için bizimle iletişime geçin.',
                     'title' => 'İade Politikası',
                 ],
 
                 'return-policy' => [
-                    'content' => 'İade Politikası Sayfa İçeriği',
+                    'content' => 'İade politikamız şu anda tamamlanıyor. Bu süre zarfında ayrıntılar için bizimle iletişime geçin.',
                     'title' => 'İade Politikası',
                 ],
 
                 'shipping-policy' => [
-                    'content' => 'Kargo Politikası Sayfa İçeriği',
+                    'content' => 'Kargo politikamız şu anda tamamlanıyor. Bu süre zarfında ayrıntılar için bizimle iletişime geçin.',
                     'title' => 'Kargo Politikası',
                 ],
 
                 'terms-conditions' => [
-                    'content' => 'Şartlar ve Koşullar Sayfa İçeriği',
+                    'content' => 'Şartlar ve koşullarımız şu anda tamamlanıyor. Bu süre zarfında ayrıntılar için bizimle iletişime geçin.',
                     'title' => 'Şartlar ve Koşullar',
                 ],
 
                 'terms-of-use' => [
-                    'content' => 'Kullanım Koşulları Sayfa İçeriği',
+                    'content' => 'Kullanım koşullarımız şu anda tamamlanıyor. Bu süre zarfında ayrıntılar için bizimle iletişime geçin.',
                     'title' => 'Kullanım Koşulları',
                 ],
 
                 'whats-new' => [
-                    'content' => 'Yenilikler Sayfa İçeriği',
+                    'content' => 'Bu bölüm en son haberlerle güncelleniyor. Lütfen yakında tekrar kontrol edin.',
                     'title' => 'Yenilikler',
                 ],
             ],

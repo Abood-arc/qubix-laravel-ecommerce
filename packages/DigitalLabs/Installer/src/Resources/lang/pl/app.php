@@ -71,7 +71,7 @@ return [
         'cms' => [
             'pages' => [
                 'about-us' => [
-                    'content' => 'Treść strony "O nas"',
+                    'content' => 'Treść tej strony jest obecnie finalizowana. Zapraszamy wkrótce ponownie.',
                     'title' => 'O nas',
                 ],
 
@@ -81,47 +81,47 @@ return [
                 ],
 
                 'customer-service' => [
-                    'content' => 'Treść strony obsługi klienta',
+                    'content' => 'Informacje o naszej obsłudze klienta są obecnie finalizowane. W międzyczasie prosimy o kontakt w celu uzyskania pomocy.',
                     'title' => 'Obsługa klienta',
                 ],
 
                 'payment-policy' => [
-                    'content' => 'Treść strony z regulaminem płatności',
+                    'content' => 'Nasza polityka płatności jest obecnie finalizowana. W międzyczasie prosimy o kontakt w celu uzyskania szczegółów.',
                     'title' => 'Regulamin płatności',
                 ],
 
                 'privacy-policy' => [
-                    'content' => 'Treść strony z polityką prywatności',
+                    'content' => 'Nasza polityka prywatności jest obecnie finalizowana. W międzyczasie prosimy o kontakt w celu uzyskania szczegółów.',
                     'title' => 'Polityka prywatności',
                 ],
 
                 'refund-policy' => [
-                    'content' => 'Treść strony z regulaminem zwrotów',
+                    'content' => 'Nasza polityka zwrotu kosztów jest obecnie finalizowana. W międzyczasie prosimy o kontakt w celu uzyskania szczegółów.',
                     'title' => 'Regulamin zwrotów',
                 ],
 
                 'return-policy' => [
-                    'content' => 'Treść strony z regulaminem zwrotów',
+                    'content' => 'Nasza polityka zwrotów jest obecnie finalizowana. W międzyczasie prosimy o kontakt w celu uzyskania szczegółów.',
                     'title' => 'Regulamin zwrotów',
                 ],
 
                 'shipping-policy' => [
-                    'content' => 'Treść strony z regulaminem wysyłki',
+                    'content' => 'Nasza polityka wysyłki jest obecnie finalizowana. W międzyczasie prosimy o kontakt w celu uzyskania szczegółów.',
                     'title' => 'Regulamin wysyłki',
                 ],
 
                 'terms-conditions' => [
-                    'content' => 'Treść strony z regulaminem ogólnym',
+                    'content' => 'Nasze warunki i zasady są obecnie finalizowane. W międzyczasie prosimy o kontakt w celu uzyskania szczegółów.',
                     'title' => 'Regulamin ogólny',
                 ],
 
                 'terms-of-use' => [
-                    'content' => 'Treść strony z warunkami użytkowania',
+                    'content' => 'Nasze warunki korzystania są obecnie finalizowane. W międzyczasie prosimy o kontakt w celu uzyskania szczegółów.',
                     'title' => 'Warunki użytkowania',
                 ],
 
                 'whats-new' => [
-                    'content' => 'Treść strony "Co nowego"',
+                    'content' => 'Ta sekcja jest aktualizowana o najnowsze wiadomości. Zapraszamy wkrótce ponownie.',
                     'title' => 'Co nowego',
                 ],
             ],

@@ -71,7 +71,7 @@ return [
         'cms' => [
             'pages' => [
                 'about-us' => [
-                    'content' => 'Conteúdo da Página Sobre Nós',
+                    'content' => 'O conteúdo desta página está sendo finalizado. Volte em breve.',
                     'title' => 'Sobre Nós',
                 ],
 
@@ -81,47 +81,47 @@ return [
                 ],
 
                 'customer-service' => [
-                    'content' => 'Conteúdo da Página de Atendimento ao Cliente',
+                    'content' => 'As informações do nosso atendimento ao cliente estão sendo finalizadas. Entre em contato conosco enquanto isso para obter ajuda.',
                     'title' => 'Atendimento ao Cliente',
                 ],
 
                 'payment-policy' => [
-                    'content' => 'Conteúdo da Página de Política de Pagamento',
+                    'content' => 'Nossa política de pagamento está sendo finalizada no momento. Entre em contato conosco enquanto isso para mais detalhes.',
                     'title' => 'Política de Pagamento',
                 ],
 
                 'privacy-policy' => [
-                    'content' => 'Conteúdo da Página de Política de Privacidade',
+                    'content' => 'Nossa política de privacidade está sendo finalizada no momento. Entre em contato conosco enquanto isso para mais detalhes.',
                     'title' => 'Política de Privacidade',
                 ],
 
                 'refund-policy' => [
-                    'content' => 'Conteúdo da Página de Reembolso',
+                    'content' => 'Nossa política de reembolso está sendo finalizada no momento. Entre em contato conosco enquanto isso para mais detalhes.',
                     'title' => 'Política de Reembolso',
                 ],
 
                 'return-policy' => [
-                    'content' => 'Conteúdo da Página de Devolução',
+                    'content' => 'Nossa política de devolução está sendo finalizada no momento. Entre em contato conosco enquanto isso para mais detalhes.',
                     'title' => 'Política de Devolução',
                 ],
 
                 'shipping-policy' => [
-                    'content' => 'Conteúdo da Página de Política de Envio',
+                    'content' => 'Nossa política de envio está sendo finalizada no momento. Entre em contato conosco enquanto isso para mais detalhes.',
                     'title' => 'Política de Envio',
                 ],
 
                 'terms-conditions' => [
-                    'content' => 'Conteúdo da Página de Termos e Condições',
+                    'content' => 'Nossos termos e condições estão sendo finalizados no momento. Entre em contato conosco enquanto isso para mais detalhes.',
                     'title' => 'Termos e Condições',
                 ],
 
                 'terms-of-use' => [
-                    'content' => 'Conteúdo da Página de Termos de Uso',
+                    'content' => 'Nossos termos de uso estão sendo finalizados no momento. Entre em contato conosco enquanto isso para mais detalhes.',
                     'title' => 'Termos de Uso',
                 ],
 
                 'whats-new' => [
-                    'content' => 'Conteúdo da Página de Novidades',
+                    'content' => 'Esta seção está sendo atualizada com as últimas novidades. Volte em breve.',
                     'title' => 'Novidades',
                 ],
             ],

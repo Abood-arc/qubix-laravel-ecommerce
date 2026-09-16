@@ -71,7 +71,7 @@ return [
         'cms' => [
             'pages' => [
                 'about-us' => [
-                    'content' => 'Contingut de la Pàgina Sobre de Nosaltres',
+                    'content' => 'El contingut d\'aquesta pàgina s\'està finalitzant. Torneu a consultar-la aviat.',
                     'title' => 'Sobre de Nosaltres',
                 ],
 
@@ -81,47 +81,47 @@ return [
                 ],
 
                 'customer-service' => [
-                    'content' => 'Contingut de la pàgina Servei al Client',
+                    'content' => 'La nostra informació de servei al client s\'està finalitzant. Contacteu amb nosaltres mentrestant per obtenir ajuda.',
                     'title' => 'Servei al Client',
                 ],
 
                 'payment-policy' => [
-                    'content' => 'Contingut de la pàgina Política de Pagament',
+                    'content' => 'La nostra política de pagament s\'està finalitzant. Contacteu amb nosaltres mentrestant per obtenir més detalls.',
                     'title' => 'Política de Pagament',
                 ],
 
                 'privacy-policy' => [
-                    'content' => 'Contingut de la pàgina Política de Privacitat',
+                    'content' => 'La nostra política de privadesa s\'està finalitzant. Contacteu amb nosaltres mentrestant per obtenir més detalls.',
                     'title' => 'Política de Privacitat',
                 ],
 
                 'refund-policy' => [
-                    'content' => 'Contingut de la pàgina Política de Reemborsament',
+                    'content' => 'La nostra política de reemborsaments s\'està finalitzant. Contacteu amb nosaltres mentrestant per obtenir més detalls.',
                     'title' => 'Política de Reemborsament',
                 ],
 
                 'return-policy' => [
-                    'content' => 'Contingut de la pàgina Política de Retorn',
+                    'content' => 'La nostra política de devolucions s\'està finalitzant. Contacteu amb nosaltres mentrestant per obtenir més detalls.',
                     'title' => 'Política de Retorn',
                 ],
 
                 'shipping-policy' => [
-                    'content' => 'Contingut de la pàgina Política d\'Enviament',
+                    'content' => 'La nostra política d\'enviaments s\'està finalitzant. Contacteu amb nosaltres mentrestant per obtenir més detalls.',
                     'title' => 'Política d\'Enviament',
                 ],
 
                 'terms-conditions' => [
-                    'content' => 'Contingut de la pàgina Termes i Condicions',
+                    'content' => 'Els nostres termes i condicions s\'estan finalitzant. Contacteu amb nosaltres mentrestant per obtenir més detalls.',
                     'title' => 'Termes i Condicions',
                 ],
 
                 'terms-of-use' => [
-                    'content' => 'Contingut de la pàgina Termes d\'Ús',
+                    'content' => 'Les nostres condicions d\'ús s\'estan finalitzant. Contacteu amb nosaltres mentrestant per obtenir més detalls.',
                     'title' => 'Termes d\'Ús',
                 ],
 
                 'whats-new' => [
-                    'content' => 'Contingut de la pàgina Novetats',
+                    'content' => 'Aquesta secció s\'està actualitzant amb les últimes novetats. Torneu a consultar-la aviat.',
                     'title' => 'Novetats',
                 ],
             ],

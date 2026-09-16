@@ -71,7 +71,7 @@ return [
         'cms' => [
             'pages' => [
                 'about-us' => [
-                    'content' => 'Über uns Seitensinhalt',
+                    'content' => 'Der Inhalt dieser Seite wird derzeit fertiggestellt. Bitte schauen Sie bald wieder vorbei.',
                     'title' => 'Über uns',
                 ],
 
@@ -81,47 +81,47 @@ return [
                 ],
 
                 'customer-service' => [
-                    'content' => 'Kundenservice Seitensinhalt',
+                    'content' => 'Unsere Kundendienstinformationen werden derzeit fertiggestellt. Bitte kontaktieren Sie uns in der Zwischenzeit für Unterstützung.',
                     'title' => 'Kundenservice',
                 ],
 
                 'payment-policy' => [
-                    'content' => 'Zahlungsrichtlinie Seitensinhalt',
+                    'content' => 'Unsere Zahlungsrichtlinie wird derzeit fertiggestellt. Bitte kontaktieren Sie uns in der Zwischenzeit für weitere Details.',
                     'title' => 'Zahlungsrichtlinie',
                 ],
 
                 'privacy-policy' => [
-                    'content' => 'Datenschutzrichtlinie Seitensinhalt',
+                    'content' => 'Unsere Datenschutzrichtlinie wird derzeit fertiggestellt. Bitte kontaktieren Sie uns in der Zwischenzeit für weitere Details.',
                     'title' => 'Datenschutzrichtlinie',
                 ],
 
                 'refund-policy' => [
-                    'content' => 'Rückgaberecht Seitensinhalt',
+                    'content' => 'Unsere Erstattungsrichtlinie wird derzeit fertiggestellt. Bitte kontaktieren Sie uns in der Zwischenzeit für weitere Details.',
                     'title' => 'Rückgaberecht',
                 ],
 
                 'return-policy' => [
-                    'content' => 'Rückgaberecht Seitensinhalt',
+                    'content' => 'Unsere Rückgaberichtlinie wird derzeit fertiggestellt. Bitte kontaktieren Sie uns in der Zwischenzeit für weitere Details.',
                     'title' => 'Rückgaberecht',
                 ],
 
                 'shipping-policy' => [
-                    'content' => 'Versandrichtlinie Seitensinhalt',
+                    'content' => 'Unsere Versandrichtlinie wird derzeit fertiggestellt. Bitte kontaktieren Sie uns in der Zwischenzeit für weitere Details.',
                     'title' => 'Versandrichtlinie',
                 ],
 
                 'terms-conditions' => [
-                    'content' => 'Nutzungsbedingungen Seitensinhalt',
+                    'content' => 'Unsere Allgemeinen Geschäftsbedingungen werden derzeit fertiggestellt. Bitte kontaktieren Sie uns in der Zwischenzeit für weitere Details.',
                     'title' => 'Nutzungsbedingungen',
                 ],
 
                 'terms-of-use' => [
-                    'content' => 'Nutzungsbedingungen Seitensinhalt',
+                    'content' => 'Unsere Nutzungsbedingungen werden derzeit fertiggestellt. Bitte kontaktieren Sie uns in der Zwischenzeit für weitere Details.',
                     'title' => 'Nutzungsbedingungen',
                 ],
 
                 'whats-new' => [
-                    'content' => 'Inhaltsseite für Neuigkeiten',
+                    'content' => 'Dieser Bereich wird mit den neuesten Nachrichten aktualisiert. Bitte schauen Sie bald wieder vorbei.',
                     'title' => 'Was gibt es Neues',
                 ],
             ],
