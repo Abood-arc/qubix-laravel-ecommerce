@@ -765,14 +765,19 @@ return [
                 'name' => 'engine',
                 'title' => 'admin::app.configuration.index.catalog.products.search.search-engine',
                 'type' => 'select',
+                'validation' => 'in:database',
                 'default' => 'database',
+                // 'elastic' intentionally removed: the fleet stack (this branch) never
+                // provisions an Elasticsearch container, so selecting it would make every
+                // product save queue a job that throws (see UpdateCreateIndex::handle()).
+                // The `abood` branch (the two live sites, which still run ES) keeps the
+                // option. `validation` closes a crafted POST to admin.configuration.store
+                // that bypasses the dropdown entirely, since ConfigurationForm builds its
+                // rules from this array's 'validation' key.
                 'options' => [
                     [
                         'title' => 'admin::app.configuration.index.catalog.products.search.database',
                         'value' => 'database',
-                    ], [
-                        'title' => 'admin::app.configuration.index.catalog.products.search.elastic',
-                        'value' => 'elastic',
                     ],
                 ],
             ], [
@@ -780,14 +785,12 @@ return [
                 'title' => 'admin::app.configuration.index.catalog.products.search.admin-mode',
                 'info' => 'admin::app.configuration.index.catalog.products.search.admin-mode-info',
                 'type' => 'select',
+                'validation' => 'in:database',
                 'default' => 'database',
                 'options' => [
                     [
                         'title' => 'admin::app.configuration.index.catalog.products.search.database',
                         'value' => 'database',
-                    ], [
-                        'title' => 'admin::app.configuration.index.catalog.products.search.elastic',
-                        'value' => 'elastic',
                     ],
                 ],
             ], [
@@ -795,14 +798,12 @@ return [
                 'title' => 'admin::app.configuration.index.catalog.products.search.storefront-mode',
                 'info' => 'admin::app.configuration.index.catalog.products.search.storefront-mode-info',
                 'type' => 'select',
+                'validation' => 'in:database',
                 'default' => 'database',
                 'options' => [
                     [
                         'title' => 'admin::app.configuration.index.catalog.products.search.database',
                         'value' => 'database',
-                    ], [
-                        'title' => 'admin::app.configuration.index.catalog.products.search.elastic',
-                        'value' => 'elastic',
                     ],
                 ],
             ], [
