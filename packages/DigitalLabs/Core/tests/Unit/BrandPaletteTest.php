@@ -78,6 +78,18 @@ it('chooses a dark foreground for a pale primary color', function () {
     expect(hexLightness($palette['onPrimary']))->toBeLessThan(30);
 });
 
+it('derives onPrimaryRgb as the space-separated RGB triplet of onPrimary, for Tailwind opacity composition', function () {
+    // Arrange: a dark primary, so onPrimary is white (#ffffff -> "255 255 255").
+    $darkPalette = BrandPalette::derive('#1f5f4f');
+
+    // Arrange: a pale primary, so onPrimary is the dark foreground (#1a1a1a -> "26 26 26").
+    $palePalette = BrandPalette::derive('#FFE08A');
+
+    // Act and Assert.
+    expect($darkPalette['onPrimaryRgb'])->toBe('255 255 255');
+    expect($palePalette['onPrimaryRgb'])->toBe('26 26 26');
+});
+
 it('keeps the scrolled shade distinguishable from a very dark primary color', function () {
     // Arrange.
     $hex = '#101014';

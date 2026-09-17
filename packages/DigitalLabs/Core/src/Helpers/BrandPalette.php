@@ -52,11 +52,18 @@ class BrandPalette
             $scrolledL = max(0, $l - static::MIN_LIGHTNESS_DELTA);
         }
 
+        $onPrimary = static::readableForeground($rgb);
+
         return [
             'primary' => static::rgbToHex($rgb),
             'border' => static::rgbToHex(static::hslToRgb($h, $s, $borderL)),
             'scrolled' => static::rgbToHex(static::hslToRgb($h, $s, $scrolledL)),
-            'onPrimary' => static::readableForeground($rgb),
+            'onPrimary' => $onPrimary,
+            // Space-separated RGB triplet of onPrimary, for Tailwind arbitrary
+            // values that compose it with an opacity modifier, e.g.
+            // bg-[rgb(var(--brand-on-primary-rgb)/10%)] — a literal hex can't
+            // be blended with an opacity fraction the way this triplet can.
+            'onPrimaryRgb' => implode(' ', static::parseHex($onPrimary)),
             'footerBg' => static::rgbToHex(static::hslToRgb($h, static::FOOTER_BG_SATURATION, static::FOOTER_BG_LIGHTNESS)),
             'footerBorder' => static::rgbToHex(static::hslToRgb($h, static::FOOTER_BORDER_SATURATION, static::FOOTER_BORDER_LIGHTNESS)),
         ];

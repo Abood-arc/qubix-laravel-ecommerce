@@ -45,14 +45,14 @@
         <!-- Search Bar -->
         <details class="header-search group relative">
             <summary
-                class="inline-flex h-10 w-10 list-none cursor-pointer items-center justify-center rounded-full text-[var(--brand-on-primary)] transition-colors hover:bg-white/10"
+                class="inline-flex h-10 w-10 list-none cursor-pointer items-center justify-center rounded-full text-[var(--brand-on-primary)] transition-colors hover:bg-[rgb(var(--brand-on-primary-rgb)/10%)]"
                 aria-label="@lang('shop::app.components.layouts.header.desktop.bottom.search')"
             >
                 <span class="icon-search text-2xl group-open:hidden"></span>
                 <span class="icon-cancel text-2xl hidden group-open:inline-block"></span>
             </summary>
 
-            <div class="absolute top-full z-[70] mt-3 w-[min(92vw,980px)] rounded-2xl border border-white/25 bg-[var(--brand-primary)] p-3 shadow-[0_14px_32px_rgba(10,30,24,0.35)] ltr:right-0 rtl:left-0">
+            <div class="absolute top-full z-[70] mt-3 w-[min(92vw,980px)] rounded-2xl border border-[rgb(var(--brand-on-primary-rgb)/25%)] bg-[var(--brand-primary)] p-3 shadow-[0_14px_32px_rgba(10,30,24,0.35)] ltr:right-0 rtl:left-0">
                 <form
                     action="{{ route('shop.search.index') }}"
                     class="relative flex items-center text-[var(--brand-on-primary)] [&_label.icon-camera]:text-[var(--brand-on-primary)] [&_button.icon-camera]:text-[var(--brand-on-primary)] [&_svg]:text-[var(--brand-on-primary)] [&_svg.animate-spin]:!text-[var(--brand-on-primary)] [&_label.absolute]:!top-1/2 [&_label.absolute]:-translate-y-1/2 [&_label.absolute]:mt-0 [&_button.absolute]:!top-1/2 [&_button.absolute]:-translate-y-1/2 [&_button.absolute]:mt-0"
@@ -75,7 +75,7 @@
                         name="query"
                         value="{{ request('query') }}"
                         @class([
-                            'block w-full rounded-xl border border-white/30 bg-white/10 py-3 text-sm font-medium text-[var(--brand-on-primary)] placeholder:text-white/70 transition-all hover:border-white/50 focus:border-white',
+                            'block w-full rounded-xl border border-[rgb(var(--brand-on-primary-rgb)/30%)] bg-[rgb(var(--brand-on-primary-rgb)/10%)] py-3 text-sm font-medium text-[var(--brand-on-primary)] placeholder:text-[rgb(var(--brand-on-primary-rgb)/70%)] transition-all hover:border-[rgb(var(--brand-on-primary-rgb)/50%)] focus:border-[var(--brand-on-primary)]',
                             'px-11' => ! core()->getConfigData('catalog.products.settings.image_search'),
                             'pl-11 pr-12 sm:pr-14 rtl:pl-12 rtl:pr-11' => core()->getConfigData('catalog.products.settings.image_search'),
                         ])
@@ -278,20 +278,20 @@
             v-else-if="'{{ core()->getConfigData('general.design.categories.category_view') }}' !== 'sidebar'"
         >
             <div
-                class="velocity-nav-category-group group relative flex h-[77px] items-center border-b-2 border-transparent pb-0.5 transition-[border-color] duration-200 hover:border-white/80"
+                class="velocity-nav-category-group group relative flex h-[77px] items-center border-b-2 border-transparent pb-0.5 transition-[border-color] duration-200 hover:border-[rgb(var(--brand-on-primary-rgb)/80%)]"
                 v-for="category in categories"
             >
                 <span class="flex h-full items-center">
                     <a
                         :href="category.url"
-                        class="velocity-nav-category-trigger inline-flex max-w-[14rem] items-center px-3 py-2 text-center text-[18px] font-medium tracking-normal text-[var(--brand-on-primary)] transition-[background-color,opacity,color] duration-200 hover:bg-white/[0.08] hover:text-[var(--brand-on-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/45 sm:max-w-none"
+                        class="velocity-nav-category-trigger inline-flex max-w-[14rem] items-center px-3 py-2 text-center text-[18px] font-medium tracking-normal text-[var(--brand-on-primary)] transition-[background-color,opacity,color] duration-200 hover:bg-[rgb(var(--brand-on-primary-rgb)/8%)] hover:text-[var(--brand-on-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgb(var(--brand-on-primary-rgb)/45%)] sm:max-w-none"
                     >
                         @{{ category.name }}
                     </a>
                 </span>
 
                 <div
-                    class="velocity-nav-megamenu pointer-events-none absolute top-full z-[60] max-h-[min(580px,80vh)] w-[min(94vw,1260px)] max-w-[1260px] translate-y-1 overflow-y-auto overflow-x-auto rounded-b-2xl border border-white/10 bg-[var(--brand-primary)] px-8 py-8 opacity-0 shadow-[0_24px_50px_-12px_rgba(10,30,24,0.45)] backdrop-blur-md transition duration-300 ease-out group-hover:pointer-events-auto group-hover:translate-y-0 group-hover:opacity-100 group-hover:duration-200 group-hover:ease-in ltr:left-1/2 ltr:-translate-x-1/2 rtl:right-1/2 rtl:translate-x-1/2"
+                    class="velocity-nav-megamenu pointer-events-none absolute top-full z-[60] max-h-[min(580px,80vh)] w-[min(94vw,1260px)] max-w-[1260px] translate-y-1 overflow-y-auto overflow-x-auto rounded-b-2xl border border-[rgb(var(--brand-on-primary-rgb)/10%)] bg-[var(--brand-primary)] px-8 py-8 opacity-0 shadow-[0_24px_50px_-12px_rgba(10,30,24,0.45)] backdrop-blur-md transition duration-300 ease-out group-hover:pointer-events-auto group-hover:translate-y-0 group-hover:opacity-100 group-hover:duration-200 group-hover:ease-in ltr:left-1/2 ltr:-translate-x-1/2 rtl:right-1/2 rtl:translate-x-1/2"
                     v-if="category.children && category.children.length"
                 >
                     <div class="flex flex-wrap justify-start gap-x-12 gap-y-10 xl:gap-x-16">
@@ -303,7 +303,7 @@
                                 <div>
                                     <p class="velocity-nav-megamenu-title font-medium text-[var(--brand-on-primary)]">
                                         <a
-                                            class="velocity-nav-megamenu-title-link inline-block pb-1 text-[15px] font-medium leading-snug tracking-normal transition-colors hover:text-white/85"
+                                            class="velocity-nav-megamenu-title-link inline-block pb-1 text-[15px] font-medium leading-snug tracking-normal transition-colors hover:text-[rgb(var(--brand-on-primary-rgb)/85%)]"
                                             :href="secondLevelCategory.url"
                                         >
                                             @{{ secondLevelCategory.name }}
@@ -316,7 +316,7 @@
                                     >
                                         <li v-for="thirdLevelCategory in secondLevelCategory.children">
                                             <a
-                                                class="velocity-nav-megalnk block rounded-lg px-2 py-1.5 text-[13px] font-medium text-white/70 transition-colors hover:bg-white/10 hover:text-[var(--brand-on-primary)]"
+                                                class="velocity-nav-megalnk block rounded-lg px-2 py-1.5 text-[13px] font-medium text-[rgb(var(--brand-on-primary-rgb)/70%)] transition-colors hover:bg-[rgb(var(--brand-on-primary-rgb)/10%)] hover:text-[var(--brand-on-primary)]"
                                                 :href="thirdLevelCategory.url"
                                             >
                                                 @{{ thirdLevelCategory.name }}
@@ -353,7 +353,7 @@
                     <span>
                         <a
                             :href="category.url"
-                            class="velocity-nav-category-trigger-sidebar inline-block px-5 py-2 text-[18px] font-medium normal-case tracking-normal text-[var(--brand-on-primary)] hover:text-white/90"
+                            class="velocity-nav-category-trigger-sidebar inline-block px-5 py-2 text-[18px] font-medium normal-case tracking-normal text-[var(--brand-on-primary)] hover:text-[rgb(var(--brand-on-primary-rgb)/90%)]"
                         >
                             @{{ category.name }}
                         </a>

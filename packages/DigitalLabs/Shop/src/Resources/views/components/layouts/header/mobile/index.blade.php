@@ -41,7 +41,7 @@
             --}}
             <details class="header-search mobile-header-details-search relative z-[60]">
                 <summary
-                    class="inline-flex h-10 w-10 list-none cursor-pointer items-center justify-center rounded-full text-[var(--brand-on-primary)] transition-colors hover:bg-white/10"
+                    class="inline-flex h-10 w-10 list-none cursor-pointer items-center justify-center rounded-full text-[var(--brand-on-primary)] transition-colors hover:bg-[rgb(var(--brand-on-primary-rgb)/10%)]"
                     aria-label="@lang('shop::app.components.layouts.header.mobile.search')"
                 >
                     <span class="mobile-search-mag icon-search text-2xl"></span>
@@ -49,7 +49,7 @@
                 </summary>
 
                 <div
-                    class="mobile-search-panel fixed inset-x-0 z-[70] hidden w-full max-w-none flex-col border-b border-white/20 bg-[var(--brand-primary)] px-4 py-3 shadow-[0_14px_32px_rgba(10,30,24,0.35)]"
+                    class="mobile-search-panel fixed inset-x-0 z-[70] hidden w-full max-w-none flex-col border-b border-[rgb(var(--brand-on-primary-rgb)/20%)] bg-[var(--brand-primary)] px-4 py-3 shadow-[0_14px_32px_rgba(10,30,24,0.35)]"
                     style="top: calc(env(safe-area-inset-top, 0px) + 5.75rem)"
                 >
                     <form
@@ -73,7 +73,7 @@
                             type="search"
                             name="query"
                             value="{{ request('query') }}"
-                            class="block w-full rounded-xl border border-white/30 bg-white/10 px-11 py-3 text-sm font-medium text-[var(--brand-on-primary)] placeholder:text-white/70 transition-all hover:border-white/50 focus:border-white focus:outline-none"
+                            class="block w-full rounded-xl border border-[rgb(var(--brand-on-primary-rgb)/30%)] bg-[rgb(var(--brand-on-primary-rgb)/10%)] px-11 py-3 text-sm font-medium text-[var(--brand-on-primary)] placeholder:text-[rgb(var(--brand-on-primary-rgb)/70%)] transition-all hover:border-[rgb(var(--brand-on-primary-rgb)/50%)] focus:border-[var(--brand-on-primary)] focus:outline-none"
                             minlength="{{ core()->getConfigData('catalog.products.search.min_query_length') }}"
                             maxlength="{{ core()->getConfigData('catalog.products.search.max_query_length') }}"
                             placeholder="@lang('shop::app.components.layouts.header.mobile.search-text')"
@@ -268,7 +268,7 @@
                 <span class="text-2xl cursor-pointer text-[var(--brand-on-primary)] icon-hamburger"></span>
             </x-slot>
 
-            <x-slot:header class="!border-white/15 text-[var(--brand-on-primary)] [&_.icon-cancel]:text-[var(--brand-on-primary)] [&_.icon-cancel]:opacity-95">
+            <x-slot:header class="!border-[rgb(var(--brand-on-primary-rgb)/15%)] text-[var(--brand-on-primary)] [&_.icon-cancel]:text-[var(--brand-on-primary)] [&_.icon-cancel]:opacity-95">
                 <div class="flex items-center justify-between">
                     <a href="{{ route('shop.home.index') }}">
                         <img
@@ -283,8 +283,8 @@
 
             <x-slot:content class="!p-0 shop-mobile-nav-drawer-content">
                 <!-- Account Profile Section -->
-                <div class="border-b border-white/15 p-4">
-                    <div class="grid grid-cols-[auto_1fr] items-center gap-4 rounded-xl border border-white/20 bg-white/5 p-2.5">
+                <div class="border-b border-[rgb(var(--brand-on-primary-rgb)/15%)] p-4">
+                    <div class="grid grid-cols-[auto_1fr] items-center gap-4 rounded-xl border border-[rgb(var(--brand-on-primary-rgb)/20%)] bg-[rgb(var(--brand-on-primary-rgb)/5%)] p-2.5">
                         <div>
                             <img
                                 src="{{ auth()->user()?->image_url ?? qubix_asset('images/user-placeholder.png') }}"
@@ -299,7 +299,7 @@
                             >
                                 @lang('shop::app.components.layouts.header.mobile.login')
 
-                                <i class="icon-double-arrow text-2xl text-white/90 ltr:ml-2.5 rtl:mr-2.5"></i>
+                                <i class="icon-double-arrow text-2xl text-[rgb(var(--brand-on-primary-rgb)/90%)] ltr:ml-2.5 rtl:mr-2.5"></i>
                             </a>
                         @endguest
 
@@ -310,7 +310,7 @@
                             >
                                 <p class="text-2xl break-all font-medium max-md:text-xl text-[var(--brand-on-primary)]">Hello! {{ auth()->user()?->first_name }}</p>
 
-                                <p class="no-underline max-md:text-sm text-white/65">{{ auth()->user()?->email }}</p>
+                                <p class="no-underline max-md:text-sm text-[rgb(var(--brand-on-primary-rgb)/65%)]">{{ auth()->user()?->email }}</p>
                             </div>
                         @endauth
                     </div>
@@ -326,7 +326,7 @@
             <x-slot:footer>
                 <!-- Locale & Currency -->
                 @if(core()->getCurrentChannel()->locales()->count() > 1 || core()->getCurrentChannel()->currencies()->count() > 1)
-                    <div class="fixed bottom-0 z-10 grid w-full max-w-full grid-cols-[1fr_auto_1fr] items-center justify-items-center border-t border-white/15 bg-[var(--brand-scrolled)] px-5 text-[var(--brand-on-primary)] ltr:left-0 rtl:right-0">
+                    <div class="fixed bottom-0 z-10 grid w-full max-w-full grid-cols-[1fr_auto_1fr] items-center justify-items-center border-t border-[rgb(var(--brand-on-primary-rgb)/15%)] bg-[var(--brand-scrolled)] px-5 text-[var(--brand-on-primary)] ltr:left-0 rtl:right-0">
                         <!-- Currency Drawer -->
                         <x-shop::drawer position="bottom" width="100%">
                             <x-slot:toggle>
@@ -357,7 +357,7 @@
                             </x-slot>
                         </x-shop::drawer>
 
-                        <span class="h-5 w-0.5 bg-white/25"></span>
+                        <span class="h-5 w-0.5 bg-[rgb(var(--brand-on-primary-rgb)/25%)]"></span>
 
                         <!-- Locale Drawer -->
                         <x-shop::drawer position="bottom" width="100%">
@@ -425,7 +425,7 @@
                             :class="{'mb-2': category.children && category.children.length}"
                         >
                             <div class="flex items-center justify-between py-2 transition-colors duration-200 cursor-pointer">
-                                <a :href="category.url" class="text-base font-medium text-[var(--brand-on-primary)] hover:text-white/90">
+                                <a :href="category.url" class="text-base font-medium text-[var(--brand-on-primary)] hover:text-[rgb(var(--brand-on-primary-rgb)/90%)]">
                                     @{{ category.name }}
                                 </a>
                             </div>
@@ -440,13 +440,13 @@
                                         class="flex items-center justify-between py-2 transition-colors duration-200 cursor-pointer"
                                         @click="showThirdLevel(secondLevelCategory, category, $event)"
                                     >
-                                        <a :href="secondLevelCategory.url" class="text-sm font-normal text-white/85 hover:text-[var(--brand-on-primary)]">
+                                        <a :href="secondLevelCategory.url" class="text-sm font-normal text-[rgb(var(--brand-on-primary-rgb)/85%)] hover:text-[var(--brand-on-primary)]">
                                             @{{ secondLevelCategory.name }}
                                         </a>
 
                                         <span
                                             v-if="secondLevelCategory.children && secondLevelCategory.children.length"
-                                            class="icon-arrow-right rtl:icon-arrow-left text-white/50"
+                                            class="icon-arrow-right rtl:icon-arrow-left text-[rgb(var(--brand-on-primary-rgb)/50%)]"
                                         ></span>
                                     </div>
                                 </div>
@@ -460,7 +460,7 @@
                     class="flex-shrink-0 w-full h-full"
                     v-if="currentViewLevel === 'third'"
                 >
-                    <div class="border-b border-white/15 px-6 py-4">
+                    <div class="border-b border-[rgb(var(--brand-on-primary-rgb)/15%)] px-6 py-4">
                         <button
                             @click="goBackToMainView"
                             class="flex items-center justify-center gap-2 text-[var(--brand-on-primary)] focus:outline-none"
@@ -481,7 +481,7 @@
                         >
                             <a
                                 :href="thirdLevelCategory.url"
-                                class="block py-2 text-sm text-white/80 transition-colors duration-200 hover:text-[var(--brand-on-primary)]"
+                                class="block py-2 text-sm text-[rgb(var(--brand-on-primary-rgb)/80%)] transition-colors duration-200 hover:text-[var(--brand-on-primary)]"
                             >
                                 @{{ thirdLevelCategory.name }}
                             </a>

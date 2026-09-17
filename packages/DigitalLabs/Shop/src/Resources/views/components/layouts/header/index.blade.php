@@ -24,7 +24,7 @@
 --}}
 @if (core()->getConfigData('general.content.header_offer.title'))
     <div
-        class="border-b border-[var(--brand-border)] bg-[var(--brand-primary)] px-4 py-2 text-center text-xs font-semibold tracking-[0.02em] text-white/90 lg:hidden"
+        class="border-b border-[var(--brand-border)] bg-[var(--brand-primary)] px-4 py-2 text-center text-xs font-semibold tracking-[0.02em] text-[rgb(var(--brand-on-primary-rgb)/90%)] lg:hidden"
         v-pre
     >
         {{ core()->getConfigData('general.content.header_offer.title') }}
@@ -83,7 +83,7 @@
             </x-slot>
         </x-shop::drawer>
 
-        <span class="h-4 w-0.5 bg-white/25"></span>
+        <span class="h-4 w-0.5 bg-[rgb(var(--brand-on-primary-rgb)/25%)]"></span>
 
         <!-- Locale Drawer -->
         <x-shop::drawer position="bottom" width="100%">

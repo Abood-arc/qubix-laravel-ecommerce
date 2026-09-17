@@ -90,7 +90,7 @@
             {!! view_render_event('qubix.shop.components.layouts.header.desktop.top.currency_switcher.after') !!}
 
             <p
-                class="py-2.5 text-center text-xs font-semibold tracking-[0.02em] text-white/90"
+                class="py-2.5 text-center text-xs font-semibold tracking-[0.02em] text-[rgb(var(--brand-on-primary-rgb)/90%)]"
                 v-pre
             >
                 {{ core()->getConfigData('general.content.header_offer.title') }}
