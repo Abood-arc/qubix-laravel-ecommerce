@@ -45,7 +45,7 @@ it('should fails the validation error when certain inputs not provided when add 
     $cartRule = CartRule::factory()->afterCreating(function (CartRule $cartRule) {
         $cartRule->cart_rule_customer_groups()->sync([1, 2, 3]);
 
-        $cartRule->cart_rule_channels()->sync([1]);
+        $cartRule->cart_rule_channels()->sync([core()->getCurrentChannel()->id]);
     })->create([
         'name' => fake()->uuid(),
         'description' => fake()->sentence(),
@@ -116,7 +116,7 @@ it('should add a virtual product to the cart with a cart rule of the no coupon t
     $cartRule = CartRule::factory()->afterCreating(function (CartRule $cartRule) {
         $cartRule->cart_rule_customer_groups()->sync([1, 2, 3]);
 
-        $cartRule->cart_rule_channels()->sync([1]);
+        $cartRule->cart_rule_channels()->sync([core()->getCurrentChannel()->id]);
     })->create([
         'name' => fake()->uuid(),
         'description' => fake()->sentence(),
@@ -195,7 +195,7 @@ it('should fails the validation error when certain inputs not provided when add 
     $cartRule = CartRule::factory()->afterCreating(function (CartRule $cartRule) {
         $cartRule->cart_rule_customer_groups()->sync([1]);
 
-        $cartRule->cart_rule_channels()->sync([1]);
+        $cartRule->cart_rule_channels()->sync([core()->getCurrentChannel()->id]);
     })->create([
         'name' => fake()->uuid(),
         'description' => fake()->sentence(),
@@ -266,7 +266,7 @@ it('should add a virtual product to the cart with a cart rule of the no coupon t
     $cartRule = CartRule::factory()->afterCreating(function (CartRule $cartRule) {
         $cartRule->cart_rule_customer_groups()->sync([1]);
 
-        $cartRule->cart_rule_channels()->sync([1]);
+        $cartRule->cart_rule_channels()->sync([core()->getCurrentChannel()->id]);
     })->create([
         'name' => fake()->uuid(),
         'description' => fake()->sentence(),
@@ -341,7 +341,7 @@ it('should fails the validation error when certain inputs not provided when add 
     $cartRule = CartRule::factory()->afterCreating(function (CartRule $cartRule) {
         $cartRule->cart_rule_customer_groups()->sync([2]);
 
-        $cartRule->cart_rule_channels()->sync([1]);
+        $cartRule->cart_rule_channels()->sync([core()->getCurrentChannel()->id]);
     })->create([
         'name' => fake()->uuid(),
         'description' => fake()->sentence(),
@@ -412,7 +412,7 @@ it('should add a virtual product to the cart with a cart rule of the no coupon t
     $cartRule = CartRule::factory()->afterCreating(function (CartRule $cartRule) {
         $cartRule->cart_rule_customer_groups()->sync([2]);
 
-        $cartRule->cart_rule_channels()->sync([1]);
+        $cartRule->cart_rule_channels()->sync([core()->getCurrentChannel()->id]);
     })->create([
         'name' => fake()->uuid(),
         'description' => fake()->sentence(),
@@ -491,7 +491,7 @@ it('should fails the validation error when certain inputs not provided when add 
     $cartRule = CartRule::factory()->afterCreating(function (CartRule $cartRule) {
         $cartRule->cart_rule_customer_groups()->sync([3]);
 
-        $cartRule->cart_rule_channels()->sync([1]);
+        $cartRule->cart_rule_channels()->sync([core()->getCurrentChannel()->id]);
     })->create([
         'name' => fake()->uuid(),
         'description' => fake()->sentence(),
@@ -562,7 +562,7 @@ it('should add a virtual product to the cart with a cart rule of the no coupon t
     $cartRule = CartRule::factory()->afterCreating(function (CartRule $cartRule) {
         $cartRule->cart_rule_customer_groups()->sync([3]);
 
-        $cartRule->cart_rule_channels()->sync([1]);
+        $cartRule->cart_rule_channels()->sync([core()->getCurrentChannel()->id]);
     })->create([
         'name' => fake()->uuid(),
         'description' => fake()->sentence(),
@@ -644,7 +644,7 @@ it('should fails the validation error when certain inputs not provided when add 
     $cartRule = CartRule::factory()->afterCreating(function (CartRule $cartRule) {
         $cartRule->cart_rule_customer_groups()->sync([1, 2, 3]);
 
-        $cartRule->cart_rule_channels()->sync([1]);
+        $cartRule->cart_rule_channels()->sync([core()->getCurrentChannel()->id]);
     })->create([
         'name' => fake()->uuid(),
         'description' => fake()->sentence(),
@@ -743,7 +743,7 @@ it('should add a virtual product to the cart with a cart rule of the specific co
     $cartRule = CartRule::factory()->afterCreating(function (CartRule $cartRule) {
         $cartRule->cart_rule_customer_groups()->sync([1, 2, 3]);
 
-        $cartRule->cart_rule_channels()->sync([1]);
+        $cartRule->cart_rule_channels()->sync([core()->getCurrentChannel()->id]);
     })->create([
         'name' => fake()->uuid(),
         'description' => fake()->sentence(),
@@ -849,7 +849,7 @@ it('should fails the validation error when certain inputs not provided when add 
     $cartRule = CartRule::factory()->afterCreating(function (CartRule $cartRule) {
         $cartRule->cart_rule_customer_groups()->sync([1]);
 
-        $cartRule->cart_rule_channels()->sync([1]);
+        $cartRule->cart_rule_channels()->sync([core()->getCurrentChannel()->id]);
     })->create([
         'name' => fake()->uuid(),
         'description' => fake()->sentence(),
@@ -945,7 +945,7 @@ it('should add a virtual product to the cart with a cart rule of the specific co
     $cartRule = CartRule::factory()->afterCreating(function (CartRule $cartRule) {
         $cartRule->cart_rule_customer_groups()->sync([1]);
 
-        $cartRule->cart_rule_channels()->sync([1]);
+        $cartRule->cart_rule_channels()->sync([core()->getCurrentChannel()->id]);
     })->create([
         'name' => fake()->uuid(),
         'description' => fake()->sentence(),
@@ -1044,7 +1044,7 @@ it('should fails the validation error when certain inputs not provided when add 
     $cartRule = CartRule::factory()->afterCreating(function (CartRule $cartRule) {
         $cartRule->cart_rule_customer_groups()->sync([2]);
 
-        $cartRule->cart_rule_channels()->sync([1]);
+        $cartRule->cart_rule_channels()->sync([core()->getCurrentChannel()->id]);
     })->create([
         'name' => fake()->uuid(),
         'description' => fake()->sentence(),
@@ -1141,7 +1141,7 @@ it('should add a virtual product to the cart with a cart rule of the specific co
     $cartRule = CartRule::factory()->afterCreating(function (CartRule $cartRule) {
         $cartRule->cart_rule_customer_groups()->sync([2]);
 
-        $cartRule->cart_rule_channels()->sync([1]);
+        $cartRule->cart_rule_channels()->sync([core()->getCurrentChannel()->id]);
     })->create([
         'name' => fake()->uuid(),
         'description' => fake()->sentence(),
@@ -1245,7 +1245,7 @@ it('should fails the validation error when certain inputs not provided when add 
     $cartRule = CartRule::factory()->afterCreating(function (CartRule $cartRule) {
         $cartRule->cart_rule_customer_groups()->sync([3]);
 
-        $cartRule->cart_rule_channels()->sync([1]);
+        $cartRule->cart_rule_channels()->sync([core()->getCurrentChannel()->id]);
     })->create([
         'name' => fake()->uuid(),
         'description' => fake()->sentence(),
@@ -1342,7 +1342,7 @@ it('should add a virtual product to the cart with a cart rule of the specific co
     $cartRule = CartRule::factory()->afterCreating(function (CartRule $cartRule) {
         $cartRule->cart_rule_customer_groups()->sync([3]);
 
-        $cartRule->cart_rule_channels()->sync([1]);
+        $cartRule->cart_rule_channels()->sync([core()->getCurrentChannel()->id]);
     })->create([
         'name' => fake()->uuid(),
         'description' => fake()->sentence(),
@@ -1998,7 +1998,7 @@ it('should check customer group price for wholesale customer with discount price
 it('should fails the validation error when the certain inputs not provided when check discount price if catalog rule applied for percentage price for virtual product for guest customer into cart', function () {
     // Arrange.
     $catalogRule = CatalogRule::factory()->afterCreating(function (CatalogRule $catalogRule) {
-        $catalogRule->channels()->sync([1]);
+        $catalogRule->channels()->sync([core()->getCurrentChannel()->id]);
 
         $catalogRule->customer_groups()->sync([1]);
     })->create([
@@ -2033,7 +2033,7 @@ it('should fails the validation error when the certain inputs not provided when 
 it('should check discount price if catalog rule applied for percentage price for virtual product for guest customer into cart', function () {
     // Arrange.
     $catalogRule = CatalogRule::factory()->afterCreating(function (CatalogRule $catalogRule) {
-        $catalogRule->channels()->sync([1]);
+        $catalogRule->channels()->sync([core()->getCurrentChannel()->id]);
 
         $catalogRule->customer_groups()->sync([1]);
     })->create([
@@ -2101,7 +2101,7 @@ it('should fails the validation error when certain inputs not provided when chec
     $customer = Customer::factory()->create();
 
     $catalogRule = CatalogRule::factory()->afterCreating(function (CatalogRule $catalogRule) {
-        $catalogRule->channels()->sync([1]);
+        $catalogRule->channels()->sync([core()->getCurrentChannel()->id]);
 
         $catalogRule->customer_groups()->sync([2]);
     })->create([
@@ -2159,7 +2159,7 @@ it('should check discount price if catalog rule applied for percentage price for
     $customer = Customer::factory()->create();
 
     $catalogRule = CatalogRule::factory()->afterCreating(function (CatalogRule $catalogRule) {
-        $catalogRule->channels()->sync([1]);
+        $catalogRule->channels()->sync([core()->getCurrentChannel()->id]);
 
         $catalogRule->customer_groups()->sync([2]);
     })->create([
@@ -2225,7 +2225,7 @@ it('should fails the validation error when the certain inputs not provided when 
     $customer = Customer::factory()->create(['customer_group_id' => 3]);
 
     $catalogRule = CatalogRule::factory()->afterCreating(function (CatalogRule $catalogRule) {
-        $catalogRule->channels()->sync([1]);
+        $catalogRule->channels()->sync([core()->getCurrentChannel()->id]);
 
         $catalogRule->customer_groups()->sync([3]);
     })->create([
@@ -2283,7 +2283,7 @@ it('should check discount price if catalog rule applied for percentage price for
     $customer = Customer::factory()->create(['customer_group_id' => 3]);
 
     $catalogRule = CatalogRule::factory()->afterCreating(function (CatalogRule $catalogRule) {
-        $catalogRule->channels()->sync([1]);
+        $catalogRule->channels()->sync([core()->getCurrentChannel()->id]);
 
         $catalogRule->customer_groups()->sync([3]);
     })->create([
@@ -2347,7 +2347,7 @@ it('should check discount price if catalog rule applied for percentage price for
 it('should fails the validation error when the certain inputs not provided when check discount price if catalog rule applied for fixed price for virtual product for guest customer into cart', function () {
     // Arrange.
     $catalogRule = CatalogRule::factory()->afterCreating(function (CatalogRule $catalogRule) {
-        $catalogRule->channels()->sync([1]);
+        $catalogRule->channels()->sync([core()->getCurrentChannel()->id]);
 
         $catalogRule->customer_groups()->sync([1]);
     })->create([
@@ -2406,7 +2406,7 @@ it('should fails the validation error when the certain inputs not provided when 
 it('should check discount price if catalog rule applied for fixed price for virtual product for guest customer into cart', function () {
     // Arrange.
     $catalogRule = CatalogRule::factory()->afterCreating(function (CatalogRule $catalogRule) {
-        $catalogRule->channels()->sync([1]);
+        $catalogRule->channels()->sync([core()->getCurrentChannel()->id]);
 
         $catalogRule->customer_groups()->sync([1]);
     })->create([
@@ -2473,7 +2473,7 @@ it('should check discount price if catalog rule applied for fixed price for virt
     $customer = Customer::factory()->create(['customer_group_id' => 2]);
 
     $catalogRule = CatalogRule::factory()->afterCreating(function (CatalogRule $catalogRule) {
-        $catalogRule->channels()->sync([1]);
+        $catalogRule->channels()->sync([core()->getCurrentChannel()->id]);
 
         $catalogRule->customer_groups()->sync([2]);
     })->create([
@@ -2542,7 +2542,7 @@ it('should fails the validation error when the certain inputs not provided when 
     $customer = Customer::factory()->create(['customer_group_id' => 3]);
 
     $catalogRule = CatalogRule::factory()->afterCreating(function (CatalogRule $catalogRule) {
-        $catalogRule->channels()->sync([1]);
+        $catalogRule->channels()->sync([core()->getCurrentChannel()->id]);
 
         $catalogRule->customer_groups()->sync([3]);
     })->create([
@@ -2605,7 +2605,7 @@ it('should check discount price if catalog rule applied for fixed price for virt
     $customer = Customer::factory()->create(['customer_group_id' => 3]);
 
     $catalogRule = CatalogRule::factory()->afterCreating(function (CatalogRule $catalogRule) {
-        $catalogRule->channels()->sync([1]);
+        $catalogRule->channels()->sync([core()->getCurrentChannel()->id]);
 
         $catalogRule->customer_groups()->sync([3]);
     })->create([
@@ -2672,7 +2672,7 @@ it('should check discount price if catalog rule applied for fixed price for virt
 it('should check discount price if catalog rule applied for fixed price for virtual product for guest customer', function () {
     // Arrange.
     $catalogRule = CatalogRule::factory()->afterCreating(function (CatalogRule $catalogRule) {
-        $catalogRule->channels()->sync([1]);
+        $catalogRule->channels()->sync([core()->getCurrentChannel()->id]);
 
         $catalogRule->customer_groups()->sync([1]);
     })->create([
@@ -2736,7 +2736,7 @@ it('should check discount price if catalog rule applied for fixed price for virt
     $customer = Customer::factory()->create();
 
     $catalogRule = CatalogRule::factory()->afterCreating(function (CatalogRule $catalogRule) {
-        $catalogRule->channels()->sync([1]);
+        $catalogRule->channels()->sync([core()->getCurrentChannel()->id]);
 
         $catalogRule->customer_groups()->sync([2]);
     })->create([
@@ -2798,7 +2798,7 @@ it('should check discount price if catalog rule applied for fixed price for virt
     $customer = Customer::factory()->create();
 
     $catalogRule = CatalogRule::factory()->afterCreating(function (CatalogRule $catalogRule) {
-        $catalogRule->channels()->sync([1]);
+        $catalogRule->channels()->sync([core()->getCurrentChannel()->id]);
 
         $catalogRule->customer_groups()->sync([3]);
     })->create([
@@ -2858,7 +2858,7 @@ it('should check discount price if catalog rule applied for fixed price for virt
 it('should check discount price if catalog rule applied for percentage price for virtual product for guest customer', function () {
     // Arrange.
     $catalogRule = CatalogRule::factory()->afterCreating(function (CatalogRule $catalogRule) {
-        $catalogRule->channels()->sync([1]);
+        $catalogRule->channels()->sync([core()->getCurrentChannel()->id]);
 
         $catalogRule->customer_groups()->sync([1]);
     })->create([
@@ -2921,7 +2921,7 @@ it('should check discount price if catalog rule applied for percentage price for
     $customer = Customer::factory()->create();
 
     $catalogRule = CatalogRule::factory()->afterCreating(function (CatalogRule $catalogRule) {
-        $catalogRule->channels()->sync([1]);
+        $catalogRule->channels()->sync([core()->getCurrentChannel()->id]);
 
         $catalogRule->customer_groups()->sync([2]);
     })->create([
@@ -2982,7 +2982,7 @@ it('should check discount price if catalog rule applied for percentage price for
     $customer = Customer::factory()->create(['customer_group_id' => 3]);
 
     $catalogRule = CatalogRule::factory()->afterCreating(function (CatalogRule $catalogRule) {
-        $catalogRule->channels()->sync([1]);
+        $catalogRule->channels()->sync([core()->getCurrentChannel()->id]);
 
         $catalogRule->customer_groups()->sync([3]);
     })->create([
