@@ -53,6 +53,13 @@ jobs:
           cat .env
 
       - name: Running Qubix Installer
+        # Unlike the two Playwright workflows, this one doesn't need
+        # QUBIX_INSTALL_ADMIN_PASSWORD: Pest's loginAsAdmin() helper
+        # (Admin/tests/Concerns/AdminTestBench.php) authenticates via a
+        # factory-created admin, never the seeded row this installer leaves
+        # behind. Setting it here would be harmless but pointless — it would
+        # just make AdminsTableSeeder write a plaintext credentials file
+        # nothing in this workflow ever reads.
         run: php artisan qubix:install --skip-env-check --skip-admin-creation --skip-github-star
 
       - name: Running Pest Test

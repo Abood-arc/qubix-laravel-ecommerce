@@ -774,6 +774,17 @@ return [
                 // option. `validation` closes a crafted POST to admin.configuration.store
                 // that bypasses the dropdown entirely, since ConfigurationForm builds its
                 // rules from this array's 'validation' key.
+                //
+                // To re-enable Elasticsearch for a specific `fleet` client that needs
+                // fuzzy search: (1) add the ES service back to that client's own compose
+                // file — never the shared `docker-compose.yml` template; (2) restore the
+                // 'elastic' option to this field's (and admin_mode's/storefront_mode's
+                // below) 'options' array; (3) widen each 'validation' string to
+                // 'in:database,elastic' (the pre-Task-2.1 code had no 'validation' key
+                // on these fields at all — Task 2.1 added it as its own new guard, so
+                // don't just delete it, widen it). All three steps are required — the
+                // option-removal and the validation guard are deliberately two
+                // independent layers, not redundant with each other.
                 'options' => [
                     [
                         'title' => 'admin::app.configuration.index.catalog.products.search.database',

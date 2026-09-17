@@ -33,6 +33,7 @@ RUN apt-get update \
         libcap2-bin libpng-dev mysql-client nginx \
         php8.3-cli=8.3.6-0ubuntu0.24.04.11 \
         php8.3-common=8.3.6-0ubuntu0.24.04.11 \
+        php8.3-opcache=8.3.6-0ubuntu0.24.04.11 \
         php8.3-mysql=8.3.6-0ubuntu0.24.04.11 \
         php8.3-mbstring=8.3.6-0ubuntu0.24.04.11 \
         php8.3-xml=8.3.6-0ubuntu0.24.04.11 \

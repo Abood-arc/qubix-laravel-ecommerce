@@ -140,10 +140,22 @@ class ConfigTableSeeder extends Seeder
             'updated_at' => $now,
         ]);
 
+        // Second layer of defense alongside the seeded warehouse address
+        // itself (InventorySourceTableSeeder): defaults off, same as its
+        // sibling `new_shipment_mail_to_admin` flag two entries above, so a
+        // fresh install doesn't email an unconfigured inventory-source
+        // address (customer name/company/full shipping address included,
+        // per Admin\Listeners\Shipment::afterCreated() and
+        // InventorySourceNotification) on the very first shipment created,
+        // before an operator has had a chance to visit Settings >
+        // Inventory Sources. Was previously '1' with no apparent
+        // deliberate reason (its sibling flag right above already defaults
+        // off) — an operator who wants this notification can turn it back
+        // on once a real address is configured.
         DB::table('core_config')->insert([
             'id' => 13,
             'code' => 'emails.general.notifications.emails.general.notifications.new_inventory_source',
-            'value' => '1',
+            'value' => '0',
             'channel_code' => null,
             'locale_code' => null,
             'created_at' => $now,
