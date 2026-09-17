@@ -54,11 +54,26 @@ if [[ -z "$SLUG" ]]; then
   exit 1
 fi
 
+# I1 (Task 4.3 fix round 1): a failed `docker build` here (registry
+# timeout, apt mirror blip — precisely the kind of transient failure Task
+# 4.5's retry logic exists for) would otherwise abort this script under
+# `set -e` and propagate Docker's own raw exit code (typically 1, but not
+# guaranteed) straight to whoever invoked this wrapper — indistinguishable
+# from a genuinely terminal failure under the 0/1/2/3/10 contract
+# qubix:provision itself follows. Trapping it explicitly here and exiting
+# 10 (transient) keeps that contract intact regardless of which of the two
+# `docker build` calls fails or why.
 echo "==> Building base app image qubix/app-${SLUG}"
-docker build -t "qubix/app-${SLUG}" -f docker/8.3/Dockerfile --build-arg WWWGROUP=1000 .
+if ! docker build -t "qubix/app-${SLUG}" -f docker/8.3/Dockerfile --build-arg WWWGROUP=1000 .; then
+  err "Error: building qubix/app-${SLUG} failed (docker build) — treating as transient."
+  exit 10
+fi
 
 echo "==> Building provisioner image qubix/provisioner (from qubix/app-${SLUG})"
-docker build -t qubix/provisioner --build-arg "BASE_IMAGE=qubix/app-${SLUG}" -f docker/provisioner/Dockerfile .
+if ! docker build -t qubix/provisioner --build-arg "BASE_IMAGE=qubix/app-${SLUG}" -f docker/provisioner/Dockerfile .; then
+  err "Error: building qubix/provisioner failed (docker build) — treating as transient."
+  exit 10
+fi
 
 echo "==> Running qubix:provision inside the provisioner container"
 # Root-owned-file safety: the provisioner container needs the Docker socket,
@@ -129,6 +144,23 @@ docker run --rm \
   php artisan qubix:provision "$@"
 STATUS=$?
 set -e
+
+# I1 (Task 4.3 fix round 1): $STATUS above is only guaranteed to be one of
+# qubix:provision's own contract codes (0/1/2/3/10) if `docker run` actually
+# got as far as starting the container and running artisan inside it. If
+# `docker run` itself fails to do that (e.g. exit 125 — daemon unreachable,
+# image missing; 126/127 — exec-level failures), $STATUS is Docker's own
+# exit code instead, which falls entirely outside that contract and would
+# otherwise be handed to whoever invoked this wrapper unclassified.
+# Normalize anything not in {0,1,2,3,10} to 10 (transient) so the contract
+# holds regardless of which layer actually failed.
+case "$STATUS" in
+  0|1|2|3|10) ;;
+  *)
+    err "Warning: docker run exited with out-of-contract status ${STATUS} (not one of 0/1/2/3/10 — likely a docker-level failure, such as the daemon being unreachable, rather than qubix:provision's own result). Normalizing to 10 (transient)."
+    STATUS=10
+    ;;
+esac
 
 echo "==> Restoring host ownership of the checkout"
 # Best-effort: qubix:provision's own exit code ($STATUS) is what Task 4.5's

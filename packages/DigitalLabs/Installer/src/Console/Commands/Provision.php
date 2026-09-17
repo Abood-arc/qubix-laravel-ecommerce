@@ -114,8 +114,38 @@ class Provision extends Command
 
     /**
      * Execute the console command.
+     *
+     * Everything is delegated to provision() inside a try/catch: any
+     * unclassified/unexpected exception (most importantly
+     * Illuminate\Process\Exceptions\ProcessTimedOutException — every
+     * Process::run() call below sets a timeout, and a timeout on a loaded
+     * box is a textbook transient failure) must not surface as an uncaught
+     * stack trace with a terminal exit(1), which is what Laravel's default
+     * exception handler would otherwise do. Per this command's own
+     * default-to-transient policy (see the class docblock), anything that
+     * reaches this catch is reported cleanly and classified transient.
      */
     public function handle(): int
+    {
+        try {
+            return $this->provision();
+        } catch (\Throwable $e) {
+            $this->error('Unexpected error during provisioning: '.$e->getMessage());
+
+            if ($e instanceof \Illuminate\Process\Exceptions\ProcessTimedOutException) {
+                $this->line('A subprocess (docker/docker compose) exceeded its timeout — this is treated as transient, not terminal.');
+            }
+
+            return self::EXIT_TRANSIENT;
+        }
+    }
+
+    /**
+     * The actual provisioning sequence. Split out from handle() purely so
+     * handle() can wrap the whole thing in one try/catch (see its own
+     * docblock) without an ever-deeper nesting of every individual step.
+     */
+    private function provision(): int
     {
         $slug = (string) $this->option('slug');
         $clientName = (string) $this->option('client-name');
@@ -142,6 +172,37 @@ class Provision extends Command
 
         if (! preg_match(self::SLUG_REGEX, $slug)) {
             $this->error("Invalid --slug '{$slug}' — must match ^[a-z][a-z0-9-]{1,20}\$ (lowercase start, lowercase alphanumeric/hyphens, 2-21 chars total).");
+
+            return self::EXIT_INVALID_INPUT;
+        }
+
+        // Reject control characters (newlines/carriage returns, at minimum)
+        // in every free-text option that later gets written verbatim into
+        // .env via setEnvValue(), or passed to qubix:provision-admin. A
+        // newline in --business-name would otherwise inject arbitrary extra
+        // .env lines (e.g. a bogus DB_PASSWORD= line that could end up being
+        // the *last* definition of that key). Checked here, at the same
+        // validation step as the slug regex above, so nothing downstream
+        // ever sees an unvalidated value. admin-name is checked separately
+        // below since it isn't unconditionally provided (it defaults to
+        // client-name, which is already covered by this loop).
+        foreach ([
+            'client-name' => $clientName,
+            'business-name' => $businessName,
+            'locale' => $locale,
+            'currency' => $currency,
+        ] as $optionName => $value) {
+            if ($this->hasControlCharacters($value)) {
+                $this->error("Invalid --{$optionName} — must not contain control characters (e.g. newlines).");
+
+                return self::EXIT_INVALID_INPUT;
+            }
+        }
+
+        $adminNameOption = $this->option('admin-name');
+
+        if (filled($adminNameOption) && $this->hasControlCharacters((string) $adminNameOption)) {
+            $this->error('Invalid --admin-name — must not contain control characters (e.g. newlines).');
 
             return self::EXIT_INVALID_INPUT;
         }
@@ -192,6 +253,23 @@ class Provision extends Command
         // --- Step 3: generate the compose file ------------------------------
         $this->components->info("Generating {$composeFile} via scripts/generate-client-compose.sh");
 
+        // NOTE on retry interaction with this collision check (I3, Task 4.3
+        // fix round 1): this generator only rejects a slug that collides
+        // with an existing Docker resource named after it (app-{slug}, the
+        // qubix-{slug} project, its volumes). Once Step 5 below has brought
+        // a stack up even once, every retry of the *whole* command for the
+        // same slug — including a retry triggered by a genuinely transient
+        // failure further down this method (a migrate/seed timeout, `up`
+        // partially failing) — will hit this exact check and get rejected
+        // here with EXIT_SLUG_COLLISION (2, terminal), even though the
+        // actual failure that prompted the retry was transient. This means
+        // Task 4.5's retry logic can never actually retry the failures most
+        // likely to be transient in the first place. This is a known,
+        // named limitation, not an oversight — see task-4.3-report.md's
+        // fix-round-1 section ("I3") for the full reasoning and the
+        // required operator workaround (tear down the slug's stack with
+        // `docker compose -p qubix-{slug} down -v` before retrying) until a
+        // real "detect and resume a stalled stack" mechanism is built.
         $generate = Process::path(base_path())
             ->timeout(60)
             ->run(['bash', base_path('scripts/generate-client-compose.sh'), '--slug', $slug]);
@@ -236,6 +314,37 @@ class Provision extends Command
         $env = $this->setEnvValue($env, 'DB_USERNAME', 'qubix');
         $env = $this->setEnvValue($env, 'DB_PASSWORD', $dbPassword);
         $env = $this->setEnvValue($env, 'REDIS_PASSWORD', $redisPassword);
+
+        // C1 (Task 4.3 fix round 1): back up any existing .env before
+        // overwriting it, unconditionally. Nothing upstream of this line
+        // can guarantee the current working directory is a fresh,
+        // not-yet-live checkout for this slug — the Step 3 collision check
+        // only looks for Docker resources named after the *new* slug, so
+        // running this command (via the wrapper script, which every client
+        // checkout ships a copy of) from inside a *different*, already-live
+        // client's checkout passes every check and reaches this write. A
+        // brand-new APP_KEY silently invalidates every encrypted column and
+        // session for whatever store's .env was actually here, and a fresh
+        // DB_PASSWORD immediately desyncs from that store's real database
+        // credentials — both effectively irrecoverable without a backup.
+        // This is deliberately not an interactive prompt (must stay
+        // non-interactive for n8n) and deliberately not a --force flag —
+        // just a plain, always-on backup, so the catastrophic case becomes
+        // "restore .env.bak.<timestamp> and re-run `docker compose up`"
+        // instead of unrecoverable. Legitimate retries (re-provisioning the
+        // same not-yet-live slug after a failure) are unaffected beyond an
+        // extra harmless backup file.
+        if (file_exists(base_path('.env'))) {
+            $backupPath = base_path('.env.bak.'.now()->format('Ymd_His'));
+
+            if (! copy(base_path('.env'), $backupPath)) {
+                $this->error("Refusing to overwrite .env: could not back it up to {$backupPath} first.");
+
+                return self::EXIT_TRANSIENT;
+            }
+
+            $this->components->warn("Existing .env found — backed up to {$backupPath} before writing a new one.");
+        }
 
         if (file_put_contents(base_path('.env'), $env) === false) {
             $this->error('Failed to write .env.');
@@ -479,6 +588,15 @@ class Provision extends Command
      * Set (or append, if absent) a KEY=value line in an in-memory .env
      * file's contents. Values containing whitespace are double-quoted —
      * same convention as Installer::updateEnvVariable().
+     *
+     * Uses preg_replace_callback(), not preg_replace(), for the substitution.
+     * preg_replace()'s *replacement* argument is itself interpreted as a
+     * regex replacement pattern — a literal `$1`/`\1` inside $line (e.g. a
+     * business name containing "$1") would be silently read as a
+     * backreference and corrupt the write instead of being inserted
+     * verbatim. A callback's return value is inserted literally, with no
+     * such interpretation, which is what a plain string substitution here
+     * actually needs.
      */
     private function setEnvValue(string $content, string $key, string $value): string
     {
@@ -486,10 +604,21 @@ class Provision extends Command
         $pattern = '/^'.preg_quote($key, '/').'=.*$/m';
 
         if (preg_match($pattern, $content)) {
-            return preg_replace($pattern, $line, $content, 1);
+            return preg_replace_callback($pattern, static fn () => $line, $content, 1);
         }
 
         return rtrim($content).PHP_EOL.$line.PHP_EOL;
+    }
+
+    /**
+     * Control characters (0x00-0x1F, 0x7F) are rejected in any free-text
+     * option value that's later written verbatim into .env or forwarded as
+     * a CLI argument — see the callers for what a newline specifically
+     * would otherwise let through.
+     */
+    private function hasControlCharacters(string $value): bool
+    {
+        return (bool) preg_match('/[\x00-\x1F\x7F]/', $value);
     }
 
     private function formatBytes(float $bytes): string
