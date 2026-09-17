@@ -54,3 +54,4 @@ storage-public*.tar.gz
 CLAUDE.md
 DEPLOY-HOSTINGER.md
 /docs/
+/.worktrees/
