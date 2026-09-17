@@ -97,12 +97,12 @@ return [
 
                 'refund-policy' => [
                     'content' => 'Ons terugbetalingsbeleid wordt momenteel afgerond. Neem ondertussen contact met ons op voor meer informatie.',
-                    'title' => 'Retourbeleid',
+                    'title' => 'Terugbetalingsbeleid',
                 ],
 
                 'return-policy' => [
                     'content' => 'Ons retourbeleid wordt momenteel afgerond. Neem ondertussen contact met ons op voor meer informatie.',
-                    'title' => 'Terugstuurbeleid',
+                    'title' => 'Retourbeleid',
                 ],
 
                 'shipping-policy' => [
@@ -283,8 +283,8 @@ return [
                         'customer-service' => 'Klantenservice',
                         'payment-policy' => 'Betalingsbeleid',
                         'privacy-policy' => 'Privacybeleid',
-                        'refund-policy' => 'Retourbeleid',
-                        'return-policy' => 'Terugstuurbeleid',
+                        'refund-policy' => 'Terugbetalingsbeleid',
+                        'return-policy' => 'Retourbeleid',
                         'shipping-policy' => 'Verzendingsbeleid',
                         'terms-conditions' => 'Algemene Voorwaarden',
                         'terms-of-use' => 'Gebruiksvoorwaarden',

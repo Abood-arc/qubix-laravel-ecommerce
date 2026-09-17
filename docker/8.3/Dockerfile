@@ -27,10 +27,19 @@ RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 # between builds weeks apart, which undermines the whole point of this pin
 # for everything except PHP, for no benefit beyond fast-forwarding
 # already-installed base packages to whatever's latest at build time.
+#
+# nginx, mysql-client, nodejs and npm are pinned too (captured 2026-09-17,
+# same box, same method as the php8.3-* capture above) — Task 2.0 originally
+# scoped this to "PHP runtime only" and left these four floating, but nginx
+# in particular is the actual request-handling layer after the Phase 0
+# hardening work, so an unpinned nginx defeats the same reproducibility goal
+# the PHP pins exist for.
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
         ca-certificates curl gnupg gosu git zip unzip supervisor sqlite3 \
-        libcap2-bin libpng-dev mysql-client nginx \
+        libcap2-bin libpng-dev \
+        mysql-client=8.0.46-0ubuntu0.24.04.4 \
+        nginx=1.24.0-2ubuntu7.18 \
         php8.3-cli=8.3.6-0ubuntu0.24.04.11 \
         php8.3-common=8.3.6-0ubuntu0.24.04.11 \
         php8.3-opcache=8.3.6-0ubuntu0.24.04.11 \
@@ -56,7 +65,8 @@ RUN apt-get update \
         php8.3-memcached=3.2.0+2.2.0-4ubuntu3 \
         php8.3-pcov=1.0.11-5ubuntu1 \
         php8.3-fpm=8.3.6-0ubuntu0.24.04.11 \
-        nodejs npm \
+        nodejs=18.19.1+dfsg-6ubuntu5 \
+        npm=9.2.0~ds1-2 \
     && curl -sLS https://getcomposer.org/installer | php -- --install-dir=/usr/bin/ --filename=composer \
     && setcap "cap_net_bind_service=+ep" /usr/bin/php8.3 \
     && sed -i 's/^user www-data;/user sail;/' /etc/nginx/nginx.conf \

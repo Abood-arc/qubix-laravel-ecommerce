@@ -758,7 +758,27 @@ return [
     ], [
         'key' => 'catalog.products.search',
         'name' => 'admin::app.configuration.index.catalog.products.search.title',
-        'info' => 'admin::app.configuration.index.catalog.products.search.title-info',
+        // Empty, not the translated 'title-info' key (deliberately,
+        // fleet-only): that string in every Admin lang file describes
+        // choosing between "a database and Elasticsearch" and recommends
+        // Elasticsearch for large catalogs — both no longer true once
+        // 'elastic' is removed from the 'engine'/'admin_mode'/'storefront_mode'
+        // options below. Rewriting that sentence correctly in all 21 shipped
+        // languages isn't something to do without native-speaker review, so
+        // this section shows no description instead of a wrong one.
+        // Can't just omit the 'info' key outright — unlike ItemField (used
+        // for the fields below), SystemConfig::processSubConfigItems() reads
+        // $subConfigItem['info'] with no `?? null` guard (see
+        // Core/src/SystemConfig.php:107), so a missing key throws
+        // "Undefined array key" the moment this section renders (caught by
+        // re-running ConfigurationSearchEngineTest.php after first trying to
+        // delete the key outright — all 3 cases failed with exactly that
+        // error). An empty string is a valid array value, so this satisfies
+        // that requirement while trans('') still renders as nothing.
+        // The lang keys themselves are left alone, unused by this branch's
+        // config the same way the sibling 'elastic' => X option-label key
+        // already is.
+        'info' => '',
         'sort' => 1,
         'fields' => [
             [

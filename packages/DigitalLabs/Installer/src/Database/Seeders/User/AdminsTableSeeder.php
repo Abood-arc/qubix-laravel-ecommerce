@@ -49,6 +49,16 @@ class AdminsTableSeeder extends Seeder
         // generated one the same way, rather than scraping the file below).
         // Falls back to a random password, recorded to a local file, when
         // unset.
+        //
+        // Deliberately env() and not config(), and this only works if the
+        // caller sets it as a real process-level environment variable (as
+        // both CI workflows do via the step's own `env:` block) — never via a
+        // `.env` file line. If `artisan config:cache` has already run by the
+        // time this seeder executes, Laravel skips loading `.env` entirely,
+        // so an override that only exists there would silently vanish and
+        // this would fall back to the random branch with no warning. Phase
+        // 4's fleet automation must set this as a true environment variable
+        // and must run before any `config:cache` step, not after.
         $overridePassword = env('QUBIX_INSTALL_ADMIN_PASSWORD');
 
         $usedOverride = filled($overridePassword);
