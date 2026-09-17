@@ -69,17 +69,99 @@ echo "==> Running qubix:provision inside the provisioner container"
 # those files. `set -e` is suspended around this one invocation so a
 # non-zero exit here still falls through to the mandatory chown below
 # instead of aborting the script immediately.
+#
+# SUPERVISOR_PHP_USER=root overrides the base image's baked-in default
+# (docker/8.3/Dockerfile sets it to "sail" for the long-running app/queue/
+# scheduler containers). vendor/laravel/sail/runtimes/8.3/start-container
+# (this image's ENTRYPOINT) execs its CMD directly only when that variable
+# is "root"; otherwise it runs `gosu $WWWUSER "$@"` — and since this
+# one-off invocation never sets WWWUSER, that would make gosu try to
+# switch to a user literally named "php" (the first word of the CMD) and
+# fail with "failed switching to \"php\": unable to find user php" instead
+# of ever reaching artisan. Discovered by running this script for real,
+# not by reading start-container's own source ahead of time.
+# Mount the checkout at the SAME absolute path inside this container as it
+# has on the real Docker host, and run from there (-w), rather than at the
+# app image's usual /var/www/html. This is load-bearing, not cosmetic:
+# docker-compose.{slug}.yml itself has relative-path bind mounts
+# (app-{slug}'s `.:/var/www/html`, mysql's `./docker/mysql/my.cnf:...`), and
+# `docker compose`/`docker` inside this DooD container talk to the HOST's
+# daemon over the bind-mounted socket — but any *relative* volume path in
+# the compose file gets resolved using the calling CLI process's own cwd
+# string, which is then sent to the host daemon completely uninterpreted.
+# If that cwd were the usual /var/www/html, the host daemon would look for
+# "/var/www/html/docker/mysql/my.cnf" on the REAL HOST, find nothing there,
+# and (Docker's own well-known behaviour for a missing bind-mount source)
+# silently create an empty directory in its place — which then fails to
+# mount over a file target with a confusing "not a directory" OCI runtime
+# error, discovered by actually running this end to end, not by reading the
+# compose file first. Mirroring the real host path makes the relative paths
+# the CLI resolves and the paths the host daemon understands the same
+# string, so they resolve correctly on both sides of the socket.
+REPO_ROOT_ON_HOST="$REPO_ROOT"
+
+# Root-owned-file safety: the provisioner container needs the Docker socket,
+# which is root-equivalent regardless of the container's declared user, so
+# it runs as root (no -u flag — see docker/provisioner/Dockerfile). That
+# means root-owned writes to the bind-mounted checkout (the generated
+# compose file, .env) would otherwise break subsequent non-root access to
+# those files. `set -e` is suspended around this one invocation so a
+# non-zero exit here still falls through to the mandatory chown below
+# instead of aborting the script immediately.
+#
+# SUPERVISOR_PHP_USER=root overrides the base image's baked-in default
+# (docker/8.3/Dockerfile sets it to "sail" for the long-running app/queue/
+# scheduler containers). vendor/laravel/sail/runtimes/8.3/start-container
+# (this image's ENTRYPOINT) execs its CMD directly only when that variable
+# is "root"; otherwise it runs `gosu $WWWUSER "$@"` — and since this
+# one-off invocation never sets WWWUSER, that would make gosu try to
+# switch to a user literally named "php" (the first word of the CMD) and
+# fail with "failed switching to \"php\": unable to find user php" instead
+# of ever reaching artisan. Discovered by running this script for real,
+# not by reading start-container's own source ahead of time.
 set +e
 docker run --rm \
-  -v "$REPO_ROOT:/var/www/html" \
+  -e SUPERVISOR_PHP_USER=root \
+  -v "$REPO_ROOT_ON_HOST:$REPO_ROOT_ON_HOST" \
   -v /var/run/docker.sock:/var/run/docker.sock \
-  -w /var/www/html \
+  -w "$REPO_ROOT_ON_HOST" \
   qubix/provisioner \
   php artisan qubix:provision "$@"
 STATUS=$?
 set -e
 
 echo "==> Restoring host ownership of the checkout"
-chown -R "$(id -u):$(id -g)" .
+# Best-effort: qubix:provision's own exit code ($STATUS) is what Task 4.5's
+# retry logic keys off, and it must stay authoritative regardless of what
+# happens here. Deliberately NOT `set -e`'d — under bash's errexit, a
+# non-zero chown here would abort the script on this line and it would
+# never reach `exit "$STATUS"` below, silently replacing a real 1/2/3/10
+# exit code with whatever chown happened to return instead (observed for
+# real when testing this script outside a genuine root context — chown
+# partially fails there with "Operation not permitted" on files the
+# one-off container wrote as root, but $STATUS from the actual
+# provisioning run was still correctly 0). On the real VPS this runs as
+# root already, so chowning root-owned files to root:root is a no-op that
+# always succeeds; the guard exists for robustness, not because it's
+# expected to fail in production.
+if ! chown -R "$(id -u):$(id -g)" .; then
+  err "Warning: restoring host ownership of the checkout failed for one or more paths (see above). If this script is not itself running as root, that's expected and does not indicate a provisioning failure — the exit code below reflects qubix:provision's own result, not this step."
+fi
+
+# The blanket chown above must NOT be the last word on storage/ and
+# bootstrap/cache: qubix:provision itself deliberately chowns those two to
+# 1337:1000 (see that command's own comment — every compose file's
+# `WWWUSER: '1337'` assumes storage/bootstrap-cache already belong to that
+# uid, which start-container's PHP-FPM worker runs as after dropping root).
+# On a real root-run production invocation the blanket chown above would
+# actually succeed (unlike in a non-root test), which would silently
+# revert that ownership back to root and reintroduce the exact "Permission
+# denied writing storage/framework/views" 500 this command's own fix
+# exists to prevent. Re-asserting it here, after the blanket revert, is
+# what keeps the two intentions from clobbering each other regardless of
+# which order future edits to either step happen to run in.
+if ! chown -R 1337:1000 storage bootstrap/cache; then
+  err "Warning: could not re-assert sail (1337:1000) ownership on storage/ and bootstrap/cache after the blanket chown above — the new store may 500 on its first real request until this is fixed manually."
+fi
 
 exit "$STATUS"

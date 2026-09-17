@@ -243,10 +243,72 @@ class Provision extends Command
             return self::EXIT_TRANSIENT;
         }
 
+        // Every compose file in this codebase hardcodes WWWUSER: '1337' for
+        // the app/queue/scheduler services — docker-compose.prod.yml spells
+        // out why in its own comment: "start-container remaps `sail` to
+        // this uid; matches chowned dirs". That precondition (storage/ and
+        // bootstrap/cache already owned by uid 1337 on the host) has always
+        // been true for the two existing live stacks because *something*
+        // (manual VPS setup, undocumented in this repo) chowned them once,
+        // a long time before Task 4.1's generator or this command existed.
+        // A brand-new client's checkout has no such history — storage/ and
+        // bootstrap/cache arrive owned by whoever put the checkout on disk
+        // (root, on the VPS, per this repo's own deploy convention), not by
+        // 1337 — so without this step, PHP-FPM's worker (which really does
+        // run as `sail`/1337, dropped from root by supervisord/nginx) can
+        // read the directory but can't write a single new compiled Blade
+        // view or cache file into it, and the very first real HTTP request
+        // to the new store 500s. Found by hitting exactly that 500
+        // ("Permission denied" on storage/framework/views/*.php) on this
+        // command's own first end-to-end test run — not something the
+        // plan's own text anticipated. This process already runs as root
+        // with the checkout mounted at its real host path, so it's the
+        // natural place to establish that precondition rather than
+        // documenting it as a manual step for whoever sets up /opt/qubix-
+        // {slug} next.
+        $chown = Process::path(base_path())
+            ->timeout(60)
+            ->run(['chown', '-R', '1337:1000', base_path('storage'), base_path('bootstrap/cache')]);
+
+        if (! $chown->successful()) {
+            $this->error('Failed to chown storage/ and bootstrap/cache to the sail uid/gid (1337:1000):');
+            $this->line($chown->errorOutput());
+
+            return self::EXIT_TRANSIENT;
+        }
+
         // --- Step 5: bring up the stack --------------------------------------
         $this->components->info("Bringing up the stack ({$project})");
 
+        // docker-compose.{slug}.yml's mysql/redis services interpolate
+        // ${DB_DATABASE}/${DB_USERNAME}/${DB_PASSWORD}/${REDIS_PASSWORD} at
+        // `up` time. Compose resolves those from this *process's own*
+        // environment first, falling back to the project directory's .env
+        // file only for names not already set in the environment — and this
+        // artisan process's environment can already have stale values for
+        // exactly those names, loaded by Laravel's own dotenv bootstrap
+        // *before* handle() ever ran, from whatever .env happened to exist
+        // on disk when this command started (e.g. a previous attempt's
+        // .env, left behind by a failure Task 4.5 later retries against the
+        // same checkout). Overwriting the .env file above does not change
+        // variables the framework already loaded into this process's own
+        // environment earlier in its lifecycle, and Process::run() forwards
+        // this process's environment to the child by default — so without
+        // this override, mysql/redis would silently initialise with a
+        // leftover password from an earlier run while every other step
+        // (which each start a brand-new PHP process via `docker compose
+        // exec` and read the current on-disk .env fresh) uses the new one,
+        // producing an Access Denied error on the very next step. Found by
+        // running a real second attempt against a non-pristine checkout,
+        // not by reasoning about it ahead of time. Passing these explicitly
+        // makes this process's own env irrelevant to the interpolation.
         $up = Process::path(base_path())
+            ->env([
+                'DB_DATABASE' => 'qubix',
+                'DB_USERNAME' => 'qubix',
+                'DB_PASSWORD' => $dbPassword,
+                'REDIS_PASSWORD' => $redisPassword,
+            ])
             ->timeout(900)
             ->run(['docker', 'compose', '-f', $composeFile, '-p', $project, 'up', '-d', '--build']);
 
@@ -349,6 +411,18 @@ class Provision extends Command
      * exec`. Every argument is a separate array element (no shell string
      * is ever built), so nothing here needs quoting/escaping regardless of
      * what's in $adminName/$businessName/etc.
+     *
+     * `-u sail` is not optional. `docker compose exec` defaults to root
+     * regardless of what the container's own long-running process drops
+     * privileges to (this codebase's own CLAUDE.md documents exactly this
+     * landmine) — the app/queue/scheduler containers run their actual
+     * PHP-FPM/queue/scheduler workers as `sail`, so a root-run migrate/seed
+     * here would leave root-owned files under storage/ and
+     * bootstrap/cache/, which then blocks the sail-run FPM worker from
+     * writing compiled Blade views on the very first real HTTP request
+     * (confirmed by hitting exactly this failure — HTTP 500, "Permission
+     * denied" writing to storage/framework/views — when this method first
+     * omitted -u sail).
      */
     private function execInApp(string $composeFile, string $project, string $appService, array $command): \Illuminate\Process\ProcessResult
     {
@@ -356,7 +430,7 @@ class Provision extends Command
             ->timeout(300)
             ->run([
                 'docker', 'compose', '-f', $composeFile, '-p', $project,
-                'exec', '-T', $appService,
+                'exec', '-T', '-u', 'sail', $appService,
                 ...$command,
             ]);
     }
