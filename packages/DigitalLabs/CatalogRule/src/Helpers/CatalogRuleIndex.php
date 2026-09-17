@@ -19,9 +19,15 @@ class CatalogRuleIndex
     ) {}
 
     /**
-     * Full re-index
+     * Full re-index. Returns whether it actually completed — the caller
+     * (PriceRuleIndex console command) uses this to decide whether it's safe
+     * to tell FPC's listener the reindex is done and the cache can be
+     * cleared. A caught-and-reported exception here used to be
+     * indistinguishable from success: cached product/category pages would
+     * get wiped and rebuilt from a half-finished price index, on top of
+     * whatever the original failure already broke.
      *
-     * @return void
+     * @return bool
      */
     public function reIndexComplete()
     {
@@ -33,8 +39,12 @@ class CatalogRuleIndex
             }
 
             $this->catalogRuleProductPriceHelper->indexRuleProductPrice(1000);
+
+            return true;
         } catch (\Exception $e) {
             report($e);
+
+            return false;
         }
     }
 

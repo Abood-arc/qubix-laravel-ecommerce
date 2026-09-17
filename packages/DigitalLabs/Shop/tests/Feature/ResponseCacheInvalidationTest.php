@@ -1,5 +1,13 @@
 <?php
 
+use DigitalLabs\Attribute\Models\Attribute;
+use DigitalLabs\CatalogRule\Helpers\CatalogRuleProduct;
+use DigitalLabs\CMS\Models\Page;
+use DigitalLabs\Core\Core as CoreService;
+use DigitalLabs\FPC\Support\CacheClearer;
+use DigitalLabs\Theme\Models\ThemeCustomization;
+use DigitalLabs\User\Models\Admin;
+use Illuminate\Console\Command;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Event;
@@ -8,12 +16,6 @@ use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\URL;
 use Spatie\ResponseCache\Events\ClearingResponseCache;
 use Spatie\ResponseCache\Facades\ResponseCache;
-use DigitalLabs\Core\Core as CoreService;
-use DigitalLabs\Attribute\Models\Attribute;
-use DigitalLabs\CMS\Models\Page;
-use DigitalLabs\FPC\Support\CacheClearer;
-use DigitalLabs\Theme\Models\ThemeCustomization;
-use DigitalLabs\User\Models\Admin;
 use Webkul\Faker\Helpers\Category as CategoryFaker;
 use Webkul\Faker\Helpers\Product as ProductFaker;
 
@@ -170,6 +172,28 @@ it('collapses multiple ResponseCache::clear triggers within one request into a s
     Event::assertDispatchedTimes(ClearingResponseCache::class, 1);
 });
 
+it('resets when the container forgets scoped instances, the way the queue worker does between jobs', function () {
+    // CacheClearer is registered scoped(), not singleton(), specifically so a
+    // persistent queue:work process — which never rebuilds its container
+    // between jobs — doesn't get permanently stuck "already cleared" after
+    // the first trigger. Laravel's queue Worker calls
+    // Container::forgetScopedInstances() after every job for exactly this;
+    // simulating that call here, without touching app()->terminating() at
+    // all, is what actually distinguishes scoped() from singleton() — a
+    // singleton would still return the same $cleared=true instance after
+    // this call, and the second clearOnce() below would be silently
+    // suppressed instead of firing.
+    Event::fake([ClearingResponseCache::class]);
+
+    app(CacheClearer::class)->clearOnce();
+
+    app()->forgetScopedInstances();
+
+    app(CacheClearer::class)->clearOnce();
+
+    Event::assertDispatchedTimes(ClearingResponseCache::class, 2);
+});
+
 it('clears the whole cache when theme customization is updated, not just the home page', function () {
     // Arrange.
     $theme = ThemeCustomization::factory()->create([
@@ -283,12 +307,38 @@ it('clears the whole cache after the daily catalog price-rule reindex', function
 
     expect(fpcCacheFileCount())->toBe(1);
 
-    // Act. The scheduled command dispatches no event today, so cached product/category
-    // pages keep yesterday's price for up to the 7-day cache lifetime.
+    // Act.
     Artisan::call('product:price-rule:index');
 
     // Assert.
     expect(fpcCacheFileCount())->toBe(0);
+});
+
+it('does not clear the cache when the price-rule reindex itself fails partway through', function () {
+    // A caught-and-reported exception mid-reindex used to be indistinguishable
+    // from success — CatalogRuleIndex::reIndexComplete() swallowed it and the
+    // command dispatched catalog.price_rule.reindex.after unconditionally,
+    // clearing the cache and serving freshly-built pages from a half-finished
+    // price index. Forcing the failure at the first step reIndexComplete()
+    // takes (cleanProductIndices(), which calls straight through to this
+    // mock) is enough to prove the event no longer fires on that path — this
+    // isn't re-testing CatalogRuleIndex's own internals, just the command's
+    // decision of whether to tell FPC the reindex succeeded.
+    $this->mock(CatalogRuleProduct::class, function ($mock) {
+        $mock->shouldReceive('cleanProductIndices')->andThrow(new Exception('simulated mid-reindex failure'));
+    });
+
+    // Arrange.
+    get('/')->assertOk();
+
+    expect(fpcCacheFileCount())->toBe(1);
+
+    // Act.
+    $exitCode = Artisan::call('product:price-rule:index');
+
+    // Assert.
+    expect($exitCode)->toBe(Command::FAILURE);
+    expect(fpcCacheFileCount())->toBe(1);
 });
 
 it('does not clear the cache for an unrelated write', function () {

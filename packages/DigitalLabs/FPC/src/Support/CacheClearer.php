@@ -21,14 +21,20 @@ class CacheClearer
      * catalog.product.update.after once per item, which would otherwise mean
      * that many synchronous full-cache-directory wipes in a single request.
      *
-     * Registered as a container singleton (see FPCServiceProvider), with reset()
-     * wired to the app's terminating callback rather than relying on container
-     * lifetime: those coincide in production (a fresh container per PHP-FPM
-     * request), but not under Pest, where one test method's container can span
-     * several actual HTTP-kernel requests (each get()/postJson() call runs the
-     * full kernel, including terminate()) — relying on container lifetime alone
-     * would let an earlier request's clear (e.g. a factory's afterCreating side
-     * effect) silently suppress a later, unrelated one in the same test.
+     * Registered as a scoped container binding (see FPCServiceProvider), with
+     * reset() also wired to the app's terminating callback. Two different
+     * lifecycles need two different reset mechanisms:
+     *   - A queue:work process (docker-compose.prod.yml's `queue` service)
+     *     never rebuilds its container between jobs. Laravel's queue Worker
+     *     calls Container::forgetScopedInstances() after every job precisely
+     *     to reset bindings like this one — a plain singleton would be
+     *     invisible to that and stay "already cleared" for the worker's
+     *     entire lifetime after the first trigger.
+     *   - Nothing calls forgetScopedInstances() for an HTTP request, a
+     *     console command, or between Pest's simulated requests within one
+     *     test method (each get()/postJson() call runs the full kernel,
+     *     including terminate(), while sharing one container) — that's what
+     *     the terminating() callback resets instead.
      */
     public function clearOnce(): void
     {

@@ -2,9 +2,9 @@
 
 namespace DigitalLabs\CatalogRule\Console\Commands;
 
+use DigitalLabs\CatalogRule\Helpers\CatalogRuleIndex;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Event;
-use DigitalLabs\CatalogRule\Helpers\CatalogRuleIndex;
 
 class PriceRuleIndex extends Command
 {
@@ -36,12 +36,27 @@ class PriceRuleIndex extends Command
     /**
      * Execute the console command.
      *
-     * @return void
+     * @return int
      */
     public function handle()
     {
-        $this->catalogRuleIndexHelper->reIndexComplete();
+        if (! $this->catalogRuleIndexHelper->reIndexComplete()) {
+            // reIndexComplete() already reported the underlying exception.
+            // Skip the event on failure: FPC's listener on it clears the
+            // whole response cache, and doing that after a half-finished
+            // reindex would serve freshly-cached pages built from stale or
+            // incomplete prices instead of just the pre-existing cached
+            // ones — worse than leaving the cache alone until a future
+            // successful run clears it for real. Non-zero exit so a failed
+            // run shows up as failed to the scheduler and any monitoring on
+            // top of it, rather than looking identical to success.
+            $this->error('Price rule reindex failed — response cache was not cleared. See the logged exception for details.');
+
+            return self::FAILURE;
+        }
 
         Event::dispatch('catalog.price_rule.reindex.after');
+
+        return self::SUCCESS;
     }
 }
