@@ -4,7 +4,7 @@
 @endphp
 
 <div class="flex min-w-0 w-full flex-wrap gap-4 pt-6 pb-4 shadow-sm lg:hidden">
-    <div class="flex w-full min-w-0 items-center justify-between px-4 text-white">
+    <div class="flex w-full min-w-0 items-center justify-between px-4 text-[var(--brand-on-primary)]">
         <!-- Left Navigation -->
         <div class="flex items-center gap-x-1.5">
             {!! view_render_event('qubix.shop.components.layouts.header.mobile.drawer.before') !!}
@@ -41,7 +41,7 @@
             --}}
             <details class="header-search mobile-header-details-search relative z-[60]">
                 <summary
-                    class="inline-flex h-10 w-10 list-none cursor-pointer items-center justify-center rounded-full text-white transition-colors hover:bg-white/10"
+                    class="inline-flex h-10 w-10 list-none cursor-pointer items-center justify-center rounded-full text-[var(--brand-on-primary)] transition-colors hover:bg-white/10"
                     aria-label="@lang('shop::app.components.layouts.header.mobile.search')"
                 >
                     <span class="mobile-search-mag icon-search text-2xl"></span>
@@ -49,12 +49,12 @@
                 </summary>
 
                 <div
-                    class="mobile-search-panel fixed inset-x-0 z-[70] hidden w-full max-w-none flex-col border-b border-white/20 bg-[#1f5f4f] px-4 py-3 shadow-[0_14px_32px_rgba(10,30,24,0.35)]"
+                    class="mobile-search-panel fixed inset-x-0 z-[70] hidden w-full max-w-none flex-col border-b border-white/20 bg-[var(--brand-primary)] px-4 py-3 shadow-[0_14px_32px_rgba(10,30,24,0.35)]"
                     style="top: calc(env(safe-area-inset-top, 0px) + 5.75rem)"
                 >
                     <form
                         action="{{ route('shop.search.index') }}"
-                        class="relative flex items-center text-white [&_.icon-camera]:text-white [&_label.icon-camera]:text-white"
+                        class="relative flex items-center text-[var(--brand-on-primary)] [&_.icon-camera]:text-[var(--brand-on-primary)] [&_label.icon-camera]:text-[var(--brand-on-primary)]"
                         role="search"
                     >
                         <label
@@ -65,7 +65,7 @@
                         </label>
 
                         <div
-                            class="icon-search pointer-events-none absolute top-[0.72rem] text-xl text-white ltr:left-4 rtl:right-4"
+                            class="icon-search pointer-events-none absolute top-[0.72rem] text-xl text-[var(--brand-on-primary)] ltr:left-4 rtl:right-4"
                         ></div>
 
                         <input
@@ -73,7 +73,7 @@
                             type="search"
                             name="query"
                             value="{{ request('query') }}"
-                            class="block w-full rounded-xl border border-white/30 bg-white/10 px-11 py-3 text-sm font-medium text-white placeholder:text-white/70 transition-all hover:border-white/50 focus:border-white focus:outline-none"
+                            class="block w-full rounded-xl border border-white/30 bg-white/10 px-11 py-3 text-sm font-medium text-[var(--brand-on-primary)] placeholder:text-white/70 transition-all hover:border-white/50 focus:border-white focus:outline-none"
                             minlength="{{ core()->getConfigData('catalog.products.search.min_query_length') }}"
                             maxlength="{{ core()->getConfigData('catalog.products.search.max_query_length') }}"
                             placeholder="@lang('shop::app.components.layouts.header.mobile.search-text')"
@@ -107,7 +107,7 @@
                     href="{{ route('shop.compare.index') }}"
                     aria-label="@lang('shop::app.components.layouts.header.mobile.compare')"
                 >
-                    <span class="text-2xl cursor-pointer text-white icon-compare"></span>
+                    <span class="text-2xl cursor-pointer text-[var(--brand-on-primary)] icon-compare"></span>
                 </a>
             @endif
 
@@ -125,7 +125,7 @@
             <div class="max-md:hidden">
                 <x-shop::dropdown position="bottom-{{ core()->getCurrentLocale()->direction === 'ltr' ? 'right' : 'left' }}">
                     <x-slot:toggle>
-                        <span class="text-2xl cursor-pointer text-white icon-users"></span>
+                        <span class="text-2xl cursor-pointer text-[var(--brand-on-primary)] icon-users"></span>
                     </x-slot>
 
                     @guest('customer')
@@ -239,7 +239,7 @@
                         href="{{ route('shop.customer.session.create') }}"
                         aria-label="@lang('shop::app.components.layouts.header.mobile.account')"
                     >
-                        <span class="text-2xl cursor-pointer text-white icon-users"></span>
+                        <span class="text-2xl cursor-pointer text-[var(--brand-on-primary)] icon-users"></span>
                     </a>
                 @endguest
 
@@ -248,7 +248,7 @@
                         href="{{ route('shop.customers.account.index') }}"
                         aria-label="@lang('shop::app.components.layouts.header.mobile.account')"
                     >
-                        <span class="text-2xl cursor-pointer text-white icon-users"></span>
+                        <span class="text-2xl cursor-pointer text-[var(--brand-on-primary)] icon-users"></span>
                     </a>
                 @endauth
             </div>
@@ -261,14 +261,14 @@
         <x-shop::drawer
             position="left"
             width="100%"
-            panel-class="shop-mobile-nav-drawer bg-[#1f5f4f]"
+            panel-class="shop-mobile-nav-drawer bg-[var(--brand-primary)]"
             @close="onDrawerClose"
         >
             <x-slot:toggle>
-                <span class="text-2xl cursor-pointer text-white icon-hamburger"></span>
+                <span class="text-2xl cursor-pointer text-[var(--brand-on-primary)] icon-hamburger"></span>
             </x-slot>
 
-            <x-slot:header class="!border-white/15 text-white [&_.icon-cancel]:text-white [&_.icon-cancel]:opacity-95">
+            <x-slot:header class="!border-white/15 text-[var(--brand-on-primary)] [&_.icon-cancel]:text-[var(--brand-on-primary)] [&_.icon-cancel]:opacity-95">
                 <div class="flex items-center justify-between">
                     <a href="{{ route('shop.home.index') }}">
                         <img
@@ -295,7 +295,7 @@
                         @guest('customer')
                             <a
                                 href="{{ route('shop.customer.session.create') }}"
-                                class="flex text-base font-medium text-white"
+                                class="flex text-base font-medium text-[var(--brand-on-primary)]"
                             >
                                 @lang('shop::app.components.layouts.header.mobile.login')
 
@@ -308,7 +308,7 @@
                                 class="flex flex-col justify-between gap-2.5 max-md:gap-0"
                                 v-pre
                             >
-                                <p class="text-2xl break-all font-medium max-md:text-xl text-white">Hello! {{ auth()->user()?->first_name }}</p>
+                                <p class="text-2xl break-all font-medium max-md:text-xl text-[var(--brand-on-primary)]">Hello! {{ auth()->user()?->first_name }}</p>
 
                                 <p class="no-underline max-md:text-sm text-white/65">{{ auth()->user()?->email }}</p>
                             </div>
@@ -326,7 +326,7 @@
             <x-slot:footer>
                 <!-- Locale & Currency -->
                 @if(core()->getCurrentChannel()->locales()->count() > 1 || core()->getCurrentChannel()->currencies()->count() > 1)
-                    <div class="fixed bottom-0 z-10 grid w-full max-w-full grid-cols-[1fr_auto_1fr] items-center justify-items-center border-t border-white/15 bg-[#184a3d] px-5 text-white ltr:left-0 rtl:right-0">
+                    <div class="fixed bottom-0 z-10 grid w-full max-w-full grid-cols-[1fr_auto_1fr] items-center justify-items-center border-t border-white/15 bg-[var(--brand-scrolled)] px-5 text-[var(--brand-on-primary)] ltr:left-0 rtl:right-0">
                         <!-- Currency Drawer -->
                         <x-shop::drawer position="bottom" width="100%">
                             <x-slot:toggle>
@@ -425,7 +425,7 @@
                             :class="{'mb-2': category.children && category.children.length}"
                         >
                             <div class="flex items-center justify-between py-2 transition-colors duration-200 cursor-pointer">
-                                <a :href="category.url" class="text-base font-medium text-white hover:text-white/90">
+                                <a :href="category.url" class="text-base font-medium text-[var(--brand-on-primary)] hover:text-white/90">
                                     @{{ category.name }}
                                 </a>
                             </div>
@@ -440,7 +440,7 @@
                                         class="flex items-center justify-between py-2 transition-colors duration-200 cursor-pointer"
                                         @click="showThirdLevel(secondLevelCategory, category, $event)"
                                     >
-                                        <a :href="secondLevelCategory.url" class="text-sm font-normal text-white/85 hover:text-white">
+                                        <a :href="secondLevelCategory.url" class="text-sm font-normal text-white/85 hover:text-[var(--brand-on-primary)]">
                                             @{{ secondLevelCategory.name }}
                                         </a>
 
@@ -463,11 +463,11 @@
                     <div class="border-b border-white/15 px-6 py-4">
                         <button
                             @click="goBackToMainView"
-                            class="flex items-center justify-center gap-2 text-white focus:outline-none"
+                            class="flex items-center justify-center gap-2 text-[var(--brand-on-primary)] focus:outline-none"
                             aria-label="Go back"
                         >
-                            <span class="text-lg icon-arrow-left rtl:icon-arrow-right text-white"></span>
-                            <div class="text-base font-medium text-white">
+                            <span class="text-lg icon-arrow-left rtl:icon-arrow-right text-[var(--brand-on-primary)]"></span>
+                            <div class="text-base font-medium text-[var(--brand-on-primary)]">
                                 @lang('shop::app.components.layouts.header.mobile.back-button')
                             </div>
                         </button>
@@ -481,7 +481,7 @@
                         >
                             <a
                                 :href="thirdLevelCategory.url"
-                                class="block py-2 text-sm text-white/80 transition-colors duration-200 hover:text-white"
+                                class="block py-2 text-sm text-white/80 transition-colors duration-200 hover:text-[var(--brand-on-primary)]"
                             >
                                 @{{ thirdLevelCategory.name }}
                             </a>

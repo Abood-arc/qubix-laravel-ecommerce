@@ -24,14 +24,14 @@
 --}}
 @if (core()->getConfigData('general.content.header_offer.title'))
     <div
-        class="border-b border-[#2f6f60] bg-[#1f5f4f] px-4 py-2 text-center text-xs font-semibold tracking-[0.02em] text-white/90 lg:hidden"
+        class="border-b border-[var(--brand-border)] bg-[var(--brand-primary)] px-4 py-2 text-center text-xs font-semibold tracking-[0.02em] text-white/90 lg:hidden"
         v-pre
     >
         {{ core()->getConfigData('general.content.header_offer.title') }}
 
         <a
             href="{{ core()->getConfigData('general.content.header_offer.redirection_link') }}"
-            class="underline underline-offset-2 text-white"
+            class="underline underline-offset-2 text-[var(--brand-on-primary)]"
             role="button"
         >
             {{ core()->getConfigData('general.content.header_offer.redirection_title') }}
@@ -52,7 +52,7 @@
     inside the drawer. Same visibility gate as the drawer version.
 --}}
 @if (core()->getCurrentChannel()->locales()->count() > 1 || core()->getCurrentChannel()->currencies()->count() > 1)
-    <div class="grid w-full grid-cols-[1fr_auto_1fr] items-center justify-items-center border-b border-[#2f6f60] bg-[#1f5f4f] px-5 text-white lg:hidden">
+    <div class="grid w-full grid-cols-[1fr_auto_1fr] items-center justify-items-center border-b border-[var(--brand-border)] bg-[var(--brand-primary)] px-5 text-[var(--brand-on-primary)] lg:hidden">
         <!-- Currency Drawer -->
         <x-shop::drawer position="bottom" width="100%">
             <x-slot:toggle>
@@ -129,7 +129,7 @@
 
 <header
     id="main-header"
-    class="sticky top-0 z-10 border-b border-[#2f6f60] bg-[#1f5f4f]"
+    class="sticky top-0 z-10 border-b border-[var(--brand-border)] bg-[var(--brand-primary)]"
 >
     <v-header-switcher>
         <!-- Desktop Header Shimmer -->

@@ -1,6 +1,6 @@
 {!! view_render_event('qubix.shop.components.layouts.header.desktop.bottom.before') !!}
 
-<div class="flex min-h-[78px] w-full items-center justify-between gap-x-8 border-b border-[#2f6f60] px-[60px] max-1180:px-8">
+<div class="flex min-h-[78px] w-full items-center justify-between gap-x-8 border-b border-[var(--brand-border)] px-[60px] max-1180:px-8">
     <!--
         Categories support first, second, and third levels.
         Additional levels can be added per project requirements.
@@ -45,17 +45,17 @@
         <!-- Search Bar -->
         <details class="header-search group relative">
             <summary
-                class="inline-flex h-10 w-10 list-none cursor-pointer items-center justify-center rounded-full text-white transition-colors hover:bg-white/10"
+                class="inline-flex h-10 w-10 list-none cursor-pointer items-center justify-center rounded-full text-[var(--brand-on-primary)] transition-colors hover:bg-white/10"
                 aria-label="@lang('shop::app.components.layouts.header.desktop.bottom.search')"
             >
                 <span class="icon-search text-2xl group-open:hidden"></span>
                 <span class="icon-cancel text-2xl hidden group-open:inline-block"></span>
             </summary>
 
-            <div class="absolute top-full z-[70] mt-3 w-[min(92vw,980px)] rounded-2xl border border-white/25 bg-[#1f5f4f] p-3 shadow-[0_14px_32px_rgba(10,30,24,0.35)] ltr:right-0 rtl:left-0">
+            <div class="absolute top-full z-[70] mt-3 w-[min(92vw,980px)] rounded-2xl border border-white/25 bg-[var(--brand-primary)] p-3 shadow-[0_14px_32px_rgba(10,30,24,0.35)] ltr:right-0 rtl:left-0">
                 <form
                     action="{{ route('shop.search.index') }}"
-                    class="relative flex items-center text-white [&_label.icon-camera]:text-white [&_button.icon-camera]:text-white [&_svg]:text-white [&_svg.animate-spin]:!text-white [&_label.absolute]:!top-1/2 [&_label.absolute]:-translate-y-1/2 [&_label.absolute]:mt-0 [&_button.absolute]:!top-1/2 [&_button.absolute]:-translate-y-1/2 [&_button.absolute]:mt-0"
+                    class="relative flex items-center text-[var(--brand-on-primary)] [&_label.icon-camera]:text-[var(--brand-on-primary)] [&_button.icon-camera]:text-[var(--brand-on-primary)] [&_svg]:text-[var(--brand-on-primary)] [&_svg.animate-spin]:!text-[var(--brand-on-primary)] [&_label.absolute]:!top-1/2 [&_label.absolute]:-translate-y-1/2 [&_label.absolute]:mt-0 [&_button.absolute]:!top-1/2 [&_button.absolute]:-translate-y-1/2 [&_button.absolute]:mt-0"
                     role="search"
                 >
                     <label
@@ -66,7 +66,7 @@
                     </label>
 
                     <div
-                        class="icon-search pointer-events-none absolute top-1/2 z-[1] -translate-y-1/2 text-xl text-white ltr:left-4 rtl:right-4"
+                        class="icon-search pointer-events-none absolute top-1/2 z-[1] -translate-y-1/2 text-xl text-[var(--brand-on-primary)] ltr:left-4 rtl:right-4"
                     ></div>
 
                     <input
@@ -75,7 +75,7 @@
                         name="query"
                         value="{{ request('query') }}"
                         @class([
-                            'block w-full rounded-xl border border-white/30 bg-white/10 py-3 text-sm font-medium text-white placeholder:text-white/70 transition-all hover:border-white/50 focus:border-white',
+                            'block w-full rounded-xl border border-white/30 bg-white/10 py-3 text-sm font-medium text-[var(--brand-on-primary)] placeholder:text-white/70 transition-all hover:border-white/50 focus:border-white',
                             'px-11' => ! core()->getConfigData('catalog.products.settings.image_search'),
                             'pl-11 pr-12 sm:pr-14 rtl:pl-12 rtl:pr-11' => core()->getConfigData('catalog.products.settings.image_search'),
                         ])
@@ -117,7 +117,7 @@
                     aria-label="@lang('shop::app.components.layouts.header.desktop.bottom.compare')"
                 >
                     <span
-                        class="inline-block text-2xl cursor-pointer text-white icon-compare"
+                        class="inline-block text-2xl cursor-pointer text-[var(--brand-on-primary)] icon-compare"
                         role="presentation"
                     ></span>
                 </a>
@@ -140,7 +140,7 @@
             <x-shop::dropdown position="bottom-{{ core()->getCurrentLocale()->direction === 'ltr' ? 'right' : 'left' }}">
                 <x-slot:toggle>
                     <span
-                        class="inline-block text-2xl cursor-pointer text-white icon-users"
+                        class="inline-block text-2xl cursor-pointer text-[var(--brand-on-primary)] icon-users"
                         role="button"
                         aria-label="@lang('shop::app.components.layouts.header.desktop.bottom.profile')"
                         tabindex="0"
@@ -284,14 +284,14 @@
                 <span class="flex h-full items-center">
                     <a
                         :href="category.url"
-                        class="velocity-nav-category-trigger inline-flex max-w-[14rem] items-center px-3 py-2 text-center text-[18px] font-medium tracking-normal text-white transition-[background-color,opacity,color] duration-200 hover:bg-white/[0.08] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/45 sm:max-w-none"
+                        class="velocity-nav-category-trigger inline-flex max-w-[14rem] items-center px-3 py-2 text-center text-[18px] font-medium tracking-normal text-[var(--brand-on-primary)] transition-[background-color,opacity,color] duration-200 hover:bg-white/[0.08] hover:text-[var(--brand-on-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/45 sm:max-w-none"
                     >
                         @{{ category.name }}
                     </a>
                 </span>
 
                 <div
-                    class="velocity-nav-megamenu pointer-events-none absolute top-full z-[60] max-h-[min(580px,80vh)] w-[min(94vw,1260px)] max-w-[1260px] translate-y-1 overflow-y-auto overflow-x-auto rounded-b-2xl border border-white/10 bg-[#1f5f4f] px-8 py-8 opacity-0 shadow-[0_24px_50px_-12px_rgba(10,30,24,0.45)] backdrop-blur-md transition duration-300 ease-out group-hover:pointer-events-auto group-hover:translate-y-0 group-hover:opacity-100 group-hover:duration-200 group-hover:ease-in ltr:left-1/2 ltr:-translate-x-1/2 rtl:right-1/2 rtl:translate-x-1/2"
+                    class="velocity-nav-megamenu pointer-events-none absolute top-full z-[60] max-h-[min(580px,80vh)] w-[min(94vw,1260px)] max-w-[1260px] translate-y-1 overflow-y-auto overflow-x-auto rounded-b-2xl border border-white/10 bg-[var(--brand-primary)] px-8 py-8 opacity-0 shadow-[0_24px_50px_-12px_rgba(10,30,24,0.45)] backdrop-blur-md transition duration-300 ease-out group-hover:pointer-events-auto group-hover:translate-y-0 group-hover:opacity-100 group-hover:duration-200 group-hover:ease-in ltr:left-1/2 ltr:-translate-x-1/2 rtl:right-1/2 rtl:translate-x-1/2"
                     v-if="category.children && category.children.length"
                 >
                     <div class="flex flex-wrap justify-start gap-x-12 gap-y-10 xl:gap-x-16">
@@ -301,7 +301,7 @@
                         >
                             <template v-for="secondLevelCategory in pairCategoryChildren">
                                 <div>
-                                    <p class="velocity-nav-megamenu-title font-medium text-white">
+                                    <p class="velocity-nav-megamenu-title font-medium text-[var(--brand-on-primary)]">
                                         <a
                                             class="velocity-nav-megamenu-title-link inline-block pb-1 text-[15px] font-medium leading-snug tracking-normal transition-colors hover:text-white/85"
                                             :href="secondLevelCategory.url"
@@ -316,7 +316,7 @@
                                     >
                                         <li v-for="thirdLevelCategory in secondLevelCategory.children">
                                             <a
-                                                class="velocity-nav-megalnk block rounded-lg px-2 py-1.5 text-[13px] font-medium text-white/70 transition-colors hover:bg-white/10 hover:text-white"
+                                                class="velocity-nav-megalnk block rounded-lg px-2 py-1.5 text-[13px] font-medium text-white/70 transition-colors hover:bg-white/10 hover:text-[var(--brand-on-primary)]"
                                                 :href="thirdLevelCategory.url"
                                             >
                                                 @{{ thirdLevelCategory.name }}
@@ -353,7 +353,7 @@
                     <span>
                         <a
                             :href="category.url"
-                            class="velocity-nav-category-trigger-sidebar inline-block px-5 py-2 text-[18px] font-medium normal-case tracking-normal text-white hover:text-white/90"
+                            class="velocity-nav-category-trigger-sidebar inline-block px-5 py-2 text-[18px] font-medium normal-case tracking-normal text-[var(--brand-on-primary)] hover:text-white/90"
                         >
                             @{{ category.name }}
                         </a>

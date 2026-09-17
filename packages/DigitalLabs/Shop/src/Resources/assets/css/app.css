@@ -2,6 +2,23 @@
 @tailwind components;
 @tailwind utilities;
 
+/*
+ * Static defaults for the current hardcoded palette. The storefront layout
+ * (components/layouts/index.blade.php) emits a :root block of its own, after
+ * this stylesheet loads, with values derived server-side from the client's
+ * configured brand color (general.design.storefront_branding) — that
+ * per-request block overrides these via the cascade. These defaults only
+ * take effect if that block is ever missing.
+ */
+:root {
+    --brand-primary: #1f5f4f;
+    --brand-border: #2f6f60;
+    --brand-scrolled: #0d2b1e;
+    --brand-on-primary: #ffffff;
+    --brand-footer-bg: #F1EADF;
+    --brand-footer-border: #e9decc;
+}
+
 @font-face {
     font-family: "qubix-shop";
     src: url("../fonts/qubix-shop.woff") format("woff");
@@ -450,9 +467,9 @@ img.lazy {
     }
 
     .cart-add-btn--loading {
-        background-color: #1f5f4f !important;
-        color: #ffffff !important;
-        border-color: #1f5f4f !important;
+        background-color: var(--brand-primary) !important;
+        color: var(--brand-on-primary) !important;
+        border-color: var(--brand-primary) !important;
         opacity: 0.88 !important;
         cursor: wait !important;
     }
@@ -681,7 +698,7 @@ img.lazy {
 }
 
 #main-header.header-scrolled {
-    background-color: #0d2b1e !important;
+    background-color: var(--brand-scrolled) !important;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.65) !important;
 }
 

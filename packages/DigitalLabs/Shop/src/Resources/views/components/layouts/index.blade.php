@@ -92,6 +92,8 @@
                 --brand-border: {{ $brandPalette['border'] }};
                 --brand-scrolled: {{ $brandPalette['scrolled'] }};
                 --brand-on-primary: {{ $brandPalette['onPrimary'] }};
+                --brand-footer-bg: {{ $brandPalette['footerBg'] }};
+                --brand-footer-border: {{ $brandPalette['footerBorder'] }};
             }
         </style>
 

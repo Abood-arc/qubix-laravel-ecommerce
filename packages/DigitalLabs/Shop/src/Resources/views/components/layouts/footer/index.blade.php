@@ -52,9 +52,9 @@
         <!-- For Mobile view -->
         <x-shop::accordion
             :is-active="false"
-            class="hidden !w-full rounded-xl !border-2 !border-[#e9decc] max-1060:block max-sm:rounded-lg"
+            class="hidden !w-full rounded-xl !border-2 !border-[var(--brand-footer-border)] max-1060:block max-sm:rounded-lg"
         >
-            <x-slot:header class="rounded-t-lg bg-[#F1EADF] font-medium max-md:p-2.5 max-sm:px-3 max-sm:py-2 max-sm:text-sm">
+            <x-slot:header class="rounded-t-lg bg-[var(--brand-footer-bg)] font-medium max-md:p-2.5 max-sm:px-3 max-sm:py-2 max-sm:text-sm">
                 @lang('shop::app.components.layouts.footer.footer-content')
             </x-slot>
 
@@ -113,7 +113,7 @@
                             <x-shop::form.control-group.control
                                 type="email"
                                 id="footer-newsletter-email"
-                                class="block w-[420px] max-w-full rounded-xl border-2 border-[#e9decc] bg-[#F1EADF] px-5 py-4 text-base max-1060:w-full max-md:p-3.5 max-sm:mb-0 max-sm:rounded-lg max-sm:border-2 max-sm:p-2 max-sm:text-sm"
+                                class="block w-[420px] max-w-full rounded-xl border-2 border-[var(--brand-footer-border)] bg-[var(--brand-footer-bg)] px-5 py-4 text-base max-1060:w-full max-md:p-3.5 max-sm:mb-0 max-sm:rounded-lg max-sm:border-2 max-sm:p-2 max-sm:text-sm"
                                 name="email"
                                 autocomplete="email"
                                 rules="required|email"
@@ -139,7 +139,7 @@
         {!! view_render_event('qubix.shop.layout.footer.newsletter_subscription.after') !!}
     </div>
 
-    <div class="flex justify-between bg-[#F1EADF] px-[60px] py-3.5 max-md:justify-center max-sm:px-5">
+    <div class="flex justify-between bg-[var(--brand-footer-bg)] px-[60px] py-3.5 max-md:justify-center max-sm:px-5">
         {!! view_render_event('qubix.shop.layout.footer.footer_text.before') !!}
 
         <p class="text-sm text-zinc-600 max-md:text-center">
