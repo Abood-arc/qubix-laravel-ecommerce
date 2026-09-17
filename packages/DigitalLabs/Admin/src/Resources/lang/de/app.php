@@ -3774,6 +3774,11 @@ return [
                         'sidebar' => 'Seitenleistenmenü',
                         'title' => 'Menükategorie-Ansicht',
                     ],
+
+                    'storefront-branding' => [
+                        'info' => 'Wählen Sie eine primäre Markenfarbe. Kopfzeile, Fußzeile und Schaltflächen des Shops leiten ihre Farbtöne automatisch daraus ab.',
+                        'title' => 'Storefront-Branding',
+                    ],
                 ],
 
                 'magic-ai' => [

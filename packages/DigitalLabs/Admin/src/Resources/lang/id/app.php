@@ -3774,6 +3774,11 @@ return [
                         'sidebar' => 'Menu Sidebar',
                         'title' => 'Tampilan Kategori Menu',
                     ],
+
+                    'storefront-branding' => [
+                        'info' => 'Pilih satu warna merek utama. Header, footer, dan tombol toko akan otomatis menurunkan corak warnanya dari warna ini.',
+                        'title' => 'Branding Toko',
+                    ],
                 ],
 
                 'magic-ai' => [

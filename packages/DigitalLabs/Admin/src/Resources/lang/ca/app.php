@@ -3774,6 +3774,11 @@ return [
                         'sidebar' => 'Menú lateral',
                         'title' => 'Vista de la categoria del menú',
                     ],
+
+                    'storefront-branding' => [
+                        'info' => 'Trieu un color principal de marca. La capçalera, el peu de pàgina i els botons de la botiga en derivaran automàticament els seus tons.',
+                        'title' => 'Marca de la botiga',
+                    ],
                 ],
 
                 'magic-ai' => [

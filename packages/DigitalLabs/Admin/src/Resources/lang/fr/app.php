@@ -3774,6 +3774,11 @@ return [
                         'sidebar' => 'Menu latéral',
                         'title' => 'Vue de la catégorie du menu',
                     ],
+
+                    'storefront-branding' => [
+                        'info' => 'Choisissez une couleur principale de marque. L\'en-tête, le pied de page et les boutons de la boutique en dériveront automatiquement leurs teintes.',
+                        'title' => 'Image de marque de la boutique',
+                    ],
                 ],
 
                 'magic-ai' => [

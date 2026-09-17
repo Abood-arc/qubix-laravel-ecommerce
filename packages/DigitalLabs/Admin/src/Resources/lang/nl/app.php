@@ -3774,6 +3774,11 @@ return [
                         'sidebar' => 'Zijbalkmenu',
                         'title' => 'Menucategorie weergave',
                     ],
+
+                    'storefront-branding' => [
+                        'info' => 'Kies één primaire merkkleur. De header, footer en knoppen van de winkel leiden hier automatisch hun tinten van af.',
+                        'title' => 'Winkel-branding',
+                    ],
                 ],
 
                 'magic-ai' => [

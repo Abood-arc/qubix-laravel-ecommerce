@@ -80,6 +80,21 @@
 
         @stack('styles')
 
+        @php
+            $brandPalette = \DigitalLabs\Core\Helpers\BrandPalette::derive(
+                core()->getConfigData('general.design.storefront_branding.storefront_branding')
+            );
+        @endphp
+
+        <style>
+            :root {
+                --brand-primary: {{ $brandPalette['primary'] }};
+                --brand-border: {{ $brandPalette['border'] }};
+                --brand-scrolled: {{ $brandPalette['scrolled'] }};
+                --brand-on-primary: {{ $brandPalette['onPrimary'] }};
+            }
+        </style>
+
         <style>
             {!! core()->getConfigData('general.content.custom_scripts.custom_css') !!}
         </style>

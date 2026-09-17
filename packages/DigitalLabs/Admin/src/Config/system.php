@@ -277,6 +277,20 @@ return [
             ],
         ],
     ], [
+        'key' => 'general.design.storefront_branding',
+        'name' => 'admin::app.configuration.index.general.design.storefront-branding.title',
+        'info' => 'admin::app.configuration.index.general.design.storefront-branding.info',
+        'sort' => 3,
+        'fields' => [
+            [
+                'name' => 'storefront_branding',
+                'title' => 'admin::app.configuration.index.general.design.storefront-branding.title',
+                'type' => 'color',
+                'channel_based' => true,
+                'locale_based' => false,
+            ],
+        ],
+    ], [
         'key' => 'general.magic_ai',
         'name' => 'admin::app.configuration.index.general.magic-ai.title',
         'info' => 'admin::app.configuration.index.general.magic-ai.info',

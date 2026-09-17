@@ -3774,6 +3774,11 @@ return [
                         'sidebar' => 'Menu boczne',
                         'title' => 'Widok kategorii menu',
                     ],
+
+                    'storefront-branding' => [
+                        'info' => 'Wybierz jeden podstawowy kolor marki. Nagłówek, stopka i przyciski sklepu automatycznie wyprowadzą z niego swoje odcienie.',
+                        'title' => 'Branding sklepu',
+                    ],
                 ],
 
                 'magic-ai' => [

@@ -3774,6 +3774,11 @@ return [
                         'sidebar' => 'Kenar Çubuğu Menüsü',
                         'title' => 'Menü Kategori Görünümü',
                     ],
+
+                    'storefront-branding' => [
+                        'info' => 'Birincil marka rengini seçin. Mağazanın üst bilgisi, alt bilgisi ve düğmeleri tonlarını otomatik olarak bu renkten türetir.',
+                        'title' => 'Mağaza Markalaşması',
+                    ],
                 ],
 
                 'magic-ai' => [

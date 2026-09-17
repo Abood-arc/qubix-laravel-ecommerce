@@ -3774,6 +3774,11 @@ return [
                         'sidebar' => 'Menú lateral',
                         'title' => 'Vista de categoría del menú',
                     ],
+
+                    'storefront-branding' => [
+                        'info' => 'Elige un color principal de marca. El encabezado, el pie de página y los botones de la tienda derivarán sus tonos automáticamente de este color.',
+                        'title' => 'Marca de la tienda',
+                    ],
                 ],
 
                 'magic-ai' => [

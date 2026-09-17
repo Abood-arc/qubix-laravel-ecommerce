@@ -3774,6 +3774,11 @@ return [
                         'sidebar' => 'Sidebar Menu',
                         'title' => 'Menu Category View',
                     ],
+
+                    'storefront-branding' => [
+                        'info' => 'Pick one primary brand color. The storefront header, footer, and buttons derive their shades from it automatically.',
+                        'title' => 'Storefront Branding',
+                    ],
                 ],
 
                 'magic-ai' => [
