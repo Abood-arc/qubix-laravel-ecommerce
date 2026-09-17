@@ -2,12 +2,15 @@
 
 namespace DigitalLabs\Installer\Providers;
 
+use DigitalLabs\Installer\Console\Commands\Installer as InstallerCommand;
+use DigitalLabs\Installer\Console\Commands\Provision as ProvisionCommand;
+use DigitalLabs\Installer\Console\Commands\ProvisionAdmin as ProvisionAdminCommand;
+use DigitalLabs\Installer\Console\Commands\SeedStarterStore as SeedStarterStoreCommand;
+use DigitalLabs\Installer\Http\Middleware\CanInstall;
+use DigitalLabs\Installer\Http\Middleware\Locale;
 use Illuminate\Routing\Router;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
-use DigitalLabs\Installer\Console\Commands\Installer as InstallerCommand;
-use DigitalLabs\Installer\Http\Middleware\CanInstall;
-use DigitalLabs\Installer\Http\Middleware\Locale;
 
 class InstallerServiceProvider extends ServiceProvider
 {
@@ -49,6 +52,9 @@ class InstallerServiceProvider extends ServiceProvider
         if ($this->app->runningInConsole()) {
             $this->commands([
                 InstallerCommand::class,
+                ProvisionCommand::class,
+                ProvisionAdminCommand::class,
+                SeedStarterStoreCommand::class,
             ]);
         }
     }
