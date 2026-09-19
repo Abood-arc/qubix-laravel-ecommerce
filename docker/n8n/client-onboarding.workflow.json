@@ -1,0 +1,1767 @@
+{
+  "name": "Fleet — Client Onboarding",
+  "nodes": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        300
+      ],
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "fleet-onboard",
+        "authentication": "headerAuth",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "webhookId": "a1b2c3d4-0000-4000-8000-00000000f001",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "bwtF5adabtqKStxi",
+          "name": "fleet-webhook-token"
+        }
+      }
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000012",
+      "name": "Config",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        220,
+        300
+      ],
+      "parameters": {
+        "mode": "manual",
+        "includeOtherFields": false,
+        "assignments": {
+          "assignments": [
+            {
+              "id": "00000000-0000-4000-8000-000000000002",
+              "name": "per_client_mib",
+              "value": 441,
+              "type": "number"
+            },
+            {
+              "id": "00000000-0000-4000-8000-000000000003",
+              "name": "reserve_mib",
+              "value": 1024,
+              "type": "number"
+            },
+            {
+              "id": "00000000-0000-4000-8000-000000000004",
+              "name": "max_load_per_core",
+              "value": 0.7,
+              "type": "number"
+            },
+            {
+              "id": "00000000-0000-4000-8000-000000000005",
+              "name": "min_free_disk_mib",
+              "value": 3072,
+              "type": "number"
+            },
+            {
+              "id": "00000000-0000-4000-8000-000000000006",
+              "name": "max_attempts",
+              "value": 3,
+              "type": "number"
+            },
+            {
+              "id": "00000000-0000-4000-8000-000000000007",
+              "name": "backoff_seconds",
+              "value": 5,
+              "type": "number"
+            },
+            {
+              "id": "00000000-0000-4000-8000-000000000008",
+              "name": "base_dir",
+              "value": "/opt",
+              "type": "string"
+            },
+            {
+              "id": "00000000-0000-4000-8000-000000000009",
+              "name": "repo_url",
+              "value": "https://github.com/Abood-arc/qubix-laravel-ecommerce.git",
+              "type": "string"
+            },
+            {
+              "id": "00000000-0000-4000-8000-000000000010",
+              "name": "domain",
+              "value": "digital-labs.ai",
+              "type": "string"
+            },
+            {
+              "id": "00000000-0000-4000-8000-000000000011",
+              "name": "alert_email",
+              "value": "fleet-alerts@qubix.local",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "notes": "Single place for every threshold. per_client_mib=441: Task 2.4 conservative per-client figure. backoff_seconds=5 is the LOCAL value; production should use 60."
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000013",
+      "name": "Validate",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        440,
+        300
+      ],
+      "parameters": {
+        "jsCode": "// Validation BEFORE any SSH. Rejects malformed input, control characters and legacy slugs.\nconst raw = $('Webhook').first().json.body;\nconst b = (raw && typeof raw === 'object' && !Array.isArray(raw)) ? raw : {};\nconst cfg = $('Config').first().json;\nconst run_id = 'run-' + Date.now() + '-' + Math.random().toString(36).slice(2, 8);\nconst errors = [];\nconst CTRL = /[\\u0000-\\u001f\\u007f]/;\nconst LEGACY = ['jjbags-in', 'jj-bags-com', 'jjbags', 'jj-bags', 'jjbags.in', 'jj-bags.com', 'sa', 'qubix', 'qubix-sa'];\nconst isStr = (v) => typeof v === 'string';\nconst slug = isStr(b.slug) ? b.slug : '';\nif (!/^[a-z][a-z0-9-]{1,20}$/.test(slug)) errors.push('slug must match ^[a-z][a-z0-9-]{1,20}$');\nif (LEGACY.includes(slug)) errors.push('slug is reserved (legacy site)');\nfor (const f of ['clientName', 'businessName']) {\nconst v = b[f];\nif (!isStr(v) || v.trim().length === 0) errors.push(f + ' is required');\nelse if (v.length > 80) errors.push(f + ' must be <= 80 chars');\nelse if (CTRL.test(v)) errors.push(f + ' must not contain control characters');\n}\nconst email = isStr(b.adminEmail) ? b.adminEmail : '';\nif (email.length > 254 || !/^[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+(\\.[A-Za-z0-9-]+)*\\.[A-Za-z]{2,}$/.test(email)) errors.push('adminEmail is not a valid email');\nlet brandColor = '';\nif (b.brandColor !== undefined && b.brandColor !== null && b.brandColor !== '') {\nif (!isStr(b.brandColor) || !/^#[0-9a-fA-F]{6}$/.test(b.brandColor)) errors.push('brandColor must match ^#[0-9a-fA-F]{6}$');\nelse brandColor = b.brandColor;\n}\nlet extra = 0;\nif (b.debug_extra_reserve_mib !== undefined && b.debug_extra_reserve_mib !== null) {\nconst d = b.debug_extra_reserve_mib;\nif (typeof d !== 'number' || !Number.isFinite(d) || d < 0) errors.push('debug_extra_reserve_mib must be a number >= 0');\nelse extra = d;\n}\nconst ok = errors.length === 0;\nconst safeSlug = (isStr(b.slug) ? b.slug : '').replace(/[^\\x20-\\x7e]/g, '?').slice(0, 40);\nconst now = new Date().toISOString();\nreturn [{ json: {\nok, run_id, cfg, errors,\ninput: ok ? { slug, clientName: b.clientName, businessName: b.businessName, adminEmail: email, brandColor, debug_extra_reserve_mib: extra } : null,\nresp_code: 422,\nresp: { status: 'invalid', run_id, errors },\nrec: { run_id, slug: safeSlug, attempt_no: 0, phase: 'preflight', started_at: now, finished_at: now, exit_code: null, classification: 'invalid', decision: 'invalid_input', capacity_json: '', output_tail: '', note: errors.join('; ').slice(0, 500) },\n} }];\n"
+      },
+      "notes": "Validation before any SSH. Rejects legacy slugs (jjbags-in, jj-bags-com, sa, qubix, ...) so no write node can ever match a legacy row."
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000015",
+      "name": "Valid?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        660,
+        300
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "00000000-0000-4000-8000-000000000014",
+              "leftValue": "={{ $json.ok }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000016",
+      "name": "Rec Invalid",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        880,
+        460
+      ],
+      "parameters": {
+        "resource": "row",
+        "operation": "insert",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "ou4jJacyyc6ou9Fq",
+          "cachedResultName": "provision_attempts"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "run_id": "={{ $('Validate').first().json.rec.run_id }}",
+            "slug": "={{ $('Validate').first().json.rec.slug }}",
+            "attempt_no": "={{ $('Validate').first().json.rec.attempt_no }}",
+            "phase": "={{ $('Validate').first().json.rec.phase }}",
+            "started_at": "={{ $('Validate').first().json.rec.started_at }}",
+            "finished_at": "={{ $('Validate').first().json.rec.finished_at }}",
+            "exit_code": "={{ $('Validate').first().json.rec.exit_code }}",
+            "classification": "={{ $('Validate').first().json.rec.classification }}",
+            "decision": "={{ $('Validate').first().json.rec.decision }}",
+            "capacity_json": "={{ $('Validate').first().json.rec.capacity_json }}",
+            "output_tail": "={{ $('Validate').first().json.rec.output_tail }}",
+            "note": "={{ $('Validate').first().json.rec.note }}"
+          },
+          "matchingColumns": [],
+          "schema": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "notes": "Records one provision_attempts row (redacted output only)."
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000017",
+      "name": "Respond 422",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        1100,
+        460
+      ],
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify($('Validate').first().json.resp) }}",
+        "options": {
+          "responseCode": "={{ $('Validate').first().json.resp_code }}"
+        }
+      }
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000018",
+      "name": "Get Client",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        880,
+        200
+      ],
+      "parameters": {
+        "resource": "row",
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "vd35TNhYbv9neA1n",
+          "cachedResultName": "fleet_clients"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "slug",
+              "condition": "eq",
+              "keyValue": "={{ $('Validate').first().json.input.slug }}"
+            }
+          ]
+        },
+        "returnAll": false,
+        "limit": 1,
+        "options": {}
+      },
+      "alwaysOutputData": true,
+      "notes": "Read-only registry lookup for in-progress / already-active detection."
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000019",
+      "name": "Check Existing",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1100,
+        200
+      ],
+      "parameters": {
+        "jsCode": "const v = $('Validate').first().json;\nconst row = $input.first().json || {};\nlet exists = false, why = '';\nif (row.slug === v.input.slug) {\nconst t = Date.parse(row.updated_at || row.updatedAt || '');\nif (row.status === 'provisioning' && Number.isFinite(t) && (Date.now() - t) < 2 * 3600 * 1000) { exists = true; why = 'provisioning in progress'; }\nelse if (row.status === 'active') { exists = true; why = 'client already active'; }\n}\nconst now = new Date().toISOString();\nreturn [{ json: {\nexists, resp_code: 409,\nresp: { status: 'conflict', reason: why, run_id: v.run_id },\nrec: { run_id: v.run_id, slug: v.input.slug, attempt_no: 0, phase: 'preflight', started_at: now, finished_at: now, exit_code: null, classification: 'conflict', decision: 'slug_exists_in_registry', capacity_json: '', output_tail: '', note: why },\n} }];\n"
+      }
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000021",
+      "name": "Exists?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1320,
+        200
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "00000000-0000-4000-8000-000000000020",
+              "leftValue": "={{ $json.exists }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000022",
+      "name": "Rec Exists",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        1540,
+        340
+      ],
+      "parameters": {
+        "resource": "row",
+        "operation": "insert",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "ou4jJacyyc6ou9Fq",
+          "cachedResultName": "provision_attempts"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "run_id": "={{ $('Check Existing').first().json.rec.run_id }}",
+            "slug": "={{ $('Check Existing').first().json.rec.slug }}",
+            "attempt_no": "={{ $('Check Existing').first().json.rec.attempt_no }}",
+            "phase": "={{ $('Check Existing').first().json.rec.phase }}",
+            "started_at": "={{ $('Check Existing').first().json.rec.started_at }}",
+            "finished_at": "={{ $('Check Existing').first().json.rec.finished_at }}",
+            "exit_code": "={{ $('Check Existing').first().json.rec.exit_code }}",
+            "classification": "={{ $('Check Existing').first().json.rec.classification }}",
+            "decision": "={{ $('Check Existing').first().json.rec.decision }}",
+            "capacity_json": "={{ $('Check Existing').first().json.rec.capacity_json }}",
+            "output_tail": "={{ $('Check Existing').first().json.rec.output_tail }}",
+            "note": "={{ $('Check Existing').first().json.rec.note }}"
+          },
+          "matchingColumns": [],
+          "schema": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "notes": "Records one provision_attempts row (redacted output only)."
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000023",
+      "name": "Respond 409 Exists",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        1760,
+        340
+      ],
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify($('Check Existing').first().json.resp) }}",
+        "options": {
+          "responseCode": "={{ $('Check Existing').first().json.resp_code }}"
+        }
+      }
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000024",
+      "name": "Prep Preflight",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1540,
+        60
+      ],
+      "parameters": {
+        "jsCode": "const v = $('Validate').first().json;\nconst cmd = \"echo '##MEM'; free -m | awk '/^Mem:/{print $7}'; echo '##NPROC'; nproc; echo '##LOAD'; cat /proc/loadavg; \" +\n\"echo '##DISK'; p=/var/lib/docker; [ -d \\\"$p\\\" ] || p=/; df -Pm \\\"$p\\\" | awk 'NR==2{print $4}'; \" +\n\"echo '##PROJECTS'; docker compose ls -a -q; echo \\\"##DOCKER_RC=$?\\\"; echo '##END'\";\nreturn [{ json: { ...v, preflight_cmd: cmd, preflight_started_at: new Date().toISOString() } }];\n"
+      }
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000025",
+      "name": "Preflight SSH",
+      "type": "n8n-nodes-base.ssh",
+      "typeVersion": 1,
+      "position": [
+        1760,
+        60
+      ],
+      "parameters": {
+        "resource": "command",
+        "operation": "execute",
+        "authentication": "privateKey",
+        "command": "={{ $json.preflight_cmd }}",
+        "cwd": "/"
+      },
+      "credentials": {
+        "sshPrivateKey": {
+          "id": "TmkUiyEQ2litPuSA",
+          "name": "fleet-target-ssh"
+        }
+      },
+      "onError": "continueRegularOutput",
+      "notes": "READ-ONLY pre-flight. continueOnFail: an SSH failure yields an error item which Evaluate turns into blocked_preflight_failed (fail closed)."
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000026",
+      "name": "Evaluate",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1980,
+        60
+      ],
+      "parameters": {
+        "jsCode": "// Pre-flight evaluation. FAIL CLOSED: anything failed/unparseable => blocked_preflight_failed.\n// \"available\" from `free -m` already reflects both legacy stacks (Elasticsearch included) and the OS,\n// which is exactly Task 2.4's requirement that the formula subtracts the two legacy stacks.\nconst v = $('Validate').first().json;\nconst cfg = v.cfg;\nconst started = $('Prep Preflight').first().json.preflight_started_at;\nconst r = $input.first().json || {};\nconst finished = new Date().toISOString();\nconst extra = v.input.debug_extra_reserve_mib || 0;\nconst reserve = Number(cfg.reserve_mib) + extra;\nlet decision = 'blocked_preflight_failed', reasons = [], cap = {}, projects = [], owned = false;\nconst sshOk = r.error === undefined && r.code === 0 && typeof r.stdout === 'string';\nif (!sshOk) {\nreasons.push('pre-flight SSH failed: ' + String((r.error && (r.error.message || r.error)) || 'no successful result (connection failure or missing exit status)').slice(0, 200));\n} else {\nconst sec = {};\nlet cur = null;\nfor (const line of r.stdout.split('\\n')) {\n    const m = line.trim().match(/^##([A-Z_]+)(?:=(.*))?$/);\n    if (m) { cur = m[1]; sec[cur] = m[2] !== undefined ? [m[2]] : []; }\n    else if (cur && line.trim() !== '') sec[cur].push(line.trim());\n}\nconst avail = Number((sec.MEM || [])[0]);\nconst nproc = Number((sec.NPROC || [])[0]);\nconst lp = ((sec.LOAD || [])[0] || '').split(/\\s+/).map(Number);\nconst disk = Number((sec.DISK || [])[0]);\nconst rc = (sec.DOCKER_RC || [])[0];\nconst parsed = [avail, nproc, disk, lp[0], lp[1], lp[2]].every((n) => Number.isFinite(n)) && nproc > 0 && rc === '0' && sec.END !== undefined;\nif (!parsed) {\n    reasons.push('pre-flight output unparseable or docker listing failed');\n} else {\n    projects = sec.PROJECTS || [];\n    const perClient = Number(cfg.per_client_mib);\n    const load5pc = lp[1] / nproc;\n    const fit = Math.max(0, Math.floor((avail - reserve) / perClient));\n    const ramOk = (avail - reserve) >= perClient;\n    const cpuOk = load5pc <= Number(cfg.max_load_per_core);\n    const diskOk = disk >= Number(cfg.min_free_disk_mib);\n    cap = { available_mib: avail, nproc, load1: lp[0], load5: lp[1], load15: lp[2], load5_per_core: Math.round(load5pc * 1000) / 1000,\n        free_disk_mib: disk, per_client_mib: perClient, reserve_mib: Number(cfg.reserve_mib), debug_extra_reserve_mib: extra, reserve_effective_mib: reserve,\n        max_load_per_core: Number(cfg.max_load_per_core), min_free_disk_mib: Number(cfg.min_free_disk_mib),\n        clients_that_fit: fit, checks: { ram: ramOk, cpu: cpuOk, disk: diskOk }, project_count: projects.length };\n    if (projects.includes('qubix-' + v.input.slug)) { decision = 'slug_taken'; reasons.push('project qubix-' + v.input.slug + ' already exists'); }\n    else if (!ramOk || !cpuOk || !diskOk) {\n        decision = 'blocked_capacity';\n        if (!ramOk) reasons.push('RAM: available ' + avail + ' - reserve ' + reserve + ' < per-client ' + perClient);\n        if (!cpuOk) reasons.push('CPU: load5/core ' + cap.load5_per_core + ' > ' + cfg.max_load_per_core);\n        if (!diskOk) reasons.push('disk: free ' + disk + ' MiB < ' + cfg.min_free_disk_mib);\n    } else { decision = 'proceed'; owned = true; } // project proven ABSENT => this run owns whatever it creates\n}\n}\nconst proceed = decision === 'proceed';\nconst recDecision = { proceed: 'proceed', slug_taken: 'slug_taken', blocked_capacity: 'blocked — insufficient capacity', blocked_preflight_failed: 'blocked_preflight_failed' }[decision];\nconst resp_code = { proceed: 202, slug_taken: 409, blocked_capacity: 503, blocked_preflight_failed: 503 }[decision];\nconst now = new Date().toISOString();\nconst state = {\n...v, decision, proceed, owned_by_run: owned, capacity: cap, reasons, attempt_no: 0, history: [],\nresp_code,\nresp: proceed ? { status: 'accepted', run_id: v.run_id, slug: v.input.slug, capacity: { available_mib: cap.available_mib, clients_that_fit: cap.clients_that_fit } }\n    : { status: decision, run_id: v.run_id, reasons, capacity: cap.available_mib === undefined ? null : { available_mib: cap.available_mib, clients_that_fit: cap.clients_that_fit, checks: cap.checks } },\nrec: { run_id: v.run_id, slug: v.input.slug, attempt_no: 0, phase: 'preflight', started_at: started, finished_at: finished, exit_code: sshOk ? 0 : (typeof r.code === 'number' ? r.code : null),\n    classification: proceed ? 'ok' : (decision === 'slug_taken' ? 'terminal' : 'blocked'), decision: recDecision, capacity_json: JSON.stringify(cap), output_tail: '', note: reasons.join('; ').slice(0, 500) },\nclient: { slug: v.input.slug, client_name: v.input.clientName, business_name: v.input.businessName, subdomain: v.input.slug + '.' + cfg.domain,\n    site_url: 'https://' + v.input.slug + '.' + cfg.domain, admin_url: 'https://' + v.input.slug + '.' + cfg.domain + '/admin', status: 'provisioning',\n    last_run_id: v.run_id, est_ram_mib: Number(cfg.per_client_mib), legacy: false, read_only: false, updated_at: now },\nalert_to: cfg.alert_email,\nalert_subject: '[Qubix fleet] Onboarding BLOCKED for ' + v.input.slug + ': ' + recDecision,\nalert_text: 'Onboarding of \"' + v.input.slug + '\" was stopped BEFORE any deployment action.\\nDecision: ' + recDecision + '\\nReasons: ' + reasons.join('; ') + '\\nCapacity: ' + JSON.stringify(cap) + '\\nRun: ' + v.run_id,\n};\nreturn [{ json: state }];\n"
+      },
+      "notes": "available = free -m \"available\" column: already reflects both legacy stacks + OS (Task 2.4 requirement). Fail closed. debug_extra_reserve_mib can only INCREASE the reserve."
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000027",
+      "name": "Rec Preflight",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        2200,
+        60
+      ],
+      "parameters": {
+        "resource": "row",
+        "operation": "insert",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "ou4jJacyyc6ou9Fq",
+          "cachedResultName": "provision_attempts"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "run_id": "={{ $('Evaluate').first().json.rec.run_id }}",
+            "slug": "={{ $('Evaluate').first().json.rec.slug }}",
+            "attempt_no": "={{ $('Evaluate').first().json.rec.attempt_no }}",
+            "phase": "={{ $('Evaluate').first().json.rec.phase }}",
+            "started_at": "={{ $('Evaluate').first().json.rec.started_at }}",
+            "finished_at": "={{ $('Evaluate').first().json.rec.finished_at }}",
+            "exit_code": "={{ $('Evaluate').first().json.rec.exit_code }}",
+            "classification": "={{ $('Evaluate').first().json.rec.classification }}",
+            "decision": "={{ $('Evaluate').first().json.rec.decision }}",
+            "capacity_json": "={{ $('Evaluate').first().json.rec.capacity_json }}",
+            "output_tail": "={{ $('Evaluate').first().json.rec.output_tail }}",
+            "note": "={{ $('Evaluate').first().json.rec.note }}"
+          },
+          "matchingColumns": [],
+          "schema": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "notes": "Records one provision_attempts row (redacted output only)."
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000028",
+      "name": "Preflight State",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2420,
+        60
+      ],
+      "parameters": {
+        "jsCode": "return [{ json: $('Evaluate').first().json }];\n"
+      }
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000030",
+      "name": "Proceed?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        2640,
+        60
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "00000000-0000-4000-8000-000000000029",
+              "leftValue": "={{ $json.proceed }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "notes": "The ONLY edge to any deployment node is this IF true branch."
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000032",
+      "name": "Slug Taken?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        2860,
+        200
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "00000000-0000-4000-8000-000000000031",
+              "leftValue": "={{ $json.decision === 'slug_taken' }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000033",
+      "name": "Respond 409 Taken",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        3080,
+        260
+      ],
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify($('Evaluate').first().json.resp) }}",
+        "options": {
+          "responseCode": "={{ $('Evaluate').first().json.resp_code }}"
+        }
+      }
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000034",
+      "name": "Respond 503 Blocked",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        3080,
+        140
+      ],
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify($('Evaluate').first().json.resp) }}",
+        "options": {
+          "responseCode": "={{ $('Evaluate').first().json.resp_code }}"
+        }
+      }
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000035",
+      "name": "Build Alert Blocked",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3300,
+        140
+      ],
+      "parameters": {
+        "jsCode": "const s = $('Evaluate').first().json;\nreturn [{ json: { alert_to: s.alert_to, alert_subject: s.alert_subject, alert_text: s.alert_text } }];\n"
+      }
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000036",
+      "name": "Send Alert",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        3520,
+        300
+      ],
+      "parameters": {
+        "fromEmail": "fleet-onboarding@qubix.local",
+        "toEmail": "={{ $json.alert_to }}",
+        "subject": "={{ $json.alert_subject }}",
+        "emailFormat": "text",
+        "text": "={{ $json.alert_text }}",
+        "options": {}
+      },
+      "credentials": {
+        "smtp": {
+          "id": "u6P9XUzzsNdHaluM",
+          "name": "fleet-alert-smtp"
+        }
+      }
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000037",
+      "name": "Mark Provisioning",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        2860,
+        -60
+      ],
+      "parameters": {
+        "resource": "row",
+        "operation": "upsert",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "vd35TNhYbv9neA1n",
+          "cachedResultName": "fleet_clients"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "slug",
+              "condition": "eq",
+              "keyValue": "={{ $('Evaluate').first().json.client.slug }}"
+            }
+          ]
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "slug": "={{ $('Evaluate').first().json.client.slug }}",
+            "client_name": "={{ $('Evaluate').first().json.client.client_name }}",
+            "business_name": "={{ $('Evaluate').first().json.client.business_name }}",
+            "subdomain": "={{ $('Evaluate').first().json.client.subdomain }}",
+            "site_url": "={{ $('Evaluate').first().json.client.site_url }}",
+            "admin_url": "={{ $('Evaluate').first().json.client.admin_url }}",
+            "status": "={{ $('Evaluate').first().json.client.status }}",
+            "last_run_id": "={{ $('Evaluate').first().json.client.last_run_id }}",
+            "est_ram_mib": "={{ $('Evaluate').first().json.client.est_ram_mib }}",
+            "legacy": "={{ $('Evaluate').first().json.client.legacy }}",
+            "read_only": "={{ $('Evaluate').first().json.client.read_only }}",
+            "updated_at": "={{ $('Evaluate').first().json.client.updated_at }}"
+          },
+          "matchingColumns": [
+            "slug"
+          ],
+          "schema": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "notes": "Matches ONLY slug = the validated new-client slug. Legacy slugs are rejected in Validate, so legacy rows are unreachable."
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000038",
+      "name": "Respond 202",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        3080,
+        -60
+      ],
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify($('Evaluate').first().json.resp) }}",
+        "options": {
+          "responseCode": "={{ $('Evaluate').first().json.resp_code }}"
+        }
+      }
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000039",
+      "name": "Init Loop",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3300,
+        -60
+      ],
+      "parameters": {
+        "jsCode": "return [{ json: { ...$('Evaluate').first().json, attempt_no: 0, history: [] } }];\n"
+      }
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000040",
+      "name": "Prep Deploy",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3520,
+        -60
+      ],
+      "parameters": {
+        "jsCode": "const st = $input.first().json;\nconst cfg = st.cfg, inp = st.input;\nconst attempt_no = (st.attempt_no || 0) + 1;\n// Hard bound: the loop can never exceed max_attempts.\nif (attempt_no > Number(cfg.max_attempts)) throw new Error('attempt bound exceeded');\nif (st.proceed !== true) throw new Error('deploy reached without a proceed decision');\nconst q = (s) => \"'\" + String(s).replace(/'/g, \"'\\\\''\") + \"'\"; // the ONLY way user values enter a shell command\nlet args = ' --slug=' + q(inp.slug) + ' --client-name=' + q(inp.clientName) + ' --business-name=' + q(inp.businessName) + ' --admin-email=' + q(inp.adminEmail);\nif (inp.brandColor) args += ' --brand-color=' + q(inp.brandColor);\nconst dir = cfg.base_dir + '/qubix-' + inp.slug;\nconst cmd = 'd=' + q(dir) + '; [ -d \"$d/.git\" ] || git clone --branch fleet --depth 1 ' + q(cfg.repo_url) + ' \"$d\" || exit 10; cd \"$d\" && scripts/provision-client.sh' + args;\nreturn [{ json: { ...st, attempt_no, deploy_cmd: cmd, attempt_started_at: new Date().toISOString() } }];\n"
+      },
+      "notes": "All user values enter the command only via the q() single-quote-escaping helper. Bounded by max_attempts."
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000041",
+      "name": "Deploy SSH",
+      "type": "n8n-nodes-base.ssh",
+      "typeVersion": 1,
+      "position": [
+        3740,
+        -60
+      ],
+      "parameters": {
+        "resource": "command",
+        "operation": "execute",
+        "authentication": "privateKey",
+        "command": "={{ $json.deploy_cmd }}",
+        "cwd": "/"
+      },
+      "credentials": {
+        "sshPrivateKey": {
+          "id": "TmkUiyEQ2litPuSA",
+          "name": "fleet-target-ssh"
+        }
+      },
+      "onError": "continueRegularOutput",
+      "notes": "Non-zero remote exit: see Classify. continueOnFail so SSH errors are classified transient (default-to-transient)."
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000042",
+      "name": "Classify",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3960,
+        -60
+      ],
+      "parameters": {
+        "jsCode": "// Ruling (Task 4.3): 0 success, 1-9 terminal, 10-19 transient,\n// ANY other value (125/127/255, null, signal) or an SSH node error/timeout => DEFAULT-TO-TRANSIENT.\nconst st = $('Prep Deploy').item.json;\nconst r = $input.first().json || {};\nconst cfg = st.cfg;\nconst errored = r.error !== undefined;\nconst code = (!errored && typeof r.code === 'number') ? r.code : null;\nlet cls;\nif (code === 0) cls = 'success';\nelse if (code !== null && code >= 1 && code <= 9) cls = 'terminal';\nelse cls = 'transient';\nconst out = errored ? '' : String(r.stdout || '');\nconst err = errored ? String((r.error && (r.error.message || r.error)) || 'ssh error') : String(r.stderr || '');\nlet password = '';\nconst m = out.match(/Admin password \\(generated, shown once\\): (\\S+)/);\nif (m) password = m[1];\nconst redact = (s) => { let t = s.replace(/(Admin password \\(generated, shown once\\): )\\S+/g, '$1[REDACTED]'); if (password) t = t.split(password).join('[REDACTED]'); return t; };\nconst tail = redact(out + (err ? '\\n--stderr--\\n' + err : '')).slice(-4000);\nconst now = new Date().toISOString();\nconst history = [...(st.history || []), { attempt_no: st.attempt_no, exit_code: code, classification: cls, tail }];\nlet next, mode = null, status = null, note;\nif (cls === 'success') { next = 'success'; status = 'active'; note = 'provisioned'; }\nelse if (cls === 'terminal') { next = 'stop'; status = 'failed_terminal'; note = 'terminal exit ' + code + ': not retried, no teardown'; }\nelse if (!st.owned_by_run) { next = 'stop'; status = 'failed_escalated'; note = 'transient failure but project not proven owned by this run: no teardown'; }\nelse { next = 'teardown'; mode = st.attempt_no < Number(cfg.max_attempts) ? 'retry' : 'final'; note = 'transient (' + (errored ? 'ssh error' : 'exit ' + code) + '), attempt ' + st.attempt_no + '/' + cfg.max_attempts + ', ' + mode; }\nconst client = { ...st.client, status: status || 'provisioning', updated_at: now };\nconst allTails = history.map((h) => 'attempt ' + h.attempt_no + ' exit=' + h.exit_code + ' ' + h.classification + ':\\n' + h.tail).join('\\n\\n');\nconst s2 = { ...st, history, last_class: cls, last_code: code, next, teardown_mode: mode, client,\nsecret_password: password,\nrec: { run_id: st.run_id, slug: st.input.slug, attempt_no: st.attempt_no, phase: 'deploy', started_at: st.attempt_started_at, finished_at: now, exit_code: code, classification: cls, decision: 'deploy_attempt', capacity_json: '', output_tail: tail, note },\nalert_to: cfg.alert_email,\nalert_subject: '[Qubix fleet] Onboarding ' + (status || 'failed') + ' for ' + st.input.slug,\nalert_text: 'Onboarding of \"' + st.input.slug + '\" stopped with status ' + status + '.\\n' + note + '\\nRun: ' + st.run_id + '\\n\\nOutput (redacted) of every attempt:\\n' + allTails };\ndelete s2.deploy_cmd;\nreturn [{ json: s2 }];\n"
+      },
+      "notes": "Default-to-transient ruling (Task 4.3): 0 success; 1-9 terminal; 10-19 transient; anything else (125/127/255/null/signal/SSH error) transient. Password extracted and redacted before anything is persisted."
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000043",
+      "name": "Rec Deploy",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        4180,
+        -60
+      ],
+      "parameters": {
+        "resource": "row",
+        "operation": "insert",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "ou4jJacyyc6ou9Fq",
+          "cachedResultName": "provision_attempts"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "run_id": "={{ $('Classify').item.json.rec.run_id }}",
+            "slug": "={{ $('Classify').item.json.rec.slug }}",
+            "attempt_no": "={{ $('Classify').item.json.rec.attempt_no }}",
+            "phase": "={{ $('Classify').item.json.rec.phase }}",
+            "started_at": "={{ $('Classify').item.json.rec.started_at }}",
+            "finished_at": "={{ $('Classify').item.json.rec.finished_at }}",
+            "exit_code": "={{ $('Classify').item.json.rec.exit_code }}",
+            "classification": "={{ $('Classify').item.json.rec.classification }}",
+            "decision": "={{ $('Classify').item.json.rec.decision }}",
+            "capacity_json": "={{ $('Classify').item.json.rec.capacity_json }}",
+            "output_tail": "={{ $('Classify').item.json.rec.output_tail }}",
+            "note": "={{ $('Classify').item.json.rec.note }}"
+          },
+          "matchingColumns": [],
+          "schema": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "notes": "Records one provision_attempts row (redacted output only)."
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000044",
+      "name": "Deploy State",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        4400,
+        -60
+      ],
+      "parameters": {
+        "jsCode": "return [{ json: $('Classify').item.json }];\n"
+      }
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000046",
+      "name": "Success?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        4620,
+        -60
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "00000000-0000-4000-8000-000000000045",
+              "leftValue": "={{ $json.next === 'success' }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000047",
+      "name": "Mark Active",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        4840,
+        -160
+      ],
+      "parameters": {
+        "resource": "row",
+        "operation": "upsert",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "vd35TNhYbv9neA1n",
+          "cachedResultName": "fleet_clients"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "slug",
+              "condition": "eq",
+              "keyValue": "={{ $('Classify').item.json.client.slug }}"
+            }
+          ]
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "slug": "={{ $('Classify').item.json.client.slug }}",
+            "client_name": "={{ $('Classify').item.json.client.client_name }}",
+            "business_name": "={{ $('Classify').item.json.client.business_name }}",
+            "subdomain": "={{ $('Classify').item.json.client.subdomain }}",
+            "site_url": "={{ $('Classify').item.json.client.site_url }}",
+            "admin_url": "={{ $('Classify').item.json.client.admin_url }}",
+            "status": "={{ $('Classify').item.json.client.status }}",
+            "last_run_id": "={{ $('Classify').item.json.client.last_run_id }}",
+            "est_ram_mib": "={{ $('Classify').item.json.client.est_ram_mib }}",
+            "legacy": "={{ $('Classify').item.json.client.legacy }}",
+            "read_only": "={{ $('Classify').item.json.client.read_only }}",
+            "updated_at": "={{ $('Classify').item.json.client.updated_at }}"
+          },
+          "matchingColumns": [
+            "slug"
+          ],
+          "schema": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "notes": "Matches ONLY slug = the validated new-client slug. Legacy slugs are rejected in Validate, so legacy rows are unreachable."
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000048",
+      "name": "Build Credentials Email",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        5060,
+        -160
+      ],
+      "parameters": {
+        "jsCode": "// The ONLY place the generated admin password is ever emitted.\nconst st = $('Classify').item.json;\nconst c = st.client;\nreturn [{ json: { alert_to: st.cfg.alert_email, alert_subject: '[Qubix fleet] Client provisioned: ' + st.input.slug,\nalert_text: 'Client \"' + st.input.clientName + '\" (' + st.input.slug + ') was provisioned.\\nSite: ' + c.site_url + '\\nAdmin: ' + c.admin_url + '\\nAdmin email: ' + st.input.adminEmail + '\\nAdmin password (shown once): ' + st.secret_password + '\\nRun: ' + st.run_id } }];\n"
+      },
+      "notes": "Only place the generated admin password is emitted."
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000049",
+      "name": "Send Credentials",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        5280,
+        -160
+      ],
+      "parameters": {
+        "fromEmail": "fleet-onboarding@qubix.local",
+        "toEmail": "={{ $json.alert_to }}",
+        "subject": "={{ $json.alert_subject }}",
+        "emailFormat": "text",
+        "text": "={{ $json.alert_text }}",
+        "options": {}
+      },
+      "credentials": {
+        "smtp": {
+          "id": "u6P9XUzzsNdHaluM",
+          "name": "fleet-alert-smtp"
+        }
+      }
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000051",
+      "name": "Teardown?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        4840,
+        60
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "00000000-0000-4000-8000-000000000050",
+              "leftValue": "={{ $json.next === 'teardown' }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "notes": "Teardown only when Classify said transient AND owned_by_run (pre-flight proved project absent). Terminal never reaches here."
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000052",
+      "name": "Mark Stopped",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        5060,
+        200
+      ],
+      "parameters": {
+        "resource": "row",
+        "operation": "upsert",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "vd35TNhYbv9neA1n",
+          "cachedResultName": "fleet_clients"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "slug",
+              "condition": "eq",
+              "keyValue": "={{ $('Classify').item.json.client.slug }}"
+            }
+          ]
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "slug": "={{ $('Classify').item.json.client.slug }}",
+            "client_name": "={{ $('Classify').item.json.client.client_name }}",
+            "business_name": "={{ $('Classify').item.json.client.business_name }}",
+            "subdomain": "={{ $('Classify').item.json.client.subdomain }}",
+            "site_url": "={{ $('Classify').item.json.client.site_url }}",
+            "admin_url": "={{ $('Classify').item.json.client.admin_url }}",
+            "status": "={{ $('Classify').item.json.client.status }}",
+            "last_run_id": "={{ $('Classify').item.json.client.last_run_id }}",
+            "est_ram_mib": "={{ $('Classify').item.json.client.est_ram_mib }}",
+            "legacy": "={{ $('Classify').item.json.client.legacy }}",
+            "read_only": "={{ $('Classify').item.json.client.read_only }}",
+            "updated_at": "={{ $('Classify').item.json.client.updated_at }}"
+          },
+          "matchingColumns": [
+            "slug"
+          ],
+          "schema": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "notes": "Matches ONLY slug = the validated new-client slug. Legacy slugs are rejected in Validate, so legacy rows are unreachable."
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000053",
+      "name": "Build Alert Stop",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        5280,
+        200
+      ],
+      "parameters": {
+        "jsCode": "const s = $('Classify').item.json;\nreturn [{ json: { alert_to: s.alert_to, alert_subject: s.alert_subject, alert_text: s.alert_text } }];\n"
+      }
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000054",
+      "name": "Prep Teardown",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        5060,
+        20
+      ],
+      "parameters": {
+        "jsCode": "const st = $input.first().json;\nif (st.owned_by_run !== true || st.next !== 'teardown') throw new Error('teardown forbidden: not owned by this run');\nconst q = (s) => \"'\" + String(s).replace(/'/g, \"'\\\\''\") + \"'\";\nconst slug = st.input.slug, base = st.cfg.base_dir;\nconst proj = q('qubix-' + slug);\nconst cmd = 'cd ' + q(base + '/qubix-' + slug) + ' && docker compose -f ' + q('docker-compose.' + slug + '.yml') + ' -p ' + proj + ' down -v --remove-orphans; docker compose ls -a -q | grep -qx ' + proj + ' && echo STILL_PRESENT || echo GONE';\nreturn [{ json: { ...st, teardown_cmd: cmd, teardown_started_at: new Date().toISOString() } }];\n"
+      },
+      "notes": "Throws unless owned_by_run === true."
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000055",
+      "name": "Teardown SSH",
+      "type": "n8n-nodes-base.ssh",
+      "typeVersion": 1,
+      "position": [
+        5280,
+        20
+      ],
+      "parameters": {
+        "resource": "command",
+        "operation": "execute",
+        "authentication": "privateKey",
+        "command": "={{ $json.teardown_cmd }}",
+        "cwd": "/"
+      },
+      "credentials": {
+        "sshPrivateKey": {
+          "id": "TmkUiyEQ2litPuSA",
+          "name": "fleet-target-ssh"
+        }
+      },
+      "onError": "continueRegularOutput",
+      "notes": "docker compose down -v for THIS run project only, then verify GONE."
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000056",
+      "name": "Teardown Eval",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        5500,
+        20
+      ],
+      "parameters": {
+        "jsCode": "const st = $('Prep Teardown').item.json;\nconst r = $input.first().json || {};\nconst cfg = st.cfg;\nconst errored = r.error !== undefined;\nconst out = errored ? '' : String(r.stdout || '');\nconst gone = !errored && r.code === 0 && /(^|\\n)GONE\\s*$/.test(out) && !/STILL_PRESENT/.test(out);\nconst tail = (errored ? String((r.error && (r.error.message || r.error)) || 'ssh error') : out + String(r.stderr || '')).slice(-4000);\nconst now = new Date().toISOString();\nlet status = null, cont = false, note;\nif (!gone) { status = 'failed_teardown'; note = 'teardown did not prove project gone; retrying would hit the slug-collision check (exit 2), stopping'; }\nelse if (st.teardown_mode === 'retry') { cont = true; note = 'teardown ok, retrying after backoff'; }\nelse { status = 'failed_escalated'; note = 'attempts exhausted, teardown ok'; }\nconst client = { ...st.client, status: status || 'provisioning', updated_at: now };\nconst allTails = (st.history || []).map((h) => 'attempt ' + h.attempt_no + ' exit=' + h.exit_code + ' ' + h.classification + ':\\n' + h.tail).join('\\n\\n');\nreturn [{ json: { ...st, teardown_ok: gone, continue_retry: cont, client,\nrec: { run_id: st.run_id, slug: st.input.slug, attempt_no: st.attempt_no, phase: 'teardown', started_at: st.teardown_started_at, finished_at: now, exit_code: errored ? null : (typeof r.code === 'number' ? r.code : null), classification: gone ? 'ok' : 'failed', decision: 'teardown', capacity_json: '', output_tail: tail, note },\nalert_to: cfg.alert_email,\nalert_subject: '[Qubix fleet] Onboarding ' + status + ' for ' + st.input.slug,\nalert_text: 'Onboarding of \"' + st.input.slug + '\" ended with status ' + status + '.\\n' + note + '\\nRun: ' + st.run_id + '\\n\\nOutput (redacted) of every attempt:\\n' + allTails + '\\n\\nTeardown output:\\n' + tail } }];\n"
+      }
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000057",
+      "name": "Rec Teardown",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        5720,
+        20
+      ],
+      "parameters": {
+        "resource": "row",
+        "operation": "insert",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "ou4jJacyyc6ou9Fq",
+          "cachedResultName": "provision_attempts"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "run_id": "={{ $('Teardown Eval').item.json.rec.run_id }}",
+            "slug": "={{ $('Teardown Eval').item.json.rec.slug }}",
+            "attempt_no": "={{ $('Teardown Eval').item.json.rec.attempt_no }}",
+            "phase": "={{ $('Teardown Eval').item.json.rec.phase }}",
+            "started_at": "={{ $('Teardown Eval').item.json.rec.started_at }}",
+            "finished_at": "={{ $('Teardown Eval').item.json.rec.finished_at }}",
+            "exit_code": "={{ $('Teardown Eval').item.json.rec.exit_code }}",
+            "classification": "={{ $('Teardown Eval').item.json.rec.classification }}",
+            "decision": "={{ $('Teardown Eval').item.json.rec.decision }}",
+            "capacity_json": "={{ $('Teardown Eval').item.json.rec.capacity_json }}",
+            "output_tail": "={{ $('Teardown Eval').item.json.rec.output_tail }}",
+            "note": "={{ $('Teardown Eval').item.json.rec.note }}"
+          },
+          "matchingColumns": [],
+          "schema": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "notes": "Records one provision_attempts row (redacted output only)."
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000058",
+      "name": "Teardown State",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        5940,
+        20
+      ],
+      "parameters": {
+        "jsCode": "return [{ json: $('Teardown Eval').item.json }];\n"
+      }
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000060",
+      "name": "Retry?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        6160,
+        20
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "00000000-0000-4000-8000-000000000059",
+              "leftValue": "={{ $json.continue_retry }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000061",
+      "name": "Backoff Wait",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        6380,
+        -100
+      ],
+      "parameters": {
+        "resume": "timeInterval",
+        "amount": "={{ Number($json.cfg.backoff_seconds) }}",
+        "unit": "seconds"
+      },
+      "webhookId": "a1b2c3d4-0000-4000-8000-00000000f002"
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000062",
+      "name": "Mark Final",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        6380,
+        140
+      ],
+      "parameters": {
+        "resource": "row",
+        "operation": "upsert",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "vd35TNhYbv9neA1n",
+          "cachedResultName": "fleet_clients"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "slug",
+              "condition": "eq",
+              "keyValue": "={{ $('Teardown Eval').item.json.client.slug }}"
+            }
+          ]
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "slug": "={{ $('Teardown Eval').item.json.client.slug }}",
+            "client_name": "={{ $('Teardown Eval').item.json.client.client_name }}",
+            "business_name": "={{ $('Teardown Eval').item.json.client.business_name }}",
+            "subdomain": "={{ $('Teardown Eval').item.json.client.subdomain }}",
+            "site_url": "={{ $('Teardown Eval').item.json.client.site_url }}",
+            "admin_url": "={{ $('Teardown Eval').item.json.client.admin_url }}",
+            "status": "={{ $('Teardown Eval').item.json.client.status }}",
+            "last_run_id": "={{ $('Teardown Eval').item.json.client.last_run_id }}",
+            "est_ram_mib": "={{ $('Teardown Eval').item.json.client.est_ram_mib }}",
+            "legacy": "={{ $('Teardown Eval').item.json.client.legacy }}",
+            "read_only": "={{ $('Teardown Eval').item.json.client.read_only }}",
+            "updated_at": "={{ $('Teardown Eval').item.json.client.updated_at }}"
+          },
+          "matchingColumns": [
+            "slug"
+          ],
+          "schema": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "notes": "Matches ONLY slug = the validated new-client slug. Legacy slugs are rejected in Validate, so legacy rows are unreachable."
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000063",
+      "name": "Build Alert Final",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        6600,
+        140
+      ],
+      "parameters": {
+        "jsCode": "const s = $('Teardown Eval').item.json;\nreturn [{ json: { alert_to: s.alert_to, alert_subject: s.alert_subject, alert_text: s.alert_text } }];\n"
+      }
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Config",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Config": {
+      "main": [
+        [
+          {
+            "node": "Validate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validate": {
+      "main": [
+        [
+          {
+            "node": "Valid?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Valid?": {
+      "main": [
+        [
+          {
+            "node": "Get Client",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Rec Invalid",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Rec Invalid": {
+      "main": [
+        [
+          {
+            "node": "Respond 422",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Client": {
+      "main": [
+        [
+          {
+            "node": "Check Existing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Existing": {
+      "main": [
+        [
+          {
+            "node": "Exists?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Exists?": {
+      "main": [
+        [
+          {
+            "node": "Rec Exists",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Prep Preflight",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Rec Exists": {
+      "main": [
+        [
+          {
+            "node": "Respond 409 Exists",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prep Preflight": {
+      "main": [
+        [
+          {
+            "node": "Preflight SSH",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Preflight SSH": {
+      "main": [
+        [
+          {
+            "node": "Evaluate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Evaluate": {
+      "main": [
+        [
+          {
+            "node": "Rec Preflight",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Rec Preflight": {
+      "main": [
+        [
+          {
+            "node": "Preflight State",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Preflight State": {
+      "main": [
+        [
+          {
+            "node": "Proceed?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Proceed?": {
+      "main": [
+        [
+          {
+            "node": "Mark Provisioning",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Slug Taken?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Slug Taken?": {
+      "main": [
+        [
+          {
+            "node": "Respond 409 Taken",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Respond 503 Blocked",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Respond 503 Blocked": {
+      "main": [
+        [
+          {
+            "node": "Build Alert Blocked",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Alert Blocked": {
+      "main": [
+        [
+          {
+            "node": "Send Alert",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mark Provisioning": {
+      "main": [
+        [
+          {
+            "node": "Respond 202",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Respond 202": {
+      "main": [
+        [
+          {
+            "node": "Init Loop",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Init Loop": {
+      "main": [
+        [
+          {
+            "node": "Prep Deploy",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prep Deploy": {
+      "main": [
+        [
+          {
+            "node": "Deploy SSH",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Deploy SSH": {
+      "main": [
+        [
+          {
+            "node": "Classify",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Classify": {
+      "main": [
+        [
+          {
+            "node": "Rec Deploy",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Rec Deploy": {
+      "main": [
+        [
+          {
+            "node": "Deploy State",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Deploy State": {
+      "main": [
+        [
+          {
+            "node": "Success?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Success?": {
+      "main": [
+        [
+          {
+            "node": "Mark Active",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Teardown?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mark Active": {
+      "main": [
+        [
+          {
+            "node": "Build Credentials Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Credentials Email": {
+      "main": [
+        [
+          {
+            "node": "Send Credentials",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Teardown?": {
+      "main": [
+        [
+          {
+            "node": "Prep Teardown",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Mark Stopped",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mark Stopped": {
+      "main": [
+        [
+          {
+            "node": "Build Alert Stop",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Alert Stop": {
+      "main": [
+        [
+          {
+            "node": "Send Alert",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prep Teardown": {
+      "main": [
+        [
+          {
+            "node": "Teardown SSH",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Teardown SSH": {
+      "main": [
+        [
+          {
+            "node": "Teardown Eval",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Teardown Eval": {
+      "main": [
+        [
+          {
+            "node": "Rec Teardown",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Rec Teardown": {
+      "main": [
+        [
+          {
+            "node": "Teardown State",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Teardown State": {
+      "main": [
+        [
+          {
+            "node": "Retry?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Retry?": {
+      "main": [
+        [
+          {
+            "node": "Backoff Wait",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Mark Final",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Backoff Wait": {
+      "main": [
+        [
+          {
+            "node": "Prep Deploy",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mark Final": {
+      "main": [
+        [
+          {
+            "node": "Build Alert Final",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Alert Final": {
+      "main": [
+        [
+          {
+            "node": "Send Alert",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "saveDataSuccessExecution": "none",
+    "saveExecutionProgress": false
+  },
+  "active": false,
+  "pinData": {},
+  "tags": []
+}
