@@ -1,0 +1,47 @@
+# Production n8n (fleet automation). NOT DEPLOYED - a definition for Task 4.4 / a human to stand up.
+# Standalone file (like docker-compose.sa.yml): run from its own directory, project name `qubix-n8n`:
+#   N8N_ENCRYPTION_KEY=... docker compose -p qubix-n8n -f docker/n8n/docker-compose.n8n.yml up -d
+# Caddy (docker/caddy/, Task 4.4) reaches it as http://n8n:5678 over the shared network; nothing is published.
+# Image pinned to the version the local test instance ran (docker inspect n8n-local / n8n --version = 2.39.7).
+
+x-logging: &default-logging
+  driver: json-file
+  options:
+    max-size: '10m'
+    max-file: '5'
+
+services:
+  n8n:
+    image: docker.n8n.io/n8nio/n8n:2.39.7
+    restart: unless-stopped
+    logging: *default-logging
+    # PLACEHOLDER, NOT MEASURED. Measure n8n's real RSS on the VPS under a real onboarding run
+    # (`docker stats`), set this from that number, and count it against Task 2.4's capacity budget
+    # (it is one more always-on container next to the ~441 MiB/client stacks).
+    mem_limit: 768m
+    environment:
+      N8N_HOST: automation.digital-labs.ai
+      N8N_PROTOCOL: https
+      WEBHOOK_URL: https://automation.digital-labs.ai/
+      N8N_SECURE_COOKIE: 'true'
+      # Required and must stay stable: credentials are encrypted with it; a new key on recreate breaks them all.
+      N8N_ENCRYPTION_KEY: ${N8N_ENCRYPTION_KEY:?set N8N_ENCRYPTION_KEY (stable, generated once)}
+      EXECUTIONS_DATA_PRUNE: 'true'
+      EXECUTIONS_DATA_MAX_AGE: '720'          # hours = 30 days
+      EXECUTIONS_DATA_PRUNE_MAX_COUNT: '5000'
+      N8N_BLOCK_ENV_ACCESS_IN_NODE: 'true'
+      N8N_DIAGNOSTICS_ENABLED: 'false'
+      GENERIC_TIMEZONE: ${GENERIC_TIMEZONE:-UTC}
+    volumes:
+      - n8n-data:/home/node/.n8n
+    networks:
+      - qubix
+
+networks:
+  qubix:
+    # Same shared Caddy network the two client stacks join (see docker-compose.sa.yml for why the real name is qubix_qubix).
+    external: true
+    name: qubix_qubix
+
+volumes:
+  n8n-data: {}

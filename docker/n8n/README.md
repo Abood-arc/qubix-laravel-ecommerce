@@ -88,3 +88,48 @@ by id; after import re-select both tables in the Data Table nodes (Rec *, Mark *
 - [ ] n8n production compose service and Caddy access restriction (basic auth / IP allow-list) — Task 4.4.
 - [ ] Execution pruning env vars (above), `backoff_seconds` = 60, real `repo_url`.
 - [ ] Rotate `fleet-webhook-token`; keep the webhook reachable only from trusted callers.
+
+## Fleet dashboard (`fleet-dashboard.workflow.json`)
+
+Workflow `Fleet — Dashboard`: `GET /webhook/fleet-dashboard` -> reads `fleet_clients` and `provision_attempts`
+(get-only Data Table nodes; the workflow contains no write node) -> one Code node renders a self-contained,
+JavaScript-free HTML page -> Respond to Webhook (`text/html`, `Cache-Control: no-store`,
+`X-Content-Type-Options: nosniff`). It shows summary tiles (fleet clients, legacy sites, summed `est_ram_mib`,
+newest pre-flight capacity check: available MiB / clients that still fit / decision), a client table (status
+badge, site and `/admin` links; the two legacy rows are badged "legacy - read-only" and have no actions), a
+per-client `<details>` history of every attempt row, and a list of requests that never got a client record
+(rejected/blocked). Every dynamic value goes through one `esc()` helper; link hrefs must start with `http(s)://`
+or the link is dropped. Only summary numbers from `capacity_json` are shown (never the raw blob), plus the
+already-redacted output tails (defensively re-scrubbed for `password/secret/token: value` patterns). It exposes no
+secret, token or credential.
+
+Note: n8n replaces the `Content-Security-Policy` response header on HTML webhook responses with its own `sandbox`
+policy, so the header set in the workflow is not what the browser receives. The page therefore also carries the
+same policy in a `<meta http-equiv>` tag, and Caddy must set the strict header (below).
+
+**Access control (requirement for Task 4.4, not applied here):** n8n has none for webhooks. Production must put a
+Caddy `basic_auth` block on its own dashboard subdomain that proxies ONLY `/webhook/fleet-dashboard` to
+`n8n:5678` (everything else 404) and sets `header >Content-Security-Policy "default-src 'none'; style-src 'unsafe-inline'"`.
+The n8n editor and the onboarding webhook must not be reachable through that host.
+
+## Production compose file (`docker-compose.n8n.yml`)
+
+Definition only; never run against any host by this task. One `n8n` service, image pinned to `2.39.7`, no
+published ports, joins external `qubix_qubix` so Caddy can reach `n8n:5678`, named volume `n8n-data`, log rotation,
+pruning at 30 days, `N8N_ENCRYPTION_KEY` required from the environment. `mem_limit` is a placeholder: measure on
+the VPS and count it against Task 2.4's capacity budget. Validate with
+`N8N_ENCRYPTION_KEY=x docker compose -f docker/n8n/docker-compose.n8n.yml config`.
+
+### Manual checklist: standing n8n up in production (human steps)
+
+- [ ] Generate the encryption key once (`openssl rand -hex 32`), keep it in the VPS secret store and a password
+      manager; never change it.
+- [ ] `docker compose -p qubix-n8n -f docker/n8n/docker-compose.n8n.yml up -d` on the VPS (after Caddy is ready).
+- [ ] DNS: the `*.digital-labs.ai` wildcard from the plan covers `automation.digital-labs.ai`; add the Caddy site
+      blocks (Task 4.4) for n8n (owner-only) and the basic-auth dashboard host.
+- [ ] Open the editor and create the first owner account (strong password).
+- [ ] Recreate credentials `fleet-target-ssh`, `fleet-webhook-token`, `fleet-alert-smtp` with real values.
+- [ ] Create data tables `fleet_clients` and `provision_attempts` (columns above) and seed the two legacy rows.
+- [ ] Import `client-onboarding.workflow.json` and `fleet-dashboard.workflow.json`; re-select credentials and both
+      tables in every Data Table node; set Config (`repo_url`, `alert_email`, `backoff_seconds` = 60).
+- [ ] Activate both workflows; verify the dashboard through Caddy with basic auth and confirm the CSP header.
