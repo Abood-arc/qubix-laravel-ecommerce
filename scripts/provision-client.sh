@@ -27,6 +27,16 @@
 #
 # All arguments are passed straight through to `php artisan qubix:provision`
 # — see that command's --help for the full option list.
+#
+# Pre-validation (before any docker call): --slug must be given as
+# --slug=<value> and match ^[a-z][a-z0-9-]{1,20}$ (same rule as Provision.php
+# and generate-client-compose.sh), and no argument may contain a control
+# character (0x00-0x1F, 0x7F). Failure exits 1 (terminal / invalid input)
+# with zero docker calls and no files created, so a retrying automation layer
+# never retries permanently invalid input.
+#
+# Exit codes: 0 success, 1-9 terminal, 10-19 transient; anything else from
+# `docker run` is normalised to 10 below.
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -44,13 +54,23 @@ err() { printf '%s\n' "$*" >&2; }
 # parses the full option set itself.
 SLUG=""
 for arg in "$@"; do
+  if [[ "$arg" =~ [[:cntrl:]] ]]; then
+    err "Error: an argument contains a control character (newline/CR/tab/etc.), length ${#arg} — invalid input."
+    exit 1
+  fi
   case "$arg" in
+    --slug) err "Error: --slug requires the --slug=<slug> form — invalid input."; exit 1 ;;
     --slug=*) SLUG="${arg#--slug=}" ;;
   esac
 done
 
 if [[ -z "$SLUG" ]]; then
   err "Error: --slug=<slug> is required (e.g. --slug=acme)"
+  exit 1
+fi
+
+if [[ ! "$SLUG" =~ ^[a-z][a-z0-9-]{1,20}$ ]]; then
+  err "Error: invalid --slug (must match ^[a-z][a-z0-9-]{1,20}$; got ${#SLUG} chars) — invalid input."
   exit 1
 fi
 
@@ -115,25 +135,6 @@ echo "==> Running qubix:provision inside the provisioner container"
 # string, so they resolve correctly on both sides of the socket.
 REPO_ROOT_ON_HOST="$REPO_ROOT"
 
-# Root-owned-file safety: the provisioner container needs the Docker socket,
-# which is root-equivalent regardless of the container's declared user, so
-# it runs as root (no -u flag — see docker/provisioner/Dockerfile). That
-# means root-owned writes to the bind-mounted checkout (the generated
-# compose file, .env) would otherwise break subsequent non-root access to
-# those files. `set -e` is suspended around this one invocation so a
-# non-zero exit here still falls through to the mandatory chown below
-# instead of aborting the script immediately.
-#
-# SUPERVISOR_PHP_USER=root overrides the base image's baked-in default
-# (docker/8.3/Dockerfile sets it to "sail" for the long-running app/queue/
-# scheduler containers). vendor/laravel/sail/runtimes/8.3/start-container
-# (this image's ENTRYPOINT) execs its CMD directly only when that variable
-# is "root"; otherwise it runs `gosu $WWWUSER "$@"` — and since this
-# one-off invocation never sets WWWUSER, that would make gosu try to
-# switch to a user literally named "php" (the first word of the CMD) and
-# fail with "failed switching to \"php\": unable to find user php" instead
-# of ever reaching artisan. Discovered by running this script for real,
-# not by reading start-container's own source ahead of time.
 set +e
 docker run --rm \
   -e SUPERVISOR_PHP_USER=root \
