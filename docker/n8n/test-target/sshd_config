@@ -1,0 +1,7 @@
+PasswordAuthentication no
+KbdInteractiveAuthentication no
+PermitRootLogin no
+AllowUsers deploy
+AuthorizedKeysFile /etc/ssh/authorized_keys/%u
+# Non-interactive ssh commands ignore rc files; put the shims first here instead.
+SetEnv PATH=/opt/fleet-target/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin

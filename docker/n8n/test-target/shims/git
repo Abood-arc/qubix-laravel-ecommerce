@@ -1,0 +1,9 @@
+#!/bin/bash
+# Fake git: only `clone ... <dir>`; the clone contains the scenario-driven provisioner shim.
+T=/opt/fleet-target
+echo "$(date -u +%FT%TZ) git $*" >> $T/log/git.log
+[ "$1" = clone ] || { echo "fake git: unsupported: $*" >&2; exit 1; }
+dir="${@: -1}"
+mkdir -p "$dir/.git" "$dir/scripts"
+cp $T/bin/provision-client.sh "$dir/scripts/provision-client.sh"
+echo "Cloning into '$dir'..."

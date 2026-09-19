@@ -1,0 +1,13 @@
+#!/bin/bash
+# Fake docker: handles exactly two invocations, everything else exits 1.
+T=/opt/fleet-target; S=$T/state/projects
+echo "$(date -u +%FT%TZ) docker $*" >> $T/log/docker.log
+if [ "$*" = "compose ls -a -q" ]; then
+  cat "$S"
+elif [ $# -eq 8 ] && [ "$1" = compose ] && [ "$2" = -f ] && [ "$4" = -p ] \
+  && [ "$6" = down ] && [ "$7" = -v ] && [ "$8" = --remove-orphans ]; then
+  # Only the project named by -p is ever removed (exact-line match).
+  grep -vxF -- "$5" "$S" > "$S.tmp"; cat "$S.tmp" > "$S"; rm -f "$S.tmp"
+else
+  echo "fake docker: unsupported invocation: $*" >&2; exit 1
+fi
