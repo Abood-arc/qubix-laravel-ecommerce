@@ -94,8 +94,10 @@ by id; after import re-select both tables in the Data Table nodes (Rec *, Mark *
 Workflow `Fleet — Dashboard`: `GET /webhook/fleet-dashboard` -> reads `fleet_clients` and `provision_attempts`
 (get-only Data Table nodes; the workflow contains no write node) -> one Code node renders a self-contained,
 JavaScript-free HTML page -> Respond to Webhook (`text/html`, `Cache-Control: no-store`,
-`X-Content-Type-Options: nosniff`). It shows summary tiles (fleet clients, legacy sites, summed `est_ram_mib`,
-newest pre-flight capacity check: available MiB / clients that still fit / decision), a client table (status
+`X-Content-Type-Options: nosniff`). It shows summary tiles (fleet clients split active vs failed, legacy sites, summed `est_ram_mib` over RUNNING stacks only
+(`live`/`active`/`provisioning`; failed/blocked/rejected rows have no stack and are excluded), and "clients that still fit"
+labelled as of the newest pre-flight with its timestamp and compose-project count - a stale value that does not
+include clients provisioned since), a client table (status
 badge, site and `/admin` links; the two legacy rows are badged "legacy - read-only" and have no actions), a
 per-client `<details>` history of every attempt row, and a list of requests that never got a client record
 (rejected/blocked). Every dynamic value goes through one `esc()` helper; link hrefs must start with `http(s)://`
@@ -107,17 +109,32 @@ Note: n8n replaces the `Content-Security-Policy` response header on HTML webhook
 policy, so the header set in the workflow is not what the browser receives. The page therefore also carries the
 same policy in a `<meta http-equiv>` tag, and Caddy must set the strict header (below).
 
-**Access control (requirement for Task 4.4, not applied here):** n8n has none for webhooks. Production must put a
-Caddy `basic_auth` block on its own dashboard subdomain that proxies ONLY `/webhook/fleet-dashboard` to
-`n8n:5678` (everything else 404) and sets `header >Content-Security-Policy "default-src 'none'; style-src 'unsafe-inline'"`.
-The n8n editor and the onboarding webhook must not be reachable through that host.
+**Access control (requirements for Task 4.4, NOT applied here):** n8n has no access control on webhooks, and the page
+exposes client names, URLs and provisioning history. The Caddy block for the dashboard hostname must:
+
+1. Proxy ONLY the exact path `/webhook/fleet-dashboard` to `n8n:5678` and return 404 for everything else. In particular
+   it must not expose `/webhook/fleet-onboard`, `/webhook-test/*`, `/rest/*` or the n8n editor UI.
+2. Set the strict CSP with the `>` override prefix: `header >Content-Security-Policy "default-src 'none'; style-src 'unsafe-inline'"`.
+   n8n emits its own `sandbox` CSP on HTML webhook responses; a plain `header` would add a second policy instead of
+   replacing it.
+3. Require basic auth.
+4. Until (2) is applied, the `<meta http-equiv="Content-Security-Policy">` tag in the page (same policy) is the only
+   script-blocking control.
+
+Separately: `POST /webhook/fleet-onboard` is protected ONLY by the `X-Fleet-Token` header credential if
+`automation.digital-labs.ai` is publicly reachable. Recommend a Caddy-level restriction in front of it (source-IP
+allowlist, or basic auth); the plan lists source-IP restriction as a follow-up.
 
 ## Production compose file (`docker-compose.n8n.yml`)
 
 Definition only; never run against any host by this task. One `n8n` service, image pinned to `2.39.7`, no
 published ports, joins external `qubix_qubix` so Caddy can reach `n8n:5678`, named volume `n8n-data`, log rotation,
 pruning at 30 days, `N8N_ENCRYPTION_KEY` required from the environment. `mem_limit` is a placeholder: measure on
-the VPS and count it against Task 2.4's capacity budget. Validate with
+the VPS and count it against Task 2.4's capacity budget. `N8N_PROXY_HOPS=1` makes n8n trust one reverse proxy (Caddy), so client IPs and rate limiting key off
+`X-Forwarded-For` instead of Caddy's container IP. **Backup:** the `n8n-data` volume holds the SQLite database -
+BOTH data tables (client registry and full attempt history) and the encrypted credentials - so include it in the VPS
+backup routine (per-volume backup, like the other stacks). Losing `N8N_ENCRYPTION_KEY` makes stored credentials
+unreadable. Validate with
 `N8N_ENCRYPTION_KEY=x docker compose -f docker/n8n/docker-compose.n8n.yml config`.
 
 ### Manual checklist: standing n8n up in production (human steps)

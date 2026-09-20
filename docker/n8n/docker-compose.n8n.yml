@@ -24,6 +24,9 @@ services:
       N8N_PROTOCOL: https
       WEBHOOK_URL: https://automation.digital-labs.ai/
       N8N_SECURE_COOKIE: 'true'
+      # n8n sits behind exactly one reverse proxy (Caddy). Without this n8n sees Caddy's container IP for every request
+      # and ignores X-Forwarded-For, so client IP / rate limiting are keyed wrongly.
+      N8N_PROXY_HOPS: '1'
       # Required and must stay stable: credentials are encrypted with it; a new key on recreate breaks them all.
       N8N_ENCRYPTION_KEY: ${N8N_ENCRYPTION_KEY:?set N8N_ENCRYPTION_KEY (stable, generated once)}
       EXECUTIONS_DATA_PRUNE: 'true'
@@ -33,6 +36,9 @@ services:
       N8N_DIAGNOSTICS_ENABLED: 'false'
       GENERIC_TIMEZONE: ${GENERIC_TIMEZONE:-UTC}
     volumes:
+      # BACKUP: this volume is the SQLite database - BOTH data tables (fleet_clients registry and the full
+      # provision_attempts history) plus the encrypted credentials. Include it in the VPS per-volume backup routine.
+      # Without N8N_ENCRYPTION_KEY the stored credentials are unreadable, so back that key up separately.
       - n8n-data:/home/node/.n8n
     networks:
       - qubix
