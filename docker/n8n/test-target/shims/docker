@@ -1,13 +1,35 @@
 #!/bin/bash
-# Fake docker: handles exactly two invocations, everything else exits 1.
-T=/opt/fleet-target; S=$T/state/projects
+# Fake docker: handles exactly three invocations, everything else exits 1.
+#   compose ls -a -q                                  -> list compose projects
+#   volume ls -q                                      -> list docker volumes
+#   compose -f F -p P down -v --remove-orphans        -> remove project P + its volumes
+# Teardown behaviour per slug is scriptable via /opt/fleet-target/scenario/<slug>.down:
+#   fail     -> `down` itself fails (exit 1), nothing removed
+#   present  -> `down` "succeeds" but the project survives (STILL_PRESENT case)
+T=/opt/fleet-target; S=$T/state/projects; V=$T/state/volumes
 echo "$(date -u +%FT%TZ) docker $*" >> $T/log/docker.log
 if [ "$*" = "compose ls -a -q" ]; then
   cat "$S"
+elif [ "$*" = "volume ls -q" ]; then
+  cat "$V"
 elif [ $# -eq 8 ] && [ "$1" = compose ] && [ "$2" = -f ] && [ "$4" = -p ] \
   && [ "$6" = down ] && [ "$7" = -v ] && [ "$8" = --remove-orphans ]; then
-  # Only the project named by -p is ever removed (exact-line match).
-  grep -vxF -- "$5" "$S" > "$S.tmp"; cat "$S.tmp" > "$S"; rm -f "$S.tmp"
+  proj=$5
+  slug=${proj#qubix-}
+  mode=""; [ -f "$T/scenario/$slug.down" ] && read -r mode < "$T/scenario/$slug.down"
+  case "$mode" in
+    fail)
+      echo "fake docker: simulated 'down' failure for $proj" >&2; exit 1 ;;
+    present)
+      # Pretend the teardown ran but left the project behind.
+      echo "Removing $proj (simulated partial teardown)"; exit 0 ;;
+  esac
+  # Only the project named by -p is ever removed (exact-line match)...
+  grep -vxF -- "$proj" "$S" > "$S.tmp"; cat "$S.tmp" > "$S"; rm -f "$S.tmp"
+  # ...and only that project's own named volumes (`-v`), in both the bare and
+  # the compose-project-prefixed form docker actually creates.
+  grep -vxE -- "(${proj}_)?${proj}-(mysql|redis|elasticsearch)" "$V" > "$V.tmp"
+  cat "$V.tmp" > "$V"; rm -f "$V.tmp"
 else
   echo "fake docker: unsupported invocation: $*" >&2; exit 1
 fi

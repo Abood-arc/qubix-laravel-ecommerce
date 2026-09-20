@@ -2,7 +2,7 @@
   "name": "Fleet — Client Onboarding",
   "nodes": [
     {
-      "id": "00000000-0000-4000-8000-000000000001",
+      "id": "n0",
       "name": "Webhook",
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2.1,
@@ -26,7 +26,7 @@
       }
     },
     {
-      "id": "00000000-0000-4000-8000-000000000012",
+      "id": "n1",
       "name": "Config",
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
@@ -40,61 +40,61 @@
         "assignments": {
           "assignments": [
             {
-              "id": "00000000-0000-4000-8000-000000000002",
+              "id": "aper_client_mib",
               "name": "per_client_mib",
               "value": 441,
               "type": "number"
             },
             {
-              "id": "00000000-0000-4000-8000-000000000003",
+              "id": "areserve_mib",
               "name": "reserve_mib",
               "value": 1024,
               "type": "number"
             },
             {
-              "id": "00000000-0000-4000-8000-000000000004",
+              "id": "amax_load_per_core",
               "name": "max_load_per_core",
               "value": 0.7,
               "type": "number"
             },
             {
-              "id": "00000000-0000-4000-8000-000000000005",
+              "id": "amin_free_disk_mib",
               "name": "min_free_disk_mib",
               "value": 3072,
               "type": "number"
             },
             {
-              "id": "00000000-0000-4000-8000-000000000006",
+              "id": "amax_attempts",
               "name": "max_attempts",
               "value": 3,
               "type": "number"
             },
             {
-              "id": "00000000-0000-4000-8000-000000000007",
+              "id": "abackoff_seconds",
               "name": "backoff_seconds",
               "value": 5,
               "type": "number"
             },
             {
-              "id": "00000000-0000-4000-8000-000000000008",
+              "id": "abase_dir",
               "name": "base_dir",
               "value": "/opt",
               "type": "string"
             },
             {
-              "id": "00000000-0000-4000-8000-000000000009",
+              "id": "arepo_url",
               "name": "repo_url",
               "value": "https://github.com/Abood-arc/qubix-laravel-ecommerce.git",
               "type": "string"
             },
             {
-              "id": "00000000-0000-4000-8000-000000000010",
+              "id": "adomain",
               "name": "domain",
               "value": "digital-labs.ai",
               "type": "string"
             },
             {
-              "id": "00000000-0000-4000-8000-000000000011",
+              "id": "aalert_email",
               "name": "alert_email",
               "value": "fleet-alerts@qubix.local",
               "type": "string"
@@ -106,7 +106,7 @@
       "notes": "Single place for every threshold. per_client_mib=441: Task 2.4 conservative per-client figure. backoff_seconds=5 is the LOCAL value; production should use 60."
     },
     {
-      "id": "00000000-0000-4000-8000-000000000013",
+      "id": "n2",
       "name": "Validate",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -115,12 +115,12 @@
         300
       ],
       "parameters": {
-        "jsCode": "// Validation BEFORE any SSH. Rejects malformed input, control characters and legacy slugs.\nconst raw = $('Webhook').first().json.body;\nconst b = (raw && typeof raw === 'object' && !Array.isArray(raw)) ? raw : {};\nconst cfg = $('Config').first().json;\nconst run_id = 'run-' + Date.now() + '-' + Math.random().toString(36).slice(2, 8);\nconst errors = [];\nconst CTRL = /[\\u0000-\\u001f\\u007f]/;\nconst LEGACY = ['jjbags-in', 'jj-bags-com', 'jjbags', 'jj-bags', 'jjbags.in', 'jj-bags.com', 'sa', 'qubix', 'qubix-sa'];\nconst isStr = (v) => typeof v === 'string';\nconst slug = isStr(b.slug) ? b.slug : '';\nif (!/^[a-z][a-z0-9-]{1,20}$/.test(slug)) errors.push('slug must match ^[a-z][a-z0-9-]{1,20}$');\nif (LEGACY.includes(slug)) errors.push('slug is reserved (legacy site)');\nfor (const f of ['clientName', 'businessName']) {\nconst v = b[f];\nif (!isStr(v) || v.trim().length === 0) errors.push(f + ' is required');\nelse if (v.length > 80) errors.push(f + ' must be <= 80 chars');\nelse if (CTRL.test(v)) errors.push(f + ' must not contain control characters');\n}\nconst email = isStr(b.adminEmail) ? b.adminEmail : '';\nif (email.length > 254 || !/^[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+(\\.[A-Za-z0-9-]+)*\\.[A-Za-z]{2,}$/.test(email)) errors.push('adminEmail is not a valid email');\nlet brandColor = '';\nif (b.brandColor !== undefined && b.brandColor !== null && b.brandColor !== '') {\nif (!isStr(b.brandColor) || !/^#[0-9a-fA-F]{6}$/.test(b.brandColor)) errors.push('brandColor must match ^#[0-9a-fA-F]{6}$');\nelse brandColor = b.brandColor;\n}\nlet extra = 0;\nif (b.debug_extra_reserve_mib !== undefined && b.debug_extra_reserve_mib !== null) {\nconst d = b.debug_extra_reserve_mib;\nif (typeof d !== 'number' || !Number.isFinite(d) || d < 0) errors.push('debug_extra_reserve_mib must be a number >= 0');\nelse extra = d;\n}\nconst ok = errors.length === 0;\nconst safeSlug = (isStr(b.slug) ? b.slug : '').replace(/[^\\x20-\\x7e]/g, '?').slice(0, 40);\nconst now = new Date().toISOString();\nreturn [{ json: {\nok, run_id, cfg, errors,\ninput: ok ? { slug, clientName: b.clientName, businessName: b.businessName, adminEmail: email, brandColor, debug_extra_reserve_mib: extra } : null,\nresp_code: 422,\nresp: { status: 'invalid', run_id, errors },\nrec: { run_id, slug: safeSlug, attempt_no: 0, phase: 'preflight', started_at: now, finished_at: now, exit_code: null, classification: 'invalid', decision: 'invalid_input', capacity_json: '', output_tail: '', note: errors.join('; ').slice(0, 500) },\n} }];\n"
+        "jsCode": "const raw = $('Webhook').first().json.body;\nconst b = (raw && typeof raw === 'object' && !Array.isArray(raw)) ? raw : {};\nconst cfg = $('Config').first().json;\nconst run_id = 'run-' + Date.now() + '-' + Math.random().toString(36).slice(2, 8);\nconst errors = [];\nconst CTRL = /[\u0000-\u001f]/;\nconst LEGACY = ['jjbags-in', 'jj-bags-com', 'jjbags', 'jj-bags', 'jjbags.in', 'jj-bags.com', 'sa', 'qubix', 'qubix-sa'];\nconst isStr = (v) => typeof v === 'string';\nconst slug = isStr(b.slug) ? b.slug : '';\nif (!/^[a-z][a-z0-9-]{1,20}$/.test(slug)) errors.push('slug must match ^[a-z][a-z0-9-]{1,20}$');\nif (LEGACY.includes(slug)) errors.push('slug is reserved (legacy site)');\nfor (const f of ['clientName', 'businessName']) {\nconst v = b[f];\nif (!isStr(v) || v.trim().length === 0) errors.push(f + ' is required');\nelse if (v.length > 80) errors.push(f + ' must be <= 80 chars');\nelse if (CTRL.test(v)) errors.push(f + ' must not contain control characters');\n}\nconst email = isStr(b.adminEmail) ? b.adminEmail : '';\nif (email.length > 254 || !/^[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+(\\.[A-Za-z0-9-]+)*\\.[A-Za-z]{2,}$/.test(email)) errors.push('adminEmail is not a valid email');\nlet brandColor = '';\nif (b.brandColor !== undefined && b.brandColor !== null && b.brandColor !== '') {\nif (!isStr(b.brandColor) || !/^#[0-9a-fA-F]{6}$/.test(b.brandColor)) errors.push('brandColor must match ^#[0-9a-fA-F]{6}$');\nelse brandColor = b.brandColor;\n}\nlet extra = 0;\nif (b.debug_extra_reserve_mib !== undefined && b.debug_extra_reserve_mib !== null) {\nconst d = b.debug_extra_reserve_mib;\nif (typeof d !== 'number' || !Number.isFinite(d) || d < 0) errors.push('debug_extra_reserve_mib must be a number >= 0');\nelse extra = d;\n}\nconst ok = errors.length === 0;\nconst safeSlug = (isStr(b.slug) ? b.slug : '').replace(/[^\\x20-\\x7e]/g, '?').slice(0, 40);\nconst now = new Date().toISOString();\nreturn [{ json: {\nok, run_id, cfg, errors,\ninput: ok ? { slug, clientName: b.clientName, businessName: b.businessName, adminEmail: email, brandColor, debug_extra_reserve_mib: extra } : null,\nresp_code: 422,\nresp: { status: 'invalid', run_id, errors },\nrec: { run_id, slug: safeSlug, attempt_no: 0, phase: 'preflight', started_at: now, finished_at: now, exit_code: null, classification: 'invalid', decision: 'invalid_input', capacity_json: '', output_tail: '', note: errors.join('; ').slice(0, 500) },\n} }];\n"
       },
       "notes": "Validation before any SSH. Rejects legacy slugs (jjbags-in, jj-bags-com, sa, qubix, ...) so no write node can ever match a legacy row."
     },
     {
-      "id": "00000000-0000-4000-8000-000000000015",
+      "id": "n3",
       "name": "Valid?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
@@ -138,7 +138,7 @@
           },
           "conditions": [
             {
-              "id": "00000000-0000-4000-8000-000000000014",
+              "id": "c3",
               "leftValue": "={{ $json.ok }}",
               "rightValue": "",
               "operator": {
@@ -154,7 +154,7 @@
       }
     },
     {
-      "id": "00000000-0000-4000-8000-000000000016",
+      "id": "n4",
       "name": "Rec Invalid",
       "type": "n8n-nodes-base.dataTable",
       "typeVersion": 1.1,
@@ -197,7 +197,7 @@
       "notes": "Records one provision_attempts row (redacted output only)."
     },
     {
-      "id": "00000000-0000-4000-8000-000000000017",
+      "id": "n5",
       "name": "Respond 422",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.5,
@@ -214,7 +214,7 @@
       }
     },
     {
-      "id": "00000000-0000-4000-8000-000000000018",
+      "id": "n6",
       "name": "Get Client",
       "type": "n8n-nodes-base.dataTable",
       "typeVersion": 1.1,
@@ -245,11 +245,11 @@
         "limit": 1,
         "options": {}
       },
-      "alwaysOutputData": true,
-      "notes": "Read-only registry lookup for in-progress / already-active detection."
+      "notes": "Read-only registry lookup for in-progress / already-active detection.",
+      "alwaysOutputData": true
     },
     {
-      "id": "00000000-0000-4000-8000-000000000019",
+      "id": "n7",
       "name": "Check Existing",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -258,11 +258,11 @@
         200
       ],
       "parameters": {
-        "jsCode": "const v = $('Validate').first().json;\nconst row = $input.first().json || {};\nlet exists = false, why = '';\nif (row.slug === v.input.slug) {\nconst t = Date.parse(row.updated_at || row.updatedAt || '');\nif (row.status === 'provisioning' && Number.isFinite(t) && (Date.now() - t) < 2 * 3600 * 1000) { exists = true; why = 'provisioning in progress'; }\nelse if (row.status === 'active') { exists = true; why = 'client already active'; }\n}\nconst now = new Date().toISOString();\nreturn [{ json: {\nexists, resp_code: 409,\nresp: { status: 'conflict', reason: why, run_id: v.run_id },\nrec: { run_id: v.run_id, slug: v.input.slug, attempt_no: 0, phase: 'preflight', started_at: now, finished_at: now, exit_code: null, classification: 'conflict', decision: 'slug_exists_in_registry', capacity_json: '', output_tail: '', note: why },\n} }];\n"
+        "jsCode": "const v = $('Validate').first().json;\nconst row = $input.first().json || {};\nlet exists = false, why = '';\nif (row.slug === v.input.slug) {\nconst t = Date.parse(row.updated_at || row.updatedAt || '');\nif (row.status === 'provisioning' && Number.isFinite(t) && (Date.now() - t) < 2 * 3600 * 1000) { exists = true; why = 'provisioning in progress'; }\nelse if (row.status === 'active') { exists = true; why = 'client already active'; }\nelse if (row.legacy === true || row.read_only === true) { exists = true; why = 'slug belongs to a read-only legacy site'; }\n}\nconst now = new Date().toISOString();\nconst cfg = v.cfg;\n// C2 step (1): the row this run is about to claim as `provisioning`. It is written\n// BEFORE the pre-flight SSH so a concurrent run's Evaluate can see this run in\n// flight. Reached only on the exists === false branch, i.e. only after the checks\n// above have already stopped the run for any pre-existing active / in-progress /\n// legacy row — so the claim can never overwrite a real client's row.\nconst claim = exists ? null : {\nslug: v.input.slug, client_name: v.input.clientName, business_name: v.input.businessName,\nsubdomain: v.input.slug + '.' + cfg.domain,\nsite_url: 'https://' + v.input.slug + '.' + cfg.domain,\nadmin_url: 'https://' + v.input.slug + '.' + cfg.domain + '/admin',\nstatus: 'provisioning', last_run_id: v.run_id, est_ram_mib: Number(cfg.per_client_mib),\nlegacy: false, read_only: false, updated_at: now,\n};\nreturn [{ json: {\nexists, resp_code: 409, claim,\nresp: { status: 'conflict', reason: why, run_id: v.run_id },\nrec: { run_id: v.run_id, slug: v.input.slug, attempt_no: 0, phase: 'preflight', started_at: now, finished_at: now, exit_code: null, classification: 'conflict', decision: 'slug_exists_in_registry', capacity_json: '', output_tail: '', note: why },\n} }];\n"
       }
     },
     {
-      "id": "00000000-0000-4000-8000-000000000021",
+      "id": "n8",
       "name": "Exists?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
@@ -280,7 +280,7 @@
           },
           "conditions": [
             {
-              "id": "00000000-0000-4000-8000-000000000020",
+              "id": "c8",
               "leftValue": "={{ $json.exists }}",
               "rightValue": "",
               "operator": {
@@ -296,7 +296,7 @@
       }
     },
     {
-      "id": "00000000-0000-4000-8000-000000000022",
+      "id": "n9",
       "name": "Rec Exists",
       "type": "n8n-nodes-base.dataTable",
       "typeVersion": 1.1,
@@ -339,7 +339,7 @@
       "notes": "Records one provision_attempts row (redacted output only)."
     },
     {
-      "id": "00000000-0000-4000-8000-000000000023",
+      "id": "n10",
       "name": "Respond 409 Exists",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.5,
@@ -356,25 +356,25 @@
       }
     },
     {
-      "id": "00000000-0000-4000-8000-000000000024",
+      "id": "n11",
       "name": "Prep Preflight",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1540,
+        1760,
         60
       ],
       "parameters": {
-        "jsCode": "const v = $('Validate').first().json;\nconst cmd = \"echo '##MEM'; free -m | awk '/^Mem:/{print $7}'; echo '##NPROC'; nproc; echo '##LOAD'; cat /proc/loadavg; \" +\n\"echo '##DISK'; p=/var/lib/docker; [ -d \\\"$p\\\" ] || p=/; df -Pm \\\"$p\\\" | awk 'NR==2{print $4}'; \" +\n\"echo '##PROJECTS'; docker compose ls -a -q; echo \\\"##DOCKER_RC=$?\\\"; echo '##END'\";\nreturn [{ json: { ...v, preflight_cmd: cmd, preflight_started_at: new Date().toISOString() } }];\n"
+        "jsCode": "const v = $('Validate').first().json;\nconst q = (s) => \"'\" + String(s).replace(/'/g, \"'\\\\''\") + \"'\";\n// I2: `docker compose ls` cannot see a client whose containers were removed, but\n// its named volumes (and therefore its data) still exist. Claiming that slug would\n// let a later transient failure run `down -v` against a real client's volumes, so\n// the volume namespace is checked too. The slug is regex-validated in Validate.\nconst volRe = '(^|_)qubix-' + v.input.slug + '-(mysql|redis)$';\nconst cmd = \"echo '##MEM'; free -m | awk '/^Mem:/{print $7}'; echo '##NPROC'; nproc; echo '##LOAD'; cat /proc/loadavg; \" +\n\"echo '##DISK'; p=/var/lib/docker; [ -d \\\"$p\\\" ] || p=/; df -Pm \\\"$p\\\" | awk 'NR==2{print $4}'; \" +\n\"echo '##PROJECTS'; docker compose ls -a -q; echo \\\"##DOCKER_RC=$?\\\"; \" +\n\"echo '##VOLUMES'; vl=$(docker volume ls -q); vrc=$?; echo \\\"$vl\\\" | grep -E \" + q(volRe) + \"; echo \\\"##VOL_RC=$vrc\\\"; \" +\n\"echo '##END'\";\nreturn [{ json: { ...v, preflight_cmd: cmd, preflight_started_at: new Date().toISOString() } }];\n"
       }
     },
     {
-      "id": "00000000-0000-4000-8000-000000000025",
+      "id": "n12",
       "name": "Preflight SSH",
       "type": "n8n-nodes-base.ssh",
       "typeVersion": 1,
       "position": [
-        1760,
+        1980,
         60
       ],
       "parameters": {
@@ -384,36 +384,36 @@
         "command": "={{ $json.preflight_cmd }}",
         "cwd": "/"
       },
+      "notes": "READ-ONLY pre-flight. continueOnFail: an SSH failure yields an error item which Evaluate turns into blocked_preflight_failed (fail closed).",
       "credentials": {
         "sshPrivateKey": {
-          "id": "TmkUiyEQ2litPuSA",
+          "id": "VMRmYCvoS7UC85mr",
           "name": "fleet-target-ssh"
         }
       },
-      "onError": "continueRegularOutput",
-      "notes": "READ-ONLY pre-flight. continueOnFail: an SSH failure yields an error item which Evaluate turns into blocked_preflight_failed (fail closed)."
+      "onError": "continueRegularOutput"
     },
     {
-      "id": "00000000-0000-4000-8000-000000000026",
+      "id": "n13",
       "name": "Evaluate",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1980,
+        2420,
         60
       ],
       "parameters": {
-        "jsCode": "// Pre-flight evaluation. FAIL CLOSED: anything failed/unparseable => blocked_preflight_failed.\n// \"available\" from `free -m` already reflects both legacy stacks (Elasticsearch included) and the OS,\n// which is exactly Task 2.4's requirement that the formula subtracts the two legacy stacks.\nconst v = $('Validate').first().json;\nconst cfg = v.cfg;\nconst started = $('Prep Preflight').first().json.preflight_started_at;\nconst r = $input.first().json || {};\nconst finished = new Date().toISOString();\nconst extra = v.input.debug_extra_reserve_mib || 0;\nconst reserve = Number(cfg.reserve_mib) + extra;\nlet decision = 'blocked_preflight_failed', reasons = [], cap = {}, projects = [], owned = false;\nconst sshOk = r.error === undefined && r.code === 0 && typeof r.stdout === 'string';\nif (!sshOk) {\nreasons.push('pre-flight SSH failed: ' + String((r.error && (r.error.message || r.error)) || 'no successful result (connection failure or missing exit status)').slice(0, 200));\n} else {\nconst sec = {};\nlet cur = null;\nfor (const line of r.stdout.split('\\n')) {\n    const m = line.trim().match(/^##([A-Z_]+)(?:=(.*))?$/);\n    if (m) { cur = m[1]; sec[cur] = m[2] !== undefined ? [m[2]] : []; }\n    else if (cur && line.trim() !== '') sec[cur].push(line.trim());\n}\nconst avail = Number((sec.MEM || [])[0]);\nconst nproc = Number((sec.NPROC || [])[0]);\nconst lp = ((sec.LOAD || [])[0] || '').split(/\\s+/).map(Number);\nconst disk = Number((sec.DISK || [])[0]);\nconst rc = (sec.DOCKER_RC || [])[0];\nconst parsed = [avail, nproc, disk, lp[0], lp[1], lp[2]].every((n) => Number.isFinite(n)) && nproc > 0 && rc === '0' && sec.END !== undefined;\nif (!parsed) {\n    reasons.push('pre-flight output unparseable or docker listing failed');\n} else {\n    projects = sec.PROJECTS || [];\n    const perClient = Number(cfg.per_client_mib);\n    const load5pc = lp[1] / nproc;\n    const fit = Math.max(0, Math.floor((avail - reserve) / perClient));\n    const ramOk = (avail - reserve) >= perClient;\n    const cpuOk = load5pc <= Number(cfg.max_load_per_core);\n    const diskOk = disk >= Number(cfg.min_free_disk_mib);\n    cap = { available_mib: avail, nproc, load1: lp[0], load5: lp[1], load15: lp[2], load5_per_core: Math.round(load5pc * 1000) / 1000,\n        free_disk_mib: disk, per_client_mib: perClient, reserve_mib: Number(cfg.reserve_mib), debug_extra_reserve_mib: extra, reserve_effective_mib: reserve,\n        max_load_per_core: Number(cfg.max_load_per_core), min_free_disk_mib: Number(cfg.min_free_disk_mib),\n        clients_that_fit: fit, checks: { ram: ramOk, cpu: cpuOk, disk: diskOk }, project_count: projects.length };\n    if (projects.includes('qubix-' + v.input.slug)) { decision = 'slug_taken'; reasons.push('project qubix-' + v.input.slug + ' already exists'); }\n    else if (!ramOk || !cpuOk || !diskOk) {\n        decision = 'blocked_capacity';\n        if (!ramOk) reasons.push('RAM: available ' + avail + ' - reserve ' + reserve + ' < per-client ' + perClient);\n        if (!cpuOk) reasons.push('CPU: load5/core ' + cap.load5_per_core + ' > ' + cfg.max_load_per_core);\n        if (!diskOk) reasons.push('disk: free ' + disk + ' MiB < ' + cfg.min_free_disk_mib);\n    } else { decision = 'proceed'; owned = true; } // project proven ABSENT => this run owns whatever it creates\n}\n}\nconst proceed = decision === 'proceed';\nconst recDecision = { proceed: 'proceed', slug_taken: 'slug_taken', blocked_capacity: 'blocked — insufficient capacity', blocked_preflight_failed: 'blocked_preflight_failed' }[decision];\nconst resp_code = { proceed: 202, slug_taken: 409, blocked_capacity: 503, blocked_preflight_failed: 503 }[decision];\nconst now = new Date().toISOString();\nconst state = {\n...v, decision, proceed, owned_by_run: owned, capacity: cap, reasons, attempt_no: 0, history: [],\nresp_code,\nresp: proceed ? { status: 'accepted', run_id: v.run_id, slug: v.input.slug, capacity: { available_mib: cap.available_mib, clients_that_fit: cap.clients_that_fit } }\n    : { status: decision, run_id: v.run_id, reasons, capacity: cap.available_mib === undefined ? null : { available_mib: cap.available_mib, clients_that_fit: cap.clients_that_fit, checks: cap.checks } },\nrec: { run_id: v.run_id, slug: v.input.slug, attempt_no: 0, phase: 'preflight', started_at: started, finished_at: finished, exit_code: sshOk ? 0 : (typeof r.code === 'number' ? r.code : null),\n    classification: proceed ? 'ok' : (decision === 'slug_taken' ? 'terminal' : 'blocked'), decision: recDecision, capacity_json: JSON.stringify(cap), output_tail: '', note: reasons.join('; ').slice(0, 500) },\nclient: { slug: v.input.slug, client_name: v.input.clientName, business_name: v.input.businessName, subdomain: v.input.slug + '.' + cfg.domain,\n    site_url: 'https://' + v.input.slug + '.' + cfg.domain, admin_url: 'https://' + v.input.slug + '.' + cfg.domain + '/admin', status: 'provisioning',\n    last_run_id: v.run_id, est_ram_mib: Number(cfg.per_client_mib), legacy: false, read_only: false, updated_at: now },\nalert_to: cfg.alert_email,\nalert_subject: '[Qubix fleet] Onboarding BLOCKED for ' + v.input.slug + ': ' + recDecision,\nalert_text: 'Onboarding of \"' + v.input.slug + '\" was stopped BEFORE any deployment action.\\nDecision: ' + recDecision + '\\nReasons: ' + reasons.join('; ') + '\\nCapacity: ' + JSON.stringify(cap) + '\\nRun: ' + v.run_id,\n};\nreturn [{ json: state }];\n"
+        "jsCode": "const v = $('Validate').first().json;\nconst cfg = v.cfg;\nconst started = $('Prep Preflight').first().json.preflight_started_at;\nconst r = $('Preflight SSH').first().json || {};\nconst finished = new Date().toISOString();\nconst extra = v.input.debug_extra_reserve_mib || 0;\nconst perClient = Number(cfg.per_client_mib);\n\n// C2 step (2): count OTHER runs currently in flight and charge each of them a full\n// per-client budget. This run's own row was already written as `provisioning`\n// BEFORE the pre-flight SSH (write-then-read), so two same-moment runs each see the\n// other and both block — fail closed — instead of both reading the same free -m.\nconst INFLIGHT_MAX_AGE_MS = 2 * 3600 * 1000;\nconst inflight = [];\nfor (const it of $input.all()) {\nconst row = (it && it.json) || {};\nif (typeof row.slug !== 'string' || row.slug === '' || row.slug === v.input.slug) continue;\nif (row.status !== 'provisioning') continue;\nconst t = Date.parse(row.updated_at || row.updatedAt || '');\nif (!Number.isFinite(t) || (Date.now() - t) >= INFLIGHT_MAX_AGE_MS) continue;\ninflight.push(row.slug);\n}\nconst inflight_count = inflight.length;\nconst reserveBase = Number(cfg.reserve_mib);\nconst reserve = reserveBase + extra + inflight_count * perClient;\n\nlet decision = 'blocked_preflight_failed', reasons = [], cap = {}, projects = [], volumes = [], owned = false;\nconst sshOk = r.error === undefined && r.code === 0 && typeof r.stdout === 'string';\nif (!sshOk) {\nreasons.push('pre-flight SSH failed: ' + String((r.error && (r.error.message || r.error)) || 'no successful result (connection failure or missing exit status)').slice(0, 200));\n} else {\nconst sec = {};\nlet cur = null;\nfor (const line of r.stdout.split('\\n')) {\nconst m = line.trim().match(/^##([A-Z_]+)(?:=(.*))?$/);\nif (m) { cur = m[1]; sec[cur] = m[2] !== undefined ? [m[2]] : []; }\nelse if (cur && line.trim() !== '') sec[cur].push(line.trim());\n}\nconst avail = Number((sec.MEM || [])[0]);\nconst nproc = Number((sec.NPROC || [])[0]);\nconst lp = ((sec.LOAD || [])[0] || '').split(/\\s+/).map(Number);\nconst disk = Number((sec.DISK || [])[0]);\nconst rc = (sec.DOCKER_RC || [])[0];\nconst vrc = (sec.VOL_RC || [])[0];\nconst parsed = [avail, nproc, disk, lp[0], lp[1], lp[2]].every((n) => Number.isFinite(n)) && nproc > 0 && rc === '0' && vrc === '0' && sec.END !== undefined;\nif (!parsed) {\nreasons.push('pre-flight output unparseable, or the docker project/volume listing failed');\n} else {\nprojects = sec.PROJECTS || [];\nvolumes = sec.VOLUMES || [];\nconst load5pc = lp[1] / nproc;\nconst fit = Math.max(0, Math.floor((avail - reserve) / perClient));\nconst ramOk = (avail - reserve) >= perClient;\nconst cpuOk = load5pc <= Number(cfg.max_load_per_core);\nconst diskOk = disk >= Number(cfg.min_free_disk_mib);\ncap = { available_mib: avail, nproc, load1: lp[0], load5: lp[1], load15: lp[2], load5_per_core: Math.round(load5pc * 1000) / 1000,\nfree_disk_mib: disk, per_client_mib: perClient, reserve_mib: reserveBase, debug_extra_reserve_mib: extra,\ninflight_count, inflight_slugs: inflight, inflight_reserve_mib: inflight_count * perClient, reserve_effective_mib: reserve,\nmax_load_per_core: Number(cfg.max_load_per_core), min_free_disk_mib: Number(cfg.min_free_disk_mib),\nclients_that_fit: fit, checks: { ram: ramOk, cpu: cpuOk, disk: diskOk }, project_count: projects.length, stray_volume_count: volumes.length };\nif (projects.includes('qubix-' + v.input.slug)) { decision = 'slug_taken'; reasons.push('project qubix-' + v.input.slug + ' already exists'); }\nelse if (volumes.length > 0) { decision = 'slug_taken'; reasons.push('docker volume(s) for this slug already exist (a client whose containers were removed still owns its data): ' + volumes.join(', ')); }\nelse if (!ramOk || !cpuOk || !diskOk) {\ndecision = 'blocked_capacity';\nif (!ramOk) reasons.push('RAM: available ' + avail + ' - reserve ' + reserve + ' (base ' + reserveBase + ' + debug ' + extra + ' + ' + inflight_count + ' in-flight x ' + perClient + ') < per-client ' + perClient);\nif (!cpuOk) reasons.push('CPU: load5/core ' + cap.load5_per_core + ' > ' + cfg.max_load_per_core);\nif (!diskOk) reasons.push('disk: free ' + disk + ' MiB < ' + cfg.min_free_disk_mib);\n} else { decision = 'proceed'; owned = true; }\n}\n}\nconst proceed = decision === 'proceed';\nconst recDecision = { proceed: 'proceed', slug_taken: 'slug_taken', blocked_capacity: 'blocked — insufficient capacity', blocked_preflight_failed: 'blocked_preflight_failed' }[decision];\nconst resp_code = { proceed: 202, slug_taken: 409, blocked_capacity: 503, blocked_preflight_failed: 503 }[decision];\nconst now = new Date().toISOString();\nconst state = {\n...v, decision, proceed, owned_by_run: owned, capacity: cap, reasons, attempt_no: 0, history: [],\nresp_code,\nresp: proceed ? { status: 'accepted', run_id: v.run_id, slug: v.input.slug, capacity: { available_mib: cap.available_mib, clients_that_fit: cap.clients_that_fit, inflight_count } }\n: { status: decision, run_id: v.run_id, reasons, capacity: cap.available_mib === undefined ? null : { available_mib: cap.available_mib, clients_that_fit: cap.clients_that_fit, inflight_count, checks: cap.checks } },\nrec: { run_id: v.run_id, slug: v.input.slug, attempt_no: 0, phase: 'preflight', started_at: started, finished_at: finished, exit_code: sshOk ? 0 : (typeof r.code === 'number' ? r.code : null),\nclassification: proceed ? 'ok' : (decision === 'slug_taken' ? 'terminal' : 'blocked'), decision: recDecision, capacity_json: JSON.stringify(cap), output_tail: '', note: reasons.join('; ').slice(0, 500) },\nclient: { slug: v.input.slug, client_name: v.input.clientName, business_name: v.input.businessName, subdomain: v.input.slug + '.' + cfg.domain,\nsite_url: 'https://' + v.input.slug + '.' + cfg.domain, admin_url: 'https://' + v.input.slug + '.' + cfg.domain + '/admin', status: 'provisioning',\nlast_run_id: v.run_id, est_ram_mib: perClient, legacy: false, read_only: false, updated_at: now },\n// C2 step (3): every non-deploying outcome resets THIS run's own claim so it does\n// not hold a phantom per-client reservation for the next two hours. The reset node\n// matches on slug AND last_run_id = this run id, so a row belonging to any other\n// run (or a real client) can never be touched by it.\nreset: { slug: v.input.slug, last_run_id: v.run_id, status: decision, updated_at: now },\nalert_to: cfg.alert_email,\nalert_subject: '[Qubix fleet] Onboarding BLOCKED for ' + v.input.slug + ': ' + recDecision,\nalert_text: 'Onboarding of \"' + v.input.slug + '\" was stopped BEFORE any deployment action.\\nDecision: ' + recDecision + '\\nReasons: ' + reasons.join('; ') + '\\nCapacity: ' + JSON.stringify(cap) + '\\nRun: ' + v.run_id,\n};\nreturn [{ json: state }];\n"
       },
       "notes": "available = free -m \"available\" column: already reflects both legacy stacks + OS (Task 2.4 requirement). Fail closed. debug_extra_reserve_mib can only INCREASE the reserve."
     },
     {
-      "id": "00000000-0000-4000-8000-000000000027",
+      "id": "n14",
       "name": "Rec Preflight",
       "type": "n8n-nodes-base.dataTable",
       "typeVersion": 1.1,
       "position": [
-        2200,
+        2640,
         60
       ],
       "parameters": {
@@ -451,12 +451,12 @@
       "notes": "Records one provision_attempts row (redacted output only)."
     },
     {
-      "id": "00000000-0000-4000-8000-000000000028",
+      "id": "n15",
       "name": "Preflight State",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        2420,
+        2860,
         60
       ],
       "parameters": {
@@ -464,12 +464,12 @@
       }
     },
     {
-      "id": "00000000-0000-4000-8000-000000000030",
+      "id": "n16",
       "name": "Proceed?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        2640,
+        3080,
         60
       ],
       "parameters": {
@@ -482,7 +482,7 @@
           },
           "conditions": [
             {
-              "id": "00000000-0000-4000-8000-000000000029",
+              "id": "c16",
               "leftValue": "={{ $json.proceed }}",
               "rightValue": "",
               "operator": {
@@ -499,13 +499,13 @@
       "notes": "The ONLY edge to any deployment node is this IF true branch."
     },
     {
-      "id": "00000000-0000-4000-8000-000000000032",
+      "id": "n17",
       "name": "Slug Taken?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        2860,
-        200
+        3520,
+        140
       ],
       "parameters": {
         "conditions": {
@@ -517,8 +517,8 @@
           },
           "conditions": [
             {
-              "id": "00000000-0000-4000-8000-000000000031",
-              "leftValue": "={{ $json.decision === 'slug_taken' }}",
+              "id": "c17",
+              "leftValue": "={{ $('Evaluate').first().json.decision === 'slug_taken' }}",
               "rightValue": "",
               "operator": {
                 "type": "boolean",
@@ -533,13 +533,13 @@
       }
     },
     {
-      "id": "00000000-0000-4000-8000-000000000033",
+      "id": "n18",
       "name": "Respond 409 Taken",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.5,
       "position": [
-        3080,
-        260
+        3740,
+        220
       ],
       "parameters": {
         "respondWith": "json",
@@ -550,13 +550,13 @@
       }
     },
     {
-      "id": "00000000-0000-4000-8000-000000000034",
+      "id": "n19",
       "name": "Respond 503 Blocked",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.5,
       "position": [
-        3080,
-        140
+        3740,
+        60
       ],
       "parameters": {
         "respondWith": "json",
@@ -567,25 +567,25 @@
       }
     },
     {
-      "id": "00000000-0000-4000-8000-000000000035",
+      "id": "n20",
       "name": "Build Alert Blocked",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        3300,
-        140
+        3960,
+        60
       ],
       "parameters": {
-        "jsCode": "const s = $('Evaluate').first().json;\nreturn [{ json: { alert_to: s.alert_to, alert_subject: s.alert_subject, alert_text: s.alert_text } }];\n"
+        "jsCode": "const s = $('Evaluate').first().json;\nreturn [{ json: { alert_to: s.alert_to, alert_subject: s.alert_subject, alert_text: s.alert_text,\nrun_id: s.run_id, slug: s.input.slug, attempt_no: 0, alert_kind: s.decision } }];\n"
       }
     },
     {
-      "id": "00000000-0000-4000-8000-000000000036",
+      "id": "n21",
       "name": "Send Alert",
       "type": "n8n-nodes-base.emailSend",
       "typeVersion": 2.1,
       "position": [
-        3520,
+        7040,
         300
       ],
       "parameters": {
@@ -596,21 +596,28 @@
         "text": "={{ $json.alert_text }}",
         "options": {}
       },
+      "notes": "I4: retries 3x then CONTINUES; a failed alert is recorded as a provision_attempts row (phase alert, classification alert_failed) rather than vanishing.",
+      "webhookId": "bd7d4154-bd00-4ffa-a6ad-b0c9f5fbdb7e",
       "credentials": {
         "smtp": {
           "id": "u6P9XUzzsNdHaluM",
           "name": "fleet-alert-smtp"
         }
-      }
+      },
+      "alwaysOutputData": true,
+      "onError": "continueRegularOutput",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 2000
     },
     {
-      "id": "00000000-0000-4000-8000-000000000037",
+      "id": "n22",
       "name": "Mark Provisioning",
       "type": "n8n-nodes-base.dataTable",
       "typeVersion": 1.1,
       "position": [
-        2860,
-        -60
+        1540,
+        60
       ],
       "parameters": {
         "resource": "row",
@@ -627,25 +634,25 @@
             {
               "keyName": "slug",
               "condition": "eq",
-              "keyValue": "={{ $('Evaluate').first().json.client.slug }}"
+              "keyValue": "={{ $('Check Existing').first().json.claim.slug }}"
             }
           ]
         },
         "columns": {
           "mappingMode": "defineBelow",
           "value": {
-            "slug": "={{ $('Evaluate').first().json.client.slug }}",
-            "client_name": "={{ $('Evaluate').first().json.client.client_name }}",
-            "business_name": "={{ $('Evaluate').first().json.client.business_name }}",
-            "subdomain": "={{ $('Evaluate').first().json.client.subdomain }}",
-            "site_url": "={{ $('Evaluate').first().json.client.site_url }}",
-            "admin_url": "={{ $('Evaluate').first().json.client.admin_url }}",
-            "status": "={{ $('Evaluate').first().json.client.status }}",
-            "last_run_id": "={{ $('Evaluate').first().json.client.last_run_id }}",
-            "est_ram_mib": "={{ $('Evaluate').first().json.client.est_ram_mib }}",
-            "legacy": "={{ $('Evaluate').first().json.client.legacy }}",
-            "read_only": "={{ $('Evaluate').first().json.client.read_only }}",
-            "updated_at": "={{ $('Evaluate').first().json.client.updated_at }}"
+            "slug": "={{ $('Check Existing').first().json.claim.slug }}",
+            "client_name": "={{ $('Check Existing').first().json.claim.client_name }}",
+            "business_name": "={{ $('Check Existing').first().json.claim.business_name }}",
+            "subdomain": "={{ $('Check Existing').first().json.claim.subdomain }}",
+            "site_url": "={{ $('Check Existing').first().json.claim.site_url }}",
+            "admin_url": "={{ $('Check Existing').first().json.claim.admin_url }}",
+            "status": "={{ $('Check Existing').first().json.claim.status }}",
+            "last_run_id": "={{ $('Check Existing').first().json.claim.last_run_id }}",
+            "est_ram_mib": "={{ $('Check Existing').first().json.claim.est_ram_mib }}",
+            "legacy": "={{ $('Check Existing').first().json.claim.legacy }}",
+            "read_only": "={{ $('Check Existing').first().json.claim.read_only }}",
+            "updated_at": "={{ $('Check Existing').first().json.claim.updated_at }}"
           },
           "matchingColumns": [
             "slug"
@@ -656,16 +663,16 @@
         },
         "options": {}
       },
-      "notes": "Matches ONLY slug = the validated new-client slug. Legacy slugs are rejected in Validate, so legacy rows are unreachable."
+      "notes": "C2 step (1): write-then-read claim. Upserts THIS run's row as `provisioning` BEFORE the pre-flight SSH, so a concurrent run sees it and fails closed. Only reachable once Check Existing has ruled out a pre-existing active / in-progress / legacy row, so a real client row is never overwritten."
     },
     {
-      "id": "00000000-0000-4000-8000-000000000038",
+      "id": "n23",
       "name": "Respond 202",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.5,
       "position": [
-        3080,
-        -60
+        3300,
+        -80
       ],
       "parameters": {
         "respondWith": "json",
@@ -676,40 +683,40 @@
       }
     },
     {
-      "id": "00000000-0000-4000-8000-000000000039",
+      "id": "n24",
       "name": "Init Loop",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        3300,
-        -60
+        3520,
+        -80
       ],
       "parameters": {
         "jsCode": "return [{ json: { ...$('Evaluate').first().json, attempt_no: 0, history: [] } }];\n"
       }
     },
     {
-      "id": "00000000-0000-4000-8000-000000000040",
+      "id": "n25",
       "name": "Prep Deploy",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        3520,
-        -60
+        3740,
+        -80
       ],
       "parameters": {
-        "jsCode": "const st = $input.first().json;\nconst cfg = st.cfg, inp = st.input;\nconst attempt_no = (st.attempt_no || 0) + 1;\n// Hard bound: the loop can never exceed max_attempts.\nif (attempt_no > Number(cfg.max_attempts)) throw new Error('attempt bound exceeded');\nif (st.proceed !== true) throw new Error('deploy reached without a proceed decision');\nconst q = (s) => \"'\" + String(s).replace(/'/g, \"'\\\\''\") + \"'\"; // the ONLY way user values enter a shell command\nlet args = ' --slug=' + q(inp.slug) + ' --client-name=' + q(inp.clientName) + ' --business-name=' + q(inp.businessName) + ' --admin-email=' + q(inp.adminEmail);\nif (inp.brandColor) args += ' --brand-color=' + q(inp.brandColor);\nconst dir = cfg.base_dir + '/qubix-' + inp.slug;\nconst cmd = 'd=' + q(dir) + '; [ -d \"$d/.git\" ] || git clone --branch fleet --depth 1 ' + q(cfg.repo_url) + ' \"$d\" || exit 10; cd \"$d\" && scripts/provision-client.sh' + args;\nreturn [{ json: { ...st, attempt_no, deploy_cmd: cmd, attempt_started_at: new Date().toISOString() } }];\n"
+        "jsCode": "const st = $input.first().json;\nconst cfg = st.cfg, inp = st.input;\nconst attempt_no = (st.attempt_no || 0) + 1;\nif (attempt_no > Number(cfg.max_attempts)) throw new Error('attempt bound exceeded');\nif (st.proceed !== true) throw new Error('deploy reached without a proceed decision');\nconst q = (s) => \"'\" + String(s).replace(/'/g, \"'\\\\''\") + \"'\";\nlet args = ' --slug=' + q(inp.slug) + ' --client-name=' + q(inp.clientName) + ' --business-name=' + q(inp.businessName) + ' --admin-email=' + q(inp.adminEmail);\nif (inp.brandColor) args += ' --brand-color=' + q(inp.brandColor);\nconst dir = cfg.base_dir + '/qubix-' + inp.slug;\n// I3: ownership marker. Written after the idempotent clone and before any\n// provisioning, inside .git so it never dirties the checkout. The teardown command\n// refuses to run `docker compose down -v` unless this file still holds THIS run id.\nconst cmd = 'd=' + q(dir) + '; [ -d \"$d/.git\" ] || git clone --branch fleet --depth 1 ' + q(cfg.repo_url) + ' \"$d\" || exit 10; '\n+ 'echo ' + q(st.run_id) + ' > \"$d/.git/fleet-run-id\" || exit 10; '\n+ 'cd \"$d\" || exit 10; '\n+ 'scripts/provision-client.sh' + args;\nreturn [{ json: { ...st, attempt_no, deploy_cmd: cmd, attempt_started_at: new Date().toISOString() } }];\n"
       },
       "notes": "All user values enter the command only via the q() single-quote-escaping helper. Bounded by max_attempts."
     },
     {
-      "id": "00000000-0000-4000-8000-000000000041",
+      "id": "n26",
       "name": "Deploy SSH",
       "type": "n8n-nodes-base.ssh",
       "typeVersion": 1,
       "position": [
-        3740,
-        -60
+        3960,
+        -80
       ],
       "parameters": {
         "resource": "command",
@@ -718,37 +725,37 @@
         "command": "={{ $json.deploy_cmd }}",
         "cwd": "/"
       },
+      "notes": "Non-zero remote exit: see Classify. continueOnFail so SSH errors are classified transient (default-to-transient).",
       "credentials": {
         "sshPrivateKey": {
-          "id": "TmkUiyEQ2litPuSA",
+          "id": "VMRmYCvoS7UC85mr",
           "name": "fleet-target-ssh"
         }
       },
-      "onError": "continueRegularOutput",
-      "notes": "Non-zero remote exit: see Classify. continueOnFail so SSH errors are classified transient (default-to-transient)."
+      "onError": "continueRegularOutput"
     },
     {
-      "id": "00000000-0000-4000-8000-000000000042",
+      "id": "n27",
       "name": "Classify",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        3960,
-        -60
+        4180,
+        -80
       ],
       "parameters": {
-        "jsCode": "// Ruling (Task 4.3): 0 success, 1-9 terminal, 10-19 transient,\n// ANY other value (125/127/255, null, signal) or an SSH node error/timeout => DEFAULT-TO-TRANSIENT.\nconst st = $('Prep Deploy').item.json;\nconst r = $input.first().json || {};\nconst cfg = st.cfg;\nconst errored = r.error !== undefined;\nconst code = (!errored && typeof r.code === 'number') ? r.code : null;\nlet cls;\nif (code === 0) cls = 'success';\nelse if (code !== null && code >= 1 && code <= 9) cls = 'terminal';\nelse cls = 'transient';\nconst out = errored ? '' : String(r.stdout || '');\nconst err = errored ? String((r.error && (r.error.message || r.error)) || 'ssh error') : String(r.stderr || '');\nlet password = '';\nconst m = out.match(/Admin password \\(generated, shown once\\): (\\S+)/);\nif (m) password = m[1];\nconst redact = (s) => { let t = s.replace(/(Admin password \\(generated, shown once\\): )\\S+/g, '$1[REDACTED]'); if (password) t = t.split(password).join('[REDACTED]'); return t; };\nconst tail = redact(out + (err ? '\\n--stderr--\\n' + err : '')).slice(-4000);\nconst now = new Date().toISOString();\nconst history = [...(st.history || []), { attempt_no: st.attempt_no, exit_code: code, classification: cls, tail }];\nlet next, mode = null, status = null, note;\nif (cls === 'success') { next = 'success'; status = 'active'; note = 'provisioned'; }\nelse if (cls === 'terminal') { next = 'stop'; status = 'failed_terminal'; note = 'terminal exit ' + code + ': not retried, no teardown'; }\nelse if (!st.owned_by_run) { next = 'stop'; status = 'failed_escalated'; note = 'transient failure but project not proven owned by this run: no teardown'; }\nelse { next = 'teardown'; mode = st.attempt_no < Number(cfg.max_attempts) ? 'retry' : 'final'; note = 'transient (' + (errored ? 'ssh error' : 'exit ' + code) + '), attempt ' + st.attempt_no + '/' + cfg.max_attempts + ', ' + mode; }\nconst client = { ...st.client, status: status || 'provisioning', updated_at: now };\nconst allTails = history.map((h) => 'attempt ' + h.attempt_no + ' exit=' + h.exit_code + ' ' + h.classification + ':\\n' + h.tail).join('\\n\\n');\nconst s2 = { ...st, history, last_class: cls, last_code: code, next, teardown_mode: mode, client,\nsecret_password: password,\nrec: { run_id: st.run_id, slug: st.input.slug, attempt_no: st.attempt_no, phase: 'deploy', started_at: st.attempt_started_at, finished_at: now, exit_code: code, classification: cls, decision: 'deploy_attempt', capacity_json: '', output_tail: tail, note },\nalert_to: cfg.alert_email,\nalert_subject: '[Qubix fleet] Onboarding ' + (status || 'failed') + ' for ' + st.input.slug,\nalert_text: 'Onboarding of \"' + st.input.slug + '\" stopped with status ' + status + '.\\n' + note + '\\nRun: ' + st.run_id + '\\n\\nOutput (redacted) of every attempt:\\n' + allTails };\ndelete s2.deploy_cmd;\nreturn [{ json: s2 }];\n"
+        "jsCode": "const st = $('Prep Deploy').item.json;\nconst r = $input.first().json || {};\nconst cfg = st.cfg;\nconst errored = r.error !== undefined;\nconst code = (!errored && typeof r.code === 'number') ? r.code : null;\nlet cls;\nif (code === 0) cls = 'success';\nelse if (code !== null && code >= 1 && code <= 9) cls = 'terminal';\nelse cls = 'transient';\n\n// I1: redaction must not hinge on one exact sentence. ANSI decoration is stripped\n// first; the known wording is tried, then a generic \"password...: <value>\" form;\n// and whatever happened, a blanket second pass scrubs every remaining\n// password/secret/token assignment before anything is persisted or emailed.\nconst stripAnsi = (s) => String(s === undefined || s === null ? '' : s)\n.replace(/\\u001b\\[[0-9;?]*[ -\\/]*[@-~]/g, '')\n.replace(/\\u001b[@-_]/g, '')\n.replace(/\\r/g, '');\nconst out = errored ? '' : stripAnsi(r.stdout);\nconst err = errored ? String((r.error && (r.error.message || r.error)) || 'ssh error') : stripAnsi(r.stderr);\nlet password = '';\nconst m1 = out.match(/Admin password \\(generated, shown once\\): (\\S+)/);\nif (m1) password = m1[1];\nif (!password) {\nconst m2 = out.match(/password[^\\n:=]*[:=][ \\t]*(\\S+)/i);\nif (m2 && m2[1] !== '[REDACTED]') password = m2[1];\n}\nconst password_captured = password !== '';\nconst redact = (s) => {\nlet t = String(s);\nif (password) t = t.split(password).join('[REDACTED]');\nt = t.replace(/(password[^\\n:=]*[:=][ \\t]*)\\S+/gi, '$1[REDACTED]');\nt = t.replace(/((?:secret|token|passphrase|api[_-]?key)[^\\n:=]*[:=][ \\t]*)\\S+/gi, '$1[REDACTED]');\nreturn t;\n};\nconst tail = redact(out + (err ? '\\n--stderr--\\n' + err : '')).slice(-4000);\nconst now = new Date().toISOString();\nconst history = [...(st.history || []), { attempt_no: st.attempt_no, exit_code: code, classification: cls, tail }];\nlet next, mode = null, status = null, note;\nif (cls === 'success') {\nnext = 'success'; status = 'active';\nnote = password_captured ? 'provisioned' : 'provisioned, but the generated admin password could NOT be read from the output — it must be reset by hand';\n}\nelse if (cls === 'terminal') { next = 'stop'; status = 'failed_terminal'; note = 'terminal exit ' + code + ': not retried, no teardown'; }\nelse if (!st.owned_by_run) { next = 'stop'; status = 'failed_escalated'; note = 'transient failure but project not proven owned by this run: no teardown'; }\nelse { next = 'teardown'; mode = st.attempt_no < Number(cfg.max_attempts) ? 'retry' : 'final'; note = 'transient (' + (errored ? 'ssh error' : 'exit ' + code) + '), attempt ' + st.attempt_no + '/' + cfg.max_attempts + ', ' + mode; }\nconst client = { ...st.client, status: status || 'provisioning', updated_at: now };\nconst allTails = history.map((h) => 'attempt ' + h.attempt_no + ' exit=' + h.exit_code + ' ' + h.classification + ':\\n' + h.tail).join('\\n\\n');\nconst s2 = { ...st, history, last_class: cls, last_code: code, next, teardown_mode: mode, client,\nsecret_password: password, password_captured,\nrec: { run_id: st.run_id, slug: st.input.slug, attempt_no: st.attempt_no, phase: 'deploy', started_at: st.attempt_started_at, finished_at: now, exit_code: code, classification: cls, decision: 'deploy_attempt', capacity_json: '', output_tail: tail, note },\nalert_to: cfg.alert_email,\nalert_subject: '[Qubix fleet] Onboarding ' + (status || 'failed') + ' for ' + st.input.slug,\nalert_text: 'Onboarding of \"' + st.input.slug + '\" stopped with status ' + status + '.\\n' + note + '\\nRun: ' + st.run_id + '\\n\\nOutput (redacted) of every attempt:\\n' + allTails };\ndelete s2.deploy_cmd;\nreturn [{ json: s2 }];\n"
       },
       "notes": "Default-to-transient ruling (Task 4.3): 0 success; 1-9 terminal; 10-19 transient; anything else (125/127/255/null/signal/SSH error) transient. Password extracted and redacted before anything is persisted."
     },
     {
-      "id": "00000000-0000-4000-8000-000000000043",
+      "id": "n28",
       "name": "Rec Deploy",
       "type": "n8n-nodes-base.dataTable",
       "typeVersion": 1.1,
       "position": [
-        4180,
-        -60
+        4400,
+        -80
       ],
       "parameters": {
         "resource": "row",
@@ -785,26 +792,26 @@
       "notes": "Records one provision_attempts row (redacted output only)."
     },
     {
-      "id": "00000000-0000-4000-8000-000000000044",
+      "id": "n29",
       "name": "Deploy State",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        4400,
-        -60
+        4620,
+        -80
       ],
       "parameters": {
         "jsCode": "return [{ json: $('Classify').item.json }];\n"
       }
     },
     {
-      "id": "00000000-0000-4000-8000-000000000046",
+      "id": "n30",
       "name": "Success?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        4620,
-        -60
+        4840,
+        -80
       ],
       "parameters": {
         "conditions": {
@@ -816,7 +823,7 @@
           },
           "conditions": [
             {
-              "id": "00000000-0000-4000-8000-000000000045",
+              "id": "c30",
               "leftValue": "={{ $json.next === 'success' }}",
               "rightValue": "",
               "operator": {
@@ -832,12 +839,12 @@
       }
     },
     {
-      "id": "00000000-0000-4000-8000-000000000047",
+      "id": "n31",
       "name": "Mark Active",
       "type": "n8n-nodes-base.dataTable",
       "typeVersion": 1.1,
       "position": [
-        4840,
+        5060,
         -160
       ],
       "parameters": {
@@ -887,26 +894,26 @@
       "notes": "Matches ONLY slug = the validated new-client slug. Legacy slugs are rejected in Validate, so legacy rows are unreachable."
     },
     {
-      "id": "00000000-0000-4000-8000-000000000048",
+      "id": "n32",
       "name": "Build Credentials Email",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        5060,
+        5280,
         -160
       ],
       "parameters": {
-        "jsCode": "// The ONLY place the generated admin password is ever emitted.\nconst st = $('Classify').item.json;\nconst c = st.client;\nreturn [{ json: { alert_to: st.cfg.alert_email, alert_subject: '[Qubix fleet] Client provisioned: ' + st.input.slug,\nalert_text: 'Client \"' + st.input.clientName + '\" (' + st.input.slug + ') was provisioned.\\nSite: ' + c.site_url + '\\nAdmin: ' + c.admin_url + '\\nAdmin email: ' + st.input.adminEmail + '\\nAdmin password (shown once): ' + st.secret_password + '\\nRun: ' + st.run_id } }];\n"
+        "jsCode": "const st = $('Classify').item.json;\nconst c = st.client;\n// I1: never send a credentials email with a blank credential. If the password was\n// not captured, this becomes an ACTION REQUIRED alert carrying no credential at all.\nconst captured = st.password_captured === true && typeof st.secret_password === 'string' && st.secret_password.length > 0;\nconst head = 'Client \"' + st.input.clientName + '\" (' + st.input.slug + ') was provisioned.\\nSite: ' + c.site_url + '\\nAdmin: ' + c.admin_url + '\\nAdmin email: ' + st.input.adminEmail + '\\n';\nconst subject = captured\n? '[Qubix fleet] Client provisioned: ' + st.input.slug\n: '[Qubix fleet] ACTION REQUIRED — provisioned WITHOUT a captured password: ' + st.input.slug;\nconst text = captured\n? head + 'Admin password (shown once): ' + st.secret_password + '\\nRun: ' + st.run_id\n: head + '\\nThe generated admin password could NOT be read from the provisioning output, so it is\\n'\n+ 'not in this message and is not stored anywhere. The client admin password must be\\n'\n+ 'RESET BY HAND — see docker/n8n/README.md, \"Resetting a client admin password by hand\".\\nRun: ' + st.run_id;\nreturn [{ json: { alert_to: st.cfg.alert_email, alert_subject: subject, alert_text: text,\nrun_id: st.run_id, slug: st.input.slug, attempt_no: st.attempt_no, password_captured: captured } }];\n"
       },
       "notes": "Only place the generated admin password is emitted."
     },
     {
-      "id": "00000000-0000-4000-8000-000000000049",
+      "id": "n33",
       "name": "Send Credentials",
       "type": "n8n-nodes-base.emailSend",
       "typeVersion": 2.1,
       "position": [
-        5280,
+        5500,
         -160
       ],
       "parameters": {
@@ -917,21 +924,28 @@
         "text": "={{ $json.alert_text }}",
         "options": {}
       },
+      "notes": "C1: retries 3x then CONTINUES. Delivery outcome is recorded as a provision_attempts row (phase credentials) so a lost password email is visible without opening execution data.",
+      "webhookId": "4e167837-4798-435b-8a2b-853526f67c64",
       "credentials": {
         "smtp": {
           "id": "u6P9XUzzsNdHaluM",
           "name": "fleet-alert-smtp"
         }
-      }
+      },
+      "alwaysOutputData": true,
+      "onError": "continueRegularOutput",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 2000
     },
     {
-      "id": "00000000-0000-4000-8000-000000000051",
+      "id": "n34",
       "name": "Teardown?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        4840,
-        60
+        5060,
+        40
       ],
       "parameters": {
         "conditions": {
@@ -943,7 +957,7 @@
           },
           "conditions": [
             {
-              "id": "00000000-0000-4000-8000-000000000050",
+              "id": "c34",
               "leftValue": "={{ $json.next === 'teardown' }}",
               "rightValue": "",
               "operator": {
@@ -960,13 +974,13 @@
       "notes": "Teardown only when Classify said transient AND owned_by_run (pre-flight proved project absent). Terminal never reaches here."
     },
     {
-      "id": "00000000-0000-4000-8000-000000000052",
+      "id": "n35",
       "name": "Mark Stopped",
       "type": "n8n-nodes-base.dataTable",
       "typeVersion": 1.1,
       "position": [
-        5060,
-        200
+        5280,
+        240
       ],
       "parameters": {
         "resource": "row",
@@ -1015,39 +1029,39 @@
       "notes": "Matches ONLY slug = the validated new-client slug. Legacy slugs are rejected in Validate, so legacy rows are unreachable."
     },
     {
-      "id": "00000000-0000-4000-8000-000000000053",
+      "id": "n36",
       "name": "Build Alert Stop",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        5280,
-        200
+        5500,
+        240
       ],
       "parameters": {
-        "jsCode": "const s = $('Classify').item.json;\nreturn [{ json: { alert_to: s.alert_to, alert_subject: s.alert_subject, alert_text: s.alert_text } }];\n"
+        "jsCode": "const s = $('Classify').item.json;\nreturn [{ json: { alert_to: s.alert_to, alert_subject: s.alert_subject, alert_text: s.alert_text,\nrun_id: s.run_id, slug: s.input.slug, attempt_no: s.attempt_no, alert_kind: s.client.status } }];\n"
       }
     },
     {
-      "id": "00000000-0000-4000-8000-000000000054",
+      "id": "n37",
       "name": "Prep Teardown",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        5060,
+        5280,
         20
       ],
       "parameters": {
-        "jsCode": "const st = $input.first().json;\nif (st.owned_by_run !== true || st.next !== 'teardown') throw new Error('teardown forbidden: not owned by this run');\nconst q = (s) => \"'\" + String(s).replace(/'/g, \"'\\\\''\") + \"'\";\nconst slug = st.input.slug, base = st.cfg.base_dir;\nconst proj = q('qubix-' + slug);\nconst cmd = 'cd ' + q(base + '/qubix-' + slug) + ' && docker compose -f ' + q('docker-compose.' + slug + '.yml') + ' -p ' + proj + ' down -v --remove-orphans; docker compose ls -a -q | grep -qx ' + proj + ' && echo STILL_PRESENT || echo GONE';\nreturn [{ json: { ...st, teardown_cmd: cmd, teardown_started_at: new Date().toISOString() } }];\n"
+        "jsCode": "const st = $input.first().json;\nif (st.owned_by_run !== true || st.next !== 'teardown') throw new Error('teardown forbidden: not owned by this run');\nconst q = (s) => \"'\" + String(s).replace(/'/g, \"'\\\\''\") + \"'\";\nconst slug = st.input.slug, base = st.cfg.base_dir;\nconst proj = q('qubix-' + slug);\nconst dir = base + '/qubix-' + slug;\n// I3: defence at the point of destruction. `down -v` destroys a MySQL volume, so it\n// runs only if the checkout still carries THIS run's ownership marker. On a mismatch\n// nothing is torn down, NOT_OWNER is printed, and the run stops as failed_teardown.\nconst cmd = 'd=' + q(dir) + '; '\n+ '[ \"$(cat \"$d/.git/fleet-run-id\" 2>/dev/null)\" = ' + q(st.run_id) + ' ] || { echo NOT_OWNER; exit 0; }; '\n+ 'cd \"$d\" || exit 10; '\n+ 'docker compose -f ' + q('docker-compose.' + slug + '.yml') + ' -p ' + proj + ' down -v --remove-orphans; '\n+ 'echo \"DOWN_RC=$?\"; '\n+ 'docker compose ls -a -q | grep -qx ' + proj + ' && echo STILL_PRESENT || echo GONE';\nreturn [{ json: { ...st, teardown_cmd: cmd, teardown_started_at: new Date().toISOString() } }];\n"
       },
       "notes": "Throws unless owned_by_run === true."
     },
     {
-      "id": "00000000-0000-4000-8000-000000000055",
+      "id": "n38",
       "name": "Teardown SSH",
       "type": "n8n-nodes-base.ssh",
       "typeVersion": 1,
       "position": [
-        5280,
+        5500,
         20
       ],
       "parameters": {
@@ -1057,35 +1071,35 @@
         "command": "={{ $json.teardown_cmd }}",
         "cwd": "/"
       },
+      "notes": "docker compose down -v for THIS run project only, then verify GONE.",
       "credentials": {
         "sshPrivateKey": {
-          "id": "TmkUiyEQ2litPuSA",
+          "id": "VMRmYCvoS7UC85mr",
           "name": "fleet-target-ssh"
         }
       },
-      "onError": "continueRegularOutput",
-      "notes": "docker compose down -v for THIS run project only, then verify GONE."
+      "onError": "continueRegularOutput"
     },
     {
-      "id": "00000000-0000-4000-8000-000000000056",
+      "id": "n39",
       "name": "Teardown Eval",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        5500,
+        5720,
         20
       ],
       "parameters": {
-        "jsCode": "const st = $('Prep Teardown').item.json;\nconst r = $input.first().json || {};\nconst cfg = st.cfg;\nconst errored = r.error !== undefined;\nconst out = errored ? '' : String(r.stdout || '');\nconst gone = !errored && r.code === 0 && /(^|\\n)GONE\\s*$/.test(out) && !/STILL_PRESENT/.test(out);\nconst tail = (errored ? String((r.error && (r.error.message || r.error)) || 'ssh error') : out + String(r.stderr || '')).slice(-4000);\nconst now = new Date().toISOString();\nlet status = null, cont = false, note;\nif (!gone) { status = 'failed_teardown'; note = 'teardown did not prove project gone; retrying would hit the slug-collision check (exit 2), stopping'; }\nelse if (st.teardown_mode === 'retry') { cont = true; note = 'teardown ok, retrying after backoff'; }\nelse { status = 'failed_escalated'; note = 'attempts exhausted, teardown ok'; }\nconst client = { ...st.client, status: status || 'provisioning', updated_at: now };\nconst allTails = (st.history || []).map((h) => 'attempt ' + h.attempt_no + ' exit=' + h.exit_code + ' ' + h.classification + ':\\n' + h.tail).join('\\n\\n');\nreturn [{ json: { ...st, teardown_ok: gone, continue_retry: cont, client,\nrec: { run_id: st.run_id, slug: st.input.slug, attempt_no: st.attempt_no, phase: 'teardown', started_at: st.teardown_started_at, finished_at: now, exit_code: errored ? null : (typeof r.code === 'number' ? r.code : null), classification: gone ? 'ok' : 'failed', decision: 'teardown', capacity_json: '', output_tail: tail, note },\nalert_to: cfg.alert_email,\nalert_subject: '[Qubix fleet] Onboarding ' + status + ' for ' + st.input.slug,\nalert_text: 'Onboarding of \"' + st.input.slug + '\" ended with status ' + status + '.\\n' + note + '\\nRun: ' + st.run_id + '\\n\\nOutput (redacted) of every attempt:\\n' + allTails + '\\n\\nTeardown output:\\n' + tail } }];\n"
+        "jsCode": "const st = $('Prep Teardown').item.json;\nconst r = $input.first().json || {};\nconst cfg = st.cfg;\nconst errored = r.error !== undefined;\nconst out = errored ? '' : String(r.stdout || '');\nconst notOwner = /(^|\\n)NOT_OWNER(\\n|$)/.test(out);\nconst gone = !errored && r.code === 0 && /(^|\\n)GONE\\s*$/.test(out) && !/STILL_PRESENT/.test(out) && !notOwner;\nconst tail = (errored ? String((r.error && (r.error.message || r.error)) || 'ssh error') : out + String(r.stderr || '')).slice(-4000);\nconst now = new Date().toISOString();\nlet status = null, cont = false, note;\nif (notOwner) {\nstatus = 'failed_teardown';\nnote = 'NOT_OWNER: ' + cfg.base_dir + '/qubix-' + st.input.slug + '/.git/fleet-run-id does not hold this run id, so `docker compose down -v` was NOT executed — another run owns this checkout. Stopping; never retried.';\n} else if (!gone) {\nstatus = 'failed_teardown';\nnote = 'teardown did not prove project gone; retrying would hit the slug-collision check (exit 2), stopping';\n} else if (st.teardown_mode === 'retry') { cont = true; note = 'teardown ok, retrying after backoff'; }\nelse { status = 'failed_escalated'; note = 'attempts exhausted, teardown ok'; }\nconst client = { ...st.client, status: status || 'provisioning', updated_at: now };\nconst allTails = (st.history || []).map((h) => 'attempt ' + h.attempt_no + ' exit=' + h.exit_code + ' ' + h.classification + ':\\n' + h.tail).join('\\n\\n');\nreturn [{ json: { ...st, teardown_ok: gone, not_owner: notOwner, continue_retry: cont, client,\nrec: { run_id: st.run_id, slug: st.input.slug, attempt_no: st.attempt_no, phase: 'teardown', started_at: st.teardown_started_at, finished_at: now, exit_code: errored ? null : (typeof r.code === 'number' ? r.code : null), classification: gone ? 'ok' : (notOwner ? 'not_owner' : 'failed'), decision: 'teardown', capacity_json: '', output_tail: tail, note },\nalert_to: cfg.alert_email,\nalert_subject: '[Qubix fleet] Onboarding ' + status + ' for ' + st.input.slug,\nalert_text: 'Onboarding of \"' + st.input.slug + '\" ended with status ' + status + '.\\n' + note + '\\nRun: ' + st.run_id + '\\n\\nOutput (redacted) of every attempt:\\n' + allTails + '\\n\\nTeardown output:\\n' + tail } }];\n"
       }
     },
     {
-      "id": "00000000-0000-4000-8000-000000000057",
+      "id": "n40",
       "name": "Rec Teardown",
       "type": "n8n-nodes-base.dataTable",
       "typeVersion": 1.1,
       "position": [
-        5720,
+        5940,
         20
       ],
       "parameters": {
@@ -1123,12 +1137,12 @@
       "notes": "Records one provision_attempts row (redacted output only)."
     },
     {
-      "id": "00000000-0000-4000-8000-000000000058",
+      "id": "n41",
       "name": "Teardown State",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        5940,
+        6160,
         20
       ],
       "parameters": {
@@ -1136,12 +1150,12 @@
       }
     },
     {
-      "id": "00000000-0000-4000-8000-000000000060",
+      "id": "n42",
       "name": "Retry?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        6160,
+        6380,
         20
       ],
       "parameters": {
@@ -1154,7 +1168,7 @@
           },
           "conditions": [
             {
-              "id": "00000000-0000-4000-8000-000000000059",
+              "id": "c42",
               "leftValue": "={{ $json.continue_retry }}",
               "rightValue": "",
               "operator": {
@@ -1170,12 +1184,12 @@
       }
     },
     {
-      "id": "00000000-0000-4000-8000-000000000061",
+      "id": "n43",
       "name": "Backoff Wait",
       "type": "n8n-nodes-base.wait",
       "typeVersion": 1.1,
       "position": [
-        6380,
+        6600,
         -100
       ],
       "parameters": {
@@ -1186,12 +1200,12 @@
       "webhookId": "a1b2c3d4-0000-4000-8000-00000000f002"
     },
     {
-      "id": "00000000-0000-4000-8000-000000000062",
+      "id": "n44",
       "name": "Mark Final",
       "type": "n8n-nodes-base.dataTable",
       "typeVersion": 1.1,
       "position": [
-        6380,
+        6600,
         140
       ],
       "parameters": {
@@ -1241,17 +1255,214 @@
       "notes": "Matches ONLY slug = the validated new-client slug. Legacy slugs are rejected in Validate, so legacy rows are unreachable."
     },
     {
-      "id": "00000000-0000-4000-8000-000000000063",
+      "id": "n45",
       "name": "Build Alert Final",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        6600,
+        6820,
         140
       ],
       "parameters": {
-        "jsCode": "const s = $('Teardown Eval').item.json;\nreturn [{ json: { alert_to: s.alert_to, alert_subject: s.alert_subject, alert_text: s.alert_text } }];\n"
+        "jsCode": "const s = $('Teardown Eval').item.json;\nreturn [{ json: { alert_to: s.alert_to, alert_subject: s.alert_subject, alert_text: s.alert_text,\nrun_id: s.run_id, slug: s.input.slug, attempt_no: s.attempt_no, alert_kind: s.client.status } }];\n"
       }
+    },
+    {
+      "id": "n46",
+      "name": "List Inflight",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        2200,
+        60
+      ],
+      "parameters": {
+        "resource": "row",
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "vd35TNhYbv9neA1n",
+          "cachedResultName": "fleet_clients"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "status",
+              "condition": "eq",
+              "keyValue": "provisioning"
+            }
+          ]
+        },
+        "returnAll": true,
+        "options": {}
+      },
+      "notes": "C2 step (2): read every OTHER run currently claiming capacity. Read-only. alwaysOutputData so an empty result still lets Evaluate run.",
+      "alwaysOutputData": true
+    },
+    {
+      "id": "n47",
+      "name": "Reset Claim",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        3300,
+        140
+      ],
+      "parameters": {
+        "resource": "row",
+        "operation": "update",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "vd35TNhYbv9neA1n",
+          "cachedResultName": "fleet_clients"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "slug",
+              "condition": "eq",
+              "keyValue": "={{ $('Evaluate').first().json.reset.slug }}"
+            },
+            {
+              "keyName": "last_run_id",
+              "condition": "eq",
+              "keyValue": "={{ $('Evaluate').first().json.reset.last_run_id }}"
+            }
+          ]
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "status": "={{ $('Evaluate').first().json.reset.status }}",
+            "updated_at": "={{ $('Evaluate').first().json.reset.updated_at }}"
+          },
+          "matchingColumns": [],
+          "schema": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "notes": "C2 step (3): every non-deploying outcome clears this run's own `provisioning` claim so it cannot hold a phantom reservation for 2h. UPDATE (never upsert) matched on slug AND last_run_id = this run id, so no other run's row and no real client's row can be touched.",
+      "alwaysOutputData": true
+    },
+    {
+      "id": "n48",
+      "name": "Delivery Eval",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        5720,
+        -160
+      ],
+      "parameters": {
+        "jsCode": "// C1: credential delivery is failure-tolerant (Send Credentials retries, then\n// continues), and its outcome is recorded as a provision_attempts row so a lost\n// email is visible without ever opening n8n execution data. No secret goes in here.\nlet meta;\ntry { meta = $('Build Credentials Email').item.json; }\ncatch (e) { meta = $('Build Credentials Email').last().json; }\nconst r = $input.first().json || {};\nconst accepted = Array.isArray(r.accepted) ? r.accepted.length : 0;\nconst rejected = Array.isArray(r.rejected) ? r.rejected.length : 0;\nconst failed = r.error !== undefined || rejected > 0 || accepted === 0;\nconst now = new Date().toISOString();\nconst notes = [];\nif (failed) {\nnotes.push('credentials email NOT delivered (' + String(r.error || ('accepted=' + accepted + ', rejected=' + rejected)).slice(0, 160) + ')');\nnotes.push('the generated admin password was NOT delivered and is stored nowhere — reset the client admin password BY HAND (see the README section on resetting a client admin password by hand)');\n} else {\nnotes.push('credentials email delivered');\n}\nif (meta.password_captured !== true) notes.push('password was not captured from the provisioning output either');\nreturn [{ json: { rec: {\nrun_id: meta.run_id, slug: meta.slug, attempt_no: meta.attempt_no, phase: 'credentials',\nstarted_at: now, finished_at: now, exit_code: null,\nclassification: failed ? 'delivery_failed' : 'delivered', decision: 'credentials_delivery',\ncapacity_json: '', output_tail: '', note: notes.join('; ').slice(0, 500),\n} } }];\n"
+      },
+      "notes": "C1: records whether the credentials email actually went out. No secret here."
+    },
+    {
+      "id": "recdelivery",
+      "name": "Rec Delivery",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        5940,
+        -160
+      ],
+      "parameters": {
+        "resource": "row",
+        "operation": "insert",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "ou4jJacyyc6ou9Fq",
+          "cachedResultName": "provision_attempts"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "run_id": "={{ $('Delivery Eval').item.json.rec.run_id }}",
+            "slug": "={{ $('Delivery Eval').item.json.rec.slug }}",
+            "attempt_no": "={{ $('Delivery Eval').item.json.rec.attempt_no }}",
+            "phase": "={{ $('Delivery Eval').item.json.rec.phase }}",
+            "started_at": "={{ $('Delivery Eval').item.json.rec.started_at }}",
+            "finished_at": "={{ $('Delivery Eval').item.json.rec.finished_at }}",
+            "exit_code": "={{ $('Delivery Eval').item.json.rec.exit_code }}",
+            "classification": "={{ $('Delivery Eval').item.json.rec.classification }}",
+            "decision": "={{ $('Delivery Eval').item.json.rec.decision }}",
+            "capacity_json": "={{ $('Delivery Eval').item.json.rec.capacity_json }}",
+            "output_tail": "={{ $('Delivery Eval').item.json.rec.output_tail }}",
+            "note": "={{ $('Delivery Eval').item.json.rec.note }}"
+          },
+          "matchingColumns": [],
+          "schema": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "notes": "Records one provision_attempts row (phase credentials, no secrets)."
+    },
+    {
+      "id": "n50",
+      "name": "Alert Eval",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        7260,
+        300
+      ],
+      "parameters": {
+        "jsCode": "// I4: Send Alert retries, then continues. When the alert still could not be\n// delivered, record it — otherwise a failed run's only trace is a row nobody reads.\n// Only ONE of the three Build Alert nodes can run in a given execution.\nlet meta = null;\nfor (const n of ['Build Alert Blocked', 'Build Alert Stop', 'Build Alert Final']) {\ntry { const items = $(n).all(); if (items && items.length) meta = items[items.length - 1].json; } catch (e) { /* branch not taken */ }\n}\nif (!meta) meta = { run_id: '', slug: '', attempt_no: 0, alert_kind: 'unknown' };\nconst r = $input.first().json || {};\nconst accepted = Array.isArray(r.accepted) ? r.accepted.length : 0;\nconst rejected = Array.isArray(r.rejected) ? r.rejected.length : 0;\nconst failed = r.error !== undefined || rejected > 0 || accepted === 0;\nif (!failed) return [];\nconst now = new Date().toISOString();\nreturn [{ json: { rec: {\nrun_id: meta.run_id, slug: meta.slug, attempt_no: meta.attempt_no || 0, phase: 'alert',\nstarted_at: now, finished_at: now, exit_code: null,\nclassification: 'alert_failed', decision: 'alert_delivery',\ncapacity_json: '', output_tail: '',\nnote: ('alert \"' + (meta.alert_kind || 'unknown') + '\" could not be delivered after retries ('\n+ String(r.error || ('accepted=' + accepted + ', rejected=' + rejected)).slice(0, 160)\n+ ') — this run ended without anyone being notified by email').slice(0, 500),\n} } }];\n"
+      },
+      "notes": "I4: emits a row only when the alert could NOT be delivered."
+    },
+    {
+      "id": "recalert",
+      "name": "Rec Alert",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        7480,
+        300
+      ],
+      "parameters": {
+        "resource": "row",
+        "operation": "insert",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "ou4jJacyyc6ou9Fq",
+          "cachedResultName": "provision_attempts"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "run_id": "={{ $('Alert Eval').item.json.rec.run_id }}",
+            "slug": "={{ $('Alert Eval').item.json.rec.slug }}",
+            "attempt_no": "={{ $('Alert Eval').item.json.rec.attempt_no }}",
+            "phase": "={{ $('Alert Eval').item.json.rec.phase }}",
+            "started_at": "={{ $('Alert Eval').item.json.rec.started_at }}",
+            "finished_at": "={{ $('Alert Eval').item.json.rec.finished_at }}",
+            "exit_code": "={{ $('Alert Eval').item.json.rec.exit_code }}",
+            "classification": "={{ $('Alert Eval').item.json.rec.classification }}",
+            "decision": "={{ $('Alert Eval').item.json.rec.decision }}",
+            "capacity_json": "={{ $('Alert Eval').item.json.rec.capacity_json }}",
+            "output_tail": "={{ $('Alert Eval').item.json.rec.output_tail }}",
+            "note": "={{ $('Alert Eval').item.json.rec.note }}"
+          },
+          "matchingColumns": [],
+          "schema": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "notes": "Records one provision_attempts row (phase alert, classification alert_failed)."
     }
   ],
   "connections": {
@@ -1350,7 +1561,7 @@
         ],
         [
           {
-            "node": "Prep Preflight",
+            "node": "Mark Provisioning",
             "type": "main",
             "index": 0
           }
@@ -1383,7 +1594,7 @@
       "main": [
         [
           {
-            "node": "Evaluate",
+            "node": "List Inflight",
             "type": "main",
             "index": 0
           }
@@ -1427,14 +1638,14 @@
       "main": [
         [
           {
-            "node": "Mark Provisioning",
+            "node": "Respond 202",
             "type": "main",
             "index": 0
           }
         ],
         [
           {
-            "node": "Slug Taken?",
+            "node": "Reset Claim",
             "type": "main",
             "index": 0
           }
@@ -1485,7 +1696,7 @@
       "main": [
         [
           {
-            "node": "Respond 202",
+            "node": "Prep Preflight",
             "type": "main",
             "index": 0
           }
@@ -1754,14 +1965,80 @@
           }
         ]
       ]
+    },
+    "List Inflight": {
+      "main": [
+        [
+          {
+            "node": "Evaluate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Reset Claim": {
+      "main": [
+        [
+          {
+            "node": "Slug Taken?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Credentials": {
+      "main": [
+        [
+          {
+            "node": "Delivery Eval",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Delivery Eval": {
+      "main": [
+        [
+          {
+            "node": "Rec Delivery",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Alert": {
+      "main": [
+        [
+          {
+            "node": "Alert Eval",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Alert Eval": {
+      "main": [
+        [
+          {
+            "node": "Rec Alert",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "settings": {
-    "executionOrder": "v1",
+    "saveExecutionProgress": false,
     "saveDataSuccessExecution": "none",
-    "saveExecutionProgress": false
+    "executionOrder": "v1",
+    "saveDataErrorExecution": "none"
   },
-  "active": false,
-  "pinData": {},
+  "pinData": null,
   "tags": []
 }

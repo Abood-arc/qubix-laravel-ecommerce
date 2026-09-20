@@ -34,9 +34,42 @@ Responses (sent as soon as the pre-flight decision is known; the deploy then con
 Capacity check: `free -m` "available" already reflects the two legacy stacks (Elasticsearch included) and the OS,
 so Task 2.4's "subtract the legacy stacks" is satisfied by construction. RAM: `available - reserve >= per_client`;
 CPU: `load5/nproc <= max_load_per_core`; disk: `free >= min_free_disk_mib`. It fails closed: if the pre-flight SSH
-fails or its output cannot be parsed the decision is `blocked_preflight_failed`. `debug_extra_reserve_mib` is
-ADDED to `reserve_mib`, so it can only make the check stricter. Blocked = respond 503, record
-`blocked — insufficient capacity`, email an alert; the only edge into any deploy node is the `Proceed?` true branch.
+fails, its output cannot be parsed, or the docker project/volume listing itself failed, the decision is
+`blocked_preflight_failed`. `debug_extra_reserve_mib` is ADDED to `reserve_mib`, so it can only make the check
+stricter. Blocked = respond 503, record `blocked — insufficient capacity`, email an alert; the only edge into any
+deploy node is the `Proceed?` true branch.
+
+### In-flight accounting (concurrent onboardings)
+
+`free -m` is a single sample, so two overlapping runs would otherwise each see the same free RAM and each
+conclude it fits. The workflow therefore **writes before it reads**:
+
+1. Right after validation and the 409 registry check — and **before** the pre-flight SSH — `Mark Provisioning`
+   upserts this run's `fleet_clients` row with `status = provisioning`, `last_run_id = <run id>`, `updated_at = now`.
+2. `List Inflight` then reads every `fleet_clients` row with `status = provisioning`, and `Evaluate` counts the
+   ones that are **not** this slug and were updated in the last 2 h. Each one adds a full `per_client_mib` to the
+   effective reserve. `capacity_json` records `inflight_count`, `inflight_slugs`, `inflight_reserve_mib` and
+   `reserve_effective_mib` alongside the raw numbers.
+3. Every outcome that ends the run **without deploying** (`blocked_capacity`, `blocked_preflight_failed`,
+   `slug_taken`) goes through `Reset Claim`, which rewrites that row's status to the decision, so a blocked run
+   never leaves a phantom `provisioning` reservation. `Reset Claim` is an **update** (not an upsert) matched on
+   `slug` AND `last_run_id = this run id`: it cannot create a row and cannot touch a row belonging to another run
+   or to a real client. Invalid input and the 409 paths are rejected before step 1, so they never create a row at all.
+
+Because each run writes its own claim before reading the others, two same-moment requests always see each other
+and **both block** (fail closed) rather than both proceeding. That is the verified behaviour, not an aspiration.
+
+**Residual window — stated honestly, not claimed closed:**
+
+- A run whose execution dies between step 1 and the end (n8n restart, an unhandled node error) leaves a
+  **stranded `provisioning` row**. It keeps charging one client's worth of reserve, and keeps returning 409 to a
+  retry of the same slug, until its `updated_at` is 2 h old. There is no janitor. Clear it by hand from the n8n
+  Data Table UI (set `status` to `failed_escalated` or delete the row) if you do not want to wait.
+- The in-flight charge is a *model* (`per_client_mib` per run), not a measurement: a stack that is mid-build has
+  not yet allocated its full RAM, so `free -m` and the model disagree during the overlap. The model is
+  deliberately the pessimistic one.
+- Nothing here is a distributed lock. It makes double-proceed impossible for runs that overlap the
+  write-then-read window; it does not coordinate with anything provisioning on that host outside this workflow.
 
 ### Exit codes and classification (`scripts/provision-client.sh`)
 
@@ -49,27 +82,97 @@ hit the slug-collision check, exit 2).
 
 ### Teardown ownership rule
 
-Teardown runs only when the pre-flight proved `qubix-<slug>` did not exist before this run (`owned_by_run`).
-A pre-existing project returns 409 `slug_taken` before anything is touched, and no `down` is ever issued.
-Legacy slugs (`jjbags-in`, `jj-bags-com`, `sa`, `qubix`, ...) are rejected in validation, so no write node can
-match a legacy row in `fleet_clients`.
+`docker compose down -v` destroys a MySQL volume, so it is guarded three times over:
+
+1. **Pre-flight ownership.** Teardown runs only when the pre-flight proved the slug was free
+   (`owned_by_run`). "Free" means BOTH that `qubix-<slug>` is absent from `docker compose ls -a -q` AND that no
+   docker volume matches `(^|_)qubix-<slug>-(mysql|redis)$`. The volume check exists because a client that was
+   taken down for maintenance, or rebuilt, or hand-provisioned, has no compose project but still owns its data —
+   `docker compose ls` cannot see it, and claiming that slug would put a real client's database one transient
+   failure away from `down -v`. Either signal returns 409 `slug_taken` before anything is touched, and no `down`
+   is ever issued. A checkout directory on its own is deliberately **not** evidence: a `failed_escalated` run
+   keeps its checkout on purpose, and re-onboarding must stay possible once teardown has removed the volumes.
+2. **Ownership marker (the TOCTOU defence).** Every deploy attempt's remote command writes this run's id to
+   `<base_dir>/qubix-<slug>/.git/fleet-run-id` after the idempotent clone and before `provision-client.sh`
+   (inside `.git`, so it never dirties the checkout). The teardown command's **first** action is
+   `[ "$(cat <dir>/.git/fleet-run-id 2>/dev/null)" = '<run id>' ]`; on a mismatch it prints `NOT_OWNER`,
+   does **not** run `down`, and the workflow records status `failed_teardown` and stops. It is never retried.
+3. **Legacy slugs** (`jjbags-in`, `jj-bags-com`, `sa`, `qubix`, ...) are rejected in validation, so no write node
+   can match a legacy row in `fleet_clients`.
+
+If the teardown runs but cannot prove the project gone (`STILL_PRESENT`, a failing `down`, or an SSH error), the
+run also stops as `failed_teardown` — retrying would hit the slug-collision check and burn an attempt on a
+terminal exit 2.
 
 ### Secrets and execution data
 
-The generated admin password is extracted from stdout, redacted (`[REDACTED]`) before anything is stored or
-alerted, and emitted only in the single credentials email. The workflow sets `saveDataSuccessExecution: none` so
-it is not retained in n8n execution history on success. Residual risk: failed executions are still saved by
-default and may contain the pre-redaction output of the failing step; set execution pruning
-(`EXECUTIONS_DATA_PRUNE=true`, `EXECUTIONS_DATA_MAX_AGE=720` hours) in production. Email itself is plaintext.
+The generated admin password is extracted from stdout and redacted (`[REDACTED]`) before anything is stored or
+alerted. Redaction does **not** hinge on one exact sentence: ANSI escapes and CRs are stripped first, the known
+wording is tried, then a generic `password...: <value>` form, and finally a blanket second pass scrubs every
+remaining `password`/`secret`/`token`/`passphrase`/`api_key` assignment in the captured output. The password is
+emitted in exactly one place, the credentials email.
+
+**Execution data is never persisted.** The workflow sets **both** `saveDataSuccessExecution: none` and
+`saveDataErrorExecution: none`. Without the second one, any error after the password was extracted — SMTP briefly
+unreachable, a Data Table hiccup in `Mark Active` — would make n8n save every node's output, including the
+plaintext password and the rendered email body, readable by anyone with n8n UI access until pruning, on the same
+instance that holds the VPS deploy key.
+
+**The trade-off:** there is no n8n execution history for this workflow at all, successful or failed. Debugging
+happens through the `provision_attempts` table instead, which carries one row per pre-flight, deploy attempt,
+teardown, credential delivery and failed alert, each with a redacted ≤4000-char output tail. When something goes
+wrong, read the table, and reproduce against the dry-run target in `test-target/` — do not expect to open the
+execution in the editor. (Execution pruning env vars are still worth setting in production for every *other*
+workflow on the instance: `EXECUTIONS_DATA_PRUNE=true`, `EXECUTIONS_DATA_MAX_AGE=720` hours.)
+
+**Delivery is failure-tolerant, and failures are recorded.** `Send Credentials` and `Send Alert` both retry 3
+times and then continue rather than failing the run:
+
+- After `Send Credentials`, a `provision_attempts` row is written with phase `credentials` and classification
+  `delivered` or `delivery_failed` (no secret in it). On `delivery_failed` the note says the password was not
+  delivered, is stored nowhere, and the client admin password must be reset by hand.
+- After `Send Alert`, a row with phase `alert` and classification `alert_failed` is written **only when the alert
+  could not be delivered** — so a failed run cannot end with nobody notified and no trace of it.
+- If the provisioning output succeeded but no password could be extracted at all, **no blank-credential email is
+  sent**: the message becomes an `ACTION REQUIRED — provisioned WITHOUT a captured password` alert carrying no
+  credential, the deploy row's note says so, and the password must be reset by hand.
+
+Email itself is plaintext SMTP.
+
+### Resetting a client admin password by hand
+
+Needed whenever the credentials email was not delivered, or the password was never captured. The generated
+password is not recoverable — set a new one. This runs inside **that client's own app container**, on the host
+that owns the stack, and mirrors exactly what `qubix:provision` does at the end of a provision
+(`Provision.php` → `qubix:provision-admin`, run as `docker compose exec -T -u sail app-<slug>`):
+
+```bash
+NEW=$(LC_ALL=C tr -dc 'A-Za-z0-9' < /dev/urandom | head -c 20); echo "$NEW"   # keep this somewhere safe
+cd /opt/qubix-<slug>
+docker compose -f docker-compose.<slug>.yml -p qubix-<slug> exec -T -u sail app-<slug> \
+  php artisan qubix:provision-admin \
+    --name='<Client Name>' --email='<the client admin email>' --password="$NEW"
+```
+
+`qubix:provision-admin` upserts the `id = 1` admin row (name, email, bcrypt-hashed password, `role_id = 1`,
+`status = 1`) — the same row the installer's own admin step writes. It **hashes** the password; the plaintext is
+never stored. Omit `--brand-color` to leave the client's branding untouched (passing it would rewrite
+`general.design.storefront_branding.storefront_branding` on the `default` channel). Use `-u sail`, never a bare
+`docker exec`, or you will leave root-owned files in `storage/`.
 
 ### Data tables
 
 `fleet_clients` (slug, client_name, business_name, subdomain, site_url, admin_url, status, last_run_id,
 est_ram_mib, legacy, read_only, updated_at) — seeded with `jjbags.in` (1633 MiB) and `jj-bags.com` (1599 MiB),
 `legacy=true, read_only=true, status=live`. `provision_attempts` (run_id, slug, attempt_no, phase
-`preflight|deploy|teardown`, started_at, finished_at, exit_code, classification, decision, capacity_json,
-output_tail, note): one row per pre-flight, deploy attempt and teardown. The Data Table node references tables
-by id; after import re-select both tables in the Data Table nodes (Rec *, Mark *, Get Client).
+`preflight|deploy|teardown|credentials|alert`, started_at, finished_at, exit_code, classification, decision,
+capacity_json, output_tail, note): one row per pre-flight, deploy attempt, teardown, credential delivery, and
+per undeliverable alert. The Data Table node references tables by id; after import re-select both tables in
+every Data Table node (`Get Client`, `List Inflight`, `Mark *`, `Reset Claim`, `Rec *`).
+
+`fleet_clients.status` values written by this workflow: `provisioning` (claimed, run in flight), `active`,
+`failed_terminal`, `failed_escalated`, `failed_teardown`, `blocked_capacity`, `blocked_preflight_failed`,
+`slug_taken`. `live` belongs to the two seeded legacy rows and is never written by the workflow.
 
 ### Re-import / recreate
 
@@ -78,16 +181,46 @@ by id; after import re-select both tables in the Data Table nodes (Rec *, Mark *
    deploy target), `fleet-webhook-token` (Header Auth, header `X-Fleet-Token`, random 40+ chars),
    `fleet-alert-smtp` (SMTP). Local test: SMTP `host.docker.internal:1026` (Mailpit), no TLS/auth.
 3. Create the two data tables above and seed the two legacy rows; re-select them in the nodes.
-4. Activate. Local target: `test-target/run.sh` (see its comments).
+4. Confirm the workflow settings carry **both** `saveDataSuccessExecution: none` and
+   `saveDataErrorExecution: none` (Settings → "Save successful/failed production executions" = Do not save).
+   An import that loses either one reintroduces the plaintext-password-in-execution-data problem.
+5. Activate. Local target: `test-target/run.sh` — set `KEY_PUB` to an ssh public key path and read its header
+   first; it never bind-mounts anything and copies the public key in with `docker cp`.
+
+### Dry-run target scenario hooks (`test-target/`)
+
+`test-target/run.sh` builds and starts the throwaway SSH target; `--reset` restores pristine state (seeded
+compose projects **and** docker volumes, fresh scenarios, empty logs, no cloned dirs); `--down` removes it.
+It never bind-mounts anything — the public key goes in with `docker cp`, because Docker materialises a missing
+bind-mount source as a **root-owned** host path, and this key normally lives in a scratch directory under `/tmp`.
+A missing `KEY_PUB` is a hard error instead.
+
+Per-slug behaviour is scripted with files under `/opt/fleet-target/scenario/` (seeded from `scenarios/`):
+
+| File | Effect |
+|---|---|
+| `<slug>` | space-separated exit codes, one consumed per `provision-client.sh` run (e.g. `10 10 0`) |
+| `<slug>.down` | `fail` = the teardown `down` exits 1; `present` = `down` succeeds but the project survives (`STILL_PRESENT`) |
+| `<slug>.marker` | rewrites `<checkout>/.git/fleet-run-id` during provisioning — simulates another run claiming the checkout, so teardown hits `NOT_OWNER` |
+| `<slug>.pwfmt` | `alt` = different password wording, `ansi` = ANSI-decorated line, `none` = no password printed at all |
+
+The `docker` shim also answers `volume ls -q` from `state/volumes`, and its `down -v` removes only the target
+project's own volumes. `state/volumes` is seeded with a `qubix-stray_qubix-stray-mysql` entry that has **no**
+compose project — the "client whose containers were removed still owns its data" case. The
+`provision-client.sh` shim mirrors the real wrapper's pre-validation (control characters, bare `--slug`, missing
+slug, slug regex → exit 1 with zero state changes), because it builds a path from `--slug`.
 
 ### Manual checklist for production (not done here)
 
 - [ ] SSH deploy key for the VPS: dedicated key, authorized on the VPS deploy user, private key stored only in the
       n8n credential; user needs docker + write access to `base_dir`.
 - [ ] Real SMTP / alert channel; set `alert_email` in Config (the credentials email carries a password).
+      Monitor it: with execution data off, an undelivered alert is visible only as an `alert`/`alert_failed` row.
 - [ ] n8n production compose service and Caddy access restriction (basic auth / IP allow-list) — Task 4.4.
-- [ ] Execution pruning env vars (above), `backoff_seconds` = 60, real `repo_url`.
+- [ ] Execution pruning env vars (above, for the instance's other workflows), `backoff_seconds` = 60,
+      real `repo_url`.
 - [ ] Rotate `fleet-webhook-token`; keep the webhook reachable only from trusted callers.
+- [ ] Decide who clears a stranded `provisioning` row (see "In-flight accounting") — today that is a human.
 
 ## Fleet dashboard (`fleet-dashboard.workflow.json`)
 
