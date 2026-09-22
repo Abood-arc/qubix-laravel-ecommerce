@@ -5,6 +5,15 @@
 #   - ports 80 and 443 reachable (ufw allows them)
 # Caddy reaches the app over the Docker network at app:80 (the container's artisan serve).
 
+# Per-client fleet site blocks (Task 4.4) — one file per client under
+# clients/, written/removed by scripts/register-caddy-client.sh, never by
+# hand. Kept out of this file entirely so automation can never touch the
+# two blocks below: a bad or malformed clients/*.caddy file fails `caddy
+# validate` (register-caddy-client.sh checks before ever reloading), not a
+# live edit of this file. An empty or missing clients/ directory is a
+# no-op glob match, not an error.
+import clients/*.caddy
+
 # Redirect www -> apex (canonical host)
 www.jjbags.in {
 	redir https://jjbags.in{uri} permanent

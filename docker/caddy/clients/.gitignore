@@ -1,0 +1,6 @@
+# Per-client Caddy site blocks are generated + written by
+# scripts/register-caddy-client.sh directly on the production host over
+# SSH (Task 4.4) — deliberately never committed. See the Caddyfile's own
+# comment above the `import clients/*.caddy` line for why.
+*.caddy
+!.gitignore
