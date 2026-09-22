@@ -1,0 +1,13 @@
+# Per-client Caddy site blocks are generated + written by
+# scripts/register-caddy-client.sh directly on the production host over
+# SSH (Task 4.4) — deliberately never committed. See the Caddyfile's own
+# comment above the `import clients/*.caddy` line for why.
+#
+# That script itself is fleet-branch feature work and does not exist on
+# this branch (abood is bug-fixes-only). This directory and the Caddyfile
+# import line are carried here only as a disclosed exception so a
+# disaster-recovery restore of /opt/qubix from abood doesn't silently lose
+# the bootstrap the fleet automation depends on — see CLAUDE.md's Deploy
+# discipline section.
+*.caddy
+!.gitignore
