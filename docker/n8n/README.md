@@ -201,6 +201,33 @@ times and then continue rather than failing the run:
 
 Email itself is plaintext SMTP.
 
+### Caddy site-block registration (Task 4.4)
+
+Runs between `Mark Active` and `Build Credentials Email`: `Prep Caddy` builds a command that runs
+`scripts/generate-caddy-block.sh` + `scripts/apply-caddy-block.sh` **directly on the target** (no nested SSH —
+it's the same SSH session `Deploy SSH` already used to `git clone --branch fleet` this client's own checkout,
+which is where both scripts physically come from), `Caddy SSH` runs it, `Caddy Eval` classifies the exit code,
+and `Rec Caddy` records a `provision_attempts` row with phase `caddy`.
+
+**Deliberately non-fatal.** Unlike a deploy failure, a Caddy registration failure never triggers teardown and
+never blocks credentials delivery — the app stack is already up and reachable either way, so `Build Credentials
+Email` just appends a warning (`the Caddy site block ... could not be registered ... see this README to register
+it by hand`) instead of withholding the email. Proven both ways against the local dry-run target: a stubbed
+`apply-caddy-block.sh` returning 0 produces a clean email with no warning; the scripts genuinely absent (their
+normal state on this dry-run target, which — unlike a client's own fresh `fleet` checkout — was never cloned
+with them) produces exit 127, a `caddy`/`failed` row, and the warning text, with credentials still delivered.
+
+`apply-caddy-block.sh`'s own logic (backup existing block, write/remove, `caddy validate` before ever
+`reload`ing, roll back on validation failure) is proven separately, live, against `hostinger-vps` production
+(two full register/remove cycles, both live sites re-checked as 200 after every step) — see
+`scripts/register-caddy-client.sh`'s header for why that script (a developer's own machine reaching the target
+over SSH) and `apply-caddy-block.sh` (already-on-the-target logic, what this workflow calls) are two separate
+files sharing the one real implementation.
+
+**To register a real client's Caddy block by hand** (if this step failed, or before this workflow is wired to
+production): `scripts/register-caddy-client.sh --slug <slug>` from any machine with the `fleet` repo checked out
+and SSH access to `hostinger-vps`.
+
 ### Resetting a client admin password by hand
 
 Needed whenever the credentials email was not delivered, or the password was never captured. The generated
@@ -255,7 +282,7 @@ undeliverable alert:
 | 0 | `run_id` | string |
 | 1 | `slug` | string |
 | 2 | `attempt_no` | number |
-| 3 | `phase` | string (`preflight\|deploy\|teardown\|credentials\|alert\|registry`) |
+| 3 | `phase` | string (`preflight\|deploy\|caddy\|teardown\|credentials\|alert\|registry`) |
 | 4 | `started_at` | date |
 | 5 | `finished_at` | date |
 | 6 | `exit_code` | number (nullable — written as `null` for non-SSH phases) |

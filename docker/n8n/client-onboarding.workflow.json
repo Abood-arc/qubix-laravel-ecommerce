@@ -915,7 +915,7 @@
         -160
       ],
       "parameters": {
-        "jsCode": "const st = $('Classify').item.json;\nconst c = st.client;\n// N6: Mark Active continues on failure, so say so here rather than letting the client be\n// provisioned with nobody told and the registry row silently stuck at provisioning.\n// Same detection as Registry Eval: n8n hides the item-level error, so success is judged\n// by whether Mark Active handed back the row it was supposed to write.\nlet regFailed = false;\ntry {\nconst it = $('Mark Active').item;\nconst reg = (it && it.json) || {};\nconst errObj = it && it.error !== undefined ? it.error : reg.error;\nregFailed = (errObj !== undefined && errObj !== null)\n|| !(reg.slug === st.input.slug && typeof reg.id === 'number' && reg.status === 'active');\n} catch (e) { /* if it cannot be read, do not invent a warning */ }\nconst regWarning = regFailed\n? '\\n\\nWARNING: the fleet_clients registry row could NOT be updated after 3 tries. The client IS\\n'\n+ 'provisioned and the password above is valid, but its row still shows `provisioning` (which also\\n'\n+ 'holds a capacity reservation for 2h) — set it to active by hand.'\n: '';\n// I1: never send a credentials email with a blank credential. If the password was\n// not captured, this becomes an ACTION REQUIRED alert carrying no credential at all.\nconst captured = st.password_captured === true && typeof st.secret_password === 'string' && st.secret_password.length > 0;\nconst head = 'Client \"' + st.input.clientName + '\" (' + st.input.slug + ') was provisioned.\\nSite: ' + c.site_url + '\\nAdmin: ' + c.admin_url + '\\nAdmin email: ' + st.input.adminEmail + '\\n';\nconst subject = captured\n? '[Qubix fleet] Client provisioned: ' + st.input.slug\n: '[Qubix fleet] ACTION REQUIRED — provisioned WITHOUT a captured password: ' + st.input.slug;\nconst text = captured\n? head + 'Admin password (shown once): ' + st.secret_password + '\\nRun: ' + st.run_id\n: head + '\\nThe generated admin password could NOT be read from the provisioning output, so it is\\n'\n+ 'not in this message and is not stored anywhere. The client admin password must be\\n'\n+ 'RESET BY HAND — see docker/n8n/README.md, \"Resetting a client admin password by hand\".\\nRun: ' + st.run_id;\nreturn [{ json: { alert_to: st.cfg.alert_email, alert_subject: subject, alert_text: text + regWarning,\nrun_id: st.run_id, slug: st.input.slug, attempt_no: st.attempt_no, password_captured: captured } }];\n"
+        "jsCode": "const st = $('Classify').item.json;\nconst c = st.client;\n// N6: Mark Active continues on failure, so say so here rather than letting the client be\n// provisioned with nobody told and the registry row silently stuck at provisioning.\n// Same detection as Registry Eval: n8n hides the item-level error, so success is judged\n// by whether Mark Active handed back the row it was supposed to write.\nlet regFailed = false;\ntry {\nconst it = $('Mark Active').item;\nconst reg = (it && it.json) || {};\nconst errObj = it && it.error !== undefined ? it.error : reg.error;\nregFailed = (errObj !== undefined && errObj !== null)\n|| !(reg.slug === st.input.slug && typeof reg.id === 'number' && reg.status === 'active');\n} catch (e) { /* if it cannot be read, do not invent a warning */ }\nlet caddySuccess = true;\ntry {\nconst ce = $('Caddy Eval').item.json;\ncaddySuccess = ce && ce.caddy_success !== false;\n} catch (e) { /* not present in this run somehow; don't invent a warning */ }\nconst caddyWarning = caddySuccess ? '' : ('\\n\\nWARNING: the Caddy site block for ' + c.subdomain + ' could not be registered. The client IS\\nprovisioned and the password above is valid, but the friendly subdomain is not live yet. See\\ndocker/n8n/README.md to register it by hand, or retry it.');\nconst regWarning = regFailed\n? '\\n\\nWARNING: the fleet_clients registry row could NOT be updated after 3 tries. The client IS\\n'\n+ 'provisioned and the password above is valid, but its row still shows `provisioning` (which also\\n'\n+ 'holds a capacity reservation for 2h) — set it to active by hand.'\n: '';\n// I1: never send a credentials email with a blank credential. If the password was\n// not captured, this becomes an ACTION REQUIRED alert carrying no credential at all.\nconst captured = st.password_captured === true && typeof st.secret_password === 'string' && st.secret_password.length > 0;\nconst head = 'Client \"' + st.input.clientName + '\" (' + st.input.slug + ') was provisioned.\\nSite: ' + c.site_url + '\\nAdmin: ' + c.admin_url + '\\nAdmin email: ' + st.input.adminEmail + '\\n';\nconst subject = captured\n? '[Qubix fleet] Client provisioned: ' + st.input.slug\n: '[Qubix fleet] ACTION REQUIRED — provisioned WITHOUT a captured password: ' + st.input.slug;\nconst text = captured\n? head + 'Admin password (shown once): ' + st.secret_password + '\\nRun: ' + st.run_id\n: head + '\\nThe generated admin password could NOT be read from the provisioning output, so it is\\n'\n+ 'not in this message and is not stored anywhere. The client admin password must be\\n'\n+ 'RESET BY HAND — see docker/n8n/README.md, \"Resetting a client admin password by hand\".\\nRun: ' + st.run_id;\nreturn [{ json: { alert_to: st.cfg.alert_email, alert_subject: subject, alert_text: text + regWarning + caddyWarning,\nrun_id: st.run_id, slug: st.input.slug, attempt_no: st.attempt_no, password_captured: captured } }];\n"
       }
     },
     {
@@ -1531,6 +1531,102 @@
         },
         "options": {}
       }
+    },
+    {
+      "id": "69e9d40c-d775-4085-8979-fd7a3874b67b",
+      "name": "Prep Caddy",
+      "notes": "Task 4.4. Runs generate-caddy-block.sh + apply-caddy-block.sh directly on the target (no nested SSH) from the fresh fleet checkout Deploy SSH already cloned for this client.",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        5060,
+        -460
+      ],
+      "parameters": {
+        "jsCode": "const st = $('Classify').item.json;\nconst slug = st.input.slug;\nconst dir = st.cfg.base_dir + '/qubix-' + slug;\nconst q = (s) => \"'\" + String(s).replace(/'/g, \"'\\\\''\") + \"'\";\nconst blockFile = '/tmp/qubix-caddy-' + slug + '.block';\nconst cmd = 'cd ' + q(dir) + ' && scripts/generate-caddy-block.sh --slug=' + q(slug)\n+ ' > ' + q(blockFile)\n+ ' && scripts/apply-caddy-block.sh --slug=' + q(slug) + ' --target-dir=' + q('/opt/qubix') + ' --block-file=' + q(blockFile)\n+ '; rc=$?; rm -f ' + q(blockFile) + '; exit $rc';\nreturn [{ json: { ...st, caddy_cmd: cmd, caddy_started_at: new Date().toISOString() } }];\n"
+      }
+    },
+    {
+      "id": "be55b612-dbe5-40dc-b5dd-5652c429869e",
+      "name": "Caddy SSH",
+      "notes": "Non-zero remote exit: see Caddy Eval. continueOnFail so SSH errors are classified failed, not thrown.",
+      "type": "n8n-nodes-base.ssh",
+      "typeVersion": 1,
+      "onError": "continueRegularOutput",
+      "position": [
+        5280,
+        -460
+      ],
+      "parameters": {
+        "resource": "command",
+        "operation": "execute",
+        "authentication": "privateKey",
+        "command": "={{ $json.caddy_cmd }}",
+        "cwd": "/"
+      },
+      "credentials": {
+        "sshPrivateKey": {
+          "id": "VMRmYCvoS7UC85mr",
+          "name": "fleet-target-ssh"
+        }
+      }
+    },
+    {
+      "id": "d671c648-6401-478f-9f24-8b6257f2e903",
+      "name": "Caddy Eval",
+      "notes": "Non-fatal by design: failure here never blocks credentials delivery or triggers teardown (the app stack is up either way). Recorded and surfaced as a warning in the credentials email instead — same treatment N6 already gives a Mark Active failure.",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        5500,
+        -460
+      ],
+      "parameters": {
+        "jsCode": "const st = $('Prep Caddy').item.json;\nconst r = $input.first().json || {};\nconst errored = r.error !== undefined;\nconst code = (!errored && typeof r.code === 'number') ? r.code : null;\nconst success = code === 0;\nconst stripAnsi = (s) => String(s === undefined || s === null ? '' : s)\n.replace(/\\u001b\\[[0-9;?]*[ -\\/]*[@-~]/g, '')\n.replace(/\\u001b[@-_]/g, '')\n.replace(/\\r/g, '');\nconst out = errored ? '' : stripAnsi(r.stdout);\nconst err = errored ? String((r.error && (r.error.message || r.error)) || 'ssh error') : stripAnsi(r.stderr);\nconst tail = (out + (err ? '\\n--stderr--\\n' + err : '')).slice(-2000);\nconst now = new Date().toISOString();\nreturn [{ json: {\ncaddy_success: success,\nrec_caddy: { run_id: st.run_id, slug: st.input.slug, attempt_no: st.attempt_no, phase: 'caddy',\nstarted_at: st.caddy_started_at, finished_at: now, exit_code: code, classification: success ? 'success' : 'failed',\ndecision: 'caddy_register', capacity_json: '', output_tail: tail,\nnote: success ? ('Caddy site block registered for ' + st.client.subdomain)\n: ('Caddy site block registration FAILED for ' + st.client.subdomain + ' (exit ' + code + (errored ? ', ssh error' : '') + '). The client is provisioned and reachable; only the friendly subdomain is affected. See docker/n8n/README.md to register it by hand.') },\n} }];\n"
+      }
+    },
+    {
+      "id": "0ee77f3e-18d1-4aea-8566-28073b55bd8e",
+      "name": "Rec Caddy",
+      "notes": "Records one provision_attempts row (phase caddy, no secrets).",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        5720,
+        -460
+      ],
+      "parameters": {
+        "resource": "row",
+        "operation": "insert",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "ou4jJacyyc6ou9Fq",
+          "cachedResultName": "provision_attempts"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "run_id": "={{ $('Caddy Eval').item.json.rec_caddy.run_id }}",
+            "slug": "={{ $('Caddy Eval').item.json.rec_caddy.slug }}",
+            "attempt_no": "={{ $('Caddy Eval').item.json.rec_caddy.attempt_no }}",
+            "phase": "={{ $('Caddy Eval').item.json.rec_caddy.phase }}",
+            "started_at": "={{ $('Caddy Eval').item.json.rec_caddy.started_at }}",
+            "finished_at": "={{ $('Caddy Eval').item.json.rec_caddy.finished_at }}",
+            "exit_code": "={{ $('Caddy Eval').item.json.rec_caddy.exit_code }}",
+            "classification": "={{ $('Caddy Eval').item.json.rec_caddy.classification }}",
+            "decision": "={{ $('Caddy Eval').item.json.rec_caddy.decision }}",
+            "capacity_json": "={{ $('Caddy Eval').item.json.rec_caddy.capacity_json }}",
+            "output_tail": "={{ $('Caddy Eval').item.json.rec_caddy.output_tail }}",
+            "note": "={{ $('Caddy Eval').item.json.rec_caddy.note }}"
+          },
+          "matchingColumns": [],
+          "schema": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      }
     }
   ],
   "connections": {
@@ -1870,12 +1966,12 @@
       "main": [
         [
           {
-            "node": "Build Credentials Email",
+            "node": "Registry Eval",
             "type": "main",
             "index": 0
           },
           {
-            "node": "Registry Eval",
+            "node": "Prep Caddy",
             "type": "main",
             "index": 0
           }
@@ -2110,6 +2206,50 @@
         [
           {
             "node": "Rec Registry",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prep Caddy": {
+      "main": [
+        [
+          {
+            "node": "Caddy SSH",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Caddy SSH": {
+      "main": [
+        [
+          {
+            "node": "Caddy Eval",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Caddy Eval": {
+      "main": [
+        [
+          {
+            "node": "Rec Caddy",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Rec Caddy": {
+      "main": [
+        [
+          {
+            "node": "Build Credentials Email",
             "type": "main",
             "index": 0
           }
