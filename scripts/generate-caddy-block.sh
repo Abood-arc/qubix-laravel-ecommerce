@@ -83,6 +83,21 @@ if ! [[ "$SLUG" =~ ^[a-z][a-z0-9-]{1,20}$ ]]; then
   exit 1
 fi
 
+# Defense in depth: this is the script that actually generates a live Caddy
+# block, called both by register-caddy-client.sh (which has its own copy of
+# this check) and directly by the n8n onboarding workflow (which does not
+# go through register-caddy-client.sh at all — see that script's header).
+# The n8n webhook's own Validate node is the primary gate for real client
+# input, but this check must hold even if that gate is ever missed, since
+# this is the point where a subdomain actually gets claimed.
+RESERVED=(automation www)
+for reserved in "${RESERVED[@]}"; do
+  if [[ "$SLUG" == "$reserved" ]]; then
+    err "Error: '$SLUG' is a reserved subdomain (fleet infrastructure), not a valid client slug."
+    exit 1
+  fi
+done
+
 if [[ -z "$BACKEND" ]]; then
   BACKEND="app-${SLUG}"
 fi

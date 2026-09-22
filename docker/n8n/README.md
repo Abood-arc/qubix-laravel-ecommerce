@@ -203,19 +203,38 @@ Email itself is plaintext SMTP.
 
 ### Caddy site-block registration (Task 4.4)
 
-Runs between `Mark Active` and `Build Credentials Email`: `Prep Caddy` builds a command that runs
-`scripts/generate-caddy-block.sh` + `scripts/apply-caddy-block.sh` **directly on the target** (no nested SSH —
-it's the same SSH session `Deploy SSH` already used to `git clone --branch fleet` this client's own checkout,
-which is where both scripts physically come from), `Caddy SSH` runs it, `Caddy Eval` classifies the exit code,
-and `Rec Caddy` records a `provision_attempts` row with phase `caddy`.
+`Prep Caddy` builds a command that runs `scripts/generate-caddy-block.sh` + `scripts/apply-caddy-block.sh`
+**directly on the target** (no nested SSH — it's the same SSH session `Deploy SSH` already used to
+`git clone --branch fleet` this client's own checkout, which is where both scripts physically come from),
+`Caddy SSH` runs it, `Caddy Eval` classifies the exit code, and `Rec Caddy` records a `provision_attempts` row
+with phase `caddy`.
 
-**Deliberately non-fatal.** Unlike a deploy failure, a Caddy registration failure never triggers teardown and
-never blocks credentials delivery — the app stack is already up and reachable either way, so `Build Credentials
-Email` just appends a warning (`the Caddy site block ... could not be registered ... see this README to register
-it by hand`) instead of withholding the email. Proven both ways against the local dry-run target: a stubbed
-`apply-caddy-block.sh` returning 0 produces a clean email with no warning; the scripts genuinely absent (their
-normal state on this dry-run target, which — unlike a client's own fresh `fleet` checkout — was never cloned
-with them) produces exit 127, a `caddy`/`failed` row, and the warning text, with credentials still delivered.
+**Chained after `Rec Delivery` (the credentials pipeline's true terminal node) — deliberately sequential, not
+parallel.** An earlier design put this branch in parallel with `Build Credentials Email`, both firing directly
+off `Mark Active`. That measured worse than the original serialized version it replaced: this n8n instance
+does not run fan-out siblings concurrently — it resolves one to completion before starting the next, in an
+order that is **not** determined by which order the connections were added via the API (reordering the
+connection array had no effect, confirmed by two independent timed tests with an artificially slow Caddy
+stub). Since concurrency isn't something this runtime reliably offers here, the only proven way to guarantee
+credentials are never delayed is an explicit sequential dependency: `Prep Caddy` fires only after `Rec Delivery`
+has already run, which only happens once `Send Credentials` has already completed. Verified with a 4-second
+artificial delay in a stubbed `apply-caddy-block.sh`: the `credentials` provision_attempts row (and the actual
+mailpit-received email) both land before the `caddy` row even starts.
+
+**Non-fatal, but no longer surfaced in the credentials email.** A Caddy registration failure never triggers
+teardown and never blocks credentials delivery — the app stack is already up and reachable either way. An
+earlier version appended a warning to the credentials email when Caddy registration failed; that was removed
+once Caddy registration stopped running before the email is built (see above) — `Caddy Eval` hasn't run yet at
+that point, so checking its result there was already dead code reading data that didn't exist yet. The outcome
+is still fully recorded via `Rec Caddy`'s `provision_attempts` row (`phase = 'caddy'`) — check there, or the
+dashboard, rather than the email, if a subdomain doesn't come up.
+
+**Reserved subdomains.** `scripts/generate-caddy-block.sh` itself rejects `automation` and `www` (the names
+`automation.digital-labs.ai` needs once Task 4.4's other piece — standing n8n up there — is done), and the
+webhook's own `Validate` node rejects them as reserved slugs before any deployment action, matching how the
+existing legacy-site names are handled. Both checks exist because the automated path (`Prep Caddy`) calls
+`generate-caddy-block.sh` directly and never goes through `scripts/register-caddy-client.sh`'s own copy of this
+check — see that script's header for why the two tools are separate.
 
 `apply-caddy-block.sh`'s own logic (backup existing block, write/remove, `caddy validate` before ever
 `reload`ing, roll back on validation failure) is proven separately, live, against `hostinger-vps` production
@@ -227,6 +246,16 @@ files sharing the one real implementation.
 **To register a real client's Caddy block by hand** (if this step failed, or before this workflow is wired to
 production): `scripts/register-caddy-client.sh --slug <slug>` from any machine with the `fleet` repo checked out
 and SSH access to `hostinger-vps`.
+
+**Known follow-ups, not fixed here** (all Minor/non-blocking, recorded rather than silently left out):
+temp file paths used by `Prep Caddy` and `register-caddy-client.sh` (`/tmp/qubix-caddy-<slug>...`) have no
+run-id/PID disambiguator strong enough to rule out a collision if the same slug is re-registered while a prior
+attempt for it is still in flight on the target; `apply-caddy-block.sh` has no cross-process lock, so two
+concurrent invocations for the same slug (a retry racing a manual run) could in principle interleave; a
+`caddy validate` failure caused by the container being transiently unavailable (mid-restart) is indistinguishable
+from a real Caddyfile syntax error in the recorded note. None of these have a known live-production occurrence;
+they're the kind of edge case this plan's own concurrency work (the deploy step's atomic ownership marker) was
+built to close for the deploy path specifically, not yet replicated here.
 
 ### Resetting a client admin password by hand
 
@@ -421,8 +450,11 @@ subdomain, site and admin URL and full provisioning history, and until this was 
 anyone who could reach the n8n port. Create the credential with a long random password and rotate it with the
 webhook token.
 
-Caddy (Task 4.4, **still not started**) remains defence in depth on top of that, not the only control. The Caddy
-block for the dashboard hostname must:
+Caddy — a **different, still-not-started piece of Task 4.4** than the per-client site-block automation
+documented earlier in this file (that piece is done; this one — standing up a real Caddy block for
+`automation.digital-labs.ai` itself, in front of n8n — is not, and needs the owner's go-ahead plus real
+VPS/Caddy access before it starts) — remains defence in depth on top of Basic Auth, not the only control. The
+Caddy block for the dashboard hostname must:
 
 1. Proxy ONLY the exact path `/webhook/fleet-dashboard` to `n8n:5678` and return 404 for everything else. In particular
    it must not expose `/webhook/fleet-onboard`, `/webhook-test/*`, `/rest/*` or the n8n editor UI.
