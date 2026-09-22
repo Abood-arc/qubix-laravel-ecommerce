@@ -108,7 +108,12 @@ if [[ -z "$TARGET_DIR" || "$TARGET_DIR" =~ [[:space:]\'\"\$\`\\] ]]; then
   exit 1
 fi
 
-STAGED_REMOTE=""
+# "NONE" rather than "" — ssh concatenates the remote command into one
+# string and the remote shell re-tokenizes it, so a genuinely empty quoted
+# argument doesn't survive the trip (adjacent spaces just collapse) and
+# $4 ends up truly unset on the far side instead of set-but-empty. Found
+# by actually running --remove, not by reading the code.
+STAGED_REMOTE="NONE"
 if [[ "$MODE" == "register" ]]; then
   GEN_ARGS=(--slug "$SLUG")
   [[ -n "$BACKEND" ]] && GEN_ARGS+=(--backend "$BACKEND")
@@ -122,12 +127,22 @@ if [[ "$MODE" == "register" ]]; then
   fi
 fi
 
-# The remote side is a single self-contained script (not several separate
-# SSH round-trips) so the backup/write/validate/rollback sequence is atomic
-# with respect to network hiccups — a dropped connection mid-sequence can't
-# leave the live Caddy config half-changed with no rollback having run.
-set +e
-ssh -o ConnectTimeout=15 "$HOST" bash -s -- "$SLUG" "$TARGET_DIR" "$MODE" "$STAGED_REMOTE" <<'REMOTE_SCRIPT'
+# The remote logic is staged as an actual file and executed by path, NOT
+# piped in as `ssh host bash -s <<EOF` — that form was observed, empirically,
+# to sometimes report success (exit 0, "Valid configuration" printed) while
+# the reload it claimed to run never reached Caddy's admin API at all (no
+# corresponding /load in `docker logs`, and the change never actually took
+# effect on the running config). Confirmed by re-running the identical
+# validate/reload logic staged as a file instead: reliable every time, full
+# output present, change verifiably live. Root cause not fully isolated
+# (suspected SSH/heredoc-stdin interaction with `docker compose exec -T`'s
+# own I/O), so this script no longer depends on that path working at all,
+# rather than trusting it.
+LOCAL_STAGE="$(mktemp)"
+trap 'rm -f "$LOCAL_STAGE"' EXIT
+
+cat > "$LOCAL_STAGE" <<'REMOTE_SCRIPT'
+#!/usr/bin/env bash
 set -euo pipefail
 SLUG="$1"
 TARGET_DIR="$2"
@@ -157,7 +172,6 @@ rollback() {
 if [[ "$MODE" == "remove" ]]; then
   if [[ ! -f "$FILE" ]]; then
     echo "No block for '$SLUG' at $FILE — nothing to remove." >&2
-    [[ -n "$STAGED" && -f "$STAGED" ]] && rm -f "$STAGED"
     exit 0
   fi
   rm -f "$FILE"
@@ -180,16 +194,18 @@ fi
 
 echo "OK: ${MODE} for '${SLUG}' applied and reloaded."
 REMOTE_SCRIPT
+
+REMOTE_SCRIPT_PATH="/tmp/qubix-caddy-op-${SLUG}.$$.sh"
+
+if ! ssh -o ConnectTimeout=15 "$HOST" "cat > '$REMOTE_SCRIPT_PATH'" < "$LOCAL_STAGE"; then
+  err "Error: failed to stage the operation script on $HOST (SSH/transfer failure)."
+  exit 10
+fi
+
+set +e
+ssh -o ConnectTimeout=30 "$HOST" \
+  "chmod +x '$REMOTE_SCRIPT_PATH' && '$REMOTE_SCRIPT_PATH' '$SLUG' '$TARGET_DIR' '$MODE' '$STAGED_REMOTE'; rc=\$?; rm -f '$REMOTE_SCRIPT_PATH'; exit \$rc"
 STATUS=$?
 set -e
-
-if [[ "$MODE" == "register" && $STATUS -ne 0 ]]; then
-  # Best-effort: the remote script already cleans up $STAGED on every path
-  # it reaches, but a connection drop before it starts would leave it
-  # behind under /tmp on the remote host — low-severity, self-evidently
-  # disposable (mktemp-style name), not worth a second SSH round-trip to
-  # chase on the failure path.
-  :
-fi
 
 exit "$STATUS"
