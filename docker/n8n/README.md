@@ -16,7 +16,8 @@ curl -X POST http://localhost:5678/webhook/fleet-onboard \
 Body: `slug` (`^[a-z][a-z0-9-]{1,20}$`), `clientName`/`businessName` (<=80 chars, no control characters),
 `adminEmail`, optional `brandColor` (`#rrggbb`), optional `debug_extra_reserve_mib` (number >= 0, test hook).
 Responses (sent as soon as the pre-flight decision is known; the deploy then continues in the background):
-`202` accepted, `422` invalid input (or reserved/legacy slug), `409` slug already exists / in progress / active,
+`202` accepted, `422` invalid input (or reserved/legacy slug), `409` slug already exists (registry row `active`, `live`, a legacy/read-only row, or a run already in progress;
+or the pre-flight found a compose project or a docker volume for that slug),
 `503` blocked (`blocked_capacity` or `blocked_preflight_failed`).
 
 ### Config node (single place for thresholds)
@@ -56,8 +57,12 @@ conclude it fits. The workflow therefore **writes before it reads**:
    `slug` AND `last_run_id = this run id`: it cannot create a row and cannot touch a row belonging to another run
    or to a real client. Invalid input and the 409 paths are rejected before step 1, so they never create a row at all.
 
-Because each run writes its own claim before reading the others, two same-moment requests always see each other
-and **both block** (fail closed) rather than both proceeding. That is the verified behaviour, not an aspiration.
+Because each run writes its own claim before it reads the in-flight set, **no two overlapping runs can both
+proceed**. When their claims interleave closely, each sees the other and both block; otherwise the first
+proceeds and the second blocks. Blocking both is the fail-closed outcome, not the only one.
+
+This accounts for capacity, not for the same slug — two requests for the *same* slug are a different problem,
+handled by the claim-once ownership marker below.
 
 **Residual window — stated honestly, not claimed closed:**
 
@@ -65,6 +70,17 @@ and **both block** (fail closed) rather than both proceeding. That is the verifi
   **stranded `provisioning` row**. It keeps charging one client's worth of reserve, and keeps returning 409 to a
   retry of the same slug, until its `updated_at` is 2 h old. There is no janitor. Clear it by hand from the n8n
   Data Table UI (set `status` to `failed_escalated` or delete the row) if you do not want to wait.
+- **A stale ownership marker** is the same class of problem on the host side. After a `failed_teardown`, or an
+  execution that died between the clone and the teardown, `<base_dir>/qubix-<slug>/.git/fleet-run-id` still
+  holds a run id that no longer owns anything. Every later run for that slug then ends `failed_terminal` with
+  `FOREIGN_MARKER` and the note naming the file. That is deliberate — it is the only thing standing between a
+  retry and another run's MySQL volume. **Clear it by hand once you have confirmed no stack is running for that
+  slug**: `docker compose ls -a -q | grep qubix-<slug>` and `docker volume ls -q | grep qubix-<slug>` both
+  empty, then `rm -f /opt/qubix-<slug>/.git/fleet-run-id`. The two are usually seen together: a stranded
+  `provisioning` row on the n8n side and a stale marker on the host side.
+- **A `provisioning` row can also survive a successful provision**: if `Mark Active` ultimately fails, the run
+  still delivers the credentials email (with a warning appended) and records a `registry`/`mark_active_failed`
+  row, but the registry row stays at `provisioning`. Set it to `active` by hand.
 - The in-flight charge is a *model* (`per_client_mib` per run), not a measurement: a stack that is mid-build has
   not yet allocated its full RAM, so `free -m` and the model disagree during the overlap. The model is
   deliberately the pessimistic one.
@@ -92,11 +108,23 @@ hit the slug-collision check, exit 2).
    failure away from `down -v`. Either signal returns 409 `slug_taken` before anything is touched, and no `down`
    is ever issued. A checkout directory on its own is deliberately **not** evidence: a `failed_escalated` run
    keeps its checkout on purpose, and re-onboarding must stay possible once teardown has removed the volumes.
-2. **Ownership marker (the TOCTOU defence).** Every deploy attempt's remote command writes this run's id to
-   `<base_dir>/qubix-<slug>/.git/fleet-run-id` after the idempotent clone and before `provision-client.sh`
-   (inside `.git`, so it never dirties the checkout). The teardown command's **first** action is
-   `[ "$(cat <dir>/.git/fleet-run-id 2>/dev/null)" = '<run id>' ]`; on a mismatch it prints `NOT_OWNER`,
-   does **not** run `down`, and the workflow records status `failed_teardown` and stops. It is never retried.
+2. **Claim-once ownership marker (the TOCTOU defence).** `Check Existing` and `Mark Provisioning` are two
+   separate Data Table calls with no compare-and-set, so two near-simultaneous requests for the *same* slug can
+   both be admitted; both pre-flights then see the slug free and both get `owned_by_run`. The marker closes that
+   at the point of destruction.
+
+   Every deploy attempt's remote command **claims** `<base_dir>/qubix-<slug>/.git/fleet-run-id` (inside `.git`,
+   so it never dirties the checkout) rather than overwriting it: if the file already exists holding a *different*
+   run id, the command prints `FOREIGN_MARKER` and exits **2** — terminal, so the second run stops with no
+   deploy, no teardown and no retry, and the first run's stack is untouched. Writing the same run id again is a
+   no-op, so a run's own retry attempts are unaffected.
+
+   The teardown command's **first** action is `[ "$(cat <dir>/.git/fleet-run-id 2>/dev/null)" = '<run id>' ]`;
+   on a mismatch it prints `NOT_OWNER`, does **not** run `down`, and the workflow records `failed_teardown` and
+   stops, never retried. When the teardown *does* run and the project is confirmed `GONE`, it also **removes**
+   the marker — so re-onboarding the same slug after a `failed_escalated` run is not blocked. After a
+   `failed_teardown` the marker deliberately survives and blocks later runs for that slug until a human clears
+   it (see "In-flight accounting" → residual window).
 3. **Legacy slugs** (`jjbags-in`, `jj-bags-com`, `sa`, `qubix`, ...) are rejected in validation, so no write node
    can match a legacy row in `fleet_clients`.
 
@@ -133,6 +161,13 @@ times and then continue rather than failing the run:
   delivered, is stored nowhere, and the client admin password must be reset by hand.
 - After `Send Alert`, a row with phase `alert` and classification `alert_failed` is written **only when the alert
   could not be delivered** — so a failed run cannot end with nobody notified and no trace of it.
+- `Mark Active` gets the same treatment (retry 3, then continue), because a Data Table failure there used to end
+  the run **before** the credentials email — leaving a client provisioned with nobody told its password. It now
+  continues to the email (which gains a warning line) and records a `registry` / `mark_active_failed` row.
+  Detection detail: n8n strips the item-level `error` before a Code node can see it, so the failure is detected
+  by whether `Mark Active` handed back the row it was supposed to write.
+- The generated password is cleared from the loop state on any non-success classification, so it can never ride
+  into `Backoff Wait` — n8n persists a waiting execution's data regardless of the save-execution settings.
 - If the provisioning output succeeded but no password could be extracted at all, **no blank-credential email is
   sent**: the message becomes an `ACTION REQUIRED — provisioned WITHOUT a captured password` alert carrying no
   credential, the deploy row's note says so, and the password must be reset by hand.
