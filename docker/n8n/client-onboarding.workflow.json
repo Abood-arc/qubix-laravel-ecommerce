@@ -4,6 +4,7 @@
     {
       "id": "n0",
       "name": "Webhook",
+      "webhookId": "a1b2c3d4-0000-4000-8000-00000000f001",
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2.1,
       "position": [
@@ -17,7 +18,6 @@
         "responseMode": "responseNode",
         "options": {}
       },
-      "webhookId": "a1b2c3d4-0000-4000-8000-00000000f001",
       "credentials": {
         "httpHeaderAuth": {
           "id": "bwtF5adabtqKStxi",
@@ -28,6 +28,7 @@
     {
       "id": "n1",
       "name": "Config",
+      "notes": "Single place for every threshold. per_client_mib=441: Task 2.4 conservative per-client figure. backoff_seconds=5 is the LOCAL value; production should use 60.",
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
@@ -98,16 +99,22 @@
               "name": "alert_email",
               "value": "fleet-alerts@qubix.local",
               "type": "string"
+            },
+            {
+              "id": "afrom_email",
+              "name": "from_email",
+              "value": "fleet-onboarding@qubix.local",
+              "type": "string"
             }
           ]
         },
         "options": {}
-      },
-      "notes": "Single place for every threshold. per_client_mib=441: Task 2.4 conservative per-client figure. backoff_seconds=5 is the LOCAL value; production should use 60."
+      }
     },
     {
       "id": "n2",
       "name": "Validate",
+      "notes": "Validation before any SSH. Rejects legacy slugs (jjbags-in, jj-bags-com, sa, qubix, ...) so no write node can ever match a legacy row.",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
@@ -116,8 +123,7 @@
       ],
       "parameters": {
         "jsCode": "const raw = $('Webhook').first().json.body;\nconst b = (raw && typeof raw === 'object' && !Array.isArray(raw)) ? raw : {};\nconst cfg = $('Config').first().json;\nconst run_id = 'run-' + Date.now() + '-' + Math.random().toString(36).slice(2, 8);\nconst errors = [];\nconst CTRL = /[\\u0000-\\u001f\\u007f]/;\nconst LEGACY = ['jjbags-in', 'jj-bags-com', 'jjbags', 'jj-bags', 'jjbags.in', 'jj-bags.com', 'sa', 'qubix', 'qubix-sa'];\nconst isStr = (v) => typeof v === 'string';\nconst slug = isStr(b.slug) ? b.slug : '';\nif (!/^[a-z][a-z0-9-]{1,20}$/.test(slug)) errors.push('slug must match ^[a-z][a-z0-9-]{1,20}$');\nif (LEGACY.includes(slug)) errors.push('slug is reserved (legacy site)');\nfor (const f of ['clientName', 'businessName']) {\nconst v = b[f];\nif (!isStr(v) || v.trim().length === 0) errors.push(f + ' is required');\nelse if (v.length > 80) errors.push(f + ' must be <= 80 chars');\nelse if (CTRL.test(v)) errors.push(f + ' must not contain control characters');\n}\nconst email = isStr(b.adminEmail) ? b.adminEmail : '';\nif (email.length > 254 || !/^[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+(\\.[A-Za-z0-9-]+)*\\.[A-Za-z]{2,}$/.test(email)) errors.push('adminEmail is not a valid email');\nlet brandColor = '';\nif (b.brandColor !== undefined && b.brandColor !== null && b.brandColor !== '') {\nif (!isStr(b.brandColor) || !/^#[0-9a-fA-F]{6}$/.test(b.brandColor)) errors.push('brandColor must match ^#[0-9a-fA-F]{6}$');\nelse brandColor = b.brandColor;\n}\nlet extra = 0;\nif (b.debug_extra_reserve_mib !== undefined && b.debug_extra_reserve_mib !== null) {\nconst d = b.debug_extra_reserve_mib;\nif (typeof d !== 'number' || !Number.isFinite(d) || d < 0) errors.push('debug_extra_reserve_mib must be a number >= 0');\nelse extra = d;\n}\nconst ok = errors.length === 0;\nconst safeSlug = (isStr(b.slug) ? b.slug : '').replace(/[^\\x20-\\x7e]/g, '?').slice(0, 40);\nconst now = new Date().toISOString();\nreturn [{ json: {\nok, run_id, cfg, errors,\ninput: ok ? { slug, clientName: b.clientName, businessName: b.businessName, adminEmail: email, brandColor, debug_extra_reserve_mib: extra } : null,\nresp_code: 422,\nresp: { status: 'invalid', run_id, errors },\nrec: { run_id, slug: safeSlug, attempt_no: 0, phase: 'preflight', started_at: now, finished_at: now, exit_code: null, classification: 'invalid', decision: 'invalid_input', capacity_json: '', output_tail: '', note: errors.join('; ').slice(0, 500) },\n} }];\n"
-      },
-      "notes": "Validation before any SSH. Rejects legacy slugs (jjbags-in, jj-bags-com, sa, qubix, ...) so no write node can ever match a legacy row."
+      }
     },
     {
       "id": "n3",
@@ -156,6 +162,7 @@
     {
       "id": "n4",
       "name": "Rec Invalid",
+      "notes": "Records one provision_attempts row (redacted output only).",
       "type": "n8n-nodes-base.dataTable",
       "typeVersion": 1.1,
       "position": [
@@ -193,8 +200,7 @@
           "convertFieldsToString": false
         },
         "options": {}
-      },
-      "notes": "Records one provision_attempts row (redacted output only)."
+      }
     },
     {
       "id": "n5",
@@ -216,8 +222,10 @@
     {
       "id": "n6",
       "name": "Get Client",
+      "notes": "Read-only registry lookup for in-progress / already-active detection.",
       "type": "n8n-nodes-base.dataTable",
       "typeVersion": 1.1,
+      "alwaysOutputData": true,
       "position": [
         880,
         200
@@ -244,9 +252,7 @@
         "returnAll": false,
         "limit": 1,
         "options": {}
-      },
-      "notes": "Read-only registry lookup for in-progress / already-active detection.",
-      "alwaysOutputData": true
+      }
     },
     {
       "id": "n7",
@@ -298,6 +304,7 @@
     {
       "id": "n9",
       "name": "Rec Exists",
+      "notes": "Records one provision_attempts row (redacted output only).",
       "type": "n8n-nodes-base.dataTable",
       "typeVersion": 1.1,
       "position": [
@@ -335,8 +342,7 @@
           "convertFieldsToString": false
         },
         "options": {}
-      },
-      "notes": "Records one provision_attempts row (redacted output only)."
+      }
     },
     {
       "id": "n10",
@@ -371,8 +377,10 @@
     {
       "id": "n12",
       "name": "Preflight SSH",
+      "notes": "READ-ONLY pre-flight. continueOnFail: an SSH failure yields an error item which Evaluate turns into blocked_preflight_failed (fail closed).",
       "type": "n8n-nodes-base.ssh",
       "typeVersion": 1,
+      "onError": "continueRegularOutput",
       "position": [
         1980,
         60
@@ -384,18 +392,17 @@
         "command": "={{ $json.preflight_cmd }}",
         "cwd": "/"
       },
-      "notes": "READ-ONLY pre-flight. continueOnFail: an SSH failure yields an error item which Evaluate turns into blocked_preflight_failed (fail closed).",
       "credentials": {
         "sshPrivateKey": {
           "id": "VMRmYCvoS7UC85mr",
           "name": "fleet-target-ssh"
         }
-      },
-      "onError": "continueRegularOutput"
+      }
     },
     {
       "id": "n13",
       "name": "Evaluate",
+      "notes": "available = free -m \"available\" column: already reflects both legacy stacks + OS (Task 2.4 requirement). Fail closed. debug_extra_reserve_mib can only INCREASE the reserve.",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
@@ -404,12 +411,12 @@
       ],
       "parameters": {
         "jsCode": "const v = $('Validate').first().json;\nconst cfg = v.cfg;\nconst started = $('Prep Preflight').first().json.preflight_started_at;\nconst r = $('Preflight SSH').first().json || {};\nconst finished = new Date().toISOString();\nconst extra = v.input.debug_extra_reserve_mib || 0;\nconst perClient = Number(cfg.per_client_mib);\n\n// C2 step (2): count OTHER runs currently in flight and charge each of them a full\n// per-client budget. This run's own row was already written as `provisioning`\n// BEFORE the pre-flight SSH (write-then-read), so two same-moment runs each see the\n// other and both block — fail closed — instead of both reading the same free -m.\nconst INFLIGHT_MAX_AGE_MS = 2 * 3600 * 1000;\nconst inflight = [];\nfor (const it of $input.all()) {\nconst row = (it && it.json) || {};\nif (typeof row.slug !== 'string' || row.slug === '' || row.slug === v.input.slug) continue;\nif (row.status !== 'provisioning') continue;\nconst t = Date.parse(row.updated_at || row.updatedAt || '');\nif (!Number.isFinite(t) || (Date.now() - t) >= INFLIGHT_MAX_AGE_MS) continue;\ninflight.push(row.slug);\n}\nconst inflight_count = inflight.length;\nconst reserveBase = Number(cfg.reserve_mib);\nconst reserve = reserveBase + extra + inflight_count * perClient;\n\nlet decision = 'blocked_preflight_failed', reasons = [], cap = {}, projects = [], volumes = [], owned = false;\nconst sshOk = r.error === undefined && r.code === 0 && typeof r.stdout === 'string';\nif (!sshOk) {\nreasons.push('pre-flight SSH failed: ' + String((r.error && (r.error.message || r.error)) || 'no successful result (connection failure or missing exit status)').slice(0, 200));\n} else {\nconst sec = {};\nlet cur = null;\nfor (const line of r.stdout.split('\\n')) {\nconst m = line.trim().match(/^##([A-Z_]+)(?:=(.*))?$/);\nif (m) { cur = m[1]; sec[cur] = m[2] !== undefined ? [m[2]] : []; }\nelse if (cur && line.trim() !== '') sec[cur].push(line.trim());\n}\nconst avail = Number((sec.MEM || [])[0]);\nconst nproc = Number((sec.NPROC || [])[0]);\nconst lp = ((sec.LOAD || [])[0] || '').split(/\\s+/).map(Number);\nconst disk = Number((sec.DISK || [])[0]);\nconst rc = (sec.DOCKER_RC || [])[0];\nconst vrc = (sec.VOL_RC || [])[0];\nconst parsed = [avail, nproc, disk, lp[0], lp[1], lp[2]].every((n) => Number.isFinite(n)) && nproc > 0 && rc === '0' && vrc === '0' && sec.END !== undefined;\nif (!parsed) {\nreasons.push('pre-flight output unparseable, or the docker project/volume listing failed');\n} else {\nprojects = sec.PROJECTS || [];\nvolumes = sec.VOLUMES || [];\nconst load5pc = lp[1] / nproc;\nconst fit = Math.max(0, Math.floor((avail - reserve) / perClient));\nconst ramOk = (avail - reserve) >= perClient;\nconst cpuOk = load5pc <= Number(cfg.max_load_per_core);\nconst diskOk = disk >= Number(cfg.min_free_disk_mib);\ncap = { available_mib: avail, nproc, load1: lp[0], load5: lp[1], load15: lp[2], load5_per_core: Math.round(load5pc * 1000) / 1000,\nfree_disk_mib: disk, per_client_mib: perClient, reserve_mib: reserveBase, debug_extra_reserve_mib: extra,\ninflight_count, inflight_slugs: inflight, inflight_reserve_mib: inflight_count * perClient, reserve_effective_mib: reserve,\nmax_load_per_core: Number(cfg.max_load_per_core), min_free_disk_mib: Number(cfg.min_free_disk_mib),\nclients_that_fit: fit, checks: { ram: ramOk, cpu: cpuOk, disk: diskOk }, project_count: projects.length, stray_volume_count: volumes.length };\nif (projects.includes('qubix-' + v.input.slug)) { decision = 'slug_taken'; reasons.push('project qubix-' + v.input.slug + ' already exists'); }\nelse if (volumes.length > 0) { decision = 'slug_taken'; reasons.push('docker volume(s) for this slug already exist (a client whose containers were removed still owns its data): ' + volumes.join(', ')); }\nelse if (!ramOk || !cpuOk || !diskOk) {\ndecision = 'blocked_capacity';\nif (!ramOk) reasons.push('RAM: available ' + avail + ' - reserve ' + reserve + ' (base ' + reserveBase + ' + debug ' + extra + ' + ' + inflight_count + ' in-flight x ' + perClient + ') < per-client ' + perClient);\nif (!cpuOk) reasons.push('CPU: load5/core ' + cap.load5_per_core + ' > ' + cfg.max_load_per_core);\nif (!diskOk) reasons.push('disk: free ' + disk + ' MiB < ' + cfg.min_free_disk_mib);\n} else { decision = 'proceed'; owned = true; }\n}\n}\nconst proceed = decision === 'proceed';\nconst recDecision = { proceed: 'proceed', slug_taken: 'slug_taken', blocked_capacity: 'blocked — insufficient capacity', blocked_preflight_failed: 'blocked_preflight_failed' }[decision];\nconst resp_code = { proceed: 202, slug_taken: 409, blocked_capacity: 503, blocked_preflight_failed: 503 }[decision];\nconst now = new Date().toISOString();\nconst state = {\n...v, decision, proceed, owned_by_run: owned, capacity: cap, reasons, attempt_no: 0, history: [],\nresp_code,\nresp: proceed ? { status: 'accepted', run_id: v.run_id, slug: v.input.slug, capacity: { available_mib: cap.available_mib, clients_that_fit: cap.clients_that_fit, inflight_count } }\n: { status: decision, run_id: v.run_id, reasons, capacity: cap.available_mib === undefined ? null : { available_mib: cap.available_mib, clients_that_fit: cap.clients_that_fit, inflight_count, checks: cap.checks } },\nrec: { run_id: v.run_id, slug: v.input.slug, attempt_no: 0, phase: 'preflight', started_at: started, finished_at: finished, exit_code: sshOk ? 0 : (typeof r.code === 'number' ? r.code : null),\nclassification: proceed ? 'ok' : (decision === 'slug_taken' ? 'terminal' : 'blocked'), decision: recDecision, capacity_json: JSON.stringify(cap), output_tail: '', note: reasons.join('; ').slice(0, 500) },\nclient: { slug: v.input.slug, client_name: v.input.clientName, business_name: v.input.businessName, subdomain: v.input.slug + '.' + cfg.domain,\nsite_url: 'https://' + v.input.slug + '.' + cfg.domain, admin_url: 'https://' + v.input.slug + '.' + cfg.domain + '/admin', status: 'provisioning',\nlast_run_id: v.run_id, est_ram_mib: perClient, legacy: false, read_only: false, updated_at: now },\n// C2 step (3): every non-deploying outcome resets THIS run's own claim so it does\n// not hold a phantom per-client reservation for the next two hours. The reset node\n// matches on slug AND last_run_id = this run id, so a row belonging to any other\n// run (or a real client) can never be touched by it.\nreset: { slug: v.input.slug, last_run_id: v.run_id, status: decision, updated_at: now },\nalert_to: cfg.alert_email,\nalert_subject: '[Qubix fleet] Onboarding BLOCKED for ' + v.input.slug + ': ' + recDecision,\nalert_text: 'Onboarding of \"' + v.input.slug + '\" was stopped BEFORE any deployment action.\\nDecision: ' + recDecision + '\\nReasons: ' + reasons.join('; ') + '\\nCapacity: ' + JSON.stringify(cap) + '\\nRun: ' + v.run_id,\n};\nreturn [{ json: state }];\n"
-      },
-      "notes": "available = free -m \"available\" column: already reflects both legacy stacks + OS (Task 2.4 requirement). Fail closed. debug_extra_reserve_mib can only INCREASE the reserve."
+      }
     },
     {
       "id": "n14",
       "name": "Rec Preflight",
+      "notes": "Records one provision_attempts row (redacted output only).",
       "type": "n8n-nodes-base.dataTable",
       "typeVersion": 1.1,
       "position": [
@@ -447,8 +454,7 @@
           "convertFieldsToString": false
         },
         "options": {}
-      },
-      "notes": "Records one provision_attempts row (redacted output only)."
+      }
     },
     {
       "id": "n15",
@@ -466,6 +472,7 @@
     {
       "id": "n16",
       "name": "Proceed?",
+      "notes": "The ONLY edge to any deployment node is this IF true branch.",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
@@ -495,8 +502,7 @@
           "combinator": "and"
         },
         "options": {}
-      },
-      "notes": "The ONLY edge to any deployment node is this IF true branch."
+      }
     },
     {
       "id": "n17",
@@ -582,37 +588,38 @@
     {
       "id": "n21",
       "name": "Send Alert",
+      "webhookId": "bd7d4154-bd00-4ffa-a6ad-b0c9f5fbdb7e",
+      "notes": "I4: retries 3x then CONTINUES; a failed alert is recorded as a provision_attempts row (phase alert, classification alert_failed) rather than vanishing.",
       "type": "n8n-nodes-base.emailSend",
       "typeVersion": 2.1,
+      "alwaysOutputData": true,
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 2000,
+      "onError": "continueRegularOutput",
       "position": [
         7040,
         300
       ],
       "parameters": {
-        "fromEmail": "fleet-onboarding@qubix.local",
+        "fromEmail": "={{ $('Config').first().json.from_email }}",
         "toEmail": "={{ $json.alert_to }}",
         "subject": "={{ $json.alert_subject }}",
         "emailFormat": "text",
         "text": "={{ $json.alert_text }}",
         "options": {}
       },
-      "notes": "I4: retries 3x then CONTINUES; a failed alert is recorded as a provision_attempts row (phase alert, classification alert_failed) rather than vanishing.",
-      "webhookId": "bd7d4154-bd00-4ffa-a6ad-b0c9f5fbdb7e",
       "credentials": {
         "smtp": {
           "id": "u6P9XUzzsNdHaluM",
           "name": "fleet-alert-smtp"
         }
-      },
-      "alwaysOutputData": true,
-      "onError": "continueRegularOutput",
-      "retryOnFail": true,
-      "maxTries": 3,
-      "waitBetweenTries": 2000
+      }
     },
     {
       "id": "n22",
       "name": "Mark Provisioning",
+      "notes": "C2 step (1): write-then-read claim. Upserts THIS run's row as `provisioning` BEFORE the pre-flight SSH, so a concurrent run sees it and fails closed. Only reachable once Check Existing has ruled out a pre-existing active / in-progress / legacy row, so a real client row is never overwritten.",
       "type": "n8n-nodes-base.dataTable",
       "typeVersion": 1.1,
       "position": [
@@ -662,8 +669,7 @@
           "convertFieldsToString": false
         },
         "options": {}
-      },
-      "notes": "C2 step (1): write-then-read claim. Upserts THIS run's row as `provisioning` BEFORE the pre-flight SSH, so a concurrent run sees it and fails closed. Only reachable once Check Existing has ruled out a pre-existing active / in-progress / legacy row, so a real client row is never overwritten."
+      }
     },
     {
       "id": "n23",
@@ -698,6 +704,7 @@
     {
       "id": "n25",
       "name": "Prep Deploy",
+      "notes": "All user values enter the command only via the q() single-quote-escaping helper. Bounded by max_attempts.",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
@@ -705,15 +712,16 @@
         -80
       ],
       "parameters": {
-        "jsCode": "const st = $input.first().json;\nconst cfg = st.cfg, inp = st.input;\nconst attempt_no = (st.attempt_no || 0) + 1;\nif (attempt_no > Number(cfg.max_attempts)) throw new Error('attempt bound exceeded');\nif (st.proceed !== true) throw new Error('deploy reached without a proceed decision');\nconst q = (s) => \"'\" + String(s).replace(/'/g, \"'\\\\''\") + \"'\";\nlet args = ' --slug=' + q(inp.slug) + ' --client-name=' + q(inp.clientName) + ' --business-name=' + q(inp.businessName) + ' --admin-email=' + q(inp.adminEmail);\nif (inp.brandColor) args += ' --brand-color=' + q(inp.brandColor);\nconst dir = cfg.base_dir + '/qubix-' + inp.slug;\n// I3 + N1: claim-once ownership marker, inside .git so it never dirties the checkout.\n// The marker is CLAIMED, not overwritten: if it already exists holding a different run\n// id, this run refuses to touch the checkout at all and exits 2 (terminal — no retry,\n// no teardown). That closes the same-slug double-admit window, where two runs are both\n// admitted, both see the slug free in the pre-flight, and the second would otherwise\n// take ownership of the first's stack and later `down -v` its MySQL volume.\n// Writing the same run id again is fine, so a run's own retry attempts still pass.\n// A successful, owned teardown deletes the marker, so re-onboarding after a\n// failed_escalated run is not blocked; after a failed_teardown the marker legitimately\n// stays and an operator must clear it (see README, stranded state).\nconst cmd = 'd=' + q(dir) + '; [ -d \"$d/.git\" ] || git clone --branch fleet --depth 1 ' + q(cfg.repo_url) + ' \"$d\" || exit 10; '\n+ 'if [ -e \"$d/.git/fleet-run-id\" ] && [ \"$(cat \"$d/.git/fleet-run-id\")\" != ' + q(st.run_id) + ' ]; then echo FOREIGN_MARKER; exit 2; fi; '\n+ 'echo ' + q(st.run_id) + ' > \"$d/.git/fleet-run-id\" || exit 10; '\n+ 'cd \"$d\" || exit 10; '\n+ 'scripts/provision-client.sh' + args;\nreturn [{ json: { ...st, attempt_no, deploy_cmd: cmd, attempt_started_at: new Date().toISOString() } }];\n"
-      },
-      "notes": "All user values enter the command only via the q() single-quote-escaping helper. Bounded by max_attempts."
+        "jsCode": "const st = $input.first().json;\nconst cfg = st.cfg, inp = st.input;\nconst attempt_no = (st.attempt_no || 0) + 1;\nif (attempt_no > Number(cfg.max_attempts)) throw new Error('attempt bound exceeded');\nif (st.proceed !== true) throw new Error('deploy reached without a proceed decision');\nconst q = (s) => \"'\" + String(s).replace(/'/g, \"'\\\\''\") + \"'\";\nlet args = ' --slug=' + q(inp.slug) + ' --client-name=' + q(inp.clientName) + ' --business-name=' + q(inp.businessName) + ' --admin-email=' + q(inp.adminEmail);\nif (inp.brandColor) args += ' --brand-color=' + q(inp.brandColor);\nconst dir = cfg.base_dir + '/qubix-' + inp.slug;\n// I3 + N1: claim-once ownership marker, inside .git so it never dirties the checkout.\n// The marker is CLAIMED, not overwritten: if it already exists holding a different run\n// id, this run refuses to touch the checkout at all and exits 2 (terminal — no retry,\n// no teardown). That closes the same-slug double-admit window, where two runs are both\n// admitted, both see the slug free in the pre-flight, and the second would otherwise\n// take ownership of the first's stack and later `down -v` its MySQL volume.\n// Writing the same run id again is fine, so a run's own retry attempts still pass.\n// A successful, owned teardown deletes the marker, so re-onboarding after a\n// failed_escalated run is not blocked; after a failed_teardown the marker legitimately\n// stays and an operator must clear it (see README, stranded state).\n//\n// M1: the claim is ATOMIC. `set -C` (noclobber) makes the shell open the marker with\n// O_EXCL, so the existence test and the write are one syscall — the old\n// `if [ -e ] … ; echo > marker` was check-then-write, and two same-slug runs that both\n// reached it before either wrote could both pass the check and both proceed. Now\n// exactly one creator can win. Three outcomes, distinguished after a failed create:\n//   marker absent  -> the create failed for some other reason (unwritable .git, full\n//                     disk): MARKER_WRITE_FAILED, exit 10, transient, retryable.\n//   marker == ours -> this run's own retry re-entering; proceed, as before.\n//   marker != ours -> FOREIGN_MARKER, exit 2, terminal, no deploy and no teardown.\nconst cmd = 'd=' + q(dir) + '; m=\"$d/.git/fleet-run-id\"; r=' + q(st.run_id) + '; '\n+ '[ -d \"$d/.git\" ] || git clone --branch fleet --depth 1 ' + q(cfg.repo_url) + ' \"$d\" || exit 10; '\n+ '(set -C; echo \"$r\" > \"$m\") 2>/dev/null || { '\n+ '[ -e \"$m\" ] || { echo MARKER_WRITE_FAILED; exit 10; }; '\n+ '[ \"$(cat \"$m\" 2>/dev/null)\" = \"$r\" ] || { echo FOREIGN_MARKER; exit 2; }; }; '\n+ 'cd \"$d\" || exit 10; '\n+ 'scripts/provision-client.sh' + args;\nreturn [{ json: { ...st, attempt_no, deploy_cmd: cmd, attempt_started_at: new Date().toISOString() } }];\n"
+      }
     },
     {
       "id": "n26",
       "name": "Deploy SSH",
+      "notes": "Non-zero remote exit: see Classify. continueOnFail so SSH errors are classified transient (default-to-transient).",
       "type": "n8n-nodes-base.ssh",
       "typeVersion": 1,
+      "onError": "continueRegularOutput",
       "position": [
         3960,
         -80
@@ -725,18 +733,17 @@
         "command": "={{ $json.deploy_cmd }}",
         "cwd": "/"
       },
-      "notes": "Non-zero remote exit: see Classify. continueOnFail so SSH errors are classified transient (default-to-transient).",
       "credentials": {
         "sshPrivateKey": {
           "id": "VMRmYCvoS7UC85mr",
           "name": "fleet-target-ssh"
         }
-      },
-      "onError": "continueRegularOutput"
+      }
     },
     {
       "id": "n27",
       "name": "Classify",
+      "notes": "Default-to-transient ruling (Task 4.3): 0 success; 1-9 terminal; 10-19 transient; anything else (125/127/255/null/signal/SSH error) transient. Password extracted and redacted before anything is persisted.",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
@@ -745,12 +752,12 @@
       ],
       "parameters": {
         "jsCode": "const st = $('Prep Deploy').item.json;\nconst r = $input.first().json || {};\nconst cfg = st.cfg;\nconst errored = r.error !== undefined;\nconst code = (!errored && typeof r.code === 'number') ? r.code : null;\nlet cls;\nif (code === 0) cls = 'success';\nelse if (code !== null && code >= 1 && code <= 9) cls = 'terminal';\nelse cls = 'transient';\n\n// I1: redaction must not hinge on one exact sentence. ANSI decoration is stripped\n// first; the known wording is tried, then a generic \"password...: <value>\" form;\n// and whatever happened, a blanket second pass scrubs every remaining\n// password/secret/token assignment before anything is persisted or emailed.\nconst stripAnsi = (s) => String(s === undefined || s === null ? '' : s)\n.replace(/\\u001b\\[[0-9;?]*[ -\\/]*[@-~]/g, '')\n.replace(/\\u001b[@-_]/g, '')\n.replace(/\\r/g, '');\nconst out = errored ? '' : stripAnsi(r.stdout);\nconst err = errored ? String((r.error && (r.error.message || r.error)) || 'ssh error') : stripAnsi(r.stderr);\nlet password = '';\nconst m1 = out.match(/Admin password \\(generated, shown once\\): (\\S+)/);\nif (m1) password = m1[1];\nif (!password) {\nconst m2 = out.match(/password[^\\n:=]*[:=][ \\t]*(\\S+)/i);\nif (m2 && m2[1] !== '[REDACTED]') password = m2[1];\n}\nconst password_captured = password !== '';\nconst redact = (s) => {\nlet t = String(s);\nif (password) t = t.split(password).join('[REDACTED]');\nt = t.replace(/(password[^\\n:=]*[:=][ \\t]*)\\S+/gi, '$1[REDACTED]');\nt = t.replace(/((?:secret|token|passphrase|api[_-]?key)[^\\n:=]*[:=][ \\t]*)\\S+/gi, '$1[REDACTED]');\nreturn t;\n};\nconst tail = redact(out + (err ? '\\n--stderr--\\n' + err : '')).slice(-4000);\nconst foreignMarker = /(^|\\n)FOREIGN_MARKER(\\n|$)/.test(out);\nconst now = new Date().toISOString();\nconst history = [...(st.history || []), { attempt_no: st.attempt_no, exit_code: code, classification: cls, tail }];\nlet next, mode = null, status = null, note;\nif (cls === 'success') {\nnext = 'success'; status = 'active';\nnote = password_captured ? 'provisioned' : 'provisioned, but the generated admin password could NOT be read from the output — it must be reset by hand';\n}\nelse if (cls === 'terminal') {\nnext = 'stop'; status = 'failed_terminal';\n// N1: exit 2 also covers the claim-once marker refusing a foreign checkout.\nnote = foreignMarker\n? ('terminal: ' + cfg.base_dir + '/qubix-' + st.input.slug + '/.git/fleet-run-id holds ANOTHER run id, so this run refused the checkout (FOREIGN_MARKER). Nothing was deployed and NO teardown was attempted. Another run owns that stack, or an earlier run\\'s teardown never completed — confirm no stack is running for this slug, then clear the stale marker by hand (README: stranded state).')\n: ('terminal exit ' + code + ': not retried, no teardown');\n}\nelse if (!st.owned_by_run) { next = 'stop'; status = 'failed_escalated'; note = 'transient failure but project not proven owned by this run: no teardown'; }\nelse { next = 'teardown'; mode = st.attempt_no < Number(cfg.max_attempts) ? 'retry' : 'final'; note = 'transient (' + (errored ? 'ssh error' : 'exit ' + code) + '), attempt ' + st.attempt_no + '/' + cfg.max_attempts + ', ' + mode; }\nconst client = { ...st.client, status: status || 'provisioning', updated_at: now };\nconst allTails = history.map((h) => 'attempt ' + h.attempt_no + ' exit=' + h.exit_code + ' ' + h.classification + ':\\n' + h.tail).join('\\n\\n');\nconst s2 = { ...st, history, last_class: cls, last_code: code, next, teardown_mode: mode, client,\nsecret_password: password, password_captured,\nrec: { run_id: st.run_id, slug: st.input.slug, attempt_no: st.attempt_no, phase: 'deploy', started_at: st.attempt_started_at, finished_at: now, exit_code: code, classification: cls, decision: 'deploy_attempt', capacity_json: '', output_tail: tail, note },\nalert_to: cfg.alert_email,\nalert_subject: '[Qubix fleet] Onboarding ' + (status || 'failed') + ' for ' + st.input.slug,\nalert_text: 'Onboarding of \"' + st.input.slug + '\" stopped with status ' + status + '.\\n' + note + '\\nRun: ' + st.run_id + '\\n\\nOutput (redacted) of every attempt:\\n' + allTails };\ndelete s2.deploy_cmd;\n// N5: the password only ever has a reason to exist on the success path, which goes\n// straight to the credentials email. On any other path this state is carried into the\n// retry loop and through `Backoff Wait` — and n8n persists a waiting execution's data\n// regardless of the save-execution settings once the wait is long enough.\nif (cls !== 'success') s2.secret_password = '';\nreturn [{ json: s2 }];\n"
-      },
-      "notes": "Default-to-transient ruling (Task 4.3): 0 success; 1-9 terminal; 10-19 transient; anything else (125/127/255/null/signal/SSH error) transient. Password extracted and redacted before anything is persisted."
+      }
     },
     {
       "id": "n28",
       "name": "Rec Deploy",
+      "notes": "Records one provision_attempts row (redacted output only).",
       "type": "n8n-nodes-base.dataTable",
       "typeVersion": 1.1,
       "position": [
@@ -788,8 +795,7 @@
           "convertFieldsToString": false
         },
         "options": {}
-      },
-      "notes": "Records one provision_attempts row (redacted output only)."
+      }
     },
     {
       "id": "n29",
@@ -841,8 +847,14 @@
     {
       "id": "n31",
       "name": "Mark Active",
+      "notes": "Matches ONLY slug = the validated new-client slug. N6: retries 3x then CONTINUES, so a Data Table failure here can never strand a provisioned client with nobody told its password; the failure is recorded by Registry Eval instead.",
       "type": "n8n-nodes-base.dataTable",
       "typeVersion": 1.1,
+      "alwaysOutputData": true,
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 2000,
+      "onError": "continueRegularOutput",
       "position": [
         5060,
         -160
@@ -890,17 +902,12 @@
           "convertFieldsToString": false
         },
         "options": {}
-      },
-      "notes": "Matches ONLY slug = the validated new-client slug. N6: retries 3x then CONTINUES, so a Data Table failure here can never strand a provisioned client with nobody told its password; the failure is recorded by Registry Eval instead.",
-      "alwaysOutputData": true,
-      "onError": "continueRegularOutput",
-      "retryOnFail": true,
-      "maxTries": 3,
-      "waitBetweenTries": 2000
+      }
     },
     {
       "id": "n32",
       "name": "Build Credentials Email",
+      "notes": "Only place the generated admin password is emitted.",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
@@ -909,43 +916,43 @@
       ],
       "parameters": {
         "jsCode": "const st = $('Classify').item.json;\nconst c = st.client;\n// N6: Mark Active continues on failure, so say so here rather than letting the client be\n// provisioned with nobody told and the registry row silently stuck at provisioning.\n// Same detection as Registry Eval: n8n hides the item-level error, so success is judged\n// by whether Mark Active handed back the row it was supposed to write.\nlet regFailed = false;\ntry {\nconst it = $('Mark Active').item;\nconst reg = (it && it.json) || {};\nconst errObj = it && it.error !== undefined ? it.error : reg.error;\nregFailed = (errObj !== undefined && errObj !== null)\n|| !(reg.slug === st.input.slug && typeof reg.id === 'number' && reg.status === 'active');\n} catch (e) { /* if it cannot be read, do not invent a warning */ }\nconst regWarning = regFailed\n? '\\n\\nWARNING: the fleet_clients registry row could NOT be updated after 3 tries. The client IS\\n'\n+ 'provisioned and the password above is valid, but its row still shows `provisioning` (which also\\n'\n+ 'holds a capacity reservation for 2h) — set it to active by hand.'\n: '';\n// I1: never send a credentials email with a blank credential. If the password was\n// not captured, this becomes an ACTION REQUIRED alert carrying no credential at all.\nconst captured = st.password_captured === true && typeof st.secret_password === 'string' && st.secret_password.length > 0;\nconst head = 'Client \"' + st.input.clientName + '\" (' + st.input.slug + ') was provisioned.\\nSite: ' + c.site_url + '\\nAdmin: ' + c.admin_url + '\\nAdmin email: ' + st.input.adminEmail + '\\n';\nconst subject = captured\n? '[Qubix fleet] Client provisioned: ' + st.input.slug\n: '[Qubix fleet] ACTION REQUIRED — provisioned WITHOUT a captured password: ' + st.input.slug;\nconst text = captured\n? head + 'Admin password (shown once): ' + st.secret_password + '\\nRun: ' + st.run_id\n: head + '\\nThe generated admin password could NOT be read from the provisioning output, so it is\\n'\n+ 'not in this message and is not stored anywhere. The client admin password must be\\n'\n+ 'RESET BY HAND — see docker/n8n/README.md, \"Resetting a client admin password by hand\".\\nRun: ' + st.run_id;\nreturn [{ json: { alert_to: st.cfg.alert_email, alert_subject: subject, alert_text: text + regWarning,\nrun_id: st.run_id, slug: st.input.slug, attempt_no: st.attempt_no, password_captured: captured } }];\n"
-      },
-      "notes": "Only place the generated admin password is emitted."
+      }
     },
     {
       "id": "n33",
       "name": "Send Credentials",
+      "webhookId": "4e167837-4798-435b-8a2b-853526f67c64",
+      "notes": "C1: retries 3x then CONTINUES. Delivery outcome is recorded as a provision_attempts row (phase credentials) so a lost password email is visible without opening execution data.",
       "type": "n8n-nodes-base.emailSend",
       "typeVersion": 2.1,
+      "alwaysOutputData": true,
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 2000,
+      "onError": "continueRegularOutput",
       "position": [
         5500,
         -160
       ],
       "parameters": {
-        "fromEmail": "fleet-onboarding@qubix.local",
+        "fromEmail": "={{ $('Config').first().json.from_email }}",
         "toEmail": "={{ $json.alert_to }}",
         "subject": "={{ $json.alert_subject }}",
         "emailFormat": "text",
         "text": "={{ $json.alert_text }}",
         "options": {}
       },
-      "notes": "C1: retries 3x then CONTINUES. Delivery outcome is recorded as a provision_attempts row (phase credentials) so a lost password email is visible without opening execution data.",
-      "webhookId": "4e167837-4798-435b-8a2b-853526f67c64",
       "credentials": {
         "smtp": {
           "id": "u6P9XUzzsNdHaluM",
           "name": "fleet-alert-smtp"
         }
-      },
-      "alwaysOutputData": true,
-      "onError": "continueRegularOutput",
-      "retryOnFail": true,
-      "maxTries": 3,
-      "waitBetweenTries": 2000
+      }
     },
     {
       "id": "n34",
       "name": "Teardown?",
+      "notes": "Teardown only when Classify said transient AND owned_by_run (pre-flight proved project absent). Terminal never reaches here.",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
@@ -975,12 +982,12 @@
           "combinator": "and"
         },
         "options": {}
-      },
-      "notes": "Teardown only when Classify said transient AND owned_by_run (pre-flight proved project absent). Terminal never reaches here."
+      }
     },
     {
       "id": "n35",
       "name": "Mark Stopped",
+      "notes": "Matches ONLY slug = the validated new-client slug. Legacy slugs are rejected in Validate, so legacy rows are unreachable.",
       "type": "n8n-nodes-base.dataTable",
       "typeVersion": 1.1,
       "position": [
@@ -1030,8 +1037,7 @@
           "convertFieldsToString": false
         },
         "options": {}
-      },
-      "notes": "Matches ONLY slug = the validated new-client slug. Legacy slugs are rejected in Validate, so legacy rows are unreachable."
+      }
     },
     {
       "id": "n36",
@@ -1049,6 +1055,7 @@
     {
       "id": "n37",
       "name": "Prep Teardown",
+      "notes": "Throws unless owned_by_run === true.",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
@@ -1056,15 +1063,16 @@
         20
       ],
       "parameters": {
-        "jsCode": "const st = $input.first().json;\nif (st.owned_by_run !== true || st.next !== 'teardown') throw new Error('teardown forbidden: not owned by this run');\nconst q = (s) => \"'\" + String(s).replace(/'/g, \"'\\\\''\") + \"'\";\nconst slug = st.input.slug, base = st.cfg.base_dir;\nconst proj = q('qubix-' + slug);\nconst dir = base + '/qubix-' + slug;\n// I3: defence at the point of destruction. `down -v` destroys a MySQL volume, so it\n// runs only if the checkout still carries THIS run's ownership marker. On a mismatch\n// nothing is torn down, NOT_OWNER is printed, and the run stops as failed_teardown.\nconst cmd = 'd=' + q(dir) + '; '\n+ '[ \"$(cat \"$d/.git/fleet-run-id\" 2>/dev/null)\" = ' + q(st.run_id) + ' ] || { echo NOT_OWNER; exit 0; }; '\n+ 'cd \"$d\" || exit 10; '\n+ 'docker compose -f ' + q('docker-compose.' + slug + '.yml') + ' -p ' + proj + ' down -v --remove-orphans; '\n+ 'echo \"DOWN_RC=$?\"; '\n// N1: release the claim-once marker, but ONLY once ownership was proven above AND the\n// project is confirmed gone — so a later re-onboarding of this slug is not blocked\n// forever, while a failed teardown deliberately leaves the marker in place.\n+ 'if docker compose ls -a -q | grep -qx ' + proj + '; then echo STILL_PRESENT; '\n+ 'else rm -f \"$d/.git/fleet-run-id\"; echo GONE; fi';\nreturn [{ json: { ...st, teardown_cmd: cmd, teardown_started_at: new Date().toISOString() } }];\n"
-      },
-      "notes": "Throws unless owned_by_run === true."
+        "jsCode": "const st = $input.first().json;\nif (st.owned_by_run !== true || st.next !== 'teardown') throw new Error('teardown forbidden: not owned by this run');\nconst q = (s) => \"'\" + String(s).replace(/'/g, \"'\\\\''\") + \"'\";\nconst slug = st.input.slug, base = st.cfg.base_dir;\nconst proj = q('qubix-' + slug);\nconst dir = base + '/qubix-' + slug;\n// I3: defence at the point of destruction. `down -v` destroys a MySQL volume, so it\n// runs only if the checkout still carries THIS run's ownership marker. On a mismatch\n// nothing is torn down, NOT_OWNER is printed, and the run stops as failed_teardown.\n//\n// Finding 1: \"marker absent\" and \"marker holds a foreign run id\" are NOT the same\n// thing and must not produce the same token. The marker is claimed BEFORE\n// provision-client.sh can run (see Prep Deploy), so an absent marker proves nothing\n// was ever created for this slug — the usual cause is the `git clone` failing, the\n// most likely first-production failure of all. That is safe and retryable; a foreign\n// marker is another run's live stack and must stay terminal. NO_MARKER exits 0\n// without running `down`, exactly as NOT_OWNER does — there is nothing to tear down.\n//\n// Finding 2: the exit status of `down -v` (DOWN_RC) and of the project listing\n// (LS_RC) are both captured AND both acted on here. If the docker daemon is\n// unreachable mid-teardown, `down -v` fails and `docker compose ls` fails too — its\n// stdout is then empty, so a bare `grep -qx` finds no match and the old command\n// concluded the project was gone, printed GONE and DELETED the ownership marker,\n// although nothing had been torn down. GONE is now emitted (and the marker released)\n// only when the listing succeeded, does not contain the project, AND `down -v` itself\n// exited 0. Every other combination keeps the marker and names which check failed.\nconst cmd = 'd=' + q(dir) + '; m=\"$d/.git/fleet-run-id\"; '\n+ '[ -e \"$m\" ] || { echo NO_MARKER; exit 0; }; '\n+ '[ \"$(cat \"$m\" 2>/dev/null)\" = ' + q(st.run_id) + ' ] || { echo NOT_OWNER; exit 0; }; '\n+ 'cd \"$d\" || exit 10; '\n+ 'docker compose -f ' + q('docker-compose.' + slug + '.yml') + ' -p ' + proj + ' down -v --remove-orphans; '\n+ 'rc=$?; echo \"DOWN_RC=$rc\"; '\n+ 'p=$(docker compose ls -a -q); lsrc=$?; echo \"LS_RC=$lsrc\"; '\n// N1: release the claim-once marker, but ONLY once ownership was proven above AND the\n// project is confirmed gone — so a later re-onboarding of this slug is not blocked\n// forever, while a failed teardown deliberately leaves the marker in place.\n+ 'if [ \"$lsrc\" != 0 ]; then echo LS_FAILED; '\n+ 'elif printf \\'%s\\\\n\\' \"$p\" | grep -qx ' + proj + '; then echo STILL_PRESENT; '\n+ 'elif [ \"$rc\" != 0 ]; then echo DOWN_FAILED; '\n+ 'else rm -f \"$m\"; echo GONE; fi';\nreturn [{ json: { ...st, teardown_cmd: cmd, teardown_started_at: new Date().toISOString() } }];\n"
+      }
     },
     {
       "id": "n38",
       "name": "Teardown SSH",
+      "notes": "docker compose down -v for THIS run project only, then verify GONE.",
       "type": "n8n-nodes-base.ssh",
       "typeVersion": 1,
+      "onError": "continueRegularOutput",
       "position": [
         5500,
         20
@@ -1076,14 +1084,12 @@
         "command": "={{ $json.teardown_cmd }}",
         "cwd": "/"
       },
-      "notes": "docker compose down -v for THIS run project only, then verify GONE.",
       "credentials": {
         "sshPrivateKey": {
           "id": "VMRmYCvoS7UC85mr",
           "name": "fleet-target-ssh"
         }
-      },
-      "onError": "continueRegularOutput"
+      }
     },
     {
       "id": "n39",
@@ -1095,12 +1101,13 @@
         20
       ],
       "parameters": {
-        "jsCode": "const st = $('Prep Teardown').item.json;\nconst r = $input.first().json || {};\nconst cfg = st.cfg;\nconst errored = r.error !== undefined;\nconst out = errored ? '' : String(r.stdout || '');\nconst notOwner = /(^|\\n)NOT_OWNER(\\n|$)/.test(out);\nconst gone = !errored && r.code === 0 && /(^|\\n)GONE\\s*$/.test(out) && !/STILL_PRESENT/.test(out) && !notOwner;\nconst tail = (errored ? String((r.error && (r.error.message || r.error)) || 'ssh error') : out + String(r.stderr || '')).slice(-4000);\nconst now = new Date().toISOString();\nlet status = null, cont = false, note;\nif (notOwner) {\nstatus = 'failed_teardown';\nnote = 'NOT_OWNER: ' + cfg.base_dir + '/qubix-' + st.input.slug + '/.git/fleet-run-id does not hold this run id, so `docker compose down -v` was NOT executed — another run owns this checkout. Stopping; never retried.';\n} else if (!gone) {\nstatus = 'failed_teardown';\nnote = 'teardown did not prove project gone; retrying would hit the slug-collision check (exit 2), stopping';\n} else if (st.teardown_mode === 'retry') { cont = true; note = 'teardown ok, retrying after backoff'; }\nelse { status = 'failed_escalated'; note = 'attempts exhausted, teardown ok'; }\nconst client = { ...st.client, status: status || 'provisioning', updated_at: now };\nconst allTails = (st.history || []).map((h) => 'attempt ' + h.attempt_no + ' exit=' + h.exit_code + ' ' + h.classification + ':\\n' + h.tail).join('\\n\\n');\nreturn [{ json: { ...st, teardown_ok: gone, not_owner: notOwner, continue_retry: cont, client,\nrec: { run_id: st.run_id, slug: st.input.slug, attempt_no: st.attempt_no, phase: 'teardown', started_at: st.teardown_started_at, finished_at: now, exit_code: errored ? null : (typeof r.code === 'number' ? r.code : null), classification: gone ? 'ok' : (notOwner ? 'not_owner' : 'failed'), decision: 'teardown', capacity_json: '', output_tail: tail, note },\nalert_to: cfg.alert_email,\nalert_subject: '[Qubix fleet] Onboarding ' + status + ' for ' + st.input.slug,\nalert_text: 'Onboarding of \"' + st.input.slug + '\" ended with status ' + status + '.\\n' + note + '\\nRun: ' + st.run_id + '\\n\\nOutput (redacted) of every attempt:\\n' + allTails + '\\n\\nTeardown output:\\n' + tail } }];\n"
+        "jsCode": "const st = $('Prep Teardown').item.json;\nconst r = $input.first().json || {};\nconst cfg = st.cfg;\nconst errored = r.error !== undefined;\nconst out = errored ? '' : String(r.stdout || '');\n// Minor 11: this tail is persisted to provision_attempts, which outlives every other\n// record here, so it goes through the same blanket scrub Classify applies instead of\n// being stored raw. No secret can plausibly reach `docker compose down -v` output\n// today; this is defence in depth, not a known leak.\nconst redact = (s) => {\nlet t = String(s === undefined || s === null ? '' : s);\nif (typeof st.secret_password === 'string' && st.secret_password !== '') t = t.split(st.secret_password).join('[REDACTED]');\nt = t.replace(/(password[^\\n:=]*[:=][ \\t]*)\\S+/gi, '$1[REDACTED]');\nt = t.replace(/((?:secret|token|passphrase|api[_-]?key)[^\\n:=]*[:=][ \\t]*)\\S+/gi, '$1[REDACTED]');\nreturn t;\n};\nconst notOwner = /(^|\\n)NOT_OWNER(\\n|$)/.test(out);\n// Finding 1: an ABSENT marker is not a foreign marker. Prep Deploy claims the marker\n// before provision-client.sh can run, so NO_MARKER proves nothing was created for this\n// slug (the usual cause being a failed `git clone`, exit 10). Treating that as\n// NOT_OWNER used to end the run as failed_teardown — terminal, never retried — with a\n// note claiming another run owned the checkout, which was both wrong and the reason a\n// plain network blip at clone time could not self-heal. It now follows exactly the\n// path a successful, empty teardown follows: retry if attempts remain, otherwise\n// failed_escalated. NOT_OWNER is unchanged — that one is the real safety guard.\nconst noMarker = !notOwner && /(^|\\n)NO_MARKER(\\n|$)/.test(out);\n// Finding 2: DOWN_RC was captured and never read. If the docker daemon is unreachable\n// mid-teardown, BOTH `down -v` and the `docker compose ls` check fail; grep then sees\n// empty input, matches nothing, and the old logic concluded GONE — removing the\n// ownership marker although nothing had been torn down. GONE now additionally requires\n// the recorded exit status of `down -v` to be exactly 0; missing or non-zero is not gone.\n// LS_RC is the same story for the listing that decides \"is the project still there\".\n// A missing code is treated as a failure, not as a pass.\nconst rcMatch = out.match(/(^|\\n)DOWN_RC=(-?\\d+)(\\s|$)/);\nconst down_rc = rcMatch ? Number(rcMatch[2]) : null;\nconst lsMatch = out.match(/(^|\\n)LS_RC=(-?\\d+)(\\s|$)/);\nconst ls_rc = lsMatch ? Number(lsMatch[2]) : null;\nconst gone = !errored && r.code === 0 && down_rc === 0 && ls_rc === 0 && /(^|\\n)GONE\\s*$/.test(out) && !/STILL_PRESENT/.test(out) && !/LS_FAILED/.test(out) && !/DOWN_FAILED/.test(out) && !notOwner && !noMarker;\nconst tail = redact(errored ? String((r.error && (r.error.message || r.error)) || 'ssh error') : out + String(r.stderr || '')).slice(-4000);\nconst now = new Date().toISOString();\nlet status = null, cont = false, note;\nif (notOwner) {\nstatus = 'failed_teardown';\nnote = 'NOT_OWNER: ' + cfg.base_dir + '/qubix-' + st.input.slug + '/.git/fleet-run-id does not hold this run id, so `docker compose down -v` was NOT executed — another run owns this checkout. Stopping; never retried.';\n} else if (noMarker) {\nif (st.teardown_mode === 'retry') { cont = true; note = 'NO_MARKER: ' + cfg.base_dir + '/qubix-' + st.input.slug + '/.git/fleet-run-id does not exist, so this run never claimed the checkout and nothing was created to tear down (a failed clone is the usual cause). Nothing to undo; retrying after backoff.'; }\nelse { status = 'failed_escalated'; note = 'attempts exhausted; NO_MARKER: the checkout was never claimed, so nothing had been created and no teardown was needed'; }\n} else if (!gone) {\nstatus = 'failed_teardown';\nnote = 'teardown did not prove project gone (' + (errored ? 'ssh error' : 'down exit ' + (down_rc === null ? 'not reported' : down_rc) + ', project listing exit ' + (ls_rc === null ? 'not reported' : ls_rc)) + '); the ownership marker was deliberately NOT released; retrying would hit the slug-collision check (exit 2), stopping';\n} else if (st.teardown_mode === 'retry') { cont = true; note = 'teardown ok, retrying after backoff'; }\nelse { status = 'failed_escalated'; note = 'attempts exhausted, teardown ok'; }\nconst client = { ...st.client, status: status || 'provisioning', updated_at: now };\nconst allTails = (st.history || []).map((h) => 'attempt ' + h.attempt_no + ' exit=' + h.exit_code + ' ' + h.classification + ':\\n' + h.tail).join('\\n\\n');\nreturn [{ json: { ...st, teardown_ok: gone, not_owner: notOwner, no_marker: noMarker, down_rc, ls_rc, continue_retry: cont, client,\nrec: { run_id: st.run_id, slug: st.input.slug, attempt_no: st.attempt_no, phase: 'teardown', started_at: st.teardown_started_at, finished_at: now, exit_code: errored ? null : (typeof r.code === 'number' ? r.code : null), classification: gone ? 'ok' : (notOwner ? 'not_owner' : (noMarker ? 'no_marker' : 'failed')), decision: 'teardown', capacity_json: '', output_tail: tail, note },\nalert_to: cfg.alert_email,\nalert_subject: '[Qubix fleet] Onboarding ' + status + ' for ' + st.input.slug,\nalert_text: 'Onboarding of \"' + st.input.slug + '\" ended with status ' + status + '.\\n' + note + '\\nRun: ' + st.run_id + '\\n\\nOutput (redacted) of every attempt:\\n' + allTails + '\\n\\nTeardown output:\\n' + tail } }];\n"
       }
     },
     {
       "id": "n40",
       "name": "Rec Teardown",
+      "notes": "Records one provision_attempts row (redacted output only).",
       "type": "n8n-nodes-base.dataTable",
       "typeVersion": 1.1,
       "position": [
@@ -1138,8 +1145,7 @@
           "convertFieldsToString": false
         },
         "options": {}
-      },
-      "notes": "Records one provision_attempts row (redacted output only)."
+      }
     },
     {
       "id": "n41",
@@ -1191,6 +1197,7 @@
     {
       "id": "n43",
       "name": "Backoff Wait",
+      "webhookId": "a1b2c3d4-0000-4000-8000-00000000f002",
       "type": "n8n-nodes-base.wait",
       "typeVersion": 1.1,
       "position": [
@@ -1201,12 +1208,12 @@
         "resume": "timeInterval",
         "amount": "={{ Number($json.cfg.backoff_seconds) }}",
         "unit": "seconds"
-      },
-      "webhookId": "a1b2c3d4-0000-4000-8000-00000000f002"
+      }
     },
     {
       "id": "n44",
       "name": "Mark Final",
+      "notes": "Matches ONLY slug = the validated new-client slug. Legacy slugs are rejected in Validate, so legacy rows are unreachable.",
       "type": "n8n-nodes-base.dataTable",
       "typeVersion": 1.1,
       "position": [
@@ -1256,8 +1263,7 @@
           "convertFieldsToString": false
         },
         "options": {}
-      },
-      "notes": "Matches ONLY slug = the validated new-client slug. Legacy slugs are rejected in Validate, so legacy rows are unreachable."
+      }
     },
     {
       "id": "n45",
@@ -1275,8 +1281,10 @@
     {
       "id": "n46",
       "name": "List Inflight",
+      "notes": "C2 step (2): read every OTHER run currently claiming capacity. Read-only. alwaysOutputData so an empty result still lets Evaluate run.",
       "type": "n8n-nodes-base.dataTable",
       "typeVersion": 1.1,
+      "alwaysOutputData": true,
       "position": [
         2200,
         60
@@ -1302,15 +1310,15 @@
         },
         "returnAll": true,
         "options": {}
-      },
-      "notes": "C2 step (2): read every OTHER run currently claiming capacity. Read-only. alwaysOutputData so an empty result still lets Evaluate run.",
-      "alwaysOutputData": true
+      }
     },
     {
       "id": "n47",
       "name": "Reset Claim",
+      "notes": "C2 step (3): every non-deploying outcome clears this run's own `provisioning` claim so it cannot hold a phantom reservation for 2h. UPDATE (never upsert) matched on slug AND last_run_id = this run id, so no other run's row and no real client's row can be touched.",
       "type": "n8n-nodes-base.dataTable",
       "typeVersion": 1.1,
+      "alwaysOutputData": true,
       "position": [
         3300,
         140
@@ -1351,13 +1359,12 @@
           "convertFieldsToString": false
         },
         "options": {}
-      },
-      "notes": "C2 step (3): every non-deploying outcome clears this run's own `provisioning` claim so it cannot hold a phantom reservation for 2h. UPDATE (never upsert) matched on slug AND last_run_id = this run id, so no other run's row and no real client's row can be touched.",
-      "alwaysOutputData": true
+      }
     },
     {
       "id": "n48",
       "name": "Delivery Eval",
+      "notes": "C1: records whether the credentials email actually went out. No secret here.",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
@@ -1366,12 +1373,12 @@
       ],
       "parameters": {
         "jsCode": "// C1: credential delivery is failure-tolerant (Send Credentials retries, then\n// continues), and its outcome is recorded as a provision_attempts row so a lost\n// email is visible without ever opening n8n execution data. No secret goes in here.\nlet meta;\ntry { meta = $('Build Credentials Email').item.json; }\ncatch (e) { meta = $('Build Credentials Email').last().json; }\nconst r = $input.first().json || {};\nconst accepted = Array.isArray(r.accepted) ? r.accepted.length : 0;\nconst rejected = Array.isArray(r.rejected) ? r.rejected.length : 0;\nconst failed = r.error !== undefined || rejected > 0 || accepted === 0;\nconst now = new Date().toISOString();\nconst notes = [];\nif (failed) {\nnotes.push('credentials email NOT delivered (' + String(r.error || ('accepted=' + accepted + ', rejected=' + rejected)).slice(0, 160) + ')');\nnotes.push('the generated admin password was NOT delivered and is stored nowhere — reset the client admin password BY HAND (see the README section on resetting a client admin password by hand)');\n} else {\nnotes.push('credentials email delivered');\n}\nif (meta.password_captured !== true) notes.push('password was not captured from the provisioning output either');\nreturn [{ json: { rec: {\nrun_id: meta.run_id, slug: meta.slug, attempt_no: meta.attempt_no, phase: 'credentials',\nstarted_at: now, finished_at: now, exit_code: null,\nclassification: failed ? 'delivery_failed' : 'delivered', decision: 'credentials_delivery',\ncapacity_json: '', output_tail: '', note: notes.join('; ').slice(0, 500),\n} } }];\n"
-      },
-      "notes": "C1: records whether the credentials email actually went out. No secret here."
+      }
     },
     {
       "id": "recdelivery",
       "name": "Rec Delivery",
+      "notes": "Records one provision_attempts row (phase credentials, no secrets).",
       "type": "n8n-nodes-base.dataTable",
       "typeVersion": 1.1,
       "position": [
@@ -1409,12 +1416,12 @@
           "convertFieldsToString": false
         },
         "options": {}
-      },
-      "notes": "Records one provision_attempts row (phase credentials, no secrets)."
+      }
     },
     {
       "id": "n50",
       "name": "Alert Eval",
+      "notes": "I4: emits a row only when the alert could NOT be delivered.",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
@@ -1423,12 +1430,12 @@
       ],
       "parameters": {
         "jsCode": "// I4: Send Alert retries, then continues. When the alert still could not be\n// delivered, record it — otherwise a failed run's only trace is a row nobody reads.\n// Only ONE of the three Build Alert nodes can run in a given execution.\nlet meta = null;\nfor (const n of ['Build Alert Blocked', 'Build Alert Stop', 'Build Alert Final']) {\ntry { const items = $(n).all(); if (items && items.length) meta = items[items.length - 1].json; } catch (e) { /* branch not taken */ }\n}\nif (!meta) meta = { run_id: '', slug: '', attempt_no: 0, alert_kind: 'unknown' };\nconst r = $input.first().json || {};\nconst accepted = Array.isArray(r.accepted) ? r.accepted.length : 0;\nconst rejected = Array.isArray(r.rejected) ? r.rejected.length : 0;\nconst failed = r.error !== undefined || rejected > 0 || accepted === 0;\nif (!failed) return [];\nconst now = new Date().toISOString();\nreturn [{ json: { rec: {\nrun_id: meta.run_id, slug: meta.slug, attempt_no: meta.attempt_no || 0, phase: 'alert',\nstarted_at: now, finished_at: now, exit_code: null,\nclassification: 'alert_failed', decision: 'alert_delivery',\ncapacity_json: '', output_tail: '',\nnote: ('alert \"' + (meta.alert_kind || 'unknown') + '\" could not be delivered after retries ('\n+ String(r.error || ('accepted=' + accepted + ', rejected=' + rejected)).slice(0, 160)\n+ ') — this run ended without anyone being notified by email').slice(0, 500),\n} } }];\n"
-      },
-      "notes": "I4: emits a row only when the alert could NOT be delivered."
+      }
     },
     {
       "id": "recalert",
       "name": "Rec Alert",
+      "notes": "Records one provision_attempts row (phase alert, classification alert_failed).",
       "type": "n8n-nodes-base.dataTable",
       "typeVersion": 1.1,
       "position": [
@@ -1466,12 +1473,12 @@
           "convertFieldsToString": false
         },
         "options": {}
-      },
-      "notes": "Records one provision_attempts row (phase alert, classification alert_failed)."
+      }
     },
     {
       "id": "n52",
       "name": "Registry Eval",
+      "notes": "N6: emits a row only when Mark Active ultimately failed. No secret.",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
@@ -1480,12 +1487,12 @@
       ],
       "parameters": {
         "jsCode": "// N6: `Mark Active` retries then CONTINUES, so a Data Table failure can no longer end\n// the run before the credentials email. Emits a row ONLY when the registry write\n// ultimately failed, so the operator learns the client is provisioned while its\n// fleet_clients row is still stuck at `provisioning`. Carries no secret.\n//\n// How the failure is detected: n8n STRIPS the item-level `error` before a Code node\n// sees it (verified against this n8n build: on failure the item is exactly\n// {json, pairedItem} and json is the UNCHANGED INPUT state, i.e. Classify's item;\n// on success json is the written registry row). So the discriminator is \"did Mark\n// Active hand back the row it was supposed to write\". The `error` probes are kept as a\n// belt-and-braces signal in case a future n8n version does surface it.\nconst st = $('Classify').item.json;\nconst it = $input.first() || {};\nconst j = it.json || {};\nconst errObj = it.error !== undefined ? it.error : j.error;\nconst wroteRow = j.slug === st.input.slug && typeof j.id === 'number' && j.status === 'active';\nconst failed = (errObj !== undefined && errObj !== null) || !wroteRow;\nif (!failed) return [];\nconst msg = String((errObj && (errObj.message || errObj.description)) || errObj\n|| 'the node returned no written row (n8n hides the underlying error from this node)').slice(0, 160);\nconst now = new Date().toISOString();\nreturn [{ json: { rec: {\nrun_id: st.run_id, slug: st.input.slug, attempt_no: st.attempt_no, phase: 'registry',\nstarted_at: now, finished_at: now, exit_code: null,\nclassification: 'mark_active_failed', decision: 'registry_update',\ncapacity_json: '', output_tail: '',\nnote: ('the client WAS provisioned, but its fleet_clients row could not be set to active after 3 tries ('\n+ msg + ') — the row still shows `provisioning`, which also holds a per-client capacity '\n+ 'reservation for 2h. Set it to active by hand.').slice(0, 500),\n} } }];\n"
-      },
-      "notes": "N6: emits a row only when Mark Active ultimately failed. No secret."
+      }
     },
     {
       "id": "n53",
       "name": "Rec Registry",
+      "notes": "Records one provision_attempts row (phase registry, no secrets).",
       "type": "n8n-nodes-base.dataTable",
       "typeVersion": 1.1,
       "position": [
@@ -1523,8 +1530,7 @@
           "convertFieldsToString": false
         },
         "options": {}
-      },
-      "notes": "Records one provision_attempts row (phase registry, no secrets)."
+      }
     }
   ],
   "connections": {

@@ -6,8 +6,16 @@
 # Teardown behaviour per slug is scriptable via /opt/fleet-target/scenario/<slug>.down:
 #   fail     -> `down` itself fails (exit 1), nothing removed
 #   present  -> `down` "succeeds" but the project survives (STILL_PRESENT case)
+#   daemon   -> the docker daemon "goes away" at `down` time and stays away, so `down`
+#               AND every later call (including the `compose ls` that decides whether
+#               the project is gone) fail. Finding 2: with an empty listing, a bare
+#               `grep -qx` matches nothing, which used to look exactly like success.
 T=/opt/fleet-target; S=$T/state/projects; V=$T/state/volumes
 echo "$(date -u +%FT%TZ) docker $*" >> $T/log/docker.log
+if [ -f "$T/state/docker-unreachable" ]; then
+  echo "Cannot connect to the Docker daemon at unix:///var/run/docker.sock. Is the docker daemon running?" >&2
+  exit 1
+fi
 if [ "$*" = "compose ls -a -q" ]; then
   cat "$S"
 elif [ "$*" = "volume ls -q" ]; then
@@ -23,6 +31,11 @@ elif [ $# -eq 8 ] && [ "$1" = compose ] && [ "$2" = -f ] && [ "$4" = -p ] \
     present)
       # Pretend the teardown ran but left the project behind.
       echo "Removing $proj (simulated partial teardown)"; exit 0 ;;
+    daemon)
+      # The daemon dies here and stays dead for the rest of this teardown command.
+      touch "$T/state/docker-unreachable"
+      echo "Cannot connect to the Docker daemon at unix:///var/run/docker.sock. Is the docker daemon running?" >&2
+      exit 1 ;;
   esac
   # Only the project named by -p is ever removed (exact-line match)...
   grep -vxF -- "$proj" "$S" > "$S.tmp"; cat "$S.tmp" > "$S"; rm -f "$S.tmp"

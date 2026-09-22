@@ -31,6 +31,7 @@ or the pre-flight found a compose project or a docker volume for that slug),
 | `max_attempts` | 3 | hard bound on deploy attempts |
 | `backoff_seconds` | 5 | local value; **use 60 in production** |
 | `base_dir`, `repo_url`, `domain`, `alert_email` | `/opt`, repo URL, `digital-labs.ai`, alert address | placeholders, set per environment |
+| `from_email` | `fleet-onboarding@qubix.local` | envelope sender for BOTH `Send Alert` and `Send Credentials`; placeholder, **must be a real deliverable address in production** (`.local` is mDNS-reserved and most relays reject it, which would silently lose the credentials email — the failure is recorded as a `credentials`/`delivery_failed` row and nowhere else) |
 
 Capacity check: `free -m` "available" already reflects the two legacy stacks (Elasticsearch included) and the OS,
 so Task 2.4's "subtract the legacy stacks" is satisfied by construction. RAM: `available - reserve >= per_client`;
@@ -119,18 +120,44 @@ hit the slug-collision check, exit 2).
    deploy, no teardown and no retry, and the first run's stack is untouched. Writing the same run id again is a
    no-op, so a run's own retry attempts are unaffected.
 
-   The teardown command's **first** action is `[ "$(cat <dir>/.git/fleet-run-id 2>/dev/null)" = '<run id>' ]`;
-   on a mismatch it prints `NOT_OWNER`, does **not** run `down`, and the workflow records `failed_teardown` and
-   stops, never retried. When the teardown *does* run and the project is confirmed `GONE`, it also **removes**
-   the marker — so re-onboarding the same slug after a `failed_escalated` run is not blocked. After a
-   `failed_teardown` the marker deliberately survives and blocks later runs for that slug until a human clears
-   it (see "In-flight accounting" → residual window).
+   The claim is **atomic**: `(set -C; echo "$RUNID" > "$MARKER")` makes the shell create the file with `O_EXCL`,
+   so the existence check and the write are one syscall. The earlier `if [ -e … ]; then …; fi; echo > marker`
+   form was check-then-write, and two same-slug runs that both reached it before either wrote could both pass
+   the check and both proceed — the remaining route to one run's teardown destroying another's live stack. If
+   the create fails, the marker is read back: absent ⇒ the write itself failed (unwritable `.git`, full disk),
+   which prints `MARKER_WRITE_FAILED` and exits **10** (transient, retryable, nothing claimed); equal to this
+   run's id ⇒ this run's own retry, proceed; anything else ⇒ `FOREIGN_MARKER`, exit 2.
+
+   The teardown command's **first** action is to look at that file, and it distinguishes three cases, not two:
+
+   - **absent** → `NO_MARKER`, exit 0, no `down`. Nothing was ever claimed, and since the claim happens before
+     `provision-client.sh` can run, nothing was ever created — the usual cause is the `git clone` itself
+     failing (exit 10). This is **not** an error: the run follows the same path an empty, successful teardown
+     follows, i.e. it retries if attempts remain and otherwise ends `failed_escalated`. (It used to be reported
+     as `NOT_OWNER`, which made a failed clone terminal, never retried, and attached a note falsely claiming
+     another run owned the checkout.)
+   - **holds another run's id** → `NOT_OWNER`, exit 0, no `down`; the workflow records `failed_teardown` and
+     stops, never retried. This one is the real safety guard and is deliberately terminal.
+   - **holds this run's id** → the teardown runs.
+
+   When the teardown does run, `docker compose down -v` and the following `docker compose ls` **both** have
+   their exit status captured (`DOWN_RC`, `LS_RC`) and both are checked, on the host and again in
+   `Teardown Eval`. The project counts as gone — and the marker is released — only when the listing succeeded,
+   does not contain the project, and `down -v` itself exited 0. Otherwise the command prints `LS_FAILED`,
+   `STILL_PRESENT` or `DOWN_FAILED`, the marker survives, and the run ends `failed_teardown`. This matters
+   because a docker daemon that is unreachable mid-teardown fails *both* commands: the listing's stdout is then
+   empty, so a bare `grep -qx` matches nothing, which used to look exactly like "the project is gone" and
+   released the marker although nothing had been torn down.
+
+   Releasing the marker on a confirmed teardown is what keeps re-onboarding the same slug possible after a
+   `failed_escalated` run. After a `failed_teardown` the marker deliberately survives and blocks later runs for
+   that slug until a human clears it (see "In-flight accounting" → residual window).
 3. **Legacy slugs** (`jjbags-in`, `jj-bags-com`, `sa`, `qubix`, ...) are rejected in validation, so no write node
    can match a legacy row in `fleet_clients`.
 
-If the teardown runs but cannot prove the project gone (`STILL_PRESENT`, a failing `down`, or an SSH error), the
-run also stops as `failed_teardown` — retrying would hit the slug-collision check and burn an attempt on a
-terminal exit 2.
+If the teardown runs but cannot prove the project gone (`STILL_PRESENT`, `DOWN_FAILED`, `LS_FAILED`, a missing
+`DOWN_RC`/`LS_RC` line, or an SSH error), the run also stops as `failed_teardown` — retrying would hit the
+slug-collision check and burn an attempt on a terminal exit 2.
 
 ### Secrets and execution data
 
@@ -197,13 +224,50 @@ never stored. Omit `--brand-color` to leave the client's branding untouched (pas
 
 ### Data tables
 
-`fleet_clients` (slug, client_name, business_name, subdomain, site_url, admin_url, status, last_run_id,
-est_ram_mib, legacy, read_only, updated_at) — seeded with `jjbags.in` (1633 MiB) and `jj-bags.com` (1599 MiB),
-`legacy=true, read_only=true, status=live`. `provision_attempts` (run_id, slug, attempt_no, phase
-`preflight|deploy|teardown|credentials|alert`, started_at, finished_at, exit_code, classification, decision,
-capacity_json, output_tail, note): one row per pre-flight, deploy attempt, teardown, credential delivery, and
-per undeliverable alert. The Data Table node references tables by id; after import re-select both tables in
-every Data Table node (`Get Client`, `List Inflight`, `Mark *`, `Reset Claim`, `Rec *`).
+**Column types matter** — n8n data-table columns are typed at creation and cannot be retyped afterwards, and
+the workflow depends on the types below (`est_ram_mib` is used in arithmetic, `legacy`/`read_only` are compared
+with `=== true`, `updated_at` is parsed with `Date.parse`, `exit_code` is written as `null`, and `Registry Eval`
+discriminates on `typeof row.id === 'number'`). Recreate them exactly, in this order:
+
+`fleet_clients` — seeded with `jjbags.in` (1633 MiB) and `jj-bags.com` (1599 MiB), `legacy=true, read_only=true,
+status=live`:
+
+| # | Column | Type |
+|---|---|---|
+| 0 | `slug` | string |
+| 1 | `client_name` | string |
+| 2 | `business_name` | string |
+| 3 | `subdomain` | string |
+| 4 | `site_url` | string |
+| 5 | `admin_url` | string |
+| 6 | `status` | string |
+| 7 | `last_run_id` | string |
+| 8 | `est_ram_mib` | number |
+| 9 | `legacy` | boolean |
+| 10 | `read_only` | boolean |
+| 11 | `updated_at` | date |
+
+`provision_attempts` — one row per pre-flight, deploy attempt, teardown, credential delivery, and per
+undeliverable alert:
+
+| # | Column | Type |
+|---|---|---|
+| 0 | `run_id` | string |
+| 1 | `slug` | string |
+| 2 | `attempt_no` | number |
+| 3 | `phase` | string (`preflight\|deploy\|teardown\|credentials\|alert\|registry`) |
+| 4 | `started_at` | date |
+| 5 | `finished_at` | date |
+| 6 | `exit_code` | number (nullable — written as `null` for non-SSH phases) |
+| 7 | `classification` | string |
+| 8 | `decision` | string |
+| 9 | `capacity_json` | string |
+| 10 | `output_tail` | string |
+| 11 | `note` | string |
+
+n8n adds `id`, `createdAt` and `updatedAt` itself; the workflow reads `id` and `updatedAt` but never writes
+them. The Data Table node references tables by id; after import re-select both tables in every Data Table node
+(`Get Client`, `List Inflight`, `Mark *`, `Reset Claim`, `Rec *`), and in the dashboard's two get-nodes.
 
 `fleet_clients.status` values written by this workflow: `provisioning` (claimed, run in flight), `active`,
 `failed_terminal`, `failed_escalated`, `failed_teardown`, `blocked_capacity`, `blocked_preflight_failed`,
@@ -212,10 +276,12 @@ every Data Table node (`Get Client`, `List Inflight`, `Mark *`, `Reset Claim`, `
 ### Re-import / recreate
 
 1. n8n -> Import from file `client-onboarding.workflow.json`.
-2. Create credentials with the names the workflow expects: `fleet-target-ssh` (SSH private key, host/user of the
+2. Create credentials with the names the workflows expect: `fleet-target-ssh` (SSH private key, host/user of the
    deploy target), `fleet-webhook-token` (Header Auth, header `X-Fleet-Token`, random 40+ chars),
-   `fleet-alert-smtp` (SMTP). Local test: SMTP `host.docker.internal:1026` (Mailpit), no TLS/auth.
-3. Create the two data tables above and seed the two legacy rows; re-select them in the nodes.
+   `fleet-alert-smtp` (SMTP), and — for the dashboard — `fleet-dashboard-basic-auth` (Basic Auth, any user name,
+   long random password). Local test: SMTP `host.docker.internal:1026` (Mailpit), no TLS/auth.
+3. Create the two data tables above, **with the column types listed above**, and seed the two legacy rows;
+   re-select them in the nodes of both workflows.
 4. Confirm the workflow settings carry **both** `saveDataSuccessExecution: none` and
    `saveDataErrorExecution: none` (Settings → "Save successful/failed production executions" = Do not save).
    An import that loses either one reintroduces the plaintext-password-in-execution-data problem.
@@ -235,7 +301,8 @@ Per-slug behaviour is scripted with files under `/opt/fleet-target/scenario/` (s
 | File | Effect |
 |---|---|
 | `<slug>` | space-separated exit codes, one consumed per `provision-client.sh` run (e.g. `10 10 0`) |
-| `<slug>.down` | `fail` = the teardown `down` exits 1; `present` = `down` succeeds but the project survives (`STILL_PRESENT`) |
+| `<slug>.down` | `fail` = the teardown `down` exits 1; `present` = `down` succeeds but the project survives (`STILL_PRESENT`); `daemon` = the docker daemon "goes away" at `down` time and stays away, so `down` **and** the project listing that follows both fail (`DOWN_RC=1`, `LS_RC=1`, `LS_FAILED`) |
+| `<slug>.clone` | space-separated exit codes, one consumed per `git clone` (e.g. `1 0` = first clone fails, second succeeds). A failing clone creates nothing, like real git — so the deploy exits 10 before the ownership marker is claimed and the teardown that follows must report `NO_MARKER`, not `NOT_OWNER` |
 | `<slug>.marker` | rewrites `<checkout>/.git/fleet-run-id` during provisioning — simulates another run claiming the checkout, so teardown hits `NOT_OWNER` |
 | `<slug>.pwfmt` | `alt` = different password wording, `ansi` = ANSI-decorated line, `none` = no password printed at all |
 
@@ -249,26 +316,68 @@ slug, slug regex → exit 1 with zero state changes), because it builds a path f
 
 - [ ] SSH deploy key for the VPS: dedicated key, authorized on the VPS deploy user, private key stored only in the
       n8n credential; user needs docker + write access to `base_dir`.
-- [ ] Real SMTP / alert channel; set `alert_email` in Config (the credentials email carries a password).
-      Monitor it: with execution data off, an undelivered alert is visible only as an `alert`/`alert_failed` row.
+- [ ] **Git credentials on the target host for `repo_url`.** The deploy command runs `git clone --branch fleet
+      --depth 1 <repo_url> <dir>` **as the deploy user on the VPS**, non-interactively. A private repo therefore
+      needs a deploy key in that user's `~/.ssh` (and an `ssh://git@…` `repo_url`), or a PAT in a credential
+      helper / `~/.netrc` for the current `https://github.com/…` URL. Without it the very first real onboarding
+      fails at the clone — the single most likely first-production failure. It is now handled gracefully (the
+      run reports `NO_MARKER` and retries, and nothing is ever torn down), but it is still a failure: verify the
+      clone by hand as the deploy user before the first real run. Note the branch **`fleet` is hardcoded** in
+      `Prep Deploy`; change it there if a real deployment should track a different branch.
+- [ ] Real SMTP / alert channel; set `alert_email` **and `from_email`** in Config (the credentials email carries
+      a password). `from_email` defaults to a `.local` placeholder, which a real relay will reject — and a
+      rejected credentials email means the generated admin password is gone, visible only as a
+      `credentials`/`delivery_failed` row. Monitor the alert address too: with execution data off, an
+      undelivered alert is visible only as an `alert`/`alert_failed` row.
 - [ ] n8n production compose service and Caddy access restriction (basic auth / IP allow-list) — Task 4.4.
 - [ ] Execution pruning env vars (above, for the instance's other workflows), `backoff_seconds` = 60,
       real `repo_url`.
-- [ ] Rotate `fleet-webhook-token`; keep the webhook reachable only from trusted callers.
+- [ ] Rotate `fleet-webhook-token` and the dashboard's `fleet-dashboard-basic-auth` credential; keep both
+      webhooks reachable only from trusted callers.
 - [ ] Decide who clears a stranded `provisioning` row (see "In-flight accounting") — today that is a human.
+- [ ] **Open risk, not fixed: a long provision can outlive its SSH connection.** `provision-client.sh` keeps
+      running on the target after the SSH channel drops (an idle timeout during a long `docker build`, a network
+      blip). n8n then sees a transient failure and, if attempts remain, retries — and that retry is *permitted*
+      to `down -v`, because the marker holds its own run id. It would be tearing a stack down while the original
+      process is still mid-build. For a brand-new client there is no customer data at risk yet, and no run of
+      this workflow has ever hit it, but nothing prevents it either. Closing it means one of: an explicit long
+      SSH keep-alive/timeout on the `Deploy SSH` node, or running the remote provision detached (`setsid`/`nohup`
+      + a pid/status file) and polling for completion instead of holding the connection. Neither is implemented.
 
 ## Fleet dashboard (`fleet-dashboard.workflow.json`)
 
-Workflow `Fleet — Dashboard`: `GET /webhook/fleet-dashboard` -> reads `fleet_clients` and `provision_attempts`
+Workflow `Fleet — Dashboard`: `GET /webhook/fleet-dashboard`, **Basic Auth** (credential
+`fleet-dashboard-basic-auth`) -> reads `fleet_clients` and `provision_attempts`
 (get-only Data Table nodes; the workflow contains no write node) -> one Code node renders a self-contained,
 JavaScript-free HTML page -> Respond to Webhook (`text/html`, `Cache-Control: no-store`,
-`X-Content-Type-Options: nosniff`). It shows summary tiles (fleet clients split active vs failed, legacy sites, summed `est_ram_mib` over RUNNING stacks only
-(`live`/`active`/`provisioning`; failed/blocked/rejected rows have no stack and are excluded), and "clients that still fit"
-labelled as of the newest pre-flight with its timestamp and compose-project count - a stale value that does not
-include clients provisioned since), a client table (status
-badge, site and `/admin` links; the two legacy rows are badged "legacy - read-only" and have no actions), a
-per-client `<details>` history of every attempt row, and a list of requests that never got a client record
-(rejected/blocked). Every dynamic value goes through one `esc()` helper; link hrefs must start with `http(s)://`
+`X-Content-Type-Options: nosniff`).
+
+Summary tiles:
+
+- **Fleet clients** — non-legacy rows that are `active` or `live`, with any `provisioning` (and any
+  unrecognised status) called out underneath.
+- **Failed deploys** — `failed_terminal` / `failed_escalated` / `failed_teardown`. Something was attempted, so a
+  stack, volumes or a checkout may be left on the host.
+- **Rejected requests** — `blocked_capacity` / `blocked_preflight_failed` / `slug_taken`. These rows exist
+  because the claim is written *before* the pre-flight runs (see "In-flight accounting"), then rewritten by
+  `Reset Claim`; **nothing was deployed for them and there is nothing to clean up on any host.** They used to be
+  counted as failed clients, which badly overstated the failure count.
+- **Legacy sites**, **Est. RAM footprint** (summed `est_ram_mib` over RUNNING stacks only — `live`/`active`/
+  `provisioning`; failed and rejected rows have no stack and are excluded), and **clients that still fit**,
+  labelled as of the newest pre-flight with its timestamp and compose-project count — a stale value that does
+  not include clients provisioned since.
+
+Below the tiles: a client table (status badge, site and `/admin` links; the two legacy rows are badged
+"legacy - read-only" and have no actions), a per-client `<details>` history of every attempt row, and
+"**Attempts with no client row**" — which today means input rejected in **validation** (422), before any client
+row could be claimed, plus any attempt whose client row was deleted by hand. Blocked and rejected requests are
+*not* in that list any more; they appear in the client table with their own status.
+
+Status badges are coloured for every status the onboarding workflow can write (`live`/`active` green;
+`provisioning` and the three rejected statuses amber; the three failed statuses red); anything else renders
+uncoloured, which is the signal that a status was set outside the workflow.
+
+Every dynamic value goes through one `esc()` helper; link hrefs must start with `http(s)://`
 or the link is dropped. Only summary numbers from `capacity_json` are shown (never the raw blob), plus the
 already-redacted output tails (defensively re-scrubbed for `password/secret/token: value` patterns). It exposes no
 secret, token or credential.
@@ -277,15 +386,23 @@ Note: n8n replaces the `Content-Security-Policy` response header on HTML webhook
 policy, so the header set in the workflow is not what the browser receives. The page therefore also carries the
 same policy in a `<meta http-equiv>` tag, and Caddy must set the strict header (below).
 
-**Access control (requirements for Task 4.4, NOT applied here):** n8n has no access control on webhooks, and the page
-exposes client names, URLs and provisioning history. The Caddy block for the dashboard hostname must:
+**Access control.** The webhook itself now requires **Basic Auth** (n8n credential `fleet-dashboard-basic-auth`,
+header-level; an unauthenticated or wrong-password request gets `401 Authorization is required!` and neither
+data table is read). That is the control that actually protects the page, because it travels with the workflow
+export and does not depend on anything outside n8n — the page exposes every client's name, business name,
+subdomain, site and admin URL and full provisioning history, and until this was added the page was open to
+anyone who could reach the n8n port. Create the credential with a long random password and rotate it with the
+webhook token.
+
+Caddy (Task 4.4, **still not started**) remains defence in depth on top of that, not the only control. The Caddy
+block for the dashboard hostname must:
 
 1. Proxy ONLY the exact path `/webhook/fleet-dashboard` to `n8n:5678` and return 404 for everything else. In particular
    it must not expose `/webhook/fleet-onboard`, `/webhook-test/*`, `/rest/*` or the n8n editor UI.
 2. Set the strict CSP with the `>` override prefix: `header >Content-Security-Policy "default-src 'none'; style-src 'unsafe-inline'"`.
    n8n emits its own `sandbox` CSP on HTML webhook responses; a plain `header` would add a second policy instead of
    replacing it.
-3. Require basic auth.
+3. Require basic auth of its own (in addition to the webhook's, which is already enforced by n8n).
 4. Until (2) is applied, the `<meta http-equiv="Content-Security-Policy">` tag in the page (same policy) is the only
    script-blocking control.
 
@@ -313,8 +430,12 @@ unreadable. Validate with
 - [ ] DNS: the `*.digital-labs.ai` wildcard from the plan covers `automation.digital-labs.ai`; add the Caddy site
       blocks (Task 4.4) for n8n (owner-only) and the basic-auth dashboard host.
 - [ ] Open the editor and create the first owner account (strong password).
-- [ ] Recreate credentials `fleet-target-ssh`, `fleet-webhook-token`, `fleet-alert-smtp` with real values.
-- [ ] Create data tables `fleet_clients` and `provision_attempts` (columns above) and seed the two legacy rows.
+- [ ] Recreate credentials `fleet-target-ssh`, `fleet-webhook-token`, `fleet-alert-smtp` and
+      `fleet-dashboard-basic-auth` with real values.
+- [ ] Create data tables `fleet_clients` and `provision_attempts` (columns AND types above) and seed the two
+      legacy rows.
 - [ ] Import `client-onboarding.workflow.json` and `fleet-dashboard.workflow.json`; re-select credentials and both
-      tables in every Data Table node; set Config (`repo_url`, `alert_email`, `backoff_seconds` = 60).
-- [ ] Activate both workflows; verify the dashboard through Caddy with basic auth and confirm the CSP header.
+      tables in every Data Table node; set Config (`repo_url`, `alert_email`, `from_email`,
+      `backoff_seconds` = 60).
+- [ ] Activate both workflows; confirm the dashboard webhook answers `401` without credentials, then verify it
+      through Caddy with basic auth and confirm the CSP header.

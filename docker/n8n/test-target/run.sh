@@ -45,6 +45,17 @@ fi
 # Only the PUBLIC key ever leaves the host, and it is copied, not mounted.
 docker cp "$KEY_PUB" $NAME:/etc/ssh/authorized_keys/deploy
 docker exec -u root $NAME sh -c 'chown root:root /etc/ssh/authorized_keys/deploy && chmod 0644 /etc/ssh/authorized_keys/deploy'
+# The n8n instance has to exist before it can be attached to the test network. Without
+# this check the script died on `docker network connect` with two raw daemon errors
+# ("error: no such object" / "Error response from daemon: No such container") and no
+# hint about what it actually wanted — verified by reproducing those two lines with a
+# non-existent container name.
+if [ -z "$(docker ps -aq -f name=^n8n-local$)" ]; then
+  echo "run.sh: the n8n container 'n8n-local' does not exist." >&2
+  echo "        The target is up, but n8n cannot reach it until that container exists" >&2
+  echo "        and is attached to the '$NET' network. Start n8n, then re-run this script." >&2
+  exit 1
+fi
 docker inspect -f '{{json .NetworkSettings.Networks}}' n8n-local | grep -q "\"$NET\"" \
   || docker network connect $NET n8n-local
 docker exec $NAME /opt/fleet-target/reset.sh

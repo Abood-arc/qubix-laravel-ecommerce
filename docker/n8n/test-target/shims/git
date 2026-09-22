@@ -1,9 +1,26 @@
 #!/bin/bash
 # Fake git: only `clone ... <dir>`; the clone contains the scenario-driven provisioner shim.
+# Per-slug failure is scriptable via /opt/fleet-target/scenario/<slug>.clone —
+# space-separated exit codes, one consumed per clone (e.g. "1 0" = first clone fails,
+# second succeeds). A failing clone creates NOTHING, like real git, which cleans up its
+# partial checkout on failure. That is the case finding 1 is about: the deploy command
+# exits 10 before the ownership marker is ever claimed, so the teardown that follows
+# must see "no marker", not "someone else's marker".
 T=/opt/fleet-target
 echo "$(date -u +%FT%TZ) git $*" >> $T/log/git.log
 [ "$1" = clone ] || { echo "fake git: unsupported: $*" >&2; exit 1; }
 dir="${@: -1}"
+slug=$(basename "$dir"); slug=${slug#qubix-}
+f=$T/scenario/$slug.clone
+if [ -f "$f" ]; then
+  codes=; read -r codes < "$f"
+  set -- $codes; code=${1:-0}; shift; echo "$*" > "$f"
+  if [ "${code:-0}" != 0 ]; then
+    echo "fatal: could not read Username for 'https://github.com': terminal prompts disabled" >&2
+    echo "fake git: simulated clone failure (exit $code) for $dir" >&2
+    exit "$code"
+  fi
+fi
 mkdir -p "$dir/.git" "$dir/scripts"
 cp $T/bin/provision-client.sh "$dir/scripts/provision-client.sh"
 echo "Cloning into '$dir'..."
