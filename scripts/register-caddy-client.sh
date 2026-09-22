@@ -4,15 +4,19 @@
 # jj-bags.com (docker-compose.prod.yml, checkout /opt/qubix, branch
 # `abood`). Task 4.4.
 #
-# This script itself is `fleet`-branch tooling and is never expected to be
-# git-deployed INTO /opt/qubix (that checkout tracks `abood`, which receives
-# bug fixes only — see CLAUDE.md's branch model). Instead it runs from
-# wherever the fleet repo happens to be checked out (a developer's machine
-# today, n8n's own execution environment later) and reaches its target
-# purely over SSH: it writes/removes one file under
-# <target-dir>/docker/caddy/clients/ and reloads the already-running caddy
-# container. It never touches docker/caddy/Caddyfile itself or any other
-# client's block.
+# For a developer on a DIFFERENT machine than the target: this script
+# generates the block, then stages both it and scripts/apply-caddy-block.sh
+# (the actual apply logic — backup/write/validate/reload/rollback) onto the
+# target over SSH and runs the latter there. It never touches
+# docker/caddy/Caddyfile itself or any other client's block.
+#
+# n8n's onboarding workflow does NOT use this script — it's already
+# running directly on the target (the same SSH session Deploy SSH used to
+# `git clone --branch fleet` the new client's own checkout, which is where
+# apply-caddy-block.sh physically comes from), so it calls that script
+# directly with no SSH wrapper. This script exists for the OTHER real
+# caller: a developer proving/operating this by hand from a machine that
+# isn't the target itself (exactly how Task 4.4's own live proof was run).
 #
 # This makes the generated <slug>.caddy files themselves a second category
 # of state that lives on the VPS outside /opt/qubix's own git history —
@@ -31,15 +35,8 @@
 # --target-dir defaults to `/opt/qubix` (the checkout that owns the shared
 # Caddy). Both are overridable for testing against a different target.
 #
-# Safety: before writing, any existing <slug>.caddy is backed up remotely.
-# `caddy validate` runs against the live config before `caddy reload` is
-# ever called; if validation fails, the change (write OR removal) is rolled
-# back and the script exits non-zero — the running Caddy is never handed a
-# config that hasn't already been proven to parse. This is deliberately
-# stricter than a plain `caddy reload`, which would otherwise be the first
-# thing to notice a bad block, on the container serving two live sites.
-#
-# Exit code contract (matches the rest of the fleet tooling):
+# Exit code contract — passed straight through from apply-caddy-block.sh,
+# except 10 which this script also uses for its own SSH/transfer failures:
 #   0      success (including --remove of a block that was already absent)
 #   1      invalid input (bad/missing slug, bad --target-dir)
 #   2      config validation failed — rolled back, nothing changed
@@ -50,6 +47,7 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+APPLY_SCRIPT="$SCRIPT_DIR/apply-caddy-block.sh"
 
 err() { printf '%s\n' "$*" >&2; }
 
@@ -108,103 +106,51 @@ if [[ -z "$TARGET_DIR" || "$TARGET_DIR" =~ [[:space:]\'\"\$\`\\] ]]; then
   exit 1
 fi
 
-# "NONE" rather than "" — ssh concatenates the remote command into one
-# string and the remote shell re-tokenizes it, so a genuinely empty quoted
-# argument doesn't survive the trip (adjacent spaces just collapse) and
-# $4 ends up truly unset on the far side instead of set-but-empty. Found
-# by actually running --remove, not by reading the code.
-STAGED_REMOTE="NONE"
+if [[ ! -f "$APPLY_SCRIPT" ]]; then
+  err "Error: $APPLY_SCRIPT not found (expected alongside this script)"
+  exit 1
+fi
+
+# Everything below is staged onto the target as real files and executed by
+# path — NOT piped in as `ssh host bash -s <<EOF` — because that form was
+# observed, empirically, to sometimes report success (exit 0, "Valid
+# configuration" printed) while the reload it claimed to run never reached
+# Caddy's admin API at all (no corresponding /load in `docker logs`, and
+# the change never actually took effect on the running config). Confirmed
+# by re-running the identical logic staged as files instead: reliable
+# every time, full output present, change verifiably live. Root cause not
+# fully isolated (suspected SSH/heredoc-stdin interaction with
+# `docker compose exec -T`'s own I/O), so this script no longer depends on
+# that path working at all, rather than trusting it.
+REMOTE_APPLY_PATH="/tmp/qubix-apply-caddy-block.$$.sh"
+
+if ! ssh -o ConnectTimeout=15 "$HOST" "cat > '$REMOTE_APPLY_PATH'" < "$APPLY_SCRIPT"; then
+  err "Error: failed to stage apply-caddy-block.sh on $HOST (SSH/transfer failure)."
+  exit 10
+fi
+
+REMOTE_ARGS="--slug '$SLUG' --target-dir '$TARGET_DIR'"
+REMOTE_BLOCK_PATH=""
+
 if [[ "$MODE" == "register" ]]; then
   GEN_ARGS=(--slug "$SLUG")
   [[ -n "$BACKEND" ]] && GEN_ARGS+=(--backend "$BACKEND")
-
   BLOCK_CONTENT="$("$SCRIPT_DIR/generate-caddy-block.sh" "${GEN_ARGS[@]}")"
 
-  STAGED_REMOTE="/tmp/qubix-caddy-${SLUG}.staged.$$"
-  if ! printf '%s' "$BLOCK_CONTENT" | ssh -o ConnectTimeout=15 "$HOST" "cat > '$STAGED_REMOTE'"; then
+  REMOTE_BLOCK_PATH="/tmp/qubix-caddy-${SLUG}.block.$$"
+  if ! printf '%s' "$BLOCK_CONTENT" | ssh -o ConnectTimeout=15 "$HOST" "cat > '$REMOTE_BLOCK_PATH'"; then
     err "Error: failed to stage the generated block on $HOST (SSH/transfer failure)."
+    ssh -o ConnectTimeout=15 "$HOST" "rm -f '$REMOTE_APPLY_PATH'" || true
     exit 10
   fi
-fi
-
-# The remote logic is staged as an actual file and executed by path, NOT
-# piped in as `ssh host bash -s <<EOF` — that form was observed, empirically,
-# to sometimes report success (exit 0, "Valid configuration" printed) while
-# the reload it claimed to run never reached Caddy's admin API at all (no
-# corresponding /load in `docker logs`, and the change never actually took
-# effect on the running config). Confirmed by re-running the identical
-# validate/reload logic staged as a file instead: reliable every time, full
-# output present, change verifiably live. Root cause not fully isolated
-# (suspected SSH/heredoc-stdin interaction with `docker compose exec -T`'s
-# own I/O), so this script no longer depends on that path working at all,
-# rather than trusting it.
-LOCAL_STAGE="$(mktemp)"
-trap 'rm -f "$LOCAL_STAGE"' EXIT
-
-cat > "$LOCAL_STAGE" <<'REMOTE_SCRIPT'
-#!/usr/bin/env bash
-set -euo pipefail
-SLUG="$1"
-TARGET_DIR="$2"
-MODE="$3"
-STAGED="$4"
-
-CLIENTS_DIR="$TARGET_DIR/docker/caddy/clients"
-FILE="$CLIENTS_DIR/$SLUG.caddy"
-COMPOSE_FILE="$TARGET_DIR/docker-compose.prod.yml"
-
-mkdir -p "$CLIENTS_DIR"
-
-BACKUP=""
-if [[ -f "$FILE" ]]; then
-  BACKUP="$(mktemp "${FILE}.bak.XXXXXX")"
-  cp "$FILE" "$BACKUP"
-fi
-
-rollback() {
-  if [[ -n "$BACKUP" ]]; then
-    mv -f "$BACKUP" "$FILE"
-  else
-    rm -f "$FILE"
-  fi
-}
-
-if [[ "$MODE" == "remove" ]]; then
-  if [[ ! -f "$FILE" ]]; then
-    echo "No block for '$SLUG' at $FILE — nothing to remove." >&2
-    exit 0
-  fi
-  rm -f "$FILE"
+  REMOTE_ARGS="$REMOTE_ARGS --block-file '$REMOTE_BLOCK_PATH'"
 else
-  mv "$STAGED" "$FILE"
-fi
-
-if ! docker compose -f "$COMPOSE_FILE" exec -T caddy caddy validate --config /etc/caddy/Caddyfile --adapter caddyfile; then
-  echo "Error: Caddy config validation failed after this change — rolling back, nothing was reloaded." >&2
-  rollback
-  exit 2
-fi
-
-[[ -n "$BACKUP" ]] && rm -f "$BACKUP"
-
-if ! docker compose -f "$COMPOSE_FILE" exec -T caddy caddy reload --config /etc/caddy/Caddyfile --adapter caddyfile --force; then
-  echo "Error: config validated but reload itself failed — the file on disk is valid, but confirm the RUNNING config by hand before retrying." >&2
-  exit 10
-fi
-
-echo "OK: ${MODE} for '${SLUG}' applied and reloaded."
-REMOTE_SCRIPT
-
-REMOTE_SCRIPT_PATH="/tmp/qubix-caddy-op-${SLUG}.$$.sh"
-
-if ! ssh -o ConnectTimeout=15 "$HOST" "cat > '$REMOTE_SCRIPT_PATH'" < "$LOCAL_STAGE"; then
-  err "Error: failed to stage the operation script on $HOST (SSH/transfer failure)."
-  exit 10
+  REMOTE_ARGS="$REMOTE_ARGS --remove"
 fi
 
 set +e
 ssh -o ConnectTimeout=30 "$HOST" \
-  "chmod +x '$REMOTE_SCRIPT_PATH' && '$REMOTE_SCRIPT_PATH' '$SLUG' '$TARGET_DIR' '$MODE' '$STAGED_REMOTE'; rc=\$?; rm -f '$REMOTE_SCRIPT_PATH'; exit \$rc"
+  "chmod +x '$REMOTE_APPLY_PATH' && '$REMOTE_APPLY_PATH' $REMOTE_ARGS; rc=\$?; rm -f '$REMOTE_APPLY_PATH' '$REMOTE_BLOCK_PATH'; exit \$rc"
 STATUS=$?
 set -e
 
