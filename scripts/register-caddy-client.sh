@@ -92,8 +92,10 @@ fi
 # (deliberately dynamic, because taken client slugs change over time), this
 # list is static: these names can never become available to a client
 # because they're permanently owned by infrastructure this same plan
-# stands up (automation.digital-labs.ai — Task 4.5).
-RESERVED=(automation www)
+# stands up (automation.digital-labs.ai and fleet.digital-labs.ai — Tasks 4.4/4.5).
+# Kept in step with generate-caddy-block.sh and the onboarding workflow's Validate
+# node; docker/n8n/caddy/test-blocks.sh fails if any of the three copies drifts.
+RESERVED=(automation www fleet)
 for reserved in "${RESERVED[@]}"; do
   if [[ "$SLUG" == "$reserved" ]]; then
     err "Error: '$SLUG' is a reserved subdomain (fleet infrastructure), not a valid client slug."

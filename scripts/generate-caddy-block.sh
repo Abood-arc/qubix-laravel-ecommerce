@@ -90,7 +90,7 @@ fi
 # The n8n webhook's own Validate node is the primary gate for real client
 # input, but this check must hold even if that gate is ever missed, since
 # this is the point where a subdomain actually gets claimed.
-RESERVED=(automation www)
+RESERVED=(automation www fleet)
 for reserved in "${RESERVED[@]}"; do
   if [[ "$SLUG" == "$reserved" ]]; then
     err "Error: '$SLUG' is a reserved subdomain (fleet infrastructure), not a valid client slug."

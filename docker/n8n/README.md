@@ -229,12 +229,14 @@ that point, so checking its result there was already dead code reading data that
 is still fully recorded via `Rec Caddy`'s `provision_attempts` row (`phase = 'caddy'`) — check there, or the
 dashboard, rather than the email, if a subdomain doesn't come up.
 
-**Reserved subdomains.** `scripts/generate-caddy-block.sh` itself rejects `automation` and `www` (the names
-`automation.digital-labs.ai` needs once Task 4.4's other piece — standing n8n up there — is done), and the
-webhook's own `Validate` node rejects them as reserved slugs before any deployment action, matching how the
-existing legacy-site names are handled. Both checks exist because the automated path (`Prep Caddy`) calls
-`generate-caddy-block.sh` directly and never goes through `scripts/register-caddy-client.sh`'s own copy of this
-check — see that script's header for why the two tools are separate.
+**Reserved subdomains.** `automation`, `www` and `fleet` (the hostnames of the n8n editor and the dashboard,
+see "Fleet-infrastructure Caddy blocks" below) can never be a client slug. The list exists in **three** places — 
+`scripts/generate-caddy-block.sh`, `scripts/register-caddy-client.sh`, and the `LEGACY` array in the onboarding
+workflow's `Validate` node (which rejects them before any deployment action, like the legacy-site names). The
+automated path (`Prep Caddy`) calls `generate-caddy-block.sh` directly and never goes through
+`register-caddy-client.sh`, which is why both scripts carry their own copy — see that script's header.
+`docker/n8n/caddy/test-blocks.sh` fails if any of the three copies stops rejecting one of these names. Note that
+`qubix:provision` itself has no reserved-name check: the workflow's `Validate` node is the gate on the automated path.
 
 `apply-caddy-block.sh`'s own logic (backup existing block, write/remove, `caddy validate` before ever
 `reload`ing, roll back on validation failure) is proven separately, live, against `hostinger-vps` production
@@ -385,7 +387,8 @@ slug, slug regex → exit 1 with zero state changes), because it builds a path f
       rejected credentials email means the generated admin password is gone, visible only as a
       `credentials`/`delivery_failed` row. Monitor the alert address too: with execution data off, an
       undelivered alert is visible only as an `alert`/`alert_failed` row.
-- [ ] n8n production compose service and Caddy access restriction (basic auth / IP allow-list) — Task 4.4.
+- [ ] n8n production compose service on the VPS. (The Caddy blocks and their access restriction are built and locally
+      tested — see "Fleet-infrastructure Caddy blocks" — but not yet applied.)
 - [ ] Execution pruning env vars (above, for the instance's other workflows), `backoff_seconds` = 60,
       real `repo_url`.
 - [ ] Rotate `fleet-webhook-token` and the dashboard's `fleet-dashboard-basic-auth` credential; keep both
@@ -450,24 +453,62 @@ subdomain, site and admin URL and full provisioning history, and until this was 
 anyone who could reach the n8n port. Create the credential with a long random password and rotate it with the
 webhook token.
 
-Caddy — a **different, still-not-started piece of Task 4.4** than the per-client site-block automation
-documented earlier in this file (that piece is done; this one — standing up a real Caddy block for
-`automation.digital-labs.ai` itself, in front of n8n — is not, and needs the owner's go-ahead plus real
-VPS/Caddy access before it starts) — remains defence in depth on top of Basic Auth, not the only control. The
-Caddy block for the dashboard hostname must:
+### Fleet-infrastructure Caddy blocks (Task 4.4 piece 2)
 
-1. Proxy ONLY the exact path `/webhook/fleet-dashboard` to `n8n:5678` and return 404 for everything else. In particular
-   it must not expose `/webhook/fleet-onboard`, `/webhook-test/*`, `/rest/*` or the n8n editor UI.
-2. Set the strict CSP with the `>` override prefix: `header >Content-Security-Policy "default-src 'none'; style-src 'unsafe-inline'"`.
-   n8n emits its own `sandbox` CSP on HTML webhook responses; a plain `header` would add a second policy instead of
-   replacing it.
-3. Require basic auth of its own (in addition to the webhook's, which is already enforced by n8n).
-4. Until (2) is applied, the `<meta http-equiv="Content-Security-Policy">` tag in the page (same policy) is the only
-   script-blocking control.
+The two hostnames that front n8n itself are **not** client blocks and cannot come from `generate-caddy-block.sh`
+(its template is a plain reverse proxy, and it rejects these names). They are hand-written templates:
 
-Separately: `POST /webhook/fleet-onboard` is protected ONLY by the `X-Fleet-Token` header credential if
-`automation.digital-labs.ai` is publicly reachable. Recommend a Caddy-level restriction in front of it (source-IP
-allowlist, or basic auth); the plan lists source-IP restriction as a follow-up.
+| Host | Template | What Caddy lets through |
+|---|---|---|
+| `automation.digital-labs.ai` | `docker/n8n/caddy/automation.caddy.tpl` | **Only** `POST /webhook/fleet-onboard` (64 KiB body cap, guarded by n8n's `X-Fleet-Token` credential) skips Caddy's password. **Everything else** — the editor, `/rest/*`, `/webhook-test/*`, `/api/*`, any other method or path variant — needs Caddy basic auth (plus n8n's own login). |
+| `fleet.digital-labs.ai` | `docker/n8n/caddy/fleet.caddy.tpl` | **Only** `GET /webhook/fleet-dashboard`, with the strict CSP (`header >…` replaces n8n's own `sandbox` policy). Everything else is a 404 that never reaches n8n. |
+
+Decisions worth knowing before you change either block:
+
+- **The exemption is an exact comparison of the raw request path**, not Caddy's `path` matcher. That matcher is
+  case-insensitive and merges `//`, so `//webhook/fleet-onboard` and `/WEBHOOK/fleet-onboard` would have skipped
+  the password. Found by the local harness, not by inspection. A percent-encoded spelling that decodes to the exact
+  path (`/webhook/%66leet-onboard`) is still the same endpoint and is allowed.
+- **No Caddy basic auth on `fleet.`, deliberately** — this departs from the earlier "require basic auth of its own"
+  requirement. The dashboard webhook already enforces Basic Auth inside n8n (credential
+  `fleet-dashboard-basic-auth`), and Caddy's `basic_auth` reads and forwards the very same `Authorization`
+  header. A browser sends one credential, so two layers with different passwords can never both pass, and two with
+  the same password add nothing. n8n's check travels with the workflow export. On `automation.` the two do not
+  collide: the editor authenticates with a cookie and the n8n API with `X-N8N-API-KEY`.
+- The n8n editor host is public and protected by basic auth + n8n's login, not an IP allow-list (an allow-list
+  locks the owner out whenever their ISP address changes). `POST /webhook/fleet-onboard` is therefore reachable by
+  anyone and protected only by the `X-Fleet-Token` credential — rotate it like a password.
+
+**Applying them** (from a `fleet` checkout — `/opt/qubix` tracks `abood` and has neither the apply script nor the
+templates):
+
+```bash
+docker exec -it qubix-caddy-1 caddy hash-password | scripts/register-n8n-caddy-blocks.sh   # add --user, --host, --target-dir as needed
+scripts/register-n8n-caddy-blocks.sh --remove                                              # take both down again
+```
+
+The bcrypt hash travels on stdin only, is rendered by `docker/n8n/caddy/render-block.sh` with plain bash
+replacement (a `$2a$14$…` hash is mangled by `envsubst`), and reaches the VPS through SSH's stdin into a `mktemp`
+(0600) file. The wrapper refuses to start unless both live sites already answer 200; snapshots the current blocks;
+applies each through `apply-caddy-block.sh` (validate the whole config, then reload); re-checks the live sites;
+then verifies over real TLS that `automation.` answers 401 and `fleet.` answers 404 (neither needs n8n running).
+On any failure it **restores the previous block** (or removes one that did not exist) — it never deletes a block
+that was working before the run. Exit codes are in the script header (`0/1/2/10/11/12`, and `14` = the rollback
+itself failed, check the running config by hand).
+
+**Tests, all local — nothing touches the VPS:**
+
+- `docker/n8n/caddy/test-blocks.sh` — real Caddy + a stub n8n that emits n8n's own `sandbox` CSP and counts what it
+  actually receives. Asserts the render, `caddy validate` against the real `docker/caddy/Caddyfile`, the path
+  matrix (dot-segments, `%2e%2e`, `//`, trailing slash, sub-paths, case, HEAD/OPTIONS/PUT, the 64 KiB cap, a real
+  `caddy hash-password` hash) and that the three reserved-slug lists agree.
+- `docker/n8n/caddy/test-wrapper.sh` — the real wrapper and `apply-caddy-block.sh` against a throwaway Compose
+  project shaped like the VPS one, with an `ssh` shim. Includes: a failed re-apply restores the previous bytes, a
+  validation failure on the second block restores the first, and a live site being down blocks the run.
+
+**Not done by this piece:** the blocks have not been applied to the VPS, and n8n is not running there. Until the
+`n8n` container exists on `qubix_qubix` the hosts answer 401 / 404 as above, but an authenticated request to
+`automation.` returns 502.
 
 ## Production compose file (`docker-compose.n8n.yml`)
 
@@ -486,8 +527,10 @@ unreadable. Validate with
 - [ ] Generate the encryption key once (`openssl rand -hex 32`), keep it in the VPS secret store and a password
       manager; never change it.
 - [ ] `docker compose -p qubix-n8n -f docker/n8n/docker-compose.n8n.yml up -d` on the VPS (after Caddy is ready).
-- [ ] DNS: the `*.digital-labs.ai` wildcard from the plan covers `automation.digital-labs.ai`; add the Caddy site
-      blocks (Task 4.4) for n8n (owner-only) and the basic-auth dashboard host.
+- [ ] DNS: the `*.digital-labs.ai` wildcard already covers both hostnames (verified 2026-09-24: `automation.`,
+      `fleet.` and an arbitrary name all resolve to the VPS; the zone is at GoDaddy). Apply the Caddy blocks with
+      `scripts/register-n8n-caddy-blocks.sh` (see above) — owner go-ahead required, it edits the Caddy that serves
+      both live sites.
 - [ ] Open the editor and create the first owner account (strong password).
 - [ ] Recreate credentials `fleet-target-ssh`, `fleet-webhook-token`, `fleet-alert-smtp` and
       `fleet-dashboard-basic-auth` with real values.
@@ -497,4 +540,4 @@ unreadable. Validate with
       tables in every Data Table node; set Config (`repo_url`, `alert_email`, `from_email`,
       `backoff_seconds` = 60).
 - [ ] Activate both workflows; confirm the dashboard webhook answers `401` without credentials, then verify it
-      through Caddy with basic auth and confirm the CSP header.
+      through Caddy (`https://fleet.digital-labs.ai/webhook/fleet-dashboard`, n8n's Basic Auth) and confirm the CSP header.
