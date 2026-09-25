@@ -89,6 +89,25 @@ if ! docker build -t "qubix/app-${SLUG}" -f docker/8.3/Dockerfile --build-arg WW
   exit 10
 fi
 
+# A fresh `git clone` has no vendor/ (it is gitignored), yet the checkout is bind-mounted as the
+# app's /var/www/html and `php artisan qubix:provision` below needs vendor/autoload.php. The two
+# legacy checkouts only have one because it was installed by hand once. Install it here, with the
+# image just built (same PHP, same extensions, composer.lock pins every version). --no-scripts:
+# post-autoload-dump only runs `package:discover`, which Laravel redoes on first use, and it would
+# boot the framework without a .env. Skipped when vendor/ already exists (re-runs, dev checkouts).
+# Failure is exit 10 (transient): the usual cause is packagist/network.
+if [[ ! -f vendor/autoload.php ]]; then
+  echo "==> Installing Composer dependencies (fresh checkout has no vendor/)"
+  if ! docker run --rm \
+      -e SUPERVISOR_PHP_USER=root -e COMPOSER_ALLOW_SUPERUSER=1 -e COMPOSER_MEMORY_LIMIT=-1 \
+      -v "$REPO_ROOT:$REPO_ROOT" -w "$REPO_ROOT" \
+      "qubix/app-${SLUG}" \
+      composer install --no-dev --no-interaction --no-progress --no-scripts --prefer-dist --optimize-autoloader; then
+    err "Error: composer install failed — treating as transient."
+    exit 10
+  fi
+fi
+
 echo "==> Building provisioner image qubix/provisioner (from qubix/app-${SLUG})"
 if ! docker build -t qubix/provisioner --build-arg "BASE_IMAGE=qubix/app-${SLUG}" -f docker/provisioner/Dockerfile .; then
   err "Error: building qubix/provisioner failed (docker build) — treating as transient."

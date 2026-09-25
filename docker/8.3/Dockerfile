@@ -79,10 +79,15 @@ RUN userdel -r ubuntu 2>/dev/null || true \
     && mkdir -p /var/www/html/storage/app/public \
     && chown -R sail:sail /var/www/html/storage
 
-COPY vendor/laravel/sail/runtimes/8.3/start-container /usr/local/bin/start-container
+# start-container and the Sail php.ini are byte-identical copies of laravel/sail v1.53.0's
+# runtimes/8.3 files, tracked under docker/8.3/sail/ on purpose: vendor/ is gitignored, so a
+# fresh `git clone` (which is how every provisioned client's checkout is made) has no vendor/
+# to COPY from and the image build died with "not found" before anything else could happen.
+# If laravel/sail is upgraded, re-copy both files from vendor/laravel/sail/runtimes/8.3/.
+COPY docker/8.3/sail/start-container /usr/local/bin/start-container
 COPY docker/8.3/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 COPY docker/8.3/run-vite-shop.sh /usr/local/bin/run-vite-shop.sh
-COPY vendor/laravel/sail/runtimes/8.3/php.ini /etc/php/8.3/cli/conf.d/99-sail.ini
+COPY docker/8.3/sail/php.ini /etc/php/8.3/cli/conf.d/99-sail.ini
 COPY docker/php/php.ini /etc/php/8.3/cli/conf.d/999-qubix.ini
 COPY docker/php/php.ini /etc/php/8.3/fpm/conf.d/999-qubix.ini
 COPY docker/php/fpm-pool.conf /etc/php/8.3/fpm/pool.d/www.conf
