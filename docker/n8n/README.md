@@ -264,8 +264,9 @@ automated path (`Prep Caddy`) calls `generate-caddy-block.sh` directly and never
 `docker/n8n/caddy/test-blocks.sh` fails if any of the three copies stops rejecting one of these names. Note that
 `qubix:provision` itself has no reserved-name check: the workflow's `Validate` node is the gate on the automated path.
 
-`apply-caddy-block.sh`'s own logic (backup existing block, write/remove, `caddy validate` before ever
-`reload`ing, roll back on validation failure) is proven separately, live, against `hostinger-vps` production
+`apply-caddy-block.sh`'s own logic (stage the block as `<slug>.caddy.new`, `caddy validate` a candidate Caddyfile that
+imports it, one atomic rename/unlink, then `reload`; serialised by a flock) is proven locally by
+`docker/n8n/caddy/test-apply-atomic.sh`, and the earlier backup-and-rollback version was proven separately, live, against `hostinger-vps` production
 (two full register/remove cycles, both live sites re-checked as 200 after every step) — see
 `scripts/register-caddy-client.sh`'s header for why that script (a developer's own machine reaching the target
 over SSH) and `apply-caddy-block.sh` (already-on-the-target logic, what this workflow calls) are two separate
@@ -278,8 +279,8 @@ and SSH access to `hostinger-vps`.
 **Known follow-ups, not fixed here** (all Minor/non-blocking, recorded rather than silently left out):
 temp file paths used by `Prep Caddy` and `register-caddy-client.sh` (`/tmp/qubix-caddy-<slug>...`) have no
 run-id/PID disambiguator strong enough to rule out a collision if the same slug is re-registered while a prior
-attempt for it is still in flight on the target; `apply-caddy-block.sh` has no cross-process lock, so two
-concurrent invocations for the same slug (a retry racing a manual run) could in principle interleave; a
+attempt for it is still in flight on the target; `apply-caddy-block.sh` takes a flock on `clients/.apply.lock`, so
+concurrent applies (a retry racing a manual run) are serialised and cannot interleave; a
 `caddy validate` failure caused by the container being transiently unavailable (mid-restart) is indistinguishable
 from a real Caddyfile syntax error in the recorded note. None of these have a known live-production occurrence;
 they're the kind of edge case this plan's own concurrency work (the deploy step's atomic ownership marker) was
@@ -529,6 +530,10 @@ itself failed, check the running config by hand).
   actually receives. Asserts the render, `caddy validate` against the real `docker/caddy/Caddyfile`, the path
   matrix (dot-segments, `%2e%2e`, `//`, trailing slash, sub-paths, case, HEAD/OPTIONS/PUT, the 64 KiB cap, a real
   `caddy hash-password` hash) and that the three reserved-slug lists agree.
+- `docker/n8n/caddy/test-apply-atomic.sh` — `apply-caddy-block.sh` alone against a real Caddy: an unvalidated block is
+  never visible to the `import clients/*.caddy` glob (SIGKILL mid-validation, then a Caddy restart still comes up), a
+  duplicate site address across clients is rejected, re-registering over an existing block works, concurrent applies
+  are serialised, and a Caddyfile without exactly one import line fails closed. Fails against the previous version.
 - `docker/n8n/caddy/test-wrapper.sh` — the real wrapper and `apply-caddy-block.sh` against a throwaway Compose
   project shaped like the VPS one, with an `ssh` shim. Includes: a failed re-apply restores the previous bytes, a
   validation failure on the second block restores the first, and a live site being down blocks the run.

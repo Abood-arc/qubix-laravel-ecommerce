@@ -18,6 +18,8 @@ R="$(head -c4 /dev/urandom | od -An -tx1 | tr -d ' \n')"
 TARGET="tdtgt$R"; DECOY="tdtdc$R"; LIVEISH="tdtlv$R"; NOART="tdtna$R"
 T="$(mktemp -d)"; BASE="$T/opt"; CADDY="$T/caddy"; STUBLOG="$T/caddy.log"
 mkdir -p "$BASE" "$CADDY/docker/caddy/clients" "$T/bin"
+# apply-caddy-block.sh validates a candidate built from this Caddyfile, so it must have the import line.
+printf 'import clients/*.caddy\n' > "$CADDY/docker/caddy/Caddyfile"
 FAILS=0
 ok()   { printf 'PASS %s\n' "$1"; }
 fail() { printf 'FAIL %s\n' "$1"; FAILS=$((FAILS+1)); }
