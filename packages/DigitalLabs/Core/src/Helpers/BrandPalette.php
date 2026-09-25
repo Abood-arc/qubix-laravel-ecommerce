@@ -17,21 +17,6 @@ class BrandPalette
     const DARK_FOREGROUND = '#1a1a1a';
 
     /**
-     * Fixed saturation/lightness for the footer's pale tint, calibrated
-     * against the current hardcoded footer colors (#F1EADF / #e9decc).
-     * Only the hue is derived from the primary color — lightness and
-     * saturation stay constant so the footer reads as a pale surface
-     * regardless of how light or dark the chosen primary is.
-     */
-    const FOOTER_BG_SATURATION = 39;
-
-    const FOOTER_BG_LIGHTNESS = 91;
-
-    const FOOTER_BORDER_SATURATION = 40;
-
-    const FOOTER_BORDER_LIGHTNESS = 86;
-
-    /**
      * Derive the full brand token set from one primary hex color.
      * Malformed input falls back to the default primary rather than
      * letting an exception reach a page render.
@@ -64,8 +49,11 @@ class BrandPalette
             // bg-[rgb(var(--brand-on-primary-rgb)/10%)] — a literal hex can't
             // be blended with an opacity fraction the way this triplet can.
             'onPrimaryRgb' => implode(' ', static::parseHex($onPrimary)),
-            'footerBg' => static::rgbToHex(static::hslToRgb($h, static::FOOTER_BG_SATURATION, static::FOOTER_BG_LIGHTNESS)),
-            'footerBorder' => static::rgbToHex(static::hslToRgb($h, static::FOOTER_BORDER_SATURATION, static::FOOTER_BORDER_LIGHTNESS)),
+            // The footer is the same brand colour as the header (owner decision, 2026-09-26;
+            // it was a fixed pale tint of the hue before). Kept as their own keys so the
+            // footer can be re-themed later without touching every template.
+            'footerBg' => static::rgbToHex($rgb),
+            'footerBorder' => static::rgbToHex(static::hslToRgb($h, $s, $borderL)),
         ];
     }
 

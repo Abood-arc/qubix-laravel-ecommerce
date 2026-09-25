@@ -103,29 +103,22 @@ it('keeps the scrolled shade distinguishable from a very dark primary color', fu
         ->toBeGreaterThanOrEqual(2);
 });
 
-it('derives a footer background and border that follow the primary hue, not a fixed cream hue', function () {
-    // Arrange.
-    $hex = '#1f5f4f'; // hue 165°, far from the old hardcoded cream hue (~37°).
-
+it('makes the footer the same colour as the header: background is the primary, border is the header border', function ($hex) {
+    // Owner decision (2026-09-26): the footer reads as the same brand colour as the header,
+    // replacing the earlier "pale tint of the brand hue" (Task 3.3 Step 1, option a).
     // Act.
     $palette = BrandPalette::derive($hex);
 
     // Assert.
-    expect(abs(hexHue($palette['footerBg']) - 165))->toBeLessThanOrEqual(5);
-    expect(abs(hexHue($palette['footerBorder']) - 165))->toBeLessThanOrEqual(5);
-});
+    expect($palette['footerBg'])->toBe($palette['primary']);
+    expect($palette['footerBorder'])->toBe($palette['border']);
+})->with(['#1f5f4f', '#C2410C', '#101014', '#FFE08A']);
 
-it('keeps the footer background light and the border slightly darker, regardless of primary lightness', function () {
-    // Arrange.
-    $hex = '#101014'; // a very dark primary.
-
-    // Act.
-    $palette = BrandPalette::derive($hex);
-
-    // Assert.
-    expect(hexLightness($palette['footerBg']))->toBeGreaterThan(80);
-    expect(hexLightness($palette['footerBorder']))->toBeGreaterThan(75);
-    expect(hexLightness($palette['footerBg']))->toBeGreaterThan(hexLightness($palette['footerBorder']));
+it('gives the footer readable text through the same on-primary colour as the header, for light and dark brands', function () {
+    // Assert: the footer text uses onPrimary, so it must contrast with footerBg (== primary).
+    expect(BrandPalette::derive('#FFE08A')['onPrimary'])->toBe(BrandPalette::DARK_FOREGROUND);
+    expect(BrandPalette::derive('#101014')['onPrimary'])->toBe(BrandPalette::WHITE);
+    expect(BrandPalette::derive('#C2410C')['onPrimary'])->toBe(BrandPalette::WHITE);
 });
 
 it('falls back to the default palette for malformed input', function ($malformed) {
