@@ -126,7 +126,7 @@ check "no t6.caddy after SIGKILL" "$before" "$(glob_set)"
 # The killed apply's `docker compose exec` child is still alive (asleep in the stub). It must NOT have
 # inherited the flock, or one killed apply would block every later apply until that child exits.
 [[ -e "$WORK/validating" ]] && ok "orphaned validate child is still running" || bad "orphan child already gone (test would prove nothing)"
-flock -n "$CLIENTS/.apply.lock" true && ok "apply lock is free while the orphaned child still runs" || bad "orphaned child inherited the apply lock"
+flock -n "$CLIENTS" true && ok "clients/ lock is free while the orphaned child still runs" || bad "orphaned child inherited the apply lock"
 rm -f "$WORK/slow"; touch "$WORK/release"; sleep 1
 apply t6b --block-file "$(blockfile t6b t6b-v1)"
 check "lock was free right after SIGKILL: next apply succeeds (exit 0)" 0 "$RC"

@@ -279,7 +279,7 @@ and SSH access to `hostinger-vps`.
 **Known follow-ups, not fixed here** (all Minor/non-blocking, recorded rather than silently left out):
 temp file paths used by `Prep Caddy` and `register-caddy-client.sh` (`/tmp/qubix-caddy-<slug>...`) have no
 run-id/PID disambiguator strong enough to rule out a collision if the same slug is re-registered while a prior
-attempt for it is still in flight on the target; `apply-caddy-block.sh` takes a flock on `clients/.apply.lock`, so
+attempt for it is still in flight on the target; `apply-caddy-block.sh` takes a flock on the `clients/` directory (no lock file), so
 concurrent applies (a retry racing a manual run) are serialised and cannot interleave; a
 `caddy validate` failure caused by the container being transiently unavailable (mid-restart) is indistinguishable
 from a real Caddyfile syntax error in the recorded note. None of these have a known live-production occurrence;

@@ -4,5 +4,4 @@
 # comment above the `import clients/*.caddy` line for why.
 *.caddy
 !.gitignore
-.apply.lock
 *.caddy.new

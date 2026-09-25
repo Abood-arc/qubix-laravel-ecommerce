@@ -20,8 +20,9 @@
 #      for --remove), then reload.
 # A kill at any point (even SIGKILL) therefore leaves the directory either
 # entirely as before or entirely as after; the only debris is an unloaded
-# .caddy.new / Caddyfile.candidate.* file, swept on the next run. A flock on
-# clients/.apply.lock serialises concurrent applies (two n8n runs, or n8n plus a
+# .caddy.new / Caddyfile.candidate.* file, swept on the next run. A flock on the
+# clients/ directory itself (no lock file: the live checkout's .gitignore, on abood, cannot be
+# extended from fleet, so any new file there would show up as untracked) serialises concurrent applies (two n8n runs, or n8n plus a
 # hand-run register-caddy-client.sh) so one cannot validate against the other's
 # half-finished state.
 #
@@ -108,9 +109,9 @@ mkdir -p "$CLIENTS_DIR"
 # Serialise applies. The lock is released when this process exits, however it exits. fd 9 is closed for
 # the docker children below (`9>&-`): they inherit the lock's open file description, so a killed apply's
 # still-running child would otherwise keep holding the lock and block every later apply.
-exec 9>"$CLIENTS_DIR/.apply.lock"
+exec 9<"$CLIENTS_DIR"
 if ! flock -w 120 9; then
-  err "Error: could not take $CLIENTS_DIR/.apply.lock within 120 s (another apply is running?) — nothing was changed."
+  err "Error: could not lock $CLIENTS_DIR within 120 s (another apply is running?) — nothing was changed."
   exit 10
 fi
 
