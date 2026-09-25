@@ -219,7 +219,9 @@
 
         @stack('scripts')
 
-        <script src="https://cdn.zanderio.ai/widget/loader.js" data-id="wdg_bDmt03WxuJCWokGT6wmHrX1O" defer></script>
+        @if (filled($chatbotWidgetId = config('shop.chatbot.widget_id')))
+            <script src="{{ config('shop.chatbot.loader_url') }}" data-id="{{ $chatbotWidgetId }}" defer></script>
+        @endif
 
         {!! view_render_event('qubix.shop.layout.vue-app-mount.before') !!}
         <script>
