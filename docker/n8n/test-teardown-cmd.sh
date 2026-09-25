@@ -11,7 +11,7 @@
 # Usage: docker/n8n/test-teardown-cmd.sh      (exit 0 = all pass)
 set -uo pipefail
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-WF="$HERE/client-onboarding.workflow.json"
+WF="${WF_UNDER_TEST:-$HERE/client-onboarding.workflow.json}"
 command -v node >/dev/null || { echo "node is required"; exit 2; }
 
 T="$(mktemp -d)"; trap 'rm -rf "$T"' EXIT
