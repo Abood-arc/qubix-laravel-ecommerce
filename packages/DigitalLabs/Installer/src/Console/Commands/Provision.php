@@ -386,6 +386,25 @@ class Provision extends Command
             return self::EXIT_TRANSIENT;
         }
 
+        // public/storage -> storage/app/public, the equivalent of `artisan storage:link` that
+        // qubix:install runs but this command never did: without it every uploaded/seeded image
+        // (theme sections, locale flags, product images) 404s at /storage/... while the files
+        // sit unserved on disk. The link must be RELATIVE, not Laravel's default absolute one:
+        // this process sees the checkout at its host path (/opt/qubix-{slug}) but the app
+        // container sees it at /var/www/html, so an absolute target would dangle in the app.
+        // Plain `ln` rather than artisan: no framework boot, and nothing here can create a
+        // root-owned file under storage/ (see the chown above for why that matters).
+        $link = Process::path(base_path())
+            ->timeout(30)
+            ->run(['ln', '-sfn', '../storage/app/public', base_path('public/storage')]);
+
+        if (! $link->successful()) {
+            $this->error('Failed to create the public/storage symlink:');
+            $this->line($link->errorOutput());
+
+            return self::EXIT_TRANSIENT;
+        }
+
         // --- Step 5: bring up the stack --------------------------------------
         $this->components->info("Bringing up the stack ({$project})");
 
