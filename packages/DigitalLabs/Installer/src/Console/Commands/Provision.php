@@ -2,6 +2,7 @@
 
 namespace DigitalLabs\Installer\Console\Commands;
 
+use DigitalLabs\Core\Helpers\FriendlyPassword;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Process;
 use Illuminate\Support\Str;
@@ -64,7 +65,7 @@ class Provision extends Command
         { --business-name= : Customer-facing store name — becomes .env APP_NAME. }
         { --admin-email= : Email address for the initial admin user. }
         { --admin-name= : Name for the initial admin user. Defaults to --client-name. }
-        { --admin-password= : Plaintext password for the initial admin user. If omitted, a random one is generated via Str::random(20) and printed once. }
+        { --admin-password= : Plaintext password for the initial admin user. If omitted, a random one is generated via FriendlyPassword (8 lowercase letters/digits, no look-alike characters) and printed once. }
         { --brand-color= : Optional hex brand colour (e.g. #1a2b3c). Left unset — the neutral BrandPalette default — if omitted. }
         { --locale=en : Default and sole locale for the new store. }
         { --currency=USD : Default and sole currency for the new store. }
@@ -227,7 +228,7 @@ class Provision extends Command
 
         $passwordWasGenerated = blank($this->option('admin-password'));
         $adminPassword = $passwordWasGenerated
-            ? Str::random(20)
+            ? FriendlyPassword::generate()
             : (string) $this->option('admin-password');
 
         // --- Step 2: disk-space preflight, before anything writes a byte ---
