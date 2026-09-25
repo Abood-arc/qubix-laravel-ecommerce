@@ -97,6 +97,32 @@ Transient failures below `max_attempts` are torn down (`docker compose down -v`,
 output of every attempt. If teardown cannot prove the project gone: status `failed_teardown`, stop (a retry would
 hit the slug-collision check, exit 2).
 
+### Decommissioning a client that finished provisioning
+
+The workflow's teardown only runs on the **failure** path. A client that provisioned successfully is removed
+with `scripts/teardown-client.sh` (run on the VPS as root, from any checkout of this repo):
+
+```bash
+scripts/teardown-client.sh --slug=<slug> --confirm=<slug> --dry-run   # look first; changes nothing
+scripts/teardown-client.sh --slug=<slug> --confirm=<slug>
+```
+
+It removes the Caddy block (validate → reload, rolled back on failure), then containers, named volumes and the
+private network **selected by the Compose project label `qubix-<slug>`** (so it works even when the compose file
+is missing), the `qubix/app-<slug>` image, and the `/opt/qubix-<slug>` checkout (compose file and `.env`
+included). It refuses the reserved/live names (`sa`, `qubix`, `n8n`, `automation`, `fleet`, `www`, …) and any
+project whose containers come from `docker-compose.{prod,sa,n8n}.yml`. It leaves the shared `qubix_qubix`
+network, the `qubix/provisioner` image and Caddy's certificate store alone. Exit codes: 0 done/already gone,
+1 bad input or `--confirm` mismatch, 2 refused, 10 a step failed (safe to re-run).
+
+**It does not touch n8n.** The `fleet_clients` row keeps its old status, and the onboarding workflow's
+"slug exists" check keeps returning 409 for that slug until the row is updated or deleted by hand.
+
+Tests (no n8n, nothing outside a temp dir and `qubix-tdt*` throwaway resources): `docker/n8n/test-workflow-graph.py`
+(workflow topology — the only cycle allowed is the retry loop), `docker/n8n/test-teardown-cmd.sh` (the workflow's
+own teardown command against a stub `docker`), `scripts/test-teardown-client.sh` (the script above against real
+local Docker, with a decoy client that must survive).
+
 ### Teardown ownership rule
 
 `docker compose down -v` destroys a MySQL volume, so it is guarded three times over:
@@ -361,6 +387,7 @@ Per-slug behaviour is scripted with files under `/opt/fleet-target/scenario/` (s
 | `<slug>` | space-separated exit codes, one consumed per `provision-client.sh` run (e.g. `10 10 0`) |
 | `<slug>.down` | `fail` = the teardown `down` exits 1; `present` = `down` succeeds but the project survives (`STILL_PRESENT`); `daemon` = the docker daemon "goes away" at `down` time and stays away, so `down` **and** the project listing that follows both fail (`DOWN_RC=1`, `LS_RC=1`, `LS_FAILED`) |
 | `<slug>.clone` | space-separated exit codes, one consumed per `git clone` (e.g. `1 0` = first clone fails, second succeeds). A failing clone creates nothing, like real git — so the deploy exits 10 before the ownership marker is claimed and the teardown that follows must report `NO_MARKER`, not `NOT_OWNER` |
+| `<slug>.build` | space-separated exit codes, one consumed per `provision-client.sh` run (e.g. `10 0`). A non-zero code models a failed `docker build`: the shim exits with it **before creating anything** — no compose file, no project, no volumes — exactly as the real wrapper does before `qubix:provision` has generated `docker-compose.<slug>.yml`. The teardown that follows must report `GONE` and retry, not `DOWN_FAILED` |
 | `<slug>.marker` | rewrites `<checkout>/.git/fleet-run-id` during provisioning — simulates another run claiming the checkout, so teardown hits `NOT_OWNER` |
 | `<slug>.pwfmt` | `alt` = different password wording, `ansi` = ANSI-decorated line, `none` = no password printed at all |
 

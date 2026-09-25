@@ -33,6 +33,19 @@ if [[ ! "$slug" =~ ^[a-z][a-z0-9-]{1,20}$ ]]; then
   exit 1
 fi
 
+# /opt/fleet-target/scenario/<slug>.build = space-separated exit codes, one consumed per run:
+# a `docker build` failure (the real wrapper's exit 10) that happens BEFORE anything exists --
+# no compose file, no project, no volumes -- because qubix:provision, which generates
+# docker-compose.<slug>.yml, has not run yet. Models the case the teardown must still treat as
+# "nothing to undo, retry", not as a failed `docker compose -f <missing file> down`.
+bf=$T/scenario/$slug.build
+if [ -f "$bf" ]; then
+  read -r -a bcodes < "$bf"; bcode=${bcodes[0]:-0}; echo "${bcodes[*]:1}" > "$bf"
+  if [ "$bcode" != 0 ]; then
+    echo "Error: building qubix/app-${slug} failed (docker build) — treating as transient." >&2; exit "$bcode"
+  fi
+fi
+
 # /opt/fleet-target/scenario/<slug>.marker rewrites the ownership marker this run
 # just wrote, standing in for "another run claimed the checkout between our deploy
 # and our teardown" (finding I3). cwd is the checkout dir, as the real wrapper's is.
@@ -47,6 +60,9 @@ if [ "$code" = 2 ]; then
   echo "Error: slug '$slug' collides with an existing Docker resource matching '$proj'." >&2
   echo "Choose a different slug." >&2; exit 2
 fi
+# The real qubix:provision writes docker-compose.<slug>.yml into the checkout (cwd) before
+# `docker compose up`; the teardown's `down -f <file>` depends on it existing.
+: > "docker-compose.$slug.yml"
 grep -qxF "$proj" $T/state/projects || echo "$proj" >> $T/state/projects
 # The real stack's named volumes come up with `docker compose up`, i.e. before
 # any later step can fail — so a half-built stack leaves these behind too.
