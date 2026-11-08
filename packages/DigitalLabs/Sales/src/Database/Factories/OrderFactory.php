@@ -64,7 +64,7 @@ class OrderFactory extends Factory
             'customer_type' => Customer::class,
             'channel_id' => 1,
             'channel_type' => Channel::class,
-            'cart_id' => 0,
+            'cart_id' => null,
             'shipping_method' => 'free_free',
             'shipping_title' => 'Free Shipping',
         ];
