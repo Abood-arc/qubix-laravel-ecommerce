@@ -189,11 +189,13 @@ class PaymentFinalizer
     }
 
     /**
-     * Link the order, close the cart, then invoice it.
+     * Link the order, close the cart, invoice it, then set it to processing.
      *
      * A failure after the link never refunds: the order exists and is paid.
-     * Only an order still pending is processed, so a repeat call repairs a
+     * Only an order still pending is worked on, so a repeat call repairs a
      * crash but never moves a shipped, closed or refunded order backwards.
+     * Invoicing comes first: it moves the order on itself, so a crash before
+     * it leaves the order pending and repairable.
      */
     protected function completeOrder(RazorpayPayment $payment, Order $order): FinalizeResult
     {
@@ -201,39 +203,55 @@ class PaymentFinalizer
 
         Cart::query()->whereKey($payment->cart_id)->update(['is_active' => false]);
 
-        try {
-            if ($order->status === 'pending') {
-                $this->processOrder($payment, $order);
-            }
-        } catch (Throwable $exception) {
-            report($exception);
+        if ($order->status === 'pending') {
+            try {
+                $this->invoiceOrder($payment, $order);
+            } catch (Throwable $exception) {
+                report($exception);
 
-            $this->alertAdmin($payment, 'invoice_failed');
+                $this->alertAdmin($payment, 'invoice_failed');
+            }
+
+            $this->markProcessing($order);
         }
 
         return FinalizeResult::ordered($order->fresh());
     }
 
     /**
-     * Mark a paid order as processing, invoice it and record the transaction.
+     * Invoice a paid order and record the transaction.
      */
-    protected function processOrder(RazorpayPayment $payment, Order $order): void
+    protected function invoiceOrder(RazorpayPayment $payment, Order $order): void
     {
-        $this->orderRepository->update(['status' => 'processing'], $order->id);
+        if (! $order->canInvoice()) {
+            return;
+        }
 
-        if ($order->canInvoice()) {
-            $invoice = $this->invoiceRepository->create($this->invoiceData($order));
+        $invoice = $this->invoiceRepository->create($this->invoiceData($order));
 
-            $this->orderTransactionRepository->create([
-                'transaction_id' => $payment->razorpay_payment_id,
-                'status' => 'captured',
-                'type' => 'payment',
-                'amount' => $payment->amount / 100,
-                'payment_method' => 'razorpay',
-                'order_id' => $order->id,
-                'invoice_id' => $invoice->id,
-                'data' => json_encode(['razorpay_order_id' => $payment->razorpay_order_id]),
-            ]);
+        $this->orderTransactionRepository->create([
+            'transaction_id' => $payment->razorpay_payment_id,
+            'status' => 'captured',
+            'type' => 'payment',
+            'amount' => $payment->amount / 100,
+            'payment_method' => 'razorpay',
+            'order_id' => $order->id,
+            'invoice_id' => $invoice->id,
+            'data' => json_encode(['razorpay_order_id' => $payment->razorpay_order_id]),
+        ]);
+    }
+
+    /**
+     * Set the order to processing unless invoicing already moved it on.
+     */
+    protected function markProcessing(Order $order): void
+    {
+        try {
+            if ($order->fresh()->status === 'pending') {
+                $this->orderRepository->update(['status' => 'processing'], $order->id);
+            }
+        } catch (Throwable $exception) {
+            report($exception);
         }
     }
 

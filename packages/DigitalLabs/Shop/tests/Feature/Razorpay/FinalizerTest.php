@@ -425,3 +425,20 @@ it('renders both mails', function () {
         ->and($alert)->toContain('pay_1')
         ->and($alert)->toContain(trans('razorpay::app.emails.alert.invoice_failed'));
 });
+
+it('keeps an order pending while it is being invoiced so a crash can be repaired', function () {
+    $this->fakeRazorpayApi($this->payment);
+
+    $seen = new ArrayObject;
+
+    $this->partialMock(InvoiceRepository::class, fn ($mock) => $mock->shouldReceive('create')->once()->andReturnUsing(function (array $data) use ($seen) {
+        $seen['status'] = Order::findOrFail($data['order_id'])->status;
+
+        throw new RuntimeException('boom');
+    }));
+
+    $result = ($this->finalizer)()->finalize($this->payment, 'pay_test');
+
+    expect($seen['status'])->toBe('pending')
+        ->and($result->order->status)->toBe('processing');
+});
