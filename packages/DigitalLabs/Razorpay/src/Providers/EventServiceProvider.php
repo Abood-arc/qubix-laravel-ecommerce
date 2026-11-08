@@ -11,5 +11,9 @@ class EventServiceProvider extends ServiceProvider
      *
      * @var array
      */
-    protected $listen = [];
+    protected $listen = [
+        'sales.refund.save.after' => [
+            [\DigitalLabs\Razorpay\Listeners\Refund::class, 'afterCreated'],
+        ],
+    ];
 }
