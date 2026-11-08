@@ -32,6 +32,7 @@ or the pre-flight found a compose project or a docker volume for that slug),
 | `backoff_seconds` | 5 | local value; **use 60 in production** |
 | `base_dir`, `repo_url`, `domain`, `alert_email` | `/opt`, repo URL, `digital-labs.ai`, alert address | placeholders, set per environment |
 | `from_email` | `fleet-onboarding@qubix.local` | envelope sender for BOTH `Send Alert` and `Send Credentials`; placeholder, **must be a real deliverable address in production** (`.local` is mDNS-reserved and most relays reject it, which would silently lose the credentials email — the failure is recorded as a `credentials`/`delivery_failed` row and nowhere else) |
+| `reply_to` | `fleet-replies@qubix.local` | `Reply-To` header on the **credentials email only** (`Send Credentials`), so a client's reply reaches a mailbox that exists — the `From` address may have no mailbox behind it. Placeholder; **set the real address in n8n after import, never in this file: the repo is public.** |
 
 Capacity check: `free -m` "available" already reflects the two legacy stacks (Elasticsearch included) and the OS,
 so Task 2.4's "subtract the legacy stacks" is satisfied by construction. RAM: `available - reserve >= per_client`;
@@ -410,7 +411,8 @@ slug, slug regex → exit 1 with zero state changes), because it builds a path f
       run reports `NO_MARKER` and retries, and nothing is ever torn down), but it is still a failure: verify the
       clone by hand as the deploy user before the first real run. Note the branch **`fleet` is hardcoded** in
       `Prep Deploy`; change it there if a real deployment should track a different branch.
-- [ ] Real SMTP / alert channel; set `alert_email` **and `from_email`** in Config (the credentials email carries
+- [ ] Real SMTP / alert channel; set `alert_email`, `reply_to` **and `from_email`** in Config, in the n8n UI after
+      import — real addresses are never committed to this public repo (the credentials email carries
       a password). `from_email` defaults to a `.local` placeholder, which a real relay will reject — and a
       rejected credentials email means the generated admin password is gone, visible only as a
       `credentials`/`delivery_failed` row. Monitor the alert address too: with execution data off, an

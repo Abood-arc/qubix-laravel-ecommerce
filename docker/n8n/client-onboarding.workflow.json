@@ -105,6 +105,12 @@
               "name": "from_email",
               "value": "fleet-onboarding@qubix.local",
               "type": "string"
+            },
+            {
+              "id": "areply_to",
+              "name": "reply_to",
+              "value": "fleet-replies@qubix.local",
+              "type": "string"
             }
           ]
         },
@@ -940,7 +946,9 @@
         "subject": "={{ $json.alert_subject }}",
         "emailFormat": "text",
         "text": "={{ $json.alert_text }}",
-        "options": {}
+        "options": {
+          "replyTo": "={{ $('Config').first().json.reply_to }}"
+        }
       },
       "credentials": {
         "smtp": {
