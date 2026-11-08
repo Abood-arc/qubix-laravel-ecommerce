@@ -6,6 +6,7 @@ use DigitalLabs\Razorpay\Services\PaymentFinalizer;
 use DigitalLabs\Sales\Models\Order;
 use Illuminate\Http\Client\Request;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 
 use function Pest\Laravel\call;
@@ -127,4 +128,48 @@ it('asks razorpay to retry when the result is pending', function () {
     $this->mock(PaymentFinalizer::class, fn ($mock) => $mock->shouldReceive('finalize')->once()->andReturn(FinalizeResult::pending()));
 
     sendWebhook(webhookBody($payment->razorpay_order_id))->assertStatus(503);
+});
+
+it('logs an event it does not handle', function () {
+    Log::spy();
+
+    sendWebhook(webhookBody('order_any', 'payment.failed'))->assertOk();
+
+    Log::shouldHaveReceived('warning')->withArgs(fn ($message, $context = []) => ($context['event'] ?? null) === 'payment.failed')->once();
+});
+
+it('still completes after razorpay has been switched off', function () {
+    $this->configureRazorpay(['active' => false]);
+
+    $cart = $this->createRazorpayCart();
+
+    $payment = $this->createRazorpayPayment($cart);
+
+    $this->fakeRazorpayApi($payment);
+
+    sendWebhook(webhookBody($payment->razorpay_order_id))->assertOk();
+
+    expect(Order::where('cart_id', $cart->id)->count())->toBe(1);
+});
+
+it('records a refund that failed later', function () {
+    $this->mock(PaymentFinalizer::class, fn ($mock) => $mock->shouldReceive('recordRefundFailure')->once()->with('pay_test'));
+
+    $body = json_encode([
+        'event' => 'refund.failed',
+        'payload' => ['refund' => ['entity' => ['id' => 'rfnd_test', 'payment_id' => 'pay_test']]],
+    ]);
+
+    sendWebhook($body)->assertOk();
+});
+
+it('rejects a refund failure with a bad signature', function () {
+    $this->mock(PaymentFinalizer::class, fn ($mock) => $mock->shouldNotReceive('recordRefundFailure'));
+
+    $body = json_encode([
+        'event' => 'refund.failed',
+        'payload' => ['refund' => ['entity' => ['payment_id' => 'pay_test']]],
+    ]);
+
+    sendWebhook($body, 'bad')->assertStatus(400);
 });

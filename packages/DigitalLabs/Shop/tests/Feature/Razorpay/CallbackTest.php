@@ -84,3 +84,22 @@ it('still completes after razorpay has been switched off', function () {
 
     expect(Order::where('cart_id', $this->cart->id)->count())->toBe(1);
 });
+
+it('creates no order when razorpay reports a different payment', function () {
+    Http::swap(new Illuminate\Http\Client\Factory);
+
+    Http::fake(['api.razorpay.com/v1/payments/*' => Http::response([
+        'id' => 'pay_test',
+        'order_id' => 'order_someone_else',
+        'amount' => $this->payment->amount,
+        'currency' => $this->payment->currency,
+        'status' => 'captured',
+    ])]);
+
+    postJson(route('razorpay.callback'), callbackPayload($this->payment))
+        ->assertOk()
+        ->assertJsonPath('redirect_url', route('shop.checkout.cart.index'))
+        ->assertSessionHas('error', trans('razorpay::app.errors.payment-invalid'));
+
+    expect(Order::where('cart_id', $this->cart->id)->exists())->toBeFalse();
+});

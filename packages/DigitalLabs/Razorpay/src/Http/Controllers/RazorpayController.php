@@ -15,6 +15,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 use Illuminate\View\View;
 
 class RazorpayController extends Controller
@@ -44,7 +45,7 @@ class RazorpayController extends Controller
         $amount = (int) round($cart->grand_total * 100);
 
         try {
-            $razorpayOrder = $this->client->createOrder($amount, $cart->cart_currency_code, 'cart-'.$cart->id, [
+            $razorpayOrder = $this->client->createOrder($amount, $cart->cart_currency_code, 'cart-'.$cart->id.'-'.Str::random(12), [
                 'cart_id' => (string) $cart->id,
             ]);
         } catch (RazorpayException $exception) {
@@ -125,7 +126,13 @@ class RazorpayController extends Controller
 
         $event = json_decode($body, true);
 
+        if (data_get($event, 'event') === 'refund.failed') {
+            return $this->refundFailed($event);
+        }
+
         if (data_get($event, 'event') !== 'order.paid') {
+            Log::warning('Razorpay webhook for an unhandled event.', ['event' => data_get($event, 'event')]);
+
             return response()->json();
         }
 
@@ -152,10 +159,21 @@ class RazorpayController extends Controller
     protected function isReadyToPay($cart): bool
     {
         return $cart
+            && $this->isCustomerAllowed()
             && ! Cart::hasError()
             && $cart->payment?->method === 'razorpay'
             && $cart->billing_address
             && (! $cart->haveStockableItems() || $cart->selected_shipping_rate);
+    }
+
+    /**
+     * Whether the logged-in customer, if any, may still place orders.
+     */
+    protected function isCustomerAllowed(): bool
+    {
+        $customer = auth()->guard('customer')->user();
+
+        return ! $customer || (! $customer->is_suspended && $customer->status);
     }
 
     /**
@@ -179,6 +197,18 @@ class RazorpayController extends Controller
                 'contact' => $billing['phone'],
             ],
         ];
+    }
+
+    /**
+     * Razorpay reports that a refund it had accepted has failed.
+     */
+    protected function refundFailed(array $event): JsonResponse
+    {
+        if ($razorpayPaymentId = data_get($event, 'payload.refund.entity.payment_id')) {
+            $this->finalizer->recordRefundFailure($razorpayPaymentId);
+        }
+
+        return response()->json();
     }
 
     /**
