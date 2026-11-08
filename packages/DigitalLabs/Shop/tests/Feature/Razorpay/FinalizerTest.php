@@ -2,6 +2,7 @@
 
 use DigitalLabs\Checkout\Models\CartItem;
 use DigitalLabs\Product\Models\ProductInventoryIndex;
+use DigitalLabs\Product\Repositories\ProductRepository;
 use DigitalLabs\Razorpay\Mail\PaymentAlertNotification;
 use DigitalLabs\Razorpay\Mail\PaymentRefundedNotification;
 use DigitalLabs\Razorpay\Models\RazorpayPayment;
@@ -13,6 +14,7 @@ use DigitalLabs\Sales\Repositories\OrderRepository;
 use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Http\Client\Request;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Mail;
 
@@ -253,7 +255,173 @@ it('keeps a paid order and alerts the admin when the invoice fails', function ()
     $result = ($this->finalizer)()->finalize($this->payment, 'pay_test');
 
     expect($result->status)->toBe(FinalizeResult::ORDERED)
+        ->and($result->order->status)->toBe('processing')
+        ->and(Order::where('cart_id', $this->cart->id)->firstOrFail()->status)->toBe('processing')
         ->and(refundRequests())->toBe(0);
 
     Mail::assertQueued(PaymentAlertNotification::class);
+});
+
+it('refunds when the stock check throws', function () {
+    $this->fakeRazorpayApi($this->payment);
+
+    $this->partialMock(ProductRepository::class, fn ($mock) => $mock->shouldReceive('find')->andThrow(new RuntimeException('boom')));
+
+    $result = ($this->finalizer)()->finalize($this->payment, 'pay_test');
+
+    expect($result->status)->toBe(FinalizeResult::REFUNDED)
+        ->and($this->payment->fresh()->refund_reason)->toBe('order_failed')
+        ->and(Order::where('cart_id', $this->cart->id)->exists())->toBeFalse();
+});
+
+it('adopts its own saved order when order creation fails afterwards', function () {
+    $this->fakeRazorpayApi($this->payment);
+
+    $real = app(OrderRepository::class);
+
+    $repository = Mockery::mock($real);
+
+    $repository->shouldReceive('create')->once()->andReturnUsing(function (array $data) use ($real) {
+        $real->create($data);
+
+        throw new RuntimeException('boom');
+    });
+
+    app()->instance(OrderRepository::class, $repository);
+
+    $result = ($this->finalizer)()->finalize($this->payment, 'pay_test');
+
+    expect($result->status)->toBe(FinalizeResult::ORDERED)
+        ->and($result->order->status)->toBe('processing')
+        ->and($this->payment->fresh()->status)->toBe(RazorpayPayment::STATUS_PAID)
+        ->and(Order::where('cart_id', $this->cart->id)->count())->toBe(1)
+        ->and(refundRequests())->toBe(0);
+});
+
+it('retries a refund that stopped halfway once it is stale', function () {
+    $seenWhileRefunding = null;
+
+    $paymentId = $this->payment->id;
+
+    Http::fake([
+        'api.razorpay.com/v1/payments/*/refund' => function () use (&$seenWhileRefunding, $paymentId) {
+            $seenWhileRefunding = RazorpayPayment::find($paymentId)->updated_at;
+
+            return Http::response(['id' => 'rfnd_test', 'status' => 'processed']);
+        },
+    ]);
+
+    $this->payment->update([
+        'status' => RazorpayPayment::STATUS_REFUNDING,
+        'refund_reason' => 'out_of_stock',
+        'razorpay_payment_id' => 'pay_test',
+    ]);
+
+    DB::table('razorpay_payments')->where('id', $paymentId)->update(['updated_at' => now()->subMinutes(6)]);
+
+    $result = ($this->finalizer)()->finalize($this->payment, 'pay_test');
+
+    expect($result->status)->toBe(FinalizeResult::REFUNDED)
+        ->and($result->refundStarted)->toBeTrue()
+        ->and($seenWhileRefunding->gt(now()->subMinute()))->toBeTrue()
+        ->and($this->payment->fresh()->status)->toBe(RazorpayPayment::STATUS_REFUNDED)
+        ->and(refundRequests())->toBe(1);
+
+    Http::assertSent(fn (Request $request) => $request->hasHeader('X-Refund-Idempotency', 'auto-pay_test'));
+});
+
+it('leaves a recent refund alone', function () {
+    $this->fakeRazorpayApi($this->payment);
+
+    $this->payment->update([
+        'status' => RazorpayPayment::STATUS_REFUNDING,
+        'refund_reason' => 'out_of_stock',
+        'razorpay_payment_id' => 'pay_test',
+    ]);
+
+    DB::table('razorpay_payments')->where('id', $this->payment->id)->update(['updated_at' => now()->subMinutes(4)]);
+
+    $result = ($this->finalizer)()->finalize($this->payment, 'pay_test');
+
+    expect($result->status)->toBe(FinalizeResult::REFUNDED)
+        ->and($result->refundStarted)->toBeFalse()
+        ->and($this->payment->fresh()->status)->toBe(RazorpayPayment::STATUS_REFUNDING)
+        ->and(refundRequests())->toBe(0);
+});
+
+it('invoices a linked order that a crash left without an invoice', function () {
+    $this->fakeRazorpayApi($this->payment);
+
+    $order = app(OrderRepository::class)->create($this->payment->snapshot);
+
+    $this->payment->update([
+        'order_id' => $order->id,
+        'razorpay_payment_id' => 'pay_test',
+        'status' => RazorpayPayment::STATUS_PAID,
+    ]);
+
+    $result = ($this->finalizer)()->finalize($this->payment, 'pay_test');
+
+    expect($result->status)->toBe(FinalizeResult::ORDERED)
+        ->and($order->fresh()->status)->toBe('processing')
+        ->and($order->invoices()->count())->toBe(1)
+        ->and(refundRequests())->toBe(0);
+
+    $this->assertDatabaseHas('order_transactions', ['order_id' => $order->id, 'transaction_id' => 'pay_test']);
+});
+
+it('leaves an order that has moved on unchanged when called again', function () {
+    $this->fakeRazorpayApi($this->payment);
+
+    $order = ($this->finalizer)()->finalize($this->payment, 'pay_test')->order;
+
+    DB::table('orders')->where('id', $order->id)->update(['status' => 'completed']);
+
+    $result = ($this->finalizer)()->finalize($this->payment->fresh(), 'pay_test');
+
+    expect($result->status)->toBe(FinalizeResult::ORDERED)
+        ->and($order->fresh()->status)->toBe('completed')
+        ->and($order->invoices()->count())->toBe(1)
+        ->and(DB::table('order_transactions')->where('order_id', $order->id)->count())->toBe(1);
+});
+
+it('marks a refund that failed later and alerts the admin', function () {
+    $this->payment->update(['status' => RazorpayPayment::STATUS_REFUNDED, 'razorpay_payment_id' => 'pay_test']);
+
+    ($this->finalizer)()->recordRefundFailure('pay_test');
+
+    expect($this->payment->fresh()->status)->toBe(RazorpayPayment::STATUS_REFUND_FAILED);
+
+    Mail::assertQueued(PaymentAlertNotification::class, 1);
+});
+
+it('alerts without changing the row when an admin refund fails later', function () {
+    $this->payment->update(['status' => RazorpayPayment::STATUS_PAID, 'razorpay_payment_id' => 'pay_test']);
+
+    ($this->finalizer)()->recordRefundFailure('pay_test');
+
+    expect($this->payment->fresh()->status)->toBe(RazorpayPayment::STATUS_PAID);
+
+    Mail::assertQueued(PaymentAlertNotification::class, 1);
+});
+
+it('does not alert twice or for an unknown payment when a refund fails later', function () {
+    $this->payment->update(['status' => RazorpayPayment::STATUS_REFUND_FAILED, 'razorpay_payment_id' => 'pay_test']);
+
+    ($this->finalizer)()->recordRefundFailure('pay_test');
+
+    ($this->finalizer)()->recordRefundFailure('pay_unknown');
+
+    Mail::assertNothingQueued();
+});
+
+it('renders both mails', function () {
+    $refunded = (new PaymentRefundedNotification('buyer@example.com', 'A Buyer', 'We are returning your payment.', 'Rs 10.00'))->render();
+
+    $alert = (new PaymentAlertNotification('pay_1', 'Rs 10.00', 'invoice_failed'))->render();
+
+    expect($refunded)->toContain('We are returning your payment.')
+        ->and($refunded)->toContain(trans('razorpay::app.emails.refunded.timing'))
+        ->and($alert)->toContain('pay_1')
+        ->and($alert)->toContain(trans('razorpay::app.emails.alert.invoice_failed'));
 });

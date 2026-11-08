@@ -56,12 +56,14 @@ class RazorpayClient
     }
 
     /**
-     * Refund a captured payment.
+     * Refund a captured payment. Razorpay treats the receipt as the refund's
+     * idempotency key, so a repeated key is rejected instead of refunding twice.
      */
     public function refundPayment(string $paymentId, int $amount, string $idempotencyKey): array
     {
         return $this->send('POST', 'payments/'.rawurlencode($paymentId).'/refund', [
             'amount' => $amount,
+            'receipt' => $idempotencyKey,
         ], ['X-Refund-Idempotency' => $idempotencyKey]);
     }
 

@@ -31,6 +31,40 @@ it('keeps an open guest cart when loading the cart', function () {
         ->and(session()->has('cart'))->toBeTrue();
 });
 
+it('forgets a closed session cart on a logged in request and keeps the customer cart', function () {
+    $customer = $this->loginAsCustomer();
+
+    $closed = Cart::factory()->create(['is_active' => 0]);
+
+    $active = Cart::factory()->create(['customer_id' => $customer->id, 'is_guest' => 0, 'is_active' => 1]);
+
+    cart()->resetCart();
+
+    session()->put('cart', (object) ['id' => $closed->id]);
+
+    cart()->initCart();
+
+    expect(cart()->getCart()?->id)->toBe($active->id)
+        ->and(session()->has('cart'))->toBeFalse();
+});
+
+it('keeps an open session cart on a logged in request so it can be merged', function () {
+    $customer = $this->loginAsCustomer();
+
+    $guest = Cart::factory()->create(['is_active' => 1]);
+
+    $active = Cart::factory()->create(['customer_id' => $customer->id, 'is_guest' => 0, 'is_active' => 1]);
+
+    cart()->resetCart();
+
+    session()->put('cart', (object) ['id' => $guest->id]);
+
+    cart()->initCart();
+
+    expect(cart()->getCart()?->id)->toBe($active->id)
+        ->and(session()->has('cart'))->toBeTrue();
+});
+
 it('refuses a second order for the same cart', function () {
     $cart = Cart::factory()->create();
 

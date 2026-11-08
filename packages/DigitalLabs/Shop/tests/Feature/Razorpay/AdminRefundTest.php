@@ -73,3 +73,58 @@ it('shows the admin a message instead of a 500 page', function () {
     expect($response)->toBeInstanceOf(RedirectResponse::class)
         ->and(session('error'))->toBe(trans('razorpay::app.errors.admin-refund-failed'));
 });
+
+function sentRazorpayRefunds()
+{
+    return Http::recorded(fn (Request $request) => str_ends_with($request->url(), '/refund'))
+        ->map(fn (array $pair) => $pair[0])
+        ->values();
+}
+
+it('sends two equal partial refunds with different keys', function () {
+    [$order] = paidRazorpayOrder($this);
+
+    $data = ['order_id' => $order->id, 'refund' => ['items' => [], 'shipping' => 0, 'adjustment_refund' => 1, 'adjustment_fee' => 0]];
+
+    app(RefundRepository::class)->create($data);
+
+    app(RefundRepository::class)->create($data);
+
+    $refunds = sentRazorpayRefunds();
+
+    expect($refunds)->toHaveCount(2)
+        ->and($refunds->map(fn (Request $request) => $request->header('X-Refund-Idempotency')[0])->all())
+        ->toBe(['admin-'.$order->id.'-100', 'admin-'.$order->id.'-200'])
+        ->and($refunds->map(fn (Request $request) => $request['amount'])->all())->toBe([100, 100]);
+});
+
+it('never asks for more than was captured', function () {
+    [$order, $payment] = paidRazorpayOrder($this);
+
+    $payment->update(['amount' => (int) round($order->grand_total * 100) - 1]);
+
+    $refund = app(RefundRepository::class)->create(razorpayRefundData($order));
+
+    $paise = (int) round($refund->grand_total * 100);
+
+    expect($paise)->toBeGreaterThan($payment->amount)
+        ->and(sentRazorpayRefunds()->first()['amount'])->toBe($payment->amount);
+});
+
+it('never asks for more than what is left after earlier refunds', function () {
+    [$order, $payment] = paidRazorpayOrder($this);
+
+    app(RefundRepository::class)->create([
+        'order_id' => $order->id,
+        'refund' => ['items' => [], 'shipping' => 0, 'adjustment_refund' => 1, 'adjustment_fee' => 0],
+    ]);
+
+    $refund = app(RefundRepository::class)->create(razorpayRefundData($order->fresh()));
+
+    $paise = (int) round($refund->grand_total * 100);
+
+    $left = $payment->amount - 100;
+
+    expect($paise)->toBeGreaterThan($left)
+        ->and(sentRazorpayRefunds()->last()['amount'])->toBe($left);
+});

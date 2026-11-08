@@ -23,12 +23,13 @@ it('creates an order with the 15 minute capture window', function () {
         && $request->hasHeader('Authorization', 'Basic '.base64_encode('rzp_test_key:test_key_secret')));
 });
 
-it('sends the idempotency key with a refund', function () {
+it('sends the idempotency key with a refund in the header and as the receipt', function () {
     Http::fake(['api.razorpay.com/v1/payments/pay_1/refund' => Http::response(['id' => 'rfnd_1'])]);
 
     app(RazorpayClient::class)->refundPayment('pay_1', 500, 'auto-pay_1');
 
     Http::assertSent(fn (Request $request) => $request['amount'] === 500
+        && $request['receipt'] === 'auto-pay_1'
         && $request->hasHeader('X-Refund-Idempotency', 'auto-pay_1'));
 });
 

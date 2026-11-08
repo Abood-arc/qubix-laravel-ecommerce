@@ -49,7 +49,7 @@ return [
             'payment' => 'Payment: :payment',
             'amount' => 'Amount: :amount',
             'refund_failed' => 'The automatic refund failed. Refund this payment by hand in the Razorpay dashboard, and check the account balance.',
-            'invoice_failed' => 'The order was created and paid, but its invoice could not be created. Create the invoice from the admin panel.',
+            'invoice_failed' => 'The order was created and paid, but its invoice or payment record could not be completed. Check this order in the admin panel.',
         ],
     ],
 ];

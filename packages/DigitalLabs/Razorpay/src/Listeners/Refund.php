@@ -14,6 +14,9 @@ class Refund
     /**
      * Send an admin refund to Razorpay. Throwing rolls the refund back.
      *
+     * Each refund is rounded to paise on its own, so the amount is capped at
+     * what is left of the captured payment.
+     *
      * @param  \DigitalLabs\Sales\Contracts\Refund  $refund
      */
     public function afterCreated($refund): void
@@ -30,10 +33,12 @@ class Refund
             throw new RazorpayRefundFailedException('No Razorpay payment found for order '.$order->id);
         }
 
+        $alreadyRefunded = (int) round(($order->grand_total_refunded - $refund->grand_total) * 100);
+
         try {
             $this->client->refundPayment(
                 $payment->razorpay_payment_id,
-                (int) round($refund->grand_total * 100),
+                min((int) round($refund->grand_total * 100), (int) $payment->amount - $alreadyRefunded),
                 'admin-'.$order->id.'-'.(int) round($order->grand_total_refunded * 100)
             );
         } catch (RazorpayException $exception) {

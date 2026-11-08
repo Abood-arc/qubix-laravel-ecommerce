@@ -25,6 +25,11 @@ class PaymentFinalizer
 
     protected const LOCK_WAIT_SECONDS = 10;
 
+    /**
+     * A refund started longer ago than this is taken to have died and is retried.
+     */
+    protected const STALE_REFUND_SECONDS = 300;
+
     public function __construct(
         protected RazorpayClient $client,
         protected OrderRepository $orderRepository,
@@ -73,6 +78,24 @@ class PaymentFinalizer
     }
 
     /**
+     * Record a refund that Razorpay reported as failed after it had accepted it.
+     */
+    public function recordRefundFailure(string $razorpayPaymentId): void
+    {
+        $payment = RazorpayPayment::where('razorpay_payment_id', $razorpayPaymentId)->first();
+
+        if (! $payment || $payment->status === RazorpayPayment::STATUS_REFUND_FAILED) {
+            return;
+        }
+
+        if ($payment->status === RazorpayPayment::STATUS_REFUNDED) {
+            $payment->update(['status' => RazorpayPayment::STATUS_REFUND_FAILED]);
+        }
+
+        $this->alertAdmin($payment, 'refund_failed');
+    }
+
+    /**
      * Do everything that must happen while holding the cart lock.
      */
     protected function settle(RazorpayPayment $payment, string $razorpayPaymentId): FinalizeResult
@@ -80,11 +103,13 @@ class PaymentFinalizer
         $payment->refresh();
 
         if ($payment->isRefundStarted()) {
-            return FinalizeResult::refunded();
+            return $this->isRefundStale($payment)
+                ? $this->resumeRefund($payment)
+                : FinalizeResult::refunded();
         }
 
         if ($payment->order_id) {
-            return FinalizeResult::ordered($this->orderRepository->findOrFail($payment->order_id));
+            return $this->completeOrder($payment, $this->orderRepository->findOrFail($payment->order_id));
         }
 
         try {
@@ -106,18 +131,22 @@ class PaymentFinalizer
             return $this->settleAgainstExisting($payment, $existing);
         }
 
-        if (! $this->hasStock($payment->snapshot)) {
-            return $this->startRefund($payment, 'out_of_stock');
-        }
-
         try {
-            $order = $this->orderRepository->create($payment->snapshot);
-        } catch (UniqueConstraintViolationException) {
-            return $this->settleAgainstExisting($payment, $this->findCartOrder($payment));
-        } catch (Throwable $exception) {
-            report($exception);
+            if (! $this->hasStock($payment->snapshot)) {
+                return $this->startRefund($payment, 'out_of_stock');
+            }
 
-            return $this->startRefund($payment, 'order_failed');
+            $order = $this->orderRepository->create($payment->snapshot);
+        } catch (Throwable $exception) {
+            if (! $exception instanceof UniqueConstraintViolationException) {
+                report($exception);
+            }
+
+            $existing = $this->findCartOrder($payment);
+
+            return $existing
+                ? $this->settleAgainstExisting($payment, $existing)
+                : $this->startRefund($payment, 'order_failed');
         }
 
         return $this->completeOrder($payment, $order);
@@ -150,12 +179,8 @@ class PaymentFinalizer
     /**
      * Adopt this payment's own order, or refund because another order won.
      */
-    protected function settleAgainstExisting(RazorpayPayment $payment, ?Order $existing): FinalizeResult
+    protected function settleAgainstExisting(RazorpayPayment $payment, Order $existing): FinalizeResult
     {
-        if (! $existing) {
-            return $this->startRefund($payment, 'order_failed');
-        }
-
         if (($existing->payment?->additional['razorpay_order_id'] ?? null) === $payment->razorpay_order_id) {
             return $this->completeOrder($payment, $existing);
         }
@@ -167,6 +192,8 @@ class PaymentFinalizer
      * Link the order, close the cart, then invoice it.
      *
      * A failure after the link never refunds: the order exists and is paid.
+     * Only an order still pending is processed, so a repeat call repairs a
+     * crash but never moves a shipped, closed or refunded order backwards.
      */
     protected function completeOrder(RazorpayPayment $payment, Order $order): FinalizeResult
     {
@@ -175,21 +202,8 @@ class PaymentFinalizer
         Cart::query()->whereKey($payment->cart_id)->update(['is_active' => false]);
 
         try {
-            $this->orderRepository->update(['status' => 'processing'], $order->id);
-
-            if ($order->canInvoice()) {
-                $invoice = $this->invoiceRepository->create($this->invoiceData($order));
-
-                $this->orderTransactionRepository->create([
-                    'transaction_id' => $payment->razorpay_payment_id,
-                    'status' => 'captured',
-                    'type' => 'payment',
-                    'amount' => $payment->amount / 100,
-                    'payment_method' => 'razorpay',
-                    'order_id' => $order->id,
-                    'invoice_id' => $invoice->id,
-                    'data' => json_encode(['razorpay_order_id' => $payment->razorpay_order_id]),
-                ]);
+            if ($order->status === 'pending') {
+                $this->processOrder($payment, $order);
             }
         } catch (Throwable $exception) {
             report($exception);
@@ -198,6 +212,48 @@ class PaymentFinalizer
         }
 
         return FinalizeResult::ordered($order->fresh());
+    }
+
+    /**
+     * Mark a paid order as processing, invoice it and record the transaction.
+     */
+    protected function processOrder(RazorpayPayment $payment, Order $order): void
+    {
+        $this->orderRepository->update(['status' => 'processing'], $order->id);
+
+        if ($order->canInvoice()) {
+            $invoice = $this->invoiceRepository->create($this->invoiceData($order));
+
+            $this->orderTransactionRepository->create([
+                'transaction_id' => $payment->razorpay_payment_id,
+                'status' => 'captured',
+                'type' => 'payment',
+                'amount' => $payment->amount / 100,
+                'payment_method' => 'razorpay',
+                'order_id' => $order->id,
+                'invoice_id' => $invoice->id,
+                'data' => json_encode(['razorpay_order_id' => $payment->razorpay_order_id]),
+            ]);
+        }
+    }
+
+    /**
+     * Whether a refund was recorded long enough ago that its API call must have died.
+     */
+    protected function isRefundStale(RazorpayPayment $payment): bool
+    {
+        return $payment->status === RazorpayPayment::STATUS_REFUNDING
+            && $payment->updated_at->lt(now()->subSeconds(self::STALE_REFUND_SECONDS));
+    }
+
+    /**
+     * Hand a dead refund back to the caller, and look recent to any parallel retry.
+     */
+    protected function resumeRefund(RazorpayPayment $payment): FinalizeResult
+    {
+        $payment->touch();
+
+        return FinalizeResult::refunded(refundStarted: true);
     }
 
     /**
