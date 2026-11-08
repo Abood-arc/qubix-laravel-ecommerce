@@ -15,6 +15,7 @@ use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Http\Client\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Exceptions;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Mail;
 
@@ -168,6 +169,8 @@ it('adopts its own order after a crash instead of refunding', function () {
 });
 
 it('refunds after losing a race on the unique index', function () {
+    Exceptions::fake();
+
     $this->fakeRazorpayApi($this->payment);
 
     $repository = Mockery::mock(app(OrderRepository::class));
@@ -184,6 +187,8 @@ it('refunds after losing a race on the unique index', function () {
 
     expect($result->status)->toBe(FinalizeResult::REFUNDED)
         ->and($this->payment->fresh()->refund_reason)->toBe('already_ordered');
+
+    Exceptions::assertNotReported(UniqueConstraintViolationException::class);
 });
 
 it('refunds when the item has sold out', function () {
@@ -215,7 +220,7 @@ it('refunds when the order cannot be saved', function () {
         ->and($this->payment->fresh()->refund_reason)->toBe('order_failed');
 });
 
-it('never creates an order for or re-refunds a payment whose refund has started', function (string $status) {
+it('never creates an order for or re-refunds a payment whose refund has started', function (string $status, string $expected) {
     $this->fakeRazorpayApi($this->payment);
 
     $this->payment->update([
@@ -226,11 +231,15 @@ it('never creates an order for or re-refunds a payment whose refund has started'
 
     $result = ($this->finalizer)()->finalize($this->payment, 'pay_test');
 
-    expect($result->status)->toBe(FinalizeResult::REFUNDED)
+    expect($result->status)->toBe($expected)
         ->and($this->payment->fresh()->status)->toBe($status)
         ->and(Order::where('cart_id', $this->cart->id)->exists())->toBeFalse()
         ->and(refundRequests())->toBe(0);
-})->with([RazorpayPayment::STATUS_REFUNDING, RazorpayPayment::STATUS_REFUNDED, RazorpayPayment::STATUS_REFUND_FAILED]);
+})->with([
+    'refund in flight' => [RazorpayPayment::STATUS_REFUNDING, FinalizeResult::PENDING],
+    'refunded' => [RazorpayPayment::STATUS_REFUNDED, FinalizeResult::REFUNDED],
+    'refund failed' => [RazorpayPayment::STATUS_REFUND_FAILED, FinalizeResult::REFUNDED],
+]);
 
 it('alerts the admin when the refund fails', function () {
     $this->fakeRazorpayApi($this->payment, refundStatus: 400);
@@ -343,7 +352,7 @@ it('leaves a recent refund alone', function () {
 
     $result = ($this->finalizer)()->finalize($this->payment, 'pay_test');
 
-    expect($result->status)->toBe(FinalizeResult::REFUNDED)
+    expect($result->status)->toBe(FinalizeResult::PENDING)
         ->and($result->refundStarted)->toBeFalse()
         ->and($this->payment->fresh()->status)->toBe(RazorpayPayment::STATUS_REFUNDING)
         ->and(refundRequests())->toBe(0);
@@ -441,4 +450,23 @@ it('keeps an order pending while it is being invoiced so a crash can be repaired
 
     expect($seen['status'])->toBe('pending')
         ->and($result->order->status)->toBe('processing');
+});
+
+it('reports a unique violation that no cart order explains', function () {
+    Exceptions::fake();
+
+    $this->fakeRazorpayApi($this->payment);
+
+    $repository = Mockery::mock(app(OrderRepository::class));
+
+    $repository->shouldReceive('create')->once()->andThrow(new UniqueConstraintViolationException('mysql', 'insert', [], new Exception('duplicate increment_id')));
+
+    app()->instance(OrderRepository::class, $repository);
+
+    $result = ($this->finalizer)()->finalize($this->payment, 'pay_test');
+
+    expect($result->status)->toBe(FinalizeResult::REFUNDED)
+        ->and($this->payment->fresh()->refund_reason)->toBe('order_failed');
+
+    Exceptions::assertReported(UniqueConstraintViolationException::class);
 });

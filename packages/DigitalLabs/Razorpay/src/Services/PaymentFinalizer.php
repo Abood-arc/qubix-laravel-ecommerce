@@ -102,10 +102,14 @@ class PaymentFinalizer
     {
         $payment->refresh();
 
-        if ($payment->isRefundStarted()) {
+        if ($payment->status === RazorpayPayment::STATUS_REFUNDING) {
             return $this->isRefundStale($payment)
                 ? $this->resumeRefund($payment)
-                : FinalizeResult::refunded();
+                : FinalizeResult::pending();
+        }
+
+        if ($payment->isRefundStarted()) {
+            return FinalizeResult::refunded();
         }
 
         if ($payment->order_id) {
@@ -138,11 +142,11 @@ class PaymentFinalizer
 
             $order = $this->orderRepository->create($payment->snapshot);
         } catch (Throwable $exception) {
-            if (! $exception instanceof UniqueConstraintViolationException) {
+            $existing = $this->findCartOrder($payment);
+
+            if (! ($exception instanceof UniqueConstraintViolationException && $existing)) {
                 report($exception);
             }
-
-            $existing = $this->findCartOrder($payment);
 
             return $existing
                 ? $this->settleAgainstExisting($payment, $existing)
@@ -260,8 +264,7 @@ class PaymentFinalizer
      */
     protected function isRefundStale(RazorpayPayment $payment): bool
     {
-        return $payment->status === RazorpayPayment::STATUS_REFUNDING
-            && $payment->updated_at->lt(now()->subSeconds(self::STALE_REFUND_SECONDS));
+        return $payment->updated_at->lt(now()->subSeconds(self::STALE_REFUND_SECONDS));
     }
 
     /**
