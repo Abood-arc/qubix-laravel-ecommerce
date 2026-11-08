@@ -6,15 +6,23 @@ use DigitalLabs\Checkout\Facades\Cart;
 use DigitalLabs\Razorpay\Exceptions\RazorpayException;
 use DigitalLabs\Razorpay\Models\RazorpayPayment;
 use DigitalLabs\Razorpay\Payment\Razorpay;
+use DigitalLabs\Razorpay\Services\FinalizeResult;
+use DigitalLabs\Razorpay\Services\PaymentFinalizer;
 use DigitalLabs\Razorpay\Services\RazorpayClient;
 use DigitalLabs\Sales\Transformers\OrderResource;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
+use Illuminate\Support\Facades\Log;
 use Illuminate\View\View;
 
 class RazorpayController extends Controller
 {
-    public function __construct(protected RazorpayClient $client) {}
+    public function __construct(
+        protected RazorpayClient $client,
+        protected PaymentFinalizer $finalizer,
+    ) {}
 
     /**
      * Freeze the order and open the payment popup.
@@ -75,6 +83,70 @@ class RazorpayController extends Controller
     }
 
     /**
+     * The popup reports a successful payment.
+     */
+    public function callback(Request $request): JsonResponse
+    {
+        $data = $request->validate([
+            'razorpay_order_id' => ['required', 'string', 'max:64'],
+            'razorpay_payment_id' => ['required', 'string', 'max:64', 'regex:/^pay_\w+$/'],
+            'razorpay_signature' => ['required', 'string', 'max:128'],
+        ]);
+
+        $payment = RazorpayPayment::where('razorpay_order_id', $data['razorpay_order_id'])->first();
+
+        if (
+            ! $payment
+            || ! $this->client->isPaymentSignatureValid($data['razorpay_order_id'], $data['razorpay_payment_id'], $data['razorpay_signature'])
+        ) {
+            return $this->returnToCart(trans('razorpay::app.errors.payment-invalid'));
+        }
+
+        $result = $this->finalizer->finalize($payment, $data['razorpay_payment_id']);
+
+        return match ($result->status) {
+            FinalizeResult::ORDERED => $this->orderPlaced($result),
+            FinalizeResult::REFUNDED => $this->returnToCart($this->finalizer->customerMessage($payment->fresh())),
+            FinalizeResult::REJECTED => $this->returnToCart(trans('razorpay::app.errors.payment-invalid')),
+            default => response()->json(['pending' => true]),
+        };
+    }
+
+    /**
+     * Razorpay reports a paid order, server to server.
+     */
+    public function webhook(Request $request): JsonResponse
+    {
+        $body = $request->getContent();
+
+        if (! $this->client->isWebhookSignatureValid($body, (string) $request->header('X-Razorpay-Signature'))) {
+            return response()->json(['message' => 'Invalid signature.'], 400);
+        }
+
+        $event = json_decode($body, true);
+
+        if (data_get($event, 'event') !== 'order.paid') {
+            return response()->json();
+        }
+
+        $razorpayOrderId = data_get($event, 'payload.order.entity.id');
+
+        $razorpayPaymentId = data_get($event, 'payload.payment.entity.id');
+
+        $payment = $razorpayOrderId ? RazorpayPayment::where('razorpay_order_id', $razorpayOrderId)->first() : null;
+
+        if (! $payment || ! $razorpayPaymentId) {
+            Log::warning('Razorpay webhook for an unknown order.', ['razorpay_order_id' => $razorpayOrderId]);
+
+            return response()->json();
+        }
+
+        $result = $this->finalizer->finalize($payment, $razorpayPaymentId);
+
+        return response()->json([], $result->status === FinalizeResult::PENDING ? 503 : 200);
+    }
+
+    /**
      * Whether the cart has everything an order needs and pays with Razorpay.
      */
     protected function isReadyToPay($cart): bool
@@ -107,6 +179,26 @@ class RazorpayController extends Controller
                 'contact' => $billing['phone'],
             ],
         ];
+    }
+
+    /**
+     * Send the customer to the success page.
+     */
+    protected function orderPlaced(FinalizeResult $result): JsonResponse
+    {
+        session()->flash('order_id', $result->order->id);
+
+        return response()->json(['redirect_url' => route('shop.checkout.onepage.success')]);
+    }
+
+    /**
+     * Send the customer back to the cart with a message.
+     */
+    protected function returnToCart(string $message): JsonResponse
+    {
+        session()->flash('error', $message);
+
+        return response()->json(['redirect_url' => route('shop.checkout.cart.index')]);
     }
 
     /**

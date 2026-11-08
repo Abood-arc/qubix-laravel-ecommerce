@@ -14,3 +14,7 @@ Route::group(['middleware' => ['web', 'shop'], 'prefix' => 'razorpay'], function
         ->middleware('throttle:30,1')
         ->name('razorpay.callback');
 });
+
+Route::post('razorpay/webhook', [RazorpayController::class, 'webhook'])
+    ->middleware('throttle:120,1')
+    ->name('razorpay.webhook');
