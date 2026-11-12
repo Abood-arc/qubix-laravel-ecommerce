@@ -43,7 +43,7 @@
     {{-- The page had no heading: the admin description ("Canvas Bag", 12px on phones) was the only text above the grid. --}}
     <div class="container mt-10 px-[60px] max-lg:px-8 max-md:mt-6 max-md:px-4">
         <h1
-            class="font-dmserif text-4xl leading-tight max-md:text-[28px] max-sm:text-2xl"
+            class="font-dmserif text-4xl leading-tight text-brand max-md:text-[28px] max-sm:text-2xl"
             v-pre
         >
             {{ $category->name }}
