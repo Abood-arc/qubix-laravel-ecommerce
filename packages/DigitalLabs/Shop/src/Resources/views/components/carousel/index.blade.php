@@ -141,35 +141,26 @@
                 />
             </div>
 
-            <!-- Prev arrow -->
-            <button
-                v-if="images.length >= 2"
-                class="icon-arrow-left absolute top-1/2 z-[2] -translate-y-1/2 hidden rounded-full border border-white/70 bg-white/80 p-3 text-2xl font-bold text-zinc-900 opacity-80 shadow-md backdrop-blur transition-all hover:bg-white hover:opacity-100 focus:outline-none md:inline-block ltr:left-4 rtl:right-4"
-                aria-label="@lang('shop::components.carousel.previous')"
-                @click="navigate('prev')"
-            ></button>
-
-            <!-- Next arrow -->
-            <button
-                v-if="images.length >= 2"
-                class="icon-arrow-right absolute top-1/2 z-[2] -translate-y-1/2 hidden rounded-full border border-white/70 bg-white/80 p-3 text-2xl font-bold text-zinc-900 opacity-80 shadow-md backdrop-blur transition-all hover:bg-white hover:opacity-100 focus:outline-none md:inline-block ltr:right-4 rtl:left-4"
-                aria-label="@lang('shop::components.carousel.next')"
-                @click="navigate('next')"
-            ></button>
+            {{-- No side arrows: the banner advances on its own, swipes on phones, and the dots below jump to a slide. --}}
 
             <!-- Pagination dots -->
             <div
                 v-if="images.length >= 2"
-                class="absolute bottom-5 z-[2] flex w-full justify-center max-md:bottom-3.5 max-sm:bottom-2.5 ltr:left-0 rtl:right-0"
+                class="absolute bottom-3 z-[2] flex w-full justify-center max-sm:bottom-1.5 ltr:left-0 rtl:right-0"
             >
                 <button
                     v-for="(image, index) in images"
                     :key="'dot-' + index"
-                    class="mx-1 h-3 w-3 rounded-full border border-white/50 transition-colors focus:outline-none max-md:h-2 max-md:w-2 max-sm:h-1.5 max-sm:w-1.5"
-                    :class="index === currentIndex ? 'bg-white scale-110' : 'bg-white/30'"
+                    class="group/dot flex h-6 w-6 items-center justify-center focus:outline-none"
                     :aria-label="'Go to slide ' + (index + 1)"
+                    :aria-current="index === currentIndex ? 'true' : null"
                     @click="goTo(index)"
-                ></button>
+                >
+                    <span
+                        class="block h-2 w-2 rounded-full shadow-[0_0_0_1px_rgba(0,0,0,0.15)] transition-colors duration-200 group-focus-visible/dot:ring-2 group-focus-visible/dot:ring-white"
+                        :class="index === currentIndex ? 'bg-white' : 'bg-white/45'"
+                    ></span>
+                </button>
             </div>
         </div>
     </script>

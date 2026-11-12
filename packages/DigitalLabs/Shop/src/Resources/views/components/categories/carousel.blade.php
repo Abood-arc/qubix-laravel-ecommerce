@@ -29,7 +29,7 @@
                 v-if="title || hasOverflow"
             >
                 <h2
-                    class="font-dmserif text-3xl max-md:text-2xl max-sm:text-xl"
+                    class="w-full text-center font-dmserif text-[38px] leading-tight text-brand max-md:text-[28px] max-sm:text-2xl"
                     v-if="title"
                     v-text="title"
                 >
@@ -67,7 +67,7 @@
                     class="group block"
                     :class="useGrid ? '' : 'w-[42%] shrink-0 snap-start md:w-[calc(25%-18px)]'"
                 >
-                    <span class="block aspect-square overflow-hidden rounded-2xl bg-[#efe7d8]">
+                    <span class="block aspect-square overflow-hidden rounded-md bg-sand">
                         <x-shop::media.images.lazy
                             ::src="category.logo?.large_image_url || fallback"
                             ::srcset="`
@@ -83,7 +83,7 @@
                     </span>
 
                     <span
-                        class="mt-3 line-clamp-2 block text-base font-medium leading-6 text-zinc-900 max-sm:mt-2 max-sm:text-sm max-sm:leading-5"
+                        class="mt-3 line-clamp-2 block text-center text-[17px] font-bold leading-6 text-brand max-sm:mt-2 max-sm:text-[15px] max-sm:leading-5"
                         v-text="category.name"
                     >
                     </span>

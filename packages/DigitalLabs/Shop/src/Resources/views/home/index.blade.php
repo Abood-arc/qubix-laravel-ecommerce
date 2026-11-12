@@ -209,7 +209,7 @@
                 @case ($customization::IMAGE_CAROUSEL)
                     @if (! $isHeroCarouselRendered)
                         <section class="home-hero-section pt-0">
-                            <div class="w-full overflow-hidden bg-white shadow-[0_24px_50px_rgba(15,23,42,0.1)]">
+                            <div class="w-full overflow-hidden bg-white">
                                 <x-shop::carousel
                                     :options="$data"
                                     aria-label="{{ trans('shop::app.home.index.image-carousel') }}"

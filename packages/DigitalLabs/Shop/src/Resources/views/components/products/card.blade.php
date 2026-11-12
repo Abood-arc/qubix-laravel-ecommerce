@@ -23,7 +23,7 @@
                     :aria-label="product.name + ' '"
                 >
                     <x-shop::media.images.lazy
-                            class="after:content-[' '] relative bg-zinc-100 transition-transform duration-300 ease-[cubic-bezier(0.23,1,0.32,1)] after:block after:pb-[calc(100%+9px)] 1180:group-hover:scale-105"
+                            class="after:content-[' '] relative bg-sand transition-transform duration-300 ease-[cubic-bezier(0.23,1,0.32,1)] after:block after:pb-[calc(100%+9px)] 1180:group-hover:scale-105"
                         ::src="product.base_image.medium_image_url"
                         ::srcset="`
                             ${product.base_image.small_image_url} 150w,
@@ -66,7 +66,7 @@
                 <div class="action-items bg-black">
                     <!-- Product Sale Badge -->
                     <p
-                        class="absolute top-1.5 inline-block rounded-[44px] bg-red-600 px-2.5 text-sm text-white max-sm:px-2 max-sm:py-0.5 max-sm:text-xs ltr:left-1.5 max-sm:ltr:left-0 max-sm:ltr:rounded-l-none max-sm:ltr:rounded-r-xl rtl:right-5 max-sm:rtl:right-0 max-sm:rtl:rounded-r-none max-sm:rtl:rounded-l-xl"
+                        class="absolute top-1.5 inline-block rounded-[44px] bg-[#b5432f] px-2.5 text-sm font-semibold text-white max-sm:px-2 max-sm:py-0.5 max-sm:text-xs ltr:left-1.5 max-sm:ltr:left-0 max-sm:ltr:rounded-l-none max-sm:ltr:rounded-r-xl rtl:right-5 max-sm:rtl:right-0 max-sm:rtl:rounded-r-none max-sm:rtl:rounded-l-xl"
                         v-if="product.on_sale"
                     >
                         @lang('shop::app.components.products.card.sale')
@@ -119,14 +119,14 @@
             </div>
 
             <!-- Product Information Section -->
-            <div class="-mt-9 grid max-w-[291px] translate-y-9 content-start gap-2.5 bg-white p-2.5 transition-[transform,box-shadow,border-radius] duration-300 ease-[cubic-bezier(0.23,1,0.32,1)] group-hover:-translate-y-0 group-hover:rounded-t-xl group-hover:shadow-[0_-6px_20px_rgba(0,0,0,0.07)] max-md:relative max-md:mt-0 max-md:translate-y-0 max-md:gap-0 max-md:px-0 max-md:py-1.5 max-sm:min-w-[170px] max-sm:max-w-[192px]">
+            <div class="-mt-9 grid max-w-[291px] translate-y-9 content-start gap-2.5 bg-white p-2.5 text-center transition-[transform,box-shadow,border-radius] duration-300 ease-[cubic-bezier(0.23,1,0.32,1)] group-hover:-translate-y-0 group-hover:rounded-t-xl group-hover:shadow-[0_-6px_20px_rgba(0,0,0,0.07)] max-md:relative max-md:mt-0 max-md:translate-y-0 max-md:gap-0 max-md:px-0 max-md:py-1.5 max-sm:min-w-[170px] max-sm:max-w-[192px]">
 
                 {!! view_render_event('qubix.shop.components.products.card.name.before') !!}
 
                 {{-- Wrap between words (break-all split names like "Canva/s"), clamp to two lines and reserve both so prices line up across a row.
                      whitespace-normal overrides the product carousel's max-md:whitespace-nowrap. --}}
                 <p
-                    class="line-clamp-2 min-h-12 whitespace-normal break-words text-base font-medium leading-6 max-md:mb-1.5 max-md:max-w-56 max-sm:min-h-10 max-sm:max-w-[192px] max-sm:text-sm max-sm:leading-5"
+                    class="line-clamp-2 min-h-12 whitespace-normal break-words text-[15px] font-medium leading-6 max-md:mb-1.5 max-md:max-w-56 max-sm:min-h-10 max-sm:max-w-[192px] max-sm:text-sm max-sm:leading-5"
                     :title="product.name"
                 >
                     @{{ product.name }}
@@ -138,7 +138,7 @@
                 {!! view_render_event('qubix.shop.components.products.card.price.before') !!}
 
                 <div
-                    class="flex items-center gap-2.5 text-lg font-semibold max-sm:text-sm max-sm:leading-6"
+                    class="flex items-center justify-center gap-2.5 text-base font-bold text-brand max-sm:text-sm max-sm:leading-6"
                     v-html="product.price_html"
                 >
                 </div>
