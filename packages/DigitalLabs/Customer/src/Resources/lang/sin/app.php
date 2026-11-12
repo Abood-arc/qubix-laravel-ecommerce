@@ -9,6 +9,7 @@ return [
 
         'vat-id' => [
             'invalid-format' => 'වලංගු එක්වර්තකයක් නොවේ',
+            'invalid-gstin-format' => 'GSTIN ආකෘතිය වලංගු නොවේ. උදාහරණය: 27AAPFU0939F1ZV',
         ],
     ],
 ];

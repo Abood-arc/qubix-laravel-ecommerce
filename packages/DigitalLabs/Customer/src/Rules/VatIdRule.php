@@ -28,7 +28,11 @@ class VatIdRule implements ValidationRule
         $validator = new VatValidator;
 
         if (! empty($value) && ! $validator->validate($value, $this->country)) {
-            $fail('customer::app.validations.vat-id.invalid-format')->translate();
+            // India's tax number is a GSTIN, and the checkout labels the field that way.
+            $fail($this->country === 'IN'
+                ? 'customer::app.validations.vat-id.invalid-gstin-format'
+                : 'customer::app.validations.vat-id.invalid-format'
+            )->translate();
         }
     }
 

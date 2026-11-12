@@ -12,22 +12,6 @@
                 />
             </x-shop::form.control-group>
 
-            <!-- Company Name -->
-            <x-shop::form.control-group>
-                <x-shop::form.control-group.label>
-                    @lang('shop::app.checkout.onepage.address.company-name')
-                </x-shop::form.control-group.label>
-
-                <x-shop::form.control-group.control
-                    type="text"
-                    ::name="controlName + '.company_name'"
-                    ::value="address.company_name"
-                    :placeholder="trans('shop::app.checkout.onepage.address.company-name')"
-                />
-            </x-shop::form.control-group>
-
-            {!! view_render_event('qubix.shop.checkout.onepage.address.form.company_name.after') !!}
-
             <!-- First Name -->
             <div class="grid grid-cols-2 gap-x-5 max-md:grid-cols-1">
                 <x-shop::form.control-group>
@@ -39,6 +23,7 @@
                         type="text"
                         ::name="controlName + '.first_name'"
                         ::value="address.first_name"
+                        autocomplete="given-name"
                         rules="required"
                         :label="trans('shop::app.checkout.onepage.address.first-name')"
                         :placeholder="trans('shop::app.checkout.onepage.address.first-name')"
@@ -59,6 +44,7 @@
                         type="text"
                         ::name="controlName + '.last_name'"
                         ::value="address.last_name"
+                        autocomplete="family-name"
                         rules="required"
                         :label="trans('shop::app.checkout.onepage.address.last-name')"
                         :placeholder="trans('shop::app.checkout.onepage.address.last-name')"
@@ -80,6 +66,7 @@
                     type="email"
                     ::name="controlName + '.email'"
                     ::value="address.email"
+                    autocomplete="email"
                     rules="required|email"
                     :label="trans('shop::app.checkout.onepage.address.email')"
                     placeholder="email@example.com"
@@ -89,27 +76,6 @@
             </x-shop::form.control-group>
 
             {!! view_render_event('qubix.shop.checkout.onepage.address.form.email.after') !!}
-
-            <!-- Vat ID -->
-            <template v-if="controlName=='billing'">
-                <x-shop::form.control-group>
-                    <x-shop::form.control-group.label>
-                        @lang('shop::app.checkout.onepage.address.vat-id')
-                    </x-shop::form.control-group.label>
-
-                    <x-shop::form.control-group.control
-                        type="text"
-                        ::name="controlName + '.vat_id'"
-                        ::value="address.vat_id"
-                        :label="trans('shop::app.checkout.onepage.address.vat-id')"
-                        :placeholder="trans('shop::app.checkout.onepage.address.vat-id')"
-                    />
-
-                    <x-shop::form.control-group.error ::name="controlName + '.vat_id'" />
-                </x-shop::form.control-group>
-
-                {!! view_render_event('qubix.shop.checkout.onepage.address.form.vat_id.after') !!}
-            </template>
 
             <!-- Street Address -->
             <x-shop::form.control-group>
@@ -121,6 +87,7 @@
                     type="text"
                     ::name="controlName + '.address.[0]'"
                     ::value="address.address[0]"
+                    autocomplete="address-line1"
                     rules="required|address"
                     :label="trans('shop::app.checkout.onepage.address.street-address')"
                     :placeholder="trans('shop::app.checkout.onepage.address.street-address')"
@@ -161,8 +128,9 @@
                     <x-shop::form.control-group.control
                         type="select"
                         ::name="controlName + '.country'"
-                        ::value="address.country"
+                        ::value="address.country || defaultCountry"
                         v-model="selectedCountry"
+                        autocomplete="country"
                         rules="{{ core()->isCountryRequired() ? 'required' : '' }}"
                         :label="trans('shop::app.checkout.onepage.address.country')"
                         :placeholder="trans('shop::app.checkout.onepage.address.country')"
@@ -242,6 +210,7 @@
                         type="text"
                         ::name="controlName + '.city'"
                         ::value="address.city"
+                        autocomplete="address-level2"
                         rules="required"
                         :label="trans('shop::app.checkout.onepage.address.city')"
                         :placeholder="trans('shop::app.checkout.onepage.address.city')"
@@ -255,16 +224,19 @@
                 <!-- Postcode -->
                 <x-shop::form.control-group>
                     <x-shop::form.control-group.label class="{{ core()->isPostCodeRequired() ? 'required' : '' }} !mt-0">
-                        @lang('shop::app.checkout.onepage.address.postcode')
+                        <template v-if="isIndia">@lang('shop::app.checkout.onepage.address.pin-code')</template>
+                        <template v-else>@lang('shop::app.checkout.onepage.address.postcode')</template>
                     </x-shop::form.control-group.label>
 
                     <x-shop::form.control-group.control
                         type="text"
                         ::name="controlName + '.postcode'"
                         ::value="address.postcode"
+                        ::inputmode="isIndia ? 'numeric' : 'text'"
+                        autocomplete="postal-code"
                         rules="{{ core()->isPostCodeRequired() ? 'required' : '' }}|postcode"
-                        :label="trans('shop::app.checkout.onepage.address.postcode')"
-                        :placeholder="trans('shop::app.checkout.onepage.address.postcode')"
+                        ::label="isIndia ? {{ json_encode(trans('shop::app.checkout.onepage.address.pin-code')) }} : {{ json_encode(trans('shop::app.checkout.onepage.address.postcode')) }}"
+                        ::placeholder="isIndia ? {{ json_encode(trans('shop::app.checkout.onepage.address.pin-code')) }} : {{ json_encode(trans('shop::app.checkout.onepage.address.postcode')) }}"
                     />
 
                     <x-shop::form.control-group.error ::name="controlName + '.postcode'" />
@@ -280,9 +252,10 @@
                 </x-shop::form.control-group.label>
 
                 <x-shop::form.control-group.control
-                    type="text"
+                    type="tel"
                     ::name="controlName + '.phone'"
                     ::value="address.phone"
+                    autocomplete="tel"
                     rules="required|phone"
                     :label="trans('shop::app.checkout.onepage.address.telephone')"
                     :placeholder="trans('shop::app.checkout.onepage.address.telephone')"
@@ -292,6 +265,61 @@
             </x-shop::form.control-group>
 
             {!! view_render_event('qubix.shop.checkout.onepage.address.form.phone.after') !!}
+
+            {{--
+                Company and tax ID sit last. For an Indian address most shoppers never need them, so
+                they open behind a "GST invoice" link and the tax field is labelled GSTIN (VatValidator
+                checks the GSTIN format for IN). Other countries see both fields as before, labelled VAT.
+            --}}
+            <template v-if="! isIndia || showBusinessFields">
+                <!-- Company Name -->
+                <x-shop::form.control-group>
+                    <x-shop::form.control-group.label>
+                        @lang('shop::app.checkout.onepage.address.company-name')
+                    </x-shop::form.control-group.label>
+
+                    <x-shop::form.control-group.control
+                        type="text"
+                        ::name="controlName + '.company_name'"
+                        ::value="address.company_name"
+                        autocomplete="organization"
+                        :placeholder="trans('shop::app.checkout.onepage.address.company-name')"
+                    />
+                </x-shop::form.control-group>
+
+                {!! view_render_event('qubix.shop.checkout.onepage.address.form.company_name.after') !!}
+
+                <!-- Vat ID / GSTIN -->
+                <template v-if="controlName=='billing'">
+                    <x-shop::form.control-group>
+                        <x-shop::form.control-group.label>
+                            <template v-if="isIndia">@lang('shop::app.checkout.onepage.address.gstin')</template>
+                            <template v-else>@lang('shop::app.checkout.onepage.address.vat-id')</template>
+                        </x-shop::form.control-group.label>
+
+                        <x-shop::form.control-group.control
+                            type="text"
+                            ::name="controlName + '.vat_id'"
+                            ::value="address.vat_id"
+                            ::label="isIndia ? {{ json_encode(trans('shop::app.checkout.onepage.address.gstin')) }} : {{ json_encode(trans('shop::app.checkout.onepage.address.vat-id')) }}"
+                            ::placeholder="isIndia ? {{ json_encode(trans('shop::app.checkout.onepage.address.gstin-placeholder')) }} : {{ json_encode(trans('shop::app.checkout.onepage.address.vat-id')) }}"
+                        />
+
+                        <x-shop::form.control-group.error ::name="controlName + '.vat_id'" />
+                    </x-shop::form.control-group>
+
+                    {!! view_render_event('qubix.shop.checkout.onepage.address.form.vat_id.after') !!}
+                </template>
+            </template>
+
+            <button
+                type="button"
+                class="mb-4 py-2 text-sm font-medium text-[#1f5f4f] underline underline-offset-4"
+                v-else
+                @click="showBusinessFields = true"
+            >
+                @lang('shop::app.checkout.onepage.address.gst-invoice-toggle')
+            </button>
         </div>
     </script>
 
@@ -325,8 +353,15 @@
             },
 
             data() {
+                {{-- The store's own country (admin: Sales > Shipping > Origin) preselects an empty address. --}}
+                const defaultCountry = @json(core()->getConfigData('sales.shipping.origin.country') ?? '');
+
                 return {
-                    selectedCountry: this.address.country,
+                    defaultCountry,
+
+                    selectedCountry: this.address.country || defaultCountry,
+
+                    showBusinessFields: !! (this.address.company_name || this.address.vat_id),
 
                     countries: [],
 
@@ -337,6 +372,10 @@
             computed: {
                 haveStates() {
                     return !! this.states[this.selectedCountry]?.length;
+                },
+
+                isIndia() {
+                    return this.selectedCountry === 'IN';
                 },
             },
 

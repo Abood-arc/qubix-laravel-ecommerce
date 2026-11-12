@@ -9,6 +9,7 @@ return [
 
         'vat-id' => [
             'invalid-format' => 'Format NPWP tidak valid.',
+            'invalid-gstin-format' => 'Format GSTIN tidak valid. Contoh: 27AAPFU0939F1ZV',
         ],
     ],
 ];

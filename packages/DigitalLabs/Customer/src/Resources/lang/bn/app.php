@@ -9,6 +9,7 @@ return [
 
         'vat-id' => [
             'invalid-format' => 'অবৈধ ভ্যাট ফরম্যাট',
+            'invalid-gstin-format' => 'GSTIN ফরম্যাট সঠিক নয়। উদাহরণ: 27AAPFU0939F1ZV',
         ],
     ],
 ];

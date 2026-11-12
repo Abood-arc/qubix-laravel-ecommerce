@@ -9,6 +9,7 @@ return [
 
         'vat-id' => [
             'invalid-format' => 'अमान्य वीएट प्रारूप',
+            'invalid-gstin-format' => 'GSTIN का प्रारूप गलत है। उदाहरण: 27AAPFU0939F1ZV',
         ],
     ],
 ];

@@ -9,6 +9,7 @@ return [
 
         'vat-id' => [
             'invalid-format' => '無効な消費税形式',
+            'invalid-gstin-format' => 'GSTINの形式が正しくありません。例: 27AAPFU0939F1ZV',
         ],
     ],
 ];

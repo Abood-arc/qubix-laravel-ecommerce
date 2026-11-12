@@ -9,6 +9,7 @@ return [
 
         'vat-id' => [
             'invalid-format' => '无效的增值税格式',
+            'invalid-gstin-format' => 'GSTIN 格式无效。示例：27AAPFU0939F1ZV',
         ],
     ],
 ];

@@ -9,6 +9,7 @@ return [
 
         'vat-id' => [
             'invalid-format' => 'Geçersiz KDV Formatı',
+            'invalid-gstin-format' => 'Geçersiz GSTIN biçimi. Örnek: 27AAPFU0939F1ZV',
         ],
     ],
 ];

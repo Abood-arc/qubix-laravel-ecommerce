@@ -9,6 +9,7 @@ return [
 
         'vat-id' => [
             'invalid-format' => 'Formato inválido de VAT',
+            'invalid-gstin-format' => 'Formato de GSTIN inválido. Exemplo: 27AAPFU0939F1ZV',
         ],
     ],
 ];
