@@ -145,6 +145,29 @@
 
                 {!! view_render_event('qubix.shop.components.products.card.price.after') !!}
 
+                <!-- Phone: a visible Add to cart (the hover action row below is desktop-only). -->
+                @if (core()->getConfigData('sales.checkout.shopping_cart.cart_page'))
+                    <button
+                        type="button"
+                        class="mt-2 hidden h-10 w-full items-center justify-center gap-1.5 rounded-full border border-navyBlue text-sm font-semibold text-navyBlue transition-[background-color,color,transform] duration-150 active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-50 max-md:flex"
+                        :class="{ 'cart-add-btn--loading': isAddingToCart }"
+                        :disabled="! product.is_saleable || isAddingToCart"
+                        @click="addToCart()"
+                    >
+                        <template v-if="isAddingToCart">
+                            <span class="cart-dots" aria-hidden="true">
+                                <span class="cart-dot"></span>
+                                <span class="cart-dot"></span>
+                                <span class="cart-dot"></span>
+                            </span>
+                        </template>
+
+                        <template v-else>
+                            @lang('shop::app.components.products.card.add-to-cart')
+                        </template>
+                    </button>
+                @endif
+
                 <!-- Product Actions Section -->
                 <div class="action-items flex items-center justify-between translate-y-2 opacity-0 transition-[transform,opacity] duration-300 ease-[cubic-bezier(0.23,1,0.32,1)] group-hover:translate-y-0 group-hover:opacity-100 max-md:hidden">
                     @if (core()->getConfigData('sales.checkout.shopping_cart.cart_page'))

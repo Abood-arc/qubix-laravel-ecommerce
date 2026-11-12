@@ -270,6 +270,17 @@
                     },
                 },
 
+                mounted() {
+                    /* Follow the viewport live: the phone filter bar vs the desktop sidebar was picked once at load. */
+                    this.mobileQuery = window.matchMedia('(max-width: 767px)');
+
+                    this.mobileQuery.addEventListener('change', this.onMobileQueryChange);
+                },
+
+                beforeUnmount() {
+                    this.mobileQuery?.removeEventListener('change', this.onMobileQueryChange);
+                },
+
                 watch: {
                     queryParams() {
                         this.getProducts();
@@ -281,6 +292,10 @@
                 },
 
                 methods: {
+                    onMobileQueryChange(event) {
+                        this.isMobile = event.matches;
+                    },
+
                     setFilters(type, filters) {
                         this.filters[type] = filters;
                     },

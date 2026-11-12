@@ -11,7 +11,10 @@
         type="text/x-template"
         id="v-products-carousel-template"
     >
-        {{-- Centred green title, a clean row, one "View all" pill; side arrows only when the row overflows on desktop. --}}
+        {{--
+            A calm grid instead of a scrolling row with arrows: up to 8 products on desktop (two rows
+            of four), 6 on tablets, 4 on phones; "View all" leads to the rest.
+        --}}
         <div
             class="container mt-16 max-lg:px-8 max-md:mt-10 max-sm:!px-4"
             v-if="! isLoading && products.length"
@@ -20,36 +23,15 @@
                 @{{ title }}
             </h2>
 
-            <div class="relative mt-8 max-md:mt-5">
-                <div
-                    ref="swiperContainer"
-                    class="flex gap-6 pb-2.5 [&>*]:flex-[0] overflow-auto scroll-smooth scrollbar-hide max-md:gap-4 max-md:pb-0 max-md:whitespace-nowrap"
-                >
-                    <x-shop::products.card
-                        class="min-w-[291px] max-md:h-fit max-md:min-w-56 max-sm:min-w-[192px]"
-                        v-for="product in products"
-                    />
-                </div>
-
-                <template v-if="products.length > 4 || (products.length > 3 && isScreenMax2xl)">
-                    <button
-                        type="button"
-                        class="icon-arrow-left-stylish rtl:icon-arrow-right-stylish absolute top-[38%] z-[2] flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-white text-xl text-zinc-900 shadow-[0_1px_2px_rgba(0,0,0,0.08),0_6px_16px_rgba(20,40,30,0.14)] transition-transform duration-150 active:scale-95 max-lg:hidden ltr:-left-5 rtl:-right-5"
-                        aria-label="@lang('shop::app.components.products.carousel.previous')"
-                        @click="swipeLeft"
-                    ></button>
-
-                    <button
-                        type="button"
-                        class="icon-arrow-right-stylish rtl:icon-arrow-left-stylish absolute top-[38%] z-[2] flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-white text-xl text-zinc-900 shadow-[0_1px_2px_rgba(0,0,0,0.08),0_6px_16px_rgba(20,40,30,0.14)] transition-transform duration-150 active:scale-95 max-lg:hidden ltr:-right-5 rtl:-left-5"
-                        aria-label="@lang('shop::app.components.products.carousel.next')"
-                        @click="swipeRight"
-                    ></button>
-                </template>
+            <div class="mt-8 grid grid-cols-4 justify-items-center gap-x-6 gap-y-10 max-1060:grid-cols-3 max-md:mt-5 max-md:grid-cols-2 max-md:gap-x-4 max-md:gap-y-8">
+                <x-shop::products.card
+                    v-for="(product, index) in products.slice(0, 8)"
+                    ::class="[index >= 6 ? 'max-1060:hidden' : '', index >= 4 ? 'max-md:hidden' : '']"
+                />
             </div>
 
             <div
-                class="mt-8 flex justify-center max-md:mt-6"
+                class="mt-10 flex justify-center max-md:mt-8"
                 v-if="navigationLink"
             >
                 <a
