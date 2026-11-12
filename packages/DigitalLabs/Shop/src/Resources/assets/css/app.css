@@ -658,6 +658,13 @@ img.lazy {
 
 /* ── Header scroll behaviour ─────────────────────────────────────── */
 /* NOTE: do NOT set position here — Tailwind's sticky class must remain in effect */
+/* Product page: room under the footer for the fixed mobile buy bar (products/view.blade.php). */
+@media (max-width: 767px) {
+    body:has(.pdp-buy-bar) {
+        padding-bottom: calc(4.75rem + env(safe-area-inset-bottom));
+    }
+}
+
 /* One header green in every state; scrolling only adds a soft shadow. */
 #main-header {
     transition: box-shadow 200ms ease;

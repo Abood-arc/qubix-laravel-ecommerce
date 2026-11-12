@@ -304,7 +304,7 @@
 
                                     @if (core()->getConfigData('customer.settings.wishlist.wishlist_option'))
                                         <div
-                                            class="flex max-h-[46px] min-h-[46px] min-w-[46px] cursor-pointer items-center justify-center rounded-full border bg-white text-2xl transition-all hover:opacity-[0.8] max-sm:max-h-7 max-sm:min-h-7 max-sm:min-w-7 max-sm:text-base"
+                                            class="flex max-h-[46px] min-h-[46px] min-w-[46px] cursor-pointer items-center justify-center rounded-full border bg-white text-2xl transition-opacity hover:opacity-[0.8] max-sm:max-h-10 max-sm:min-h-10 max-sm:min-w-10 max-sm:text-xl"
                                             role="button"
                                             aria-label="@lang('shop::app.products.view.add-to-wishlist')"
                                             tabindex="0"
@@ -386,13 +386,20 @@
 
                                 <!-- Product Actions and Quantity Box -->
                                 {{--
-                                    max-sm:pr-20 reserves the bottom-right corner column (the
-                                    third-party Zander chat widget's launcher icon sits fixed
-                                    there, ~64px wide with a 16px margin, on every page — it has
-                                    no documented offset/position config, so the row is kept
-                                    clear of that corner instead of fighting the widget itself).
+                                    Below md this row is a buy bar fixed to the bottom of the screen
+                                    (body padding for it lives in app.css under .pdp-buy-bar), so
+                                    Add To Cart is always one thumb away. pr-[88px] keeps the bar's
+                                    right end clear for the third-party Zander chat launcher, which
+                                    sits fixed 20px from the bottom-right corner inside its own
+                                    shadow DOM and has no documented offset setting.
+                                    Add To Cart is the filled primary action unless Buy Now is on.
                                 --}}
-                                <div class="mt-8 flex max-w-[470px] gap-4 max-sm:mt-4 max-sm:pr-20">
+                                @php
+                                    $showBuyNow = core()->getConfigData('catalog.products.storefront.buy_now_button_display');
+                                    $addToCartStyle = $showBuyNow ? 'secondary-button' : 'primary-button';
+                                @endphp
+
+                                <div class="pdp-buy-bar mt-8 flex max-w-[470px] gap-4 max-md:fixed max-md:inset-x-0 max-md:bottom-0 max-md:z-20 max-md:m-0 max-md:max-w-none max-md:gap-2 max-md:border-t max-md:border-zinc-200 max-md:bg-white max-md:px-4 max-md:pb-[calc(0.75rem+env(safe-area-inset-bottom))] max-md:pr-[88px] max-md:pt-3 max-md:shadow-[0_-4px_16px_rgba(10,30,24,0.08)]">
 
                                     {!! view_render_event('qubix.shop.products.view.quantity.before', ['product' => $product]) !!}
 
@@ -400,7 +407,7 @@
                                         <x-shop::quantity-changer
                                             name="quantity"
                                             value="1"
-                                            class="gap-x-4 rounded-xl px-7 py-4 max-md:py-3 max-sm:gap-x-5 max-sm:rounded-lg max-sm:px-4 max-sm:py-1.5"
+                                            class="gap-x-4 rounded-xl px-7 py-4 max-md:h-12 max-md:shrink-0 max-md:gap-x-3 max-md:rounded-lg max-md:px-3 max-md:py-0"
                                         />
                                     @endif
 
@@ -412,8 +419,8 @@
 
                                         <x-shop::button
                                             type="submit"
-                                            class="secondary-button w-full max-w-full max-md:py-3 max-sm:rounded-lg max-sm:py-1.5"
-                                            button-type="secondary-button"
+                                            class="{{ $addToCartStyle }} w-full max-w-full max-md:h-12 max-md:whitespace-nowrap max-md:rounded-lg max-md:px-4 max-md:py-0"
+                                            button-type="{{ $addToCartStyle }}"
                                             :loading="false"
                                             :title="trans('shop::app.products.view.add-to-cart')"
                                             :disabled="! $product->isSaleable(1)"
@@ -430,7 +437,7 @@
                                 @if (core()->getConfigData('sales.checkout.shopping_cart.cart_page'))
                                     {!! view_render_event('qubix.shop.products.view.buy_now.before', ['product' => $product]) !!}
 
-                                    @if (core()->getConfigData('catalog.products.storefront.buy_now_button_display'))
+                                    @if ($showBuyNow)
                                         <x-shop::button
                                             type="submit"
                                             class="primary-button mt-5 w-full max-w-[470px] max-md:py-3 max-sm:mt-3 max-sm:mr-20 max-sm:rounded-lg max-sm:py-1.5"
