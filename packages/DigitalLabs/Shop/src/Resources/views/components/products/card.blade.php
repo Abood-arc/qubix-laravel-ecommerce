@@ -123,9 +123,10 @@
 
                 {!! view_render_event('qubix.shop.components.products.card.name.before') !!}
 
-                {{-- Wrap between words (break-all split names like "Canva/s"), clamp to two lines and reserve both so prices line up across a row. --}}
+                {{-- Wrap between words (break-all split names like "Canva/s"), clamp to two lines and reserve both so prices line up across a row.
+                     whitespace-normal overrides the product carousel's max-md:whitespace-nowrap. --}}
                 <p
-                    class="line-clamp-2 min-h-12 break-words text-base font-medium leading-6 max-md:mb-1.5 max-md:max-w-56 max-sm:min-h-10 max-sm:max-w-[192px] max-sm:text-sm max-sm:leading-5"
+                    class="line-clamp-2 min-h-12 whitespace-normal break-words text-base font-medium leading-6 max-md:mb-1.5 max-md:max-w-56 max-sm:min-h-10 max-sm:max-w-[192px] max-sm:text-sm max-sm:leading-5"
                     :title="product.name"
                 >
                     @{{ product.name }}
