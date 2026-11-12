@@ -877,6 +877,8 @@ return [
         'view' => [
             'empty' => 'У цій категорії немає товарів',
             'load-more' => 'Завантажити ще',
+            'product-count' => 'Товарів: :count',
+            'product-count-one' => 'Товарів: 1',
         ],
     ],
 

@@ -877,6 +877,8 @@ return [
         'view' => [
             'empty' => 'Brak dostępnych produktów w tej kategorii',
             'load-more' => 'Wczytaj więcej',
+            'product-count' => ':count produktów',
+            'product-count-one' => '1 produkt',
         ],
     ],
 

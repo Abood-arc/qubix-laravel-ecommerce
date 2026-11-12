@@ -877,6 +877,8 @@ return [
         'view' => [
             'empty' => 'このカテゴリには利用可能な製品がありません',
             'load-more' => 'さらに読み込む',
+            'product-count' => ':count 件の商品',
+            'product-count-one' => '1 件の商品',
         ],
     ],
 

@@ -877,6 +877,8 @@ return [
         'view' => [
             'empty' => 'В этой категории нет доступных товаров',
             'load-more' => 'Загрузить еще',
+            'product-count' => 'Товаров: :count',
+            'product-count-one' => 'Товаров: 1',
         ],
     ],
 

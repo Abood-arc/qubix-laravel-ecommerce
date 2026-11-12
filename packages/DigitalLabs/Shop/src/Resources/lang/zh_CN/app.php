@@ -877,6 +877,8 @@ return [
         'view' => [
             'empty' => '此类别中没有可用产品',
             'load-more' => '加载更多',
+            'product-count' => ':count 件商品',
+            'product-count-one' => '1 件商品',
         ],
     ],
 

@@ -12,9 +12,9 @@
     </v-filters>
 </div>
 
-<!-- Mobile Filters Navigation -->
+<!-- Mobile Filters Navigation (body bottom padding for it: .category-mobile-bar in app.css) -->
 <div
-    class="fixed bottom-0 z-10 grid w-full max-w-full grid-cols-[1fr_auto_1fr] items-center justify-items-center border-t border-zinc-200 bg-white px-5 ltr:left-0 rtl:right-0"
+    class="category-mobile-bar fixed bottom-0 z-10 grid w-full max-w-full grid-cols-[1fr_auto_1fr] items-center justify-items-center border-t border-zinc-200 bg-white px-5 pb-[env(safe-area-inset-bottom)] ltr:left-0 rtl:right-0"
     v-if="isMobile"
 >
     <!-- Filter Drawer -->
@@ -28,6 +28,8 @@
             <div
                 class="flex cursor-pointer items-center gap-x-2.5 px-2.5 py-3.5 text-base font-medium uppercase max-md:py-3"
                 @click="isDrawerActive.filter = true"
+                role="button"
+                tabindex="0"
             >
                 <span class="icon-filter-1 text-2xl"></span>
 
@@ -78,6 +80,8 @@
             <div
                 class="flex cursor-pointer items-center gap-x-2.5 px-2.5 py-3.5 text-base font-medium uppercase max-md:py-3"
                 @click="isDrawerActive.toolbar = true"
+                role="button"
+                tabindex="0"
             >
                 <span class="icon-sort-1 text-2xl"></span>
 

@@ -877,6 +877,8 @@ return [
         'view' => [
             'empty' => 'इस श्रेणी में कोई उत्पाद उपलब्ध नहीं है',
             'load-more' => 'और लोड करें',
+            'product-count' => ':count उत्पाद',
+            'product-count-one' => '1 उत्पाद',
         ],
     ],
 

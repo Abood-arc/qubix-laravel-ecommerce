@@ -877,6 +877,8 @@ return [
         'view' => [
             'empty' => 'אין מוצרים זמינים בקטגוריה זו',
             'load-more' => 'טען עוד',
+            'product-count' => ':count מוצרים',
+            'product-count-one' => 'מוצר אחד',
         ],
     ],
 

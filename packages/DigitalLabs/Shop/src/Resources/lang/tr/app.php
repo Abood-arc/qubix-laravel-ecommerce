@@ -877,6 +877,8 @@ return [
         'view' => [
             'empty' => 'Bu kategoride ürün bulunamadı.',
             'load-more' => 'Daha Fazla Yükle',
+            'product-count' => ':count ürün',
+            'product-count-one' => '1 ürün',
         ],
     ],
 

@@ -877,6 +877,8 @@ return [
         'view' => [
             'empty' => 'এই বিভাগে কোনও পণ্য উপলব্ধ নেই',
             'load-more' => 'আরও দেখুন',
+            'product-count' => ':count টি পণ্য',
+            'product-count-one' => '১ টি পণ্য',
         ],
     ],
 

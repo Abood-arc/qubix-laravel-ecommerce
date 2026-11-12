@@ -877,6 +877,8 @@ return [
         'view' => [
             'empty' => 'මෙම ප්‍රභේදයේ කිසිවක් නොපවතී',
             'load-more' => 'අලවන්න',
+            'product-count' => 'නිෂ්පාදන :count',
+            'product-count-one' => 'නිෂ්පාදන 1',
         ],
     ],
 

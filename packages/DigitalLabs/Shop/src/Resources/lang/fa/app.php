@@ -877,6 +877,8 @@ return [
         'view' => [
             'empty' => 'در این دسته بندی محصولی موجود نمی‌باشد',
             'load-more' => 'بارگذاری بیشتر',
+            'product-count' => ':count محصول',
+            'product-count-one' => '1 محصول',
         ],
     ],
 
