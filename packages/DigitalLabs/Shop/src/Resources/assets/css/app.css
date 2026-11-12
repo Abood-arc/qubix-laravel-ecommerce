@@ -547,7 +547,7 @@ img.lazy {
     .glow-404 {
         background-clip: text;
         -webkit-background-clip: text;
-        color: #060C3B;
+        color: #1f5f4f;
     }
 
     .glow-shadow-404 {

@@ -178,7 +178,7 @@
                                                     <template v-if="attribute?.attribute_type === 'file'">
                                                         <a
                                                             :href="attribute.file_url"
-                                                            class="text-blue-700"
+                                                            class="text-navyBlue"
                                                             target="_blank"
                                                             :download="attribute.file_name"
                                                         >
@@ -216,7 +216,7 @@
                                 <!-- Cart Item Remove Button -->
                                 <button
                                     type="button"
-                                    class="text-blue-700 max-md:text-sm"
+                                    class="text-navyBlue max-md:text-sm"
                                     @click="removeItem(item.id)"
                                 >
                                     @lang('shop::app.checkout.cart.mini-cart.remove')

@@ -61,7 +61,7 @@
 
                     <button
                         type="submit"
-                        class="text-blue-600 hover:text-blue-800 hover:underline"
+                        class="text-navyBlue hover:text-navyBlue hover:underline"
                         aria-label="{{ trans('shop::app.components.layouts.header.desktop.bottom.submit') }}"
                     >
                         {{ $searchInstead }}

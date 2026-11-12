@@ -36,7 +36,7 @@
                                 <a
                                     href="https://maps.google.com/maps?q={{ $bookingProduct->location }}"
                                     target="_blank"
-                                    class="w-fit text-blue-600 hover:text-blue-800"
+                                    class="w-fit text-navyBlue hover:text-navyBlue"
                                 >
                                     @lang('shop::app.products.view.type.booking.view-on-map')
                                 </a>

@@ -29,7 +29,10 @@ module.exports = {
 
         extend: {
             colors: {
-                navyBlue: "#060C3B",
+                // Brand green (the header colour). `navyBlue` is the template's legacy name for the
+                // primary colour and is used across 36 views, so it now points at the brand too.
+                brand: "#1f5f4f",
+                navyBlue: "#1f5f4f",
                 lightOrange: "#F6F2EB",
                 darkGreen: '#40994A',
                 darkBlue: '#0044F2',
