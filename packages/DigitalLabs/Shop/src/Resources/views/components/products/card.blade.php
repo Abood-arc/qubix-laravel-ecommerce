@@ -11,7 +11,7 @@
     >
         <!-- Grid Card -->
         <div
-            class="group w-full rounded-xl 1180:relative 1180:grid 1180:content-start 1180:overflow-hidden 1180:transition-all 1180:duration-300 1180:hover:-translate-y-1 1180:hover:shadow-[0_20px_48px_rgba(0,0,0,0.13)]"
+            class="group w-full rounded-xl 1180:relative 1180:grid 1180:content-start 1180:overflow-hidden 1180:transition-[transform,box-shadow] 1180:duration-200 1180:ease-[cubic-bezier(0.23,1,0.32,1)] 1180:hover:-translate-y-1 1180:hover:shadow-[0_20px_48px_rgba(0,0,0,0.13)]"
             v-if="mode != 'list'"
         >
             <div class="relative max-h-[300px] max-w-[291px] overflow-hidden rounded-t-xl max-md:max-h-60 max-md:max-w-full max-md:rounded-lg max-sm:max-h-[200px] max-sm:max-w-full">
@@ -23,7 +23,7 @@
                     :aria-label="product.name + ' '"
                 >
                     <x-shop::media.images.lazy
-                            class="after:content-[' '] relative bg-zinc-100 transition-all duration-500 ease-[cubic-bezier(0.25,0.46,0.45,0.94)] after:block after:pb-[calc(100%+9px)] group-hover:scale-110"
+                            class="after:content-[' '] relative bg-zinc-100 transition-transform duration-300 ease-[cubic-bezier(0.23,1,0.32,1)] after:block after:pb-[calc(100%+9px)] 1180:group-hover:scale-105"
                         ::src="product.base_image.medium_image_url"
                         ::srcset="`
                             ${product.base_image.small_image_url} 150w,
@@ -37,12 +37,6 @@
                         ::alt="product.name"
                     />
                 </a>
-
-                <!-- Depth overlay: fades in on hover, hidden on mobile -->
-                <div
-                    class="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/30 via-black/5 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100 max-md:hidden"
-                    aria-hidden="true"
-                ></div>
 
                 {!! view_render_event('qubix.shop.components.products.card.image.after') !!}
 
@@ -86,13 +80,14 @@
                         @lang('shop::app.components.products.card.new')
                     </p>
 
-                    <div class="opacity-0 transition-all duration-300 group-hover:bottom-0 group-hover:opacity-100 max-lg:opacity-100 max-sm:opacity-100">
+                    {{-- Below md the wishlist/compare buttons sit on the image (the card's action row is hidden there); 36px so a thumb can hit them. --}}
+                    <div class="opacity-0 transition-opacity duration-300 group-hover:opacity-100 max-lg:opacity-100">
 
                         {!! view_render_event('qubix.shop.components.products.card.wishlist_option.before') !!}
 
                         @if (core()->getConfigData('customer.settings.wishlist.wishlist_option'))
                             <span
-                                class="absolute top-2.5 flex h-6 w-6 items-center justify-center rounded-full border border-zinc-200 bg-white text-lg md:hidden ltr:right-1.5 rtl:left-1.5"
+                                class="absolute top-1.5 flex h-9 w-9 cursor-pointer items-center justify-center rounded-full border border-zinc-200 bg-white text-xl md:hidden ltr:right-1.5 rtl:left-1.5"
                                 role="button"
                                 aria-label="@lang('shop::app.components.products.card.add-to-wishlist')"
                                 tabindex="0"
@@ -108,7 +103,7 @@
 
                         @if (core()->getConfigData('catalog.products.settings.compare_option'))
                             <span
-                                class="icon-compare absolute top-10 flex h-6 w-6 items-center justify-center rounded-full border border-zinc-200 bg-white text-lg sm:hidden ltr:right-1.5 rtl:left-1.5"
+                                class="icon-compare absolute top-12 flex h-9 w-9 cursor-pointer items-center justify-center rounded-full border border-zinc-200 bg-white text-xl md:hidden ltr:right-1.5 rtl:left-1.5"
                                 role="button"
                                 aria-label="@lang('shop::app.components.products.card.add-to-compare')"
                                 tabindex="0"
@@ -124,11 +119,15 @@
             </div>
 
             <!-- Product Information Section -->
-            <div class="-mt-9 grid max-w-[291px] translate-y-9 content-start gap-2.5 bg-white p-2.5 transition-all duration-300 ease-[cubic-bezier(0.25,0.46,0.45,0.94)] group-hover:-translate-y-0 group-hover:rounded-t-xl group-hover:shadow-[0_-6px_20px_rgba(0,0,0,0.07)] max-md:relative max-md:mt-0 max-md:translate-y-0 max-md:gap-0 max-md:px-0 max-md:py-1.5 max-sm:min-w-[170px] max-sm:max-w-[192px]">
+            <div class="-mt-9 grid max-w-[291px] translate-y-9 content-start gap-2.5 bg-white p-2.5 transition-[transform,box-shadow,border-radius] duration-300 ease-[cubic-bezier(0.23,1,0.32,1)] group-hover:-translate-y-0 group-hover:rounded-t-xl group-hover:shadow-[0_-6px_20px_rgba(0,0,0,0.07)] max-md:relative max-md:mt-0 max-md:translate-y-0 max-md:gap-0 max-md:px-0 max-md:py-1.5 max-sm:min-w-[170px] max-sm:max-w-[192px]">
 
                 {!! view_render_event('qubix.shop.components.products.card.name.before') !!}
 
-                <p class="break-all text-base font-medium max-md:mb-1.5 max-md:max-w-56 max-md:whitespace-break-spaces max-md:leading-6 max-sm:max-w-[192px] max-sm:text-sm max-sm:leading-4">
+                {{-- Wrap between words (break-all split names like "Canva/s"), clamp to two lines and reserve both so prices line up across a row. --}}
+                <p
+                    class="line-clamp-2 min-h-12 break-words text-base font-medium leading-6 max-md:mb-1.5 max-md:max-w-56 max-sm:min-h-10 max-sm:max-w-[192px] max-sm:text-sm max-sm:leading-5"
+                    :title="product.name"
+                >
                     @{{ product.name }}
                 </p>
 
@@ -146,7 +145,7 @@
                 {!! view_render_event('qubix.shop.components.products.card.price.after') !!}
 
                 <!-- Product Actions Section -->
-                <div class="action-items flex items-center justify-between translate-y-2 opacity-0 transition-all duration-300 ease-out group-hover:translate-y-0 group-hover:opacity-100 max-md:hidden">
+                <div class="action-items flex items-center justify-between translate-y-2 opacity-0 transition-[transform,opacity] duration-300 ease-[cubic-bezier(0.23,1,0.32,1)] group-hover:translate-y-0 group-hover:opacity-100 max-md:hidden">
                     @if (core()->getConfigData('sales.checkout.shopping_cart.cart_page'))
                         {!! view_render_event('qubix.shop.components.products.card.add_to_cart.before') !!}
 
@@ -180,7 +179,7 @@
 
                     @if (core()->getConfigData('customer.settings.wishlist.wishlist_option'))
                         <span
-                            class="cursor-pointer p-2.5 text-2xl transition-transform duration-200 hover:scale-125 active:scale-95 max-sm:hidden"
+                            class="cursor-pointer p-2.5 text-2xl transition-transform duration-200 hover:scale-110 active:scale-95 max-sm:hidden"
                             role="button"
                             aria-label="@lang('shop::app.components.products.card.add-to-wishlist')"
                             tabindex="0"
@@ -196,7 +195,7 @@
 
                     @if (core()->getConfigData('catalog.products.settings.compare_option'))
                         <span
-                            class="icon-compare cursor-pointer p-2.5 text-2xl transition-transform duration-200 hover:scale-125 active:scale-95 max-sm:hidden"
+                            class="icon-compare cursor-pointer p-2.5 text-2xl transition-transform duration-200 hover:scale-110 active:scale-95 max-sm:hidden"
                             role="button"
                             aria-label="@lang('shop::app.components.products.card.add-to-compare')"
                             tabindex="0"
