@@ -24,7 +24,7 @@
 --}}
 @if (core()->getConfigData('general.content.header_offer.title'))
     <div
-        class="border-b border-[#2f6f60] bg-[#1f5f4f] px-4 py-2 text-center text-xs font-semibold tracking-[0.02em] text-white/90 lg:hidden"
+        class="bg-sage px-4 py-2 text-center text-[13px] font-semibold text-brand lg:hidden"
         v-pre
     >
         {{ core()->getConfigData('general.content.header_offer.title') }}
@@ -33,7 +33,7 @@
         @if (core()->getConfigData('general.content.header_offer.redirection_link'))
             <a
                 href="{{ core()->getConfigData('general.content.header_offer.redirection_link') }}"
-                class="inline-block py-1 text-white underline underline-offset-2"
+                class="inline-block py-1 underline underline-offset-2"
             >
                 {{ core()->getConfigData('general.content.header_offer.redirection_title') }}
             </a>
@@ -54,7 +54,7 @@
     inside the drawer. Same visibility gate as the drawer version.
 --}}
 @if (core()->getCurrentChannel()->locales()->count() > 1 || core()->getCurrentChannel()->currencies()->count() > 1)
-    <div class="grid w-full grid-cols-[1fr_auto_1fr] items-center justify-items-center border-b border-[#2f6f60] bg-[#1f5f4f] px-5 text-white lg:hidden">
+    <div class="grid w-full grid-cols-[1fr_auto_1fr] items-center justify-items-center border-b border-brand/10 bg-sage px-5 text-brand lg:hidden">
         <!-- Currency Drawer -->
         <x-shop::drawer position="bottom" width="100%">
             <x-slot:toggle>
@@ -85,7 +85,7 @@
             </x-slot>
         </x-shop::drawer>
 
-        <span class="h-4 w-0.5 bg-white/25"></span>
+        <span class="h-4 w-0.5 bg-brand/20"></span>
 
         <!-- Locale Drawer -->
         <x-shop::drawer position="bottom" width="100%">
@@ -131,7 +131,7 @@
 
 <header
     id="main-header"
-    class="sticky top-0 z-10 border-b border-[#2f6f60] bg-[#1f5f4f]"
+    class="sticky top-0 z-10 bg-brand"
 >
     <v-header-switcher>
         <!-- Desktop Header Shimmer -->
@@ -206,60 +206,16 @@
             </div>
         </div>
 
-        <!-- Mobile Header Shimmer -->
-        <div class="flex flex-wrap gap-4 px-4 pb-4 pt-6 shadow-sm lg:hidden">
-            <div class="flex w-full items-center justify-between">
-                <!-- Left Navigation -->
-                <div class="flex items-center gap-x-1.5">
-                    <!-- Hamburger Menu Shimmer -->
-                    <span 
-                        class="shimmer block h-6 w-6 rounded" 
-                        role="presentation"
-                    >
-                    </span>
-                    
-                    <!-- Logo Shimmer -->
-                    <span 
-                        class="shimmer block h-[29px] w-[131px] rounded" 
-                        role="presentation"
-                    >
-                    </span>
-                </div>
+        <!-- Mobile Header Shimmer (menu | logo | search, cart) -->
+        <div class="grid h-[60px] grid-cols-[1fr_auto_1fr] items-center px-3 lg:hidden">
+            <span class="shimmer block h-6 w-6 rounded" role="presentation"></span>
 
-                <!-- Right Navigation Icons -->
-                <div class="flex items-center gap-x-5 max-md:gap-x-4">
-                    <!-- Compare Icon Shimmer -->
-                    <span 
-                        class="shimmer block h-6 w-6 rounded" 
-                        role="presentation"
-                    >
-                    </span>
-                    
-                    <!-- Cart Icon Shimmer -->
-                    <span 
-                        class="shimmer block h-6 w-6 rounded" 
-                        role="presentation"
-                    >
-                    </span>
-                    
-                    <!-- Profile Icon Shimmer -->
-                    <span 
-                        class="shimmer block h-6 w-6 rounded" 
-                        role="presentation"
-                    >
-                    </span>
-                </div>
-            </div>
+            <span class="shimmer block h-10 w-10 rounded-full" role="presentation"></span>
 
-            <!-- Search Bar Shimmer -->
-            <div class="flex w-full items-center">
-                <div class="relative w-full">
-                    <span
-                        class="shimmer block h-[42px] w-full rounded-xl px-11 py-3.5 max-md:rounded-lg"
-                        role="presentation"
-                    >
-                    </span>
-                </div>
+            <div class="flex justify-end gap-x-4">
+                <span class="shimmer block h-6 w-6 rounded" role="presentation"></span>
+
+                <span class="shimmer block h-6 w-6 rounded" role="presentation"></span>
             </div>
         </div>
     </v-header-switcher>

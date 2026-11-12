@@ -20,9 +20,9 @@
                 <x-slot:toggle>
                     {!! view_render_event('qubix.shop.checkout.mini-cart.drawer.toggle.before') !!}
 
-                    {{-- Below lg the toggle is a 44px tap target; the badge offsets shift by the 10px of padding around the icon. --}}
+                    {{-- A 44px tap target; the badge sits on the icon's top corner inside it. --}}
                     <span
-                        class="relative inline-flex cursor-pointer items-center justify-center max-lg:h-11 max-lg:w-11"
+                        class="relative inline-flex h-11 w-11 cursor-pointer items-center justify-center rounded-full transition-colors hover:bg-white/10"
                         role="button"
                         aria-label="@lang('shop::app.checkout.cart.mini-cart.shopping-cart')"
                         tabindex="0"
@@ -32,14 +32,14 @@
 
                         @if (core()->getConfigData('sales.checkout.my_cart.summary') == 'display_item_quantity')
                             <span
-                                class="absolute -top-4 rounded-[44px] bg-white px-2 py-1.5 text-xs font-semibold leading-[9px] text-[#1f5f4f] ltr:left-5 rtl:right-5 max-lg:-top-1 max-lg:ltr:left-[26px] max-lg:rtl:right-[26px]"
+                                class="absolute -top-1 rounded-[44px] bg-white px-2 py-1.5 text-xs font-semibold leading-[9px] text-brand ltr:left-[26px] rtl:right-[26px]"
                                 v-if="cart?.items_qty"
                             >
                                 @{{ cart.items_qty }}
                             </span>
                         @else
                             <span
-                                class="absolute -top-4 rounded-[44px] bg-white px-2 py-1.5 text-xs font-semibold leading-[9px] text-[#1f5f4f] ltr:left-5 rtl:right-5 max-lg:-top-1 max-lg:ltr:left-[26px] max-lg:rtl:right-[26px]"
+                                class="absolute -top-1 rounded-[44px] bg-white px-2 py-1.5 text-xs font-semibold leading-[9px] text-brand ltr:left-[26px] rtl:right-[26px]"
                                 v-if="cart?.items_count"
                             >
                                 @{{ cart.items_count }}

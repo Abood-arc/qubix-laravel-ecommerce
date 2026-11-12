@@ -314,7 +314,7 @@
 
             <button
                 type="button"
-                class="mb-4 py-2 text-sm font-medium text-[#1f5f4f] underline underline-offset-4"
+                class="mb-4 py-2 text-sm font-medium text-[#2f5d48] underline underline-offset-4"
                 v-else
                 @click="showBusinessFields = true"
             >

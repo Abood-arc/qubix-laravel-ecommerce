@@ -373,7 +373,7 @@ img.lazy {
     }
 
     * {
-        @apply box-border font-poppins;
+        @apply box-border font-karla;
     }
 
     [dir="rtl"] * {
@@ -450,9 +450,9 @@ img.lazy {
     }
 
     .cart-add-btn--loading {
-        background-color: #1f5f4f !important;
+        background-color: #2f5d48 !important;
         color: #ffffff !important;
-        border-color: #1f5f4f !important;
+        border-color: #2f5d48 !important;
         opacity: 0.88 !important;
         cursor: wait !important;
     }
@@ -547,7 +547,7 @@ img.lazy {
     .glow-404 {
         background-clip: text;
         -webkit-background-clip: text;
-        color: #1f5f4f;
+        color: #2f5d48;
     }
 
     .glow-shadow-404 {
@@ -584,7 +584,7 @@ img.lazy {
     /** Desktop category mega menu — header nav polish */
     header.sticky .velocity-nav-megamenu {
         scrollbar-width: thin;
-        scrollbar-color: rgba(255, 255, 255, 0.28) transparent;
+        scrollbar-color: rgba(20, 40, 30, 0.22) transparent;
     }
 
     header.sticky .velocity-nav-megamenu::-webkit-scrollbar {
@@ -593,7 +593,7 @@ img.lazy {
     }
 
     header.sticky .velocity-nav-megamenu::-webkit-scrollbar-thumb {
-        background-color: rgba(255, 255, 255, 0.22);
+        background-color: rgba(20, 40, 30, 0.22);
         border-radius: 9999px;
     }
 
@@ -705,4 +705,10 @@ img.lazy {
     #main-header details.mobile-header-details-search[open] > summary .mobile-search-cancel {
         display: inline-block !important;
     }
+}
+
+/* Headings: the template marks them `font-dmserif` (a single-weight serif); in Karla they need weight. */
+.font-dmserif {
+    font-weight: 800;
+    letter-spacing: -0.01em;
 }

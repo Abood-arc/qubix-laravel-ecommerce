@@ -1,13 +1,13 @@
 {!! view_render_event('qubix.shop.components.layouts.header.desktop.bottom.before') !!}
 
-<div class="flex min-h-[78px] w-full items-center justify-between gap-x-8 border-b border-[#2f6f60] px-[60px] max-1180:px-8">
+<div class="relative grid min-h-[84px] w-full grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-x-8 px-10 max-1180:gap-x-5 max-1180:px-8">
     <!--
         Categories support first, second, and third levels.
         Additional levels can be added per project requirements.
     -->
 
-    <!-- Left Navigation Section -->
-    <div class="flex min-w-0 flex-1 items-center gap-x-8 max-[1180px]:gap-x-5">
+    <!-- Logo -->
+    <div class="flex items-center">
         {!! view_render_event('qubix.shop.components.layouts.header.desktop.bottom.logo.before') !!}
 
         <a
@@ -17,16 +17,19 @@
         >
             <img
                 src="{{ core()->getCurrentChannel()->logo_url ?? qubix_asset('images/logo.svg') }}"
-                style="height: 56px; width: auto; object-fit: contain;"
+                class="h-14 w-auto object-contain"
                 alt="{{ config('app.name') }}"
             >
         </a>
 
         {!! view_render_event('qubix.shop.components.layouts.header.desktop.bottom.logo.after') !!}
+    </div>
 
+    <!-- Categories (centred) -->
+    <div class="min-w-0">
         {!! view_render_event('qubix.shop.components.layouts.header.desktop.bottom.category.before') !!}
 
-        <v-desktop-category class="min-w-0 flex-1">
+        <v-desktop-category class="min-w-0">
             <div class="flex items-center gap-5">
                 <span class="w-20 h-6 rounded shimmer" role="presentation"></span>
                 <span class="w-20 h-6 rounded shimmer" role="presentation"></span>
@@ -37,25 +40,32 @@
         {!! view_render_event('qubix.shop.components.layouts.header.desktop.bottom.category.after') !!}
     </div>
 
-    <!-- Right Navigation Section -->
-    <div class="flex items-center gap-x-9 max-[1100px]:gap-x-6 max-lg:gap-x-8">
+    <!-- Right Navigation Section: 44px icon buttons -->
+    <div class="flex items-center gap-x-1">
 
         {!! view_render_event('qubix.shop.components.layouts.header.desktop.bottom.search_bar.before') !!}
 
         <!-- Search Bar -->
-        <details class="header-search group relative">
+        {{--
+            Unpositioned `details`: the open panel's `absolute inset-0` covers the whole header row
+            (the row is `relative`), turning the bar into one large search field.
+        --}}
+        <details
+            class="header-search group"
+            @toggle="$event.target.open && $event.target.querySelector('input[name=query]').focus()"
+        >
             <summary
-                class="inline-flex h-10 w-10 list-none cursor-pointer items-center justify-center rounded-full text-white transition-colors hover:bg-white/10"
+                class="inline-flex h-11 w-11 list-none cursor-pointer items-center justify-center rounded-full text-white transition-colors hover:bg-white/10"
                 aria-label="@lang('shop::app.components.layouts.header.desktop.bottom.search')"
             >
                 <span class="icon-search text-2xl group-open:hidden"></span>
                 <span class="icon-cancel text-2xl hidden group-open:inline-block"></span>
             </summary>
 
-            <div class="absolute top-full z-[70] mt-3 w-[min(92vw,980px)] rounded-2xl border border-white/25 bg-[#1f5f4f] p-3 shadow-[0_14px_32px_rgba(10,30,24,0.35)] ltr:right-0 rtl:left-0">
+            <div class="absolute inset-0 z-[70] flex items-center gap-4 bg-brand px-10 max-1180:px-8">
                 <form
                     action="{{ route('shop.search.index') }}"
-                    class="relative flex items-center text-white [&_label.icon-camera]:text-white [&_button.icon-camera]:text-white [&_svg]:text-white [&_svg.animate-spin]:!text-white [&_label.absolute]:!top-1/2 [&_label.absolute]:-translate-y-1/2 [&_label.absolute]:mt-0 [&_button.absolute]:!top-1/2 [&_button.absolute]:-translate-y-1/2 [&_button.absolute]:mt-0"
+                    class="relative mx-auto flex w-full max-w-[760px] items-center text-zinc-700 [&_label.icon-camera]:text-zinc-600 [&_button.icon-camera]:text-zinc-600 [&_svg]:text-zinc-600 [&_svg.animate-spin]:!text-zinc-600 [&_label.absolute]:!top-1/2 [&_label.absolute]:-translate-y-1/2 [&_label.absolute]:mt-0 [&_button.absolute]:!top-1/2 [&_button.absolute]:-translate-y-1/2 [&_button.absolute]:mt-0"
                     role="search"
                 >
                     <label
@@ -66,7 +76,7 @@
                     </label>
 
                     <div
-                        class="icon-search pointer-events-none absolute top-1/2 z-[1] -translate-y-1/2 text-xl text-white ltr:left-4 rtl:right-4"
+                        class="icon-search pointer-events-none absolute top-1/2 z-[1] -translate-y-1/2 text-xl text-zinc-500 ltr:left-5 rtl:right-5"
                     ></div>
 
                     <input
@@ -75,9 +85,9 @@
                         name="query"
                         value="{{ request('query') }}"
                         @class([
-                            'block w-full rounded-xl border border-white/30 bg-white/10 py-3 text-sm font-medium text-white placeholder:text-white/70 transition-all hover:border-white/50 focus:border-white',
-                            'px-11' => ! core()->getConfigData('catalog.products.settings.image_search'),
-                            'pl-11 pr-12 sm:pr-14 rtl:pl-12 rtl:pr-11' => core()->getConfigData('catalog.products.settings.image_search'),
+                            'block h-[52px] w-full rounded-full border-0 bg-white text-base text-zinc-900 placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-white/60',
+                            'px-12' => ! core()->getConfigData('catalog.products.settings.image_search'),
+                            'pl-12 pr-14 rtl:pl-14 rtl:pr-12' => core()->getConfigData('catalog.products.settings.image_search'),
                         ])
                         minlength="{{ core()->getConfigData('catalog.products.search.min_query_length') }}"
                         maxlength="{{ core()->getConfigData('catalog.products.search.max_query_length') }}"
@@ -100,13 +110,20 @@
                     </button>
 
                 </form>
+
+                <button
+                    type="button"
+                    class="icon-cancel inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-2xl text-white transition-colors hover:bg-white/10"
+                    aria-label="@lang('shop::app.components.layouts.header.desktop.bottom.search')"
+                    @click="$event.currentTarget.closest('details').open = false"
+                ></button>
             </div>
         </details>
 
         {!! view_render_event('qubix.shop.components.layouts.header.desktop.bottom.search_bar.after') !!}
 
         <!-- Right Navigation Icons -->
-        <div class="mt-1.5 flex gap-x-8 max-[1100px]:gap-x-6 max-lg:gap-x-8">
+        <div class="flex items-center gap-x-1">
 
             {!! view_render_event('qubix.shop.components.layouts.header.desktop.bottom.compare.before') !!}
 
@@ -114,6 +131,7 @@
             @if(core()->getConfigData('catalog.products.settings.compare_option'))
                 <a
                     href="{{ route('shop.compare.index') }}"
+                    class="inline-flex h-11 w-11 items-center justify-center rounded-full transition-colors hover:bg-white/10"
                     aria-label="@lang('shop::app.components.layouts.header.desktop.bottom.compare')"
                 >
                     <span
@@ -140,7 +158,7 @@
             <x-shop::dropdown position="bottom-{{ core()->getCurrentLocale()->direction === 'ltr' ? 'right' : 'left' }}">
                 <x-slot:toggle>
                     <span
-                        class="inline-block text-2xl cursor-pointer text-white icon-users"
+                        class="inline-flex h-11 w-11 cursor-pointer items-center justify-center rounded-full text-2xl text-white transition-colors hover:bg-white/10 icon-users"
                         role="button"
                         aria-label="@lang('shop::app.components.layouts.header.desktop.bottom.profile')"
                         tabindex="0"
@@ -278,7 +296,7 @@
             v-else-if="'{{ core()->getConfigData('general.design.categories.category_view') }}' !== 'sidebar'"
         >
             <div
-                class="velocity-nav-category-group group relative flex h-[77px] items-center"
+                class="velocity-nav-category-group group flex h-[84px] items-center"
                 v-for="category in categories"
             >
                 {{-- One hover signal: an underline that grows under the label (it used to be a tinted box plus a separate border 14px lower). --}}
@@ -292,19 +310,19 @@
                 </span>
 
                 <div
-                    class="velocity-nav-megamenu pointer-events-none absolute top-full z-[60] max-h-[min(580px,80vh)] w-[min(94vw,1260px)] max-w-[1260px] translate-y-1 overflow-y-auto overflow-x-auto rounded-b-2xl border border-white/10 bg-[#1f5f4f] px-8 py-8 opacity-0 shadow-[0_24px_50px_-12px_rgba(10,30,24,0.45)] backdrop-blur-md transition duration-300 ease-out group-hover:pointer-events-auto group-hover:translate-y-0 group-hover:opacity-100 group-hover:duration-200 group-hover:ease-in ltr:left-1/2 ltr:-translate-x-1/2 rtl:right-1/2 rtl:translate-x-1/2"
+                    class="velocity-nav-megamenu pointer-events-none absolute inset-x-0 top-full z-[60] max-h-[min(580px,80vh)] -translate-y-1 overflow-y-auto border-t border-zinc-200 bg-white px-10 py-8 text-zinc-900 opacity-0 shadow-[0_18px_30px_-18px_rgba(20,40,30,0.35)] transition duration-200 ease-[cubic-bezier(0.23,1,0.32,1)] group-hover:pointer-events-auto group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:pointer-events-auto group-focus-within:translate-y-0 group-focus-within:opacity-100"
                     v-if="category.children && category.children.length"
                 >
                     <div class="flex flex-wrap justify-start gap-x-12 gap-y-10 xl:gap-x-16">
                         <div
-                            class="velocity-nav-megamenu-col grid min-w-[140px] max-w-[180px] flex-1 grid-cols-1 content-start gap-y-8"
+                            class="velocity-nav-megamenu-col grid min-w-[160px] max-w-[220px] flex-1 grid-cols-1 content-start gap-y-3"
                             v-for="pairCategoryChildren in pairCategoryChildren(category)"
                         >
                             <template v-for="secondLevelCategory in pairCategoryChildren">
                                 <div>
-                                    <p class="velocity-nav-megamenu-title font-medium text-white">
+                                    <p class="velocity-nav-megamenu-title font-semibold text-zinc-900">
                                         <a
-                                            class="velocity-nav-megamenu-title-link inline-block pb-1 text-[15px] font-medium leading-snug tracking-normal transition-colors hover:text-white/85"
+                                            class="velocity-nav-megamenu-title-link inline-block pb-1 text-base font-semibold leading-snug tracking-normal transition-colors hover:text-brand"
                                             :href="secondLevelCategory.url"
                                         >
                                             @{{ secondLevelCategory.name }}
@@ -317,7 +335,7 @@
                                     >
                                         <li v-for="thirdLevelCategory in secondLevelCategory.children">
                                             <a
-                                                class="velocity-nav-megalnk block rounded-lg px-2 py-1.5 text-[13px] font-medium text-white/70 transition-colors hover:bg-white/10 hover:text-white"
+                                                class="velocity-nav-megalnk block rounded-lg px-2 py-1.5 text-sm font-medium text-zinc-600 transition-colors hover:bg-sage hover:text-brand"
                                                 :href="thirdLevelCategory.url"
                                             >
                                                 @{{ thirdLevelCategory.name }}

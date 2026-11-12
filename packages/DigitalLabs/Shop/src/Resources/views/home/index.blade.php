@@ -199,7 +199,7 @@
         {{  $channel->home_seo['meta_title'] ?? '' }}
     </x-slot>
 
-    <div class="home-premium bg-[#faf9f7] pb-10">
+    <div class="home-premium bg-white pb-10">
         <!-- Loop over the theme customization -->
         @foreach ($customizations as $customization)
             @php ($data = $customization->options) @endphp

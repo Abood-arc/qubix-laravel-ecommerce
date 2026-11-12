@@ -29,10 +29,13 @@ module.exports = {
 
         extend: {
             colors: {
-                // Brand green (the header colour). `navyBlue` is the template's legacy name for the
-                // primary colour and is used across 36 views, so it now points at the brand too.
-                brand: "#1f5f4f",
-                navyBlue: "#1f5f4f",
+                // Brand greens and neutrals. `navyBlue` is the template's legacy name for the
+                // primary colour and is used across 36 views, so it points at the brand green.
+                brand: "#2f5d48",
+                brandDeep: "#234537",
+                sage: "#e3ede4",
+                sand: "#f4efe6",
+                navyBlue: "#2f5d48",
                 lightOrange: "#F6F2EB",
                 darkGreen: '#40994A',
                 darkBlue: '#0044F2',
@@ -40,8 +43,12 @@ module.exports = {
             },
 
             fontFamily: {
-                poppins: ["Poppins", "sans-serif"],
-                dmserif: ["DM Serif Display", "serif"],
+                // The store's one face. `poppins` and `dmserif` are the template's legacy names
+                // (used across many views), so they point at Karla too; admin-managed HTML that
+                // names "Poppins" or "DM Serif Display" directly still gets those fonts.
+                karla: ["Karla", "sans-serif"],
+                poppins: ["Karla", "sans-serif"],
+                dmserif: ["Karla", "sans-serif"],
                 arabic: ["Noto Sans Arabic", "Poppins", "sans-serif"],
             },
         }
