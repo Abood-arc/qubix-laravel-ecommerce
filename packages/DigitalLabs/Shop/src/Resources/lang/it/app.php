@@ -516,6 +516,7 @@ return [
                     'currencies' => 'Valute',
                     'dropdown-text' => 'Gestisci carrello, ordini e lista dei desideri',
                     'locales' => 'Lingue',
+                    'menu' => 'Menu',
                     'login' => 'Registrati o accedi',
                     'logout' => 'Disconnetti',
                     'orders' => 'Ordini',

@@ -516,6 +516,7 @@ return [
                     'currencies' => 'Monedes',
                     'dropdown-text' => 'Gestiona la cistella, comandes i desitjats',
                     'locales' => 'Idiomes',
+                    'menu' => 'Menú',
                     'login' => 'Registra’t o inicia sessió',
                     'logout' => 'Tancar sessió',
                     'orders' => 'Comandes',

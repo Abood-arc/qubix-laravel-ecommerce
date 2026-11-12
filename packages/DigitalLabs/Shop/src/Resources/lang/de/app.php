@@ -516,6 +516,7 @@ return [
                     'currencies' => 'Währungen',
                     'dropdown-text' => 'Warenkorb, Bestellungen & Wunschliste verwalten',
                     'locales' => 'Sprachen',
+                    'menu' => 'Menü',
                     'login' => 'Registrieren oder Anmelden',
                     'logout' => 'Abmelden',
                     'orders' => 'Bestellungen',

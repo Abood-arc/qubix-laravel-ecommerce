@@ -516,6 +516,7 @@ return [
                     'currencies' => 'Valuta',
                     'dropdown-text' => 'Winkelwagen, bestellingen & verlanglijst beheren',
                     'locales' => 'Talen',
+                    'menu' => 'Menu',
                     'login' => 'Registreren of inloggen',
                     'logout' => 'Uitloggen',
                     'orders' => 'Bestellingen',

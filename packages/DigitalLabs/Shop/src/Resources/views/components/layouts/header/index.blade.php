@@ -29,13 +29,15 @@
     >
         {{ core()->getConfigData('general.content.header_offer.title') }}
 
-        <a
-            href="{{ core()->getConfigData('general.content.header_offer.redirection_link') }}"
-            class="underline underline-offset-2 text-white"
-            role="button"
-        >
-            {{ core()->getConfigData('general.content.header_offer.redirection_title') }}
-        </a>
+        {{-- An empty redirection_link rendered href="" and reloaded the page; show the link only when it goes somewhere. --}}
+        @if (core()->getConfigData('general.content.header_offer.redirection_link'))
+            <a
+                href="{{ core()->getConfigData('general.content.header_offer.redirection_link') }}"
+                class="inline-block py-1 text-white underline underline-offset-2"
+            >
+                {{ core()->getConfigData('general.content.header_offer.redirection_title') }}
+            </a>
+        @endif
     </div>
 @endif
 
@@ -297,11 +299,8 @@
 
             applyScrollState();
 
-            /* Per-frame polling: stable with document.scrollingElement + live header ref */
-            (function loop() {
-                applyScrollState();
-                requestAnimationFrame(loop);
-            }());
+            /* Passive scroll listener instead of per-frame polling, which kept the CPU busy on phones. */
+            window.addEventListener('scroll', applyScrollState, { passive: true });
 
             /* After Vue app.mount (#app on window.load), sync once post-paint */
             window.addEventListener('load', function () {

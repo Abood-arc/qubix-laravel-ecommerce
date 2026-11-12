@@ -516,6 +516,7 @@ return [
                     'currencies' => '通貨',
                     'dropdown-text' => 'カート、注文、ウィッシュリストを管理',
                     'locales' => '言語',
+                    'menu' => 'メニュー',
                     'login' => 'サインアップまたはログイン',
                     'logout' => 'ログアウト',
                     'orders' => '注文',

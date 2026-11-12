@@ -516,6 +516,7 @@ return [
                     'currencies' => 'Mata Uang',
                     'dropdown-text' => 'Kelola Keranjang, Pesanan & Daftar Keinginan',
                     'locales' => 'Bahasa',
+                    'menu' => 'Menu',
                     'login' => 'Daftar atau Masuk',
                     'logout' => 'Keluar',
                     'orders' => 'Pesanan',

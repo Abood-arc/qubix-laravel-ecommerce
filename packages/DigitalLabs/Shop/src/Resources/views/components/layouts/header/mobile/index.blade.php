@@ -3,10 +3,10 @@
     $showWishlist = (bool) core()->getConfigData('customer.settings.wishlist.wishlist_option');
 @endphp
 
-<div class="flex min-w-0 w-full flex-wrap gap-4 pt-6 pb-4 shadow-sm lg:hidden">
-    <div class="flex w-full min-w-0 items-center justify-between px-4 text-white">
+<div class="flex min-w-0 w-full flex-wrap py-2 lg:hidden">
+    <div class="flex w-full min-w-0 items-center justify-between px-2 text-white">
         <!-- Left Navigation -->
-        <div class="flex items-center gap-x-1.5">
+        <div class="flex items-center gap-x-1">
             {!! view_render_event('qubix.shop.components.layouts.header.mobile.drawer.before') !!}
 
             <v-mobile-drawer></v-mobile-drawer>
@@ -18,12 +18,12 @@
             <a
                 href="{{ route('shop.home.index') }}"
                 class="inline-flex items-center"
-                aria-label="@lang('shop::app.components.layouts.header.mobile.qubix')"
+                aria-label="{{ config('app.name') }}"
             >
                 <img
                     src="{{ core()->getCurrentChannel()->logo_url ?? qubix_asset('images/logo.svg') }}"
                     alt="{{ config('app.name') }}"
-                    style="height: 48px; width: auto; object-fit: contain;"
+                    class="h-10 w-auto object-contain"
                 >
             </a>
 
@@ -31,17 +31,22 @@
         </div>
 
         <!-- Right Navigation -->
-        <div class="flex items-center gap-x-5 max-md:gap-x-4">
+        <div class="flex items-center">
             {!! view_render_event('qubix.shop.components.layouts.header.mobile.search.before') !!}
 
             {{--
-                Full-width viewport strip: absolute + vw breakout fails here (nested flex + padding).
-                `fixed inset-x-0 w-full` aligns to viewport; visibility follows native `details[open]`
+                Full-width strip under the header: `details` stays unpositioned so the panel's
+                `absolute top-full` resolves against the sticky #main-header (full viewport width,
+                its real bottom edge). The old `fixed` offset assumed a header height and covered the
+                logo whenever the offer bar was showing. Visibility follows native `details[open]`
                 via app.css selectors (Tailwind group-open unreliable on v3.3).
             --}}
-            <details class="header-search mobile-header-details-search relative z-[60]">
+            <details
+                class="header-search mobile-header-details-search"
+                @toggle="$event.target.open && $event.target.querySelector('input[type=search]').focus()"
+            >
                 <summary
-                    class="inline-flex h-10 w-10 list-none cursor-pointer items-center justify-center rounded-full text-white transition-colors hover:bg-white/10"
+                    class="inline-flex h-11 w-11 list-none cursor-pointer items-center justify-center rounded-full text-white transition-colors hover:bg-white/10"
                     aria-label="@lang('shop::app.components.layouts.header.mobile.search')"
                 >
                     <span class="mobile-search-mag icon-search text-2xl"></span>
@@ -49,8 +54,7 @@
                 </summary>
 
                 <div
-                    class="mobile-search-panel fixed inset-x-0 z-[70] hidden w-full max-w-none flex-col border-b border-white/20 bg-[#1f5f4f] px-4 py-3 shadow-[0_14px_32px_rgba(10,30,24,0.35)]"
-                    style="top: calc(env(safe-area-inset-top, 0px) + 5.75rem)"
+                    class="mobile-search-panel absolute inset-x-0 top-full z-[70] hidden w-full max-w-none flex-col border-b border-white/20 bg-[#1f5f4f] px-4 py-3 shadow-[0_14px_32px_rgba(10,30,24,0.35)]"
                 >
                     <form
                         action="{{ route('shop.search.index') }}"
@@ -73,7 +77,7 @@
                             type="search"
                             name="query"
                             value="{{ request('query') }}"
-                            class="block w-full rounded-xl border border-white/30 bg-white/10 px-11 py-3 text-sm font-medium text-white placeholder:text-white/70 transition-all hover:border-white/50 focus:border-white focus:outline-none"
+                            class="block w-full rounded-xl border border-white/30 bg-white/10 px-11 py-3 text-base font-medium text-white placeholder:text-white/70 transition-all hover:border-white/50 focus:border-white focus:outline-none"
                             minlength="{{ core()->getConfigData('catalog.products.search.min_query_length') }}"
                             maxlength="{{ core()->getConfigData('catalog.products.search.max_query_length') }}"
                             placeholder="@lang('shop::app.components.layouts.header.mobile.search-text')"
@@ -105,6 +109,7 @@
             @if($showCompare)
                 <a
                     href="{{ route('shop.compare.index') }}"
+                    class="inline-flex h-11 w-11 items-center justify-center"
                     aria-label="@lang('shop::app.components.layouts.header.mobile.compare')"
                 >
                     <span class="text-2xl cursor-pointer text-white icon-compare"></span>
@@ -237,6 +242,7 @@
                 @guest('customer')
                     <a
                         href="{{ route('shop.customer.session.create') }}"
+                        class="inline-flex h-11 w-11 items-center justify-center"
                         aria-label="@lang('shop::app.components.layouts.header.mobile.account')"
                     >
                         <span class="text-2xl cursor-pointer text-white icon-users"></span>
@@ -246,6 +252,7 @@
                 @auth('customer')
                     <a
                         href="{{ route('shop.customers.account.index') }}"
+                        class="inline-flex h-11 w-11 items-center justify-center"
                         aria-label="@lang('shop::app.components.layouts.header.mobile.account')"
                     >
                         <span class="text-2xl cursor-pointer text-white icon-users"></span>
@@ -265,7 +272,12 @@
             @close="onDrawerClose"
         >
             <x-slot:toggle>
-                <span class="text-2xl cursor-pointer text-white icon-hamburger"></span>
+                <span
+                    class="inline-flex h-11 w-11 cursor-pointer items-center justify-center text-2xl text-white icon-hamburger"
+                    role="button"
+                    tabindex="0"
+                    aria-label="@lang('shop::app.components.layouts.header.mobile.menu')"
+                ></span>
             </x-slot>
 
             <x-slot:header class="!border-white/15 text-white [&_.icon-cancel]:text-white [&_.icon-cancel]:opacity-95">

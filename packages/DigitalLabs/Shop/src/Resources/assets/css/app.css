@@ -597,10 +597,6 @@ img.lazy {
         border-radius: 9999px;
     }
 
-    header.sticky .velocity-nav-category-group:focus-within {
-        border-bottom-color: rgba(255, 255, 255, 0.8);
-    }
-
     /* Header primary category nav — Karla ~18px, reference: editorial storefront nav */
     header.sticky .velocity-nav-category-list,
     header.sticky #main-header .velocity-nav-category-trigger,
@@ -662,31 +658,13 @@ img.lazy {
 
 /* ── Header scroll behaviour ─────────────────────────────────────── */
 /* NOTE: do NOT set position here — Tailwind's sticky class must remain in effect */
+/* One header green in every state; scrolling only adds a soft shadow. */
 #main-header {
-    transition: background-color 0.35s ease, box-shadow 0.35s ease;
-}
-
-/* Bright accent line — requires sticky to act as containing block for position:absolute */
-#main-header::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    height: 3px;
-    background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.6) 35%, rgba(255,255,255,0.9) 50%, rgba(255,255,255,0.6) 65%, transparent 100%);
-    opacity: 0;
-    transition: opacity 0.35s ease;
-    pointer-events: none;
+    transition: box-shadow 200ms ease;
 }
 
 #main-header.header-scrolled {
-    background-color: #0d2b1e !important;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.65) !important;
-}
-
-#main-header.header-scrolled::after {
-    opacity: 1;
+    box-shadow: 0 1px 0 rgba(10, 30, 24, 0.08), 0 6px 16px rgba(10, 30, 24, 0.16);
 }
 
 /* Homepage: no gap between hero carousel and the next theme section (announcement bar, etc.) */

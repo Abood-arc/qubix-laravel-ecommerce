@@ -516,6 +516,7 @@ return [
                     'currencies' => 'Moedas',
                     'dropdown-text' => 'Gerenciar carrinho, pedidos e lista de desejos',
                     'locales' => 'Idiomas',
+                    'menu' => 'Menu',
                     'login' => 'Cadastrar-se ou Entrar',
                     'logout' => 'Sair',
                     'orders' => 'Pedidos',

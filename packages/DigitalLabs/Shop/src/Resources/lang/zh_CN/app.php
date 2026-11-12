@@ -516,6 +516,7 @@ return [
                     'currencies' => '货币',
                     'dropdown-text' => '管理购物车、订单和愿望清单',
                     'locales' => '语言',
+                    'menu' => '菜单',
                     'login' => '注册或登录',
                     'logout' => '登出',
                     'orders' => '订单',

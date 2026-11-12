@@ -516,6 +516,7 @@ return [
                     'currencies' => 'Para Birimleri',
                     'dropdown-text' => 'Hesabımı Yönet',
                     'locales' => 'Diller',
+                    'menu' => 'Menü',
                     'login' => 'Giriş Yap veya Kayıt Ol',
                     'logout' => 'Çıkış Yap',
                     'orders' => 'Siparişler',

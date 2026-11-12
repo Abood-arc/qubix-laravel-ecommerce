@@ -516,6 +516,7 @@ return [
                     'currencies' => 'Waluty',
                     'dropdown-text' => 'Zarządzaj koszykiem, zamówieniami i listą życzeń',
                     'locales' => 'Języki',
+                    'menu' => 'Menu',
                     'login' => 'Zarejestruj się lub zaloguj',
                     'logout' => 'Wyloguj się',
                     'orders' => 'Zamówienia',

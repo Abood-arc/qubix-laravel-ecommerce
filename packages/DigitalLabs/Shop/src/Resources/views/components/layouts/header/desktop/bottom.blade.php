@@ -278,13 +278,14 @@
             v-else-if="'{{ core()->getConfigData('general.design.categories.category_view') }}' !== 'sidebar'"
         >
             <div
-                class="velocity-nav-category-group group relative flex h-[77px] items-center border-b-2 border-transparent pb-0.5 transition-[border-color] duration-200 hover:border-white/80"
+                class="velocity-nav-category-group group relative flex h-[77px] items-center"
                 v-for="category in categories"
             >
+                {{-- One hover signal: an underline that grows under the label (it used to be a tinted box plus a separate border 14px lower). --}}
                 <span class="flex h-full items-center">
                     <a
                         :href="category.url"
-                        class="velocity-nav-category-trigger inline-flex max-w-[14rem] items-center px-3 py-2 text-center text-[18px] font-medium tracking-normal text-white transition-[background-color,opacity,color] duration-200 hover:bg-white/[0.08] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/45 sm:max-w-none"
+                        class="velocity-nav-category-trigger relative inline-flex max-w-[14rem] items-center whitespace-nowrap px-2.5 py-2 text-center text-base font-medium tracking-normal text-white after:absolute after:inset-x-2.5 after:bottom-1 after:h-0.5 after:origin-left after:scale-x-0 after:rounded-full after:bg-white after:transition-transform after:duration-200 after:ease-[cubic-bezier(0.23,1,0.32,1)] after:content-[''] hover:after:scale-x-100 focus-visible:outline-none focus-visible:after:scale-x-100 group-hover:after:scale-x-100 rtl:after:origin-right sm:max-w-none"
                     >
                         @{{ category.name }}
                     </a>

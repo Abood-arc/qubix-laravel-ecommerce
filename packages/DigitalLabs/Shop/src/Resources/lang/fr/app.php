@@ -516,6 +516,7 @@ return [
                     'currencies' => 'Devises',
                     'dropdown-text' => 'Gérer le panier, les commandes et la liste de souhaits',
                     'locales' => 'Langues',
+                    'menu' => 'Menu',
                     'login' => 'Connexion ou inscription',
                     'logout' => 'Se déconnecter',
                     'orders' => 'Commandes',

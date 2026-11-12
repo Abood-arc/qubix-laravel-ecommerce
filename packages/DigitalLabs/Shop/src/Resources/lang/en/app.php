@@ -516,6 +516,7 @@ return [
                     'currencies' => 'Currencies',
                     'dropdown-text' => 'Manage Cart, Orders & Wishlist',
                     'locales' => 'Locales',
+                    'menu' => 'Menu',
                     'login' => 'Sign up or Login',
                     'logout' => 'Logout',
                     'orders' => 'Orders',

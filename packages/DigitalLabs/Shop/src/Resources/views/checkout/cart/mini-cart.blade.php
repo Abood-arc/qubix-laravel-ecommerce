@@ -20,25 +20,26 @@
                 <x-slot:toggle>
                     {!! view_render_event('qubix.shop.checkout.mini-cart.drawer.toggle.before') !!}
 
-                    <span class="relative">
-                        <span
-                            class="icon-cart cursor-pointer text-2xl text-white"
-                            role="button"
-                            aria-label="@lang('shop::app.checkout.cart.mini-cart.shopping-cart')"
-                            tabindex="0"
-                            @click="getCart"
-                        ></span>
+                    {{-- Below lg the toggle is a 44px tap target; the badge offsets shift by the 10px of padding around the icon. --}}
+                    <span
+                        class="relative inline-flex cursor-pointer items-center justify-center max-lg:h-11 max-lg:w-11"
+                        role="button"
+                        aria-label="@lang('shop::app.checkout.cart.mini-cart.shopping-cart')"
+                        tabindex="0"
+                        @click="getCart"
+                    >
+                        <span class="icon-cart text-2xl text-white"></span>
 
                         @if (core()->getConfigData('sales.checkout.my_cart.summary') == 'display_item_quantity')
                             <span
-                                class="absolute -top-4 rounded-[44px] bg-navyBlue px-2 py-1.5 text-xs font-semibold leading-[9px] text-white ltr:left-5 rtl:right-5 max-md:ltr:left-4 max-md:rtl:right-4"
+                                class="absolute -top-4 rounded-[44px] bg-white px-2 py-1.5 text-xs font-semibold leading-[9px] text-[#1f5f4f] ltr:left-5 rtl:right-5 max-lg:-top-1 max-lg:ltr:left-[26px] max-lg:rtl:right-[26px]"
                                 v-if="cart?.items_qty"
                             >
                                 @{{ cart.items_qty }}
                             </span>
                         @else
                             <span
-                                class="absolute -top-4 rounded-[44px] bg-navyBlue px-2 py-1.5 text-xs font-semibold leading-[9px] text-white ltr:left-5 rtl:right-5 max-md:px-2 max-md:py-1.5 max-md:ltr:left-4 max-md:rtl:right-4"
+                                class="absolute -top-4 rounded-[44px] bg-white px-2 py-1.5 text-xs font-semibold leading-[9px] text-[#1f5f4f] ltr:left-5 rtl:right-5 max-lg:-top-1 max-lg:ltr:left-[26px] max-lg:rtl:right-[26px]"
                                 v-if="cart?.items_count"
                             >
                                 @{{ cart.items_count }}

@@ -94,14 +94,15 @@
                 v-pre
             >
                 {{ core()->getConfigData('general.content.header_offer.title') }}
-                
-                <a 
-                    href="{{ core()->getConfigData('general.content.header_offer.redirection_link') }}" 
-                    class="underline underline-offset-2 text-white"
-                    role="button"
-                >
-                    {{ core()->getConfigData('general.content.header_offer.redirection_title') }}
-                </a>
+
+                @if (core()->getConfigData('general.content.header_offer.redirection_link'))
+                    <a
+                        href="{{ core()->getConfigData('general.content.header_offer.redirection_link') }}"
+                        class="underline underline-offset-2 text-white"
+                    >
+                        {{ core()->getConfigData('general.content.header_offer.redirection_title') }}
+                    </a>
+                @endif
             </p>
 
             {!! view_render_event('qubix.shop.components.layouts.header.desktop.top.locale_switcher.before') !!}
