@@ -3713,6 +3713,14 @@ return [
                         'info' => 'Configure the copyright content displayed in the footer of your website to protect your intellectual property and enhance brand recognition.',
                     ],
 
+                    'store-contact' => [
+                        'email' => 'Contact Email',
+                        'info' => 'WhatsApp number and email shown to shoppers in the footer and the mobile menu.',
+                        'title' => 'Store Contact',
+                        'whatsapp-number' => 'WhatsApp Number',
+                        'whatsapp-number-info' => 'Include the country code, e.g. +91 98765 43210.',
+                    ],
+
                     'speculation-rules' => [
                         'enable-speculation' => 'Enable Speculation Rules',
                         'info' => 'Configure settings for enabling or disabling automated speculation logic.',

@@ -3713,6 +3713,14 @@ return [
                         'info' => 'Configura el contingut de drets d\'autor que es mostra al peu de pàgina del teu lloc web per protegir la teva propietat intel·lectual i millorar el reconeixement de la marca.',
                     ],
 
+                    'store-contact' => [
+                        'email' => 'Correu de contacte',
+                        'info' => 'Número de WhatsApp i correu que es mostren al peu de pàgina i al menú mòbil.',
+                        'title' => 'Contacte de la botiga',
+                        'whatsapp-number' => 'Número de WhatsApp',
+                        'whatsapp-number-info' => 'Inclou el prefix del país, p. ex. +91 98765 43210.',
+                    ],
+
                     'speculation-rules' => [
                         'enable-speculation' => 'Habilita les regles d’especulació',
                         'info' => 'Configura els paràmetres per habilitar o deshabilitar la lògica automàtica d’especulació.',

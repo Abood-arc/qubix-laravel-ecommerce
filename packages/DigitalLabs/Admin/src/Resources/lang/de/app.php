@@ -3713,6 +3713,14 @@ return [
                         'info' => 'Konfigurieren Sie den im Footer Ihrer Website angezeigten Urheberrechtsinhalt, um Ihr geistiges Eigentum zu schützen und die Markenbekanntheit zu stärken.',
                     ],
 
+                    'store-contact' => [
+                        'email' => 'Kontakt-E-Mail',
+                        'info' => 'WhatsApp-Nummer und E-Mail, die Kunden im Footer und im mobilen Menü sehen.',
+                        'title' => 'Shop-Kontakt',
+                        'whatsapp-number' => 'WhatsApp-Nummer',
+                        'whatsapp-number-info' => 'Mit Ländervorwahl, z. B. +91 98765 43210.',
+                    ],
+
                     'speculation-rules' => [
                         'enable-speculation' => 'Spekulationsregeln aktivieren',
                         'info' => 'Konfigurieren Sie die Einstellungen zum Aktivieren oder Deaktivieren der automatischen Spekulationslogik.',

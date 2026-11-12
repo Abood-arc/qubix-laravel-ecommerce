@@ -3713,6 +3713,14 @@ return [
                         'info' => 'Skonfiguruj treść praw autorskich wyświetlaną w stopce swojej witryny, aby chronić swoją własność intelektualną i zwiększyć rozpoznawalność marki.',
                     ],
 
+                    'store-contact' => [
+                        'email' => 'E-mail kontaktowy',
+                        'info' => 'Numer WhatsApp i e-mail widoczne dla klientów w stopce i menu mobilnym.',
+                        'title' => 'Kontakt sklepu',
+                        'whatsapp-number' => 'Numer WhatsApp',
+                        'whatsapp-number-info' => 'Podaj numer kierunkowy kraju, np. +91 98765 43210.',
+                    ],
+
                     'speculation-rules' => [
                         'enable-speculation' => 'Włącz reguły spekulacji',
                         'info' => 'Skonfiguruj ustawienia włączania lub wyłączania automatycznej logiki spekulacji.',

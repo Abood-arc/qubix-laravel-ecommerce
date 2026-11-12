@@ -19,6 +19,11 @@
         'theme_code' => $channel->theme,
         'channel_id' => $channel->id,
     ]);
+
+    // Admin: Configuration > General > Content > Store Contact. wa.me links need digits only.
+    $whatsappDisplay = core()->getConfigData('general.content.store_contact.whatsapp_number');
+    $whatsappDigits = preg_replace('/\D+/', '', (string) $whatsappDisplay);
+    $contactEmail = core()->getConfigData('general.content.store_contact.email');
 @endphp
 
 <footer class="mt-9 bg-lightOrange max-sm:mt-10">
@@ -62,7 +67,7 @@
                 @if ($customization?->options)
                     @foreach ($customization->options as $footerLinkSection)
                         <ul
-                            class="grid gap-5 text-sm"
+                            class="grid gap-1 text-sm"
                             v-pre
                         >
                             @php
@@ -75,7 +80,7 @@
                                 <li>
                                     <a
                                         href="{{ $link['url'] }}"
-                                        class="text-sm font-medium max-sm:text-xs"
+                                        class="inline-block py-2 text-sm font-medium"
                                     >
                                         {{ $link['title'] }}
                                     </a>
@@ -137,6 +142,42 @@
         @endif
 
         {!! view_render_event('qubix.shop.layout.footer.newsletter_subscription.after') !!}
+
+        {{-- Last in the DOM so the column-reversed phone layout shows it first. --}}
+        @if ($whatsappDigits || $contactEmail)
+            <div
+                class="grid content-start gap-1"
+                v-pre
+            >
+                <p
+                    class="text-base font-semibold"
+                    role="heading"
+                    aria-level="2"
+                >
+                    @lang('shop::app.components.layouts.footer.talk-to-us')
+                </p>
+
+                @if ($whatsappDigits)
+                    <a
+                        href="https://wa.me/{{ $whatsappDigits }}"
+                        class="inline-flex min-h-11 items-center gap-2 text-sm font-medium text-navyBlue underline-offset-4 hover:underline"
+                        target="_blank"
+                        rel="noopener"
+                    >
+                        @lang('shop::app.components.layouts.footer.whatsapp'): {{ $whatsappDisplay }}
+                    </a>
+                @endif
+
+                @if ($contactEmail)
+                    <a
+                        href="mailto:{{ $contactEmail }}"
+                        class="inline-flex min-h-11 items-center gap-2 text-sm font-medium text-navyBlue underline-offset-4 hover:underline"
+                    >
+                        {{ $contactEmail }}
+                    </a>
+                @endif
+            </div>
+        @endif
     </div>
 
     <div class="flex justify-between bg-[#F1EADF] px-[60px] py-3.5 max-md:justify-center max-sm:px-5">

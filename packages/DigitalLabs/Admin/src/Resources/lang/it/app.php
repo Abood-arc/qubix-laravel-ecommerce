@@ -3713,6 +3713,14 @@ return [
                         'info' => 'Configura il contenuto del copyright visualizzato nel piè di pagina del tuo sito web per proteggere la tua proprietà intellettuale e migliorare il riconoscimento del marchio.',
                     ],
 
+                    'store-contact' => [
+                        'email' => 'Email di contatto',
+                        'info' => 'Numero WhatsApp ed email mostrati ai clienti nel footer e nel menu mobile.',
+                        'title' => 'Contatti del negozio',
+                        'whatsapp-number' => 'Numero WhatsApp',
+                        'whatsapp-number-info' => 'Includi il prefisso internazionale, es. +91 98765 43210.',
+                    ],
+
                     'speculation-rules' => [
                         'enable-speculation' => 'Abilita regole di speculazione',
                         'info' => 'Configura le impostazioni per abilitare o disabilitare la logica di speculazione automatica.',

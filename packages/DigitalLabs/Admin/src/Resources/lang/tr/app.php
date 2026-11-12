@@ -3713,6 +3713,14 @@ return [
                         'info' => 'Fikri mülkiyetinizi korumak ve marka bilinirliğini artırmak için web sitenizin alt bilgisinde görüntülenen telif hakkı içeriğini yapılandırın.',
                     ],
 
+                    'store-contact' => [
+                        'email' => 'İletişim e-postası',
+                        'info' => 'Alt bilgide ve mobil menüde müşterilere gösterilen WhatsApp numarası ve e-posta.',
+                        'title' => 'Mağaza İletişimi',
+                        'whatsapp-number' => 'WhatsApp numarası',
+                        'whatsapp-number-info' => 'Ülke kodunu ekleyin, ör. +91 98765 43210.',
+                    ],
+
                     'speculation-rules' => [
                         'enable-speculation' => 'Spekülasyon Kurallarını Etkinleştir',
                         'info' => 'Otomatik spekülasyon mantığını etkinleştirmek veya devre dışı bırakmak için ayarları yapılandırın.',

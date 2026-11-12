@@ -3713,6 +3713,14 @@ return [
                         'info' => 'Configura il contenuto del copyright visualizzato nel piè di pagina del tuo sito web per proteggere la tua proprietà intellettuale e migliorare il riconoscimento del marchio.',
                     ],
 
+                    'store-contact' => [
+                        'email' => 'Email Kontak',
+                        'info' => 'Nomor WhatsApp dan email yang ditampilkan di footer dan menu seluler.',
+                        'title' => 'Kontak Toko',
+                        'whatsapp-number' => 'Nomor WhatsApp',
+                        'whatsapp-number-info' => 'Sertakan kode negara, mis. +91 98765 43210.',
+                    ],
+
                     'speculation-rules' => [
                         'enable-speculation' => 'Aktifkan Aturan Spekulasi',
                         'info' => 'Atur preferensi untuk mengaktifkan atau menonaktifkan logika spekulasi otomatis.',

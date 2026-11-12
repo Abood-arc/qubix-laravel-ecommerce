@@ -3713,6 +3713,14 @@ return [
                         'info' => 'Configureer de auteursrechtinhoud die in de voettekst van uw website wordt weergegeven om uw intellectuele eigendom te beschermen en de merkherkenning te verbeteren.',
                     ],
 
+                    'store-contact' => [
+                        'email' => 'Contact-e-mail',
+                        'info' => 'WhatsApp-nummer en e-mail die klanten zien in de footer en het mobiele menu.',
+                        'title' => 'Winkelcontact',
+                        'whatsapp-number' => 'WhatsApp-nummer',
+                        'whatsapp-number-info' => 'Met landcode, bijv. +91 98765 43210.',
+                    ],
+
                     'speculation-rules' => [
                         'enable-speculation' => 'Speculatieregels inschakelen',
                         'info' => 'Stel instellingen in voor het in- of uitschakelen van geautomatiseerde speculatie-logica.',

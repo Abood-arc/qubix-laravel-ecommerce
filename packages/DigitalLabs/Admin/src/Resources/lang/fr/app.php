@@ -3713,6 +3713,14 @@ return [
                         'info' => 'Configurez le contenu des droits d\'auteur affiché dans le pied de page de votre site web afin de protéger votre propriété intellectuelle et d\'améliorer la reconnaissance de votre marque.',
                     ],
 
+                    'store-contact' => [
+                        'email' => 'E-mail de contact',
+                        'info' => 'Numéro WhatsApp et e-mail affichés dans le pied de page et le menu mobile.',
+                        'title' => 'Contact de la boutique',
+                        'whatsapp-number' => 'Numéro WhatsApp',
+                        'whatsapp-number-info' => 'Indiquez l\'indicatif du pays, ex. +91 98765 43210.',
+                    ],
+
                     'speculation-rules' => [
                         'enable-speculation' => 'Activer les règles de spéculation',
                         'info' => 'Configurer les paramètres pour activer ou désactiver la logique de spéculation automatique.',

@@ -333,6 +333,42 @@
                 <v-mobile-category ref="mobileCategory"></v-mobile-category>
 
                 {!! view_render_event('qubix.shop.components.layouts.header.mobile.drawer.categories.after') !!}
+
+                @php
+                    $drawerWhatsappDigits = preg_replace('/\D+/', '', (string) core()->getConfigData('general.content.store_contact.whatsapp_number'));
+                    $drawerContactEmail = core()->getConfigData('general.content.store_contact.email');
+                @endphp
+
+                {{-- Ways to reach the store; WhatsApp and email appear once set in admin (Store Contact). --}}
+                <div class="mx-6 grid border-t border-white/15 py-3">
+                    <a
+                        href="{{ route('shop.home.contact_us') }}"
+                        class="flex min-h-12 items-center text-base font-medium text-white"
+                    >
+                        @lang('shop::app.components.layouts.footer.corporate-enquiry')
+                    </a>
+
+                    @if ($drawerWhatsappDigits)
+                        <a
+                            href="https://wa.me/{{ $drawerWhatsappDigits }}"
+                            class="flex min-h-12 items-center text-base font-medium text-white"
+                            target="_blank"
+                            rel="noopener"
+                        >
+                            @lang('shop::app.components.layouts.footer.whatsapp')
+                        </a>
+                    @endif
+
+                    @if ($drawerContactEmail)
+                        <a
+                            href="mailto:{{ $drawerContactEmail }}"
+                            class="flex min-h-12 items-center text-base font-medium text-white"
+                            v-pre
+                        >
+                            {{ $drawerContactEmail }}
+                        </a>
+                    @endif
+                </div>
             </x-slot>
 
             <x-slot:footer>
@@ -420,9 +456,10 @@
         type="text/x-template"
         id="v-mobile-category-template"
     >
-        <div class="relative h-full overflow-hidden">
+        {{-- Sized to its content (not h-full) so the store links below the list stay on screen. --}}
+        <div class="relative overflow-hidden">
             <div
-                class="flex h-full transition-transform duration-300"
+                class="flex transition-transform duration-300"
                 :class="{
                     'ltr:translate-x-0 rtl:translate-x-0': currentViewLevel !== 'third',
                     'ltr:-translate-x-full rtl:translate-x-full': currentViewLevel === 'third'
@@ -430,14 +467,15 @@
             >
                 <!-- First level -->
                 <div class="flex-shrink-0 w-full h-full px-6 overflow-auto">
-                    <div class="py-4">
+                    <div class="py-2">
                         <div
                             v-for="category in categories"
                             :key="category.id"
-                            :class="{'mb-2': category.children && category.children.length}"
+                            class="border-b border-white/10 last:border-b-0"
+                            :class="{'pb-2': category.children && category.children.length}"
                         >
-                            <div class="flex items-center justify-between py-2 transition-colors duration-200 cursor-pointer">
-                                <a :href="category.url" class="text-base font-medium text-white hover:text-white/90">
+                            <div class="flex items-center justify-between transition-colors duration-200 cursor-pointer">
+                                <a :href="category.url" class="flex min-h-12 flex-1 items-center text-base font-medium text-white hover:text-white/90">
                                     @{{ category.name }}
                                 </a>
                             </div>
