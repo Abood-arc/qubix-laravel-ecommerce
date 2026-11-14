@@ -511,6 +511,7 @@ return [
                 'mobile' => [
                     'account' => 'Akun',
                     'back-button' => 'Kembali ke Menu Utama',
+                    'cart' => 'Cart',
                     'qubix' => 'Qubix',
                     'compare' => 'Bandingkan',
                     'currencies' => 'Mata Uang',
@@ -538,6 +539,7 @@ return [
                 'customer-service' => 'Layanan Pelanggan',
                 'email' => 'Email',
                 'footer-content' => 'Bantuan & Kebijakan',
+                'shop' => 'Shop',
                 'talk-to-us' => 'Hubungi kami',
                 'whatsapp' => 'WhatsApp',
                 'corporate-enquiry' => 'Pertanyaan korporat',

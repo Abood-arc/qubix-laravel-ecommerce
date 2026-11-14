@@ -511,6 +511,7 @@ return [
                 'mobile' => [
                     'account' => 'Hesap',
                     'back-button' => 'Geri Dön',
+                    'cart' => 'Cart',
                     'qubix' => 'Qubix',
                     'compare' => 'Karşılaştır',
                     'currencies' => 'Para Birimleri',
@@ -538,6 +539,7 @@ return [
                 'customer-service' => 'Müşteri Hizmetleri',
                 'email' => 'E-posta',
                 'footer-content' => 'Yardım ve politikalar',
+                'shop' => 'Shop',
                 'talk-to-us' => 'Bize ulaşın',
                 'whatsapp' => 'WhatsApp',
                 'corporate-enquiry' => 'Kurumsal talep',

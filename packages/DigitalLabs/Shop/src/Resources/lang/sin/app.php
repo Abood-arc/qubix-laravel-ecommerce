@@ -511,6 +511,7 @@ return [
                 'mobile' => [
                     'account' => 'ගිණුම',
                     'back-button' => 'ප්‍රධාන මෙනුවට ආපසු යන්න',
+                    'cart' => 'Cart',
                     'qubix' => 'Qubix',
                     'compare' => 'සංසන්දනය කරන්න',
                     'currencies' => 'මුදල් ඒකක',
@@ -538,6 +539,7 @@ return [
                 'customer-service' => 'ප්‍රශ්නය හා සේවය',
                 'email' => 'ඊමේල්',
                 'footer-content' => 'උදව් සහ ප්‍රතිපත්ති',
+                'shop' => 'Shop',
                 'talk-to-us' => 'අප හා කතා කරන්න',
                 'whatsapp' => 'WhatsApp',
                 'corporate-enquiry' => 'ආයතනික විමසීම',

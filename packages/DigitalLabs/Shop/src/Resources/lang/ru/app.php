@@ -511,6 +511,7 @@ return [
                 'mobile' => [
                     'account' => 'Аккаунт',
                     'back-button' => 'Назад к главному меню',
+                    'cart' => 'Cart',
                     'qubix' => 'Багисто',
                     'compare' => 'Сравнить',
                     'currencies' => 'Валюты',
@@ -538,6 +539,7 @@ return [
                 'customer-service' => 'Служба поддержки',
                 'email' => 'Электронная почта',
                 'footer-content' => 'Помощь и правила',
+                'shop' => 'Shop',
                 'talk-to-us' => 'Свяжитесь с нами',
                 'whatsapp' => 'WhatsApp',
                 'corporate-enquiry' => 'Корпоративный запрос',

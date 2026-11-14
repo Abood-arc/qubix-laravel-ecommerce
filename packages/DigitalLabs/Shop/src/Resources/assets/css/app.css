@@ -2,6 +2,108 @@
 @tailwind components;
 @tailwind utilities;
 
+/*
+ * Store looks. One layout; Admin > Configuration > General > Design > Store Look picks the
+ * colours, fonts and corners via data-look on <html>. Colours are RGB channels so Tailwind's
+ * opacity modifiers (bg-brand/10) keep working. Forest Green is the default (no attribute).
+ */
+:root,
+[data-look="forest-green"] {
+    --c-brand: 47 93 72;          /* #2f5d48 buttons, links, prices */
+    --c-brand-deep: 35 69 55;     /* #234537 */
+    --c-sage: 227 237 228;        /* #e3ede4 light tint */
+    --c-sand: 244 239 230;        /* #f4efe6 photo tiles */
+    --c-head: 47 93 72;
+    --c-head-ink: 255 255 255;
+    --c-nav: 47 93 72;
+    --c-nav-ink: 255 255 255;
+    --c-offer: 227 237 228;
+    --c-offer-ink: 47 93 72;
+    --c-field: 255 255 255;       /* header search field */
+    --c-accent: 181 67 47;        /* #b5432f sale badge */
+    --c-foot: 35 69 55;
+    --c-foot-ink: 255 255 255;
+    --c-foot-muted: 199 214 203;
+    --font-text: "Karla";
+    --font-display: "Karla";
+    --radius-ui: 999px;
+    --nav-trim: inset 0 1px 0 rgb(255 255 255 / 0.14);
+    --nav-case: none;
+    --nav-track: 0;
+}
+
+[data-look="marigold-indigo"] {
+    --c-brand: 28 42 107;         /* #1c2a6b indigo */
+    --c-brand-deep: 20 31 82;
+    --c-sage: 255 243 214;
+    --c-sand: 251 243 223;        /* #fbf3df */
+    --c-head: 242 172 26;         /* #f2ac1a marigold */
+    --c-head-ink: 28 42 107;
+    --c-nav: 242 172 26;
+    --c-nav-ink: 28 42 107;
+    --c-offer: 28 42 107;
+    --c-offer-ink: 255 213 106;
+    --c-field: 255 248 230;
+    --c-accent: 199 48 42;        /* #c7302a signal red */
+    --c-foot: 28 42 107;
+    --c-foot-ink: 255 255 255;
+    --c-foot-muted: 196 201 230;
+    --font-text: "Mukta";
+    --font-display: "Baloo 2";
+    --radius-ui: 999px;
+    --nav-trim: inset 0 -4px 0 rgb(28 42 107), inset 0 -7px 0 rgb(199 48 42);
+    --nav-case: none;
+    --nav-track: 0;
+}
+
+[data-look="sand-charcoal"] {
+    --c-brand: 29 26 21;          /* #1d1a15 charcoal */
+    --c-brand-deep: 17 16 12;
+    --c-sage: 239 224 191;
+    --c-sand: 241 230 207;        /* #f1e6cf */
+    --c-head: 201 164 106;        /* #c9a46a sand */
+    --c-head-ink: 29 26 21;
+    --c-nav: 29 26 21;
+    --c-nav-ink: 241 226 194;
+    --c-offer: 29 26 21;
+    --c-offer-ink: 233 211 166;
+    --c-field: 239 224 191;
+    --c-accent: 168 50 42;        /* #a8322a */
+    --c-foot: 29 26 21;
+    --c-foot-ink: 246 234 208;
+    --c-foot-muted: 191 174 140;
+    --font-text: "Archivo";
+    --font-display: "Archivo";
+    --radius-ui: 4px;
+    --nav-trim: inset 0 -3px 0 rgb(36 70 138), inset 0 -6px 0 rgb(168 50 42);
+    --nav-case: uppercase;
+    --nav-track: 0.08em;
+}
+
+[data-look="minimal-white"] {
+    --c-brand: 17 17 17;
+    --c-brand-deep: 0 0 0;
+    --c-sage: 243 243 241;
+    --c-sand: 244 244 242;
+    --c-head: 255 255 255;
+    --c-head-ink: 17 17 17;
+    --c-nav: 255 255 255;
+    --c-nav-ink: 17 17 17;
+    --c-offer: 17 17 17;
+    --c-offer-ink: 255 255 255;
+    --c-field: 243 243 241;
+    --c-accent: 17 17 17;
+    --c-foot: 244 244 242;
+    --c-foot-ink: 17 17 17;
+    --c-foot-muted: 92 92 88;
+    --font-text: "Manrope";
+    --font-display: "Manrope";
+    --radius-ui: 10px;
+    --nav-trim: inset 0 1px 0 rgb(231 231 228), inset 0 -1px 0 rgb(231 231 228);
+    --nav-case: none;
+    --nav-track: 0;
+}
+
 @font-face {
     font-family: "qubix-shop";
     src: url("../fonts/qubix-shop.woff") format("woff");
@@ -435,6 +537,28 @@ img.lazy {
         @apply bg-slate-400;
     }
 
+    /* Header actions: icon over a short label on desktop (Account, Wishlist, Cart). */
+    .header-action {
+        @apply relative inline-flex min-w-[60px] cursor-pointer flex-col items-center justify-center gap-1 rounded-lg px-2 py-1.5 text-headInk transition-colors hover:bg-headInk/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-headInk/60;
+    }
+
+    .header-action-label {
+        @apply text-xs font-semibold leading-none;
+    }
+
+    .header-badge {
+        @apply absolute -top-1.5 min-w-[18px] rounded-full bg-headInk px-1.5 py-[3px] text-center text-[11px] font-bold leading-3 text-head ltr:left-4 rtl:right-4;
+    }
+
+    /* Footer: each column has a heading; links are muted until hovered. */
+    .footer-heading {
+        @apply mb-2 text-base font-bold text-footInk;
+    }
+
+    .footer-link {
+        @apply inline-block py-1 text-[15px] text-footMuted underline-offset-4 transition-colors hover:text-footInk hover:underline;
+    }
+
     .primary-button {
         @apply flex gap-x-1.5 items-center place-content-center font-medium rounded-xl text-white bg-navyBlue border border-navyBlue px-8 py-4 max-w-max cursor-pointer transition-all hover:opacity-[0.9];
     }
@@ -450,9 +574,9 @@ img.lazy {
     }
 
     .cart-add-btn--loading {
-        background-color: #2f5d48 !important;
+        background-color: rgb(var(--c-brand)) !important;
         color: #ffffff !important;
-        border-color: #2f5d48 !important;
+        border-color: rgb(var(--c-brand)) !important;
         opacity: 0.88 !important;
         cursor: wait !important;
     }
@@ -547,7 +671,7 @@ img.lazy {
     .glow-404 {
         background-clip: text;
         -webkit-background-clip: text;
-        color: #2f5d48;
+        color: rgb(var(--c-brand));
     }
 
     .glow-shadow-404 {
@@ -597,19 +721,8 @@ img.lazy {
         border-radius: 9999px;
     }
 
-    /* Header primary category nav — Karla ~18px, reference: editorial storefront nav */
-    header.sticky .velocity-nav-category-list,
-    header.sticky #main-header .velocity-nav-category-trigger,
-    header.sticky #main-header .velocity-nav-category-trigger-sidebar {
-        font-family: "Karla", system-ui, sans-serif;
-    }
-
     header.sticky .velocity-nav-category-list {
         font-feature-settings: "kern" 1;
-    }
-
-    header.sticky .velocity-nav-megamenu {
-        font-family: "Karla", system-ui, sans-serif;
     }
 
     header.sticky .velocity-nav-category-trigger,
@@ -670,7 +783,7 @@ img.lazy {
     }
 }
 
-/* One header green in every state; scrolling only adds a soft shadow. */
+/* One header colour in every state; scrolling only adds a soft shadow. */
 #main-header {
     transition: box-shadow 200ms ease;
 }
@@ -684,27 +797,39 @@ img.lazy {
     margin-top: 0 !important;
 }
 
-/* Mobile storefront: full-width fixed search flyout (avoid vw/calc bleed from nested flex) */
-@media (max-width: 1023px) {
-    #main-header details.mobile-header-details-search[open] > .mobile-search-panel {
-        display: flex !important;
-    }
+/* Category row under the header: the look's trim lines, and its letter case for the labels. */
+.site-nav {
+    box-shadow: var(--nav-trim);
+}
 
-    #main-header details.mobile-header-details-search:not([open]) > .mobile-search-panel {
-        display: none !important;
-    }
+.site-nav .velocity-nav-category-trigger {
+    text-transform: var(--nav-case);
+    letter-spacing: var(--nav-track);
+}
 
-    #main-header details.mobile-header-details-search:not([open]) > summary .mobile-search-cancel {
-        display: none !important;
-    }
+[data-look="sand-charcoal"] .site-nav .velocity-nav-category-trigger {
+    font-size: 0.8125rem;
+    font-weight: 700;
+}
 
-    #main-header details.mobile-header-details-search[open] > summary .mobile-search-mag {
-        display: none !important;
-    }
+/* Buttons take the other looks' corners (pill, 4px or 10px). Forest Green keeps each view's own
+   radius, as before; !important because many views set a rounded-* class on the button. */
+[data-look="marigold-indigo"] .primary-button,
+[data-look="marigold-indigo"] .secondary-button,
+[data-look="sand-charcoal"] .primary-button,
+[data-look="sand-charcoal"] .secondary-button,
+[data-look="minimal-white"] .primary-button,
+[data-look="minimal-white"] .secondary-button {
+    border-radius: var(--radius-ui) !important;
+}
 
-    #main-header details.mobile-header-details-search[open] > summary .mobile-search-cancel {
-        display: inline-block !important;
-    }
+/* Phone category chips: one swipeable row, no scrollbar. */
+.category-chips {
+    scrollbar-width: none;
+}
+
+.category-chips::-webkit-scrollbar {
+    display: none;
 }
 
 /* Headings: the template marks them `font-dmserif` (a single-weight serif); in Karla they need weight. */

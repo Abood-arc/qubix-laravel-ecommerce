@@ -3782,6 +3782,17 @@ return [
                         'sidebar' => 'Menu latéral',
                         'title' => 'Vue de la catégorie du menu',
                     ],
+
+                    'store-look' => [
+                        'forest-green' => 'Forest Green',
+                        'info' => 'Choose the colours, fonts and corners of your storefront. The layout stays the same in every look.',
+                        'look' => 'Look',
+                        'look-info' => 'Forest Green: green header, cream panels. Marigold & Indigo: bright yellow header, indigo text. Sand & Charcoal: sand header, charcoal menu, square corners. Minimal White: white header, black text.',
+                        'marigold-indigo' => 'Marigold & Indigo',
+                        'minimal-white' => 'Minimal White',
+                        'sand-charcoal' => 'Sand & Charcoal',
+                        'title' => 'Store Look',
+                    ],
                 ],
 
                 'magic-ai' => [

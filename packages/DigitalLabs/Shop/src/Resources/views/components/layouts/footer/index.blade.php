@@ -31,15 +31,21 @@
     $whatsappDisplay = core()->getConfigData('general.content.store_contact.whatsapp_number');
     $whatsappDigits = preg_replace('/\D+/', '', (string) $whatsappDisplay);
     $contactEmail = core()->getConfigData('general.content.store_contact.email');
+
+    // The "Shop" column: the same top-level categories as the header menu.
+    $footerCategories = app(\DigitalLabs\Category\Repositories\CategoryRepository::class)
+        ->getVisibleCategoryTree($channel->root_category_id)
+        ->take(8);
 @endphp
 
 {{--
-    Deep green footer: logo, the admin's link groups as columns, then contact and newsletter.
+    Footer in the store look's colours: logo, a Shop column (top categories), the admin's link
+    groups under "Help & Policies", then contact and newsletter.
     On phones the contact block comes first, the links fold under "Help & Policies", and the
     newsletter follows.
 --}}
-<footer class="mt-16 bg-brandDeep text-[#e8efe9] max-md:mt-12">
-    <div class="grid grid-cols-[minmax(0,1.1fr)_minmax(0,2fr)_minmax(0,1.4fr)] gap-10 px-10 pb-10 pt-12 max-1180:px-8 max-1060:grid-cols-1 max-1060:gap-0 max-md:px-4 max-md:pb-4 max-md:pt-8">
+<footer class="mt-16 bg-foot text-footInk max-md:mt-12">
+    <div class="grid grid-cols-[minmax(0,0.8fr)_minmax(0,2.4fr)_minmax(0,1.3fr)] gap-10 px-10 pb-10 pt-12 max-1180:px-8 max-1060:grid-cols-1 max-1060:gap-0 max-md:px-4 max-md:pb-4 max-md:pt-8">
         <!-- Logo -->
         <div class="max-1060:hidden">
             <a
@@ -55,25 +61,64 @@
             </a>
         </div>
 
-        <!-- Links: columns on desktop -->
+        <!-- Links: headed columns on desktop -->
         <div
-            class="flex flex-wrap gap-x-16 gap-y-8 max-1060:hidden"
+            class="flex flex-wrap gap-x-12 gap-y-8 max-1060:hidden"
             v-pre
         >
-            @foreach ($footerLinkSections as $footerLinkSection)
-                <ul class="grid content-start gap-1">
-                    @foreach ($footerLinkSection as $link)
-                        <li>
-                            <a
-                                href="{{ $link['url'] }}"
-                                class="inline-block py-1 text-[15px] text-[#c7d6cb] underline-offset-4 transition-colors hover:text-white hover:underline"
-                            >
-                                {{ $link['title'] }}
-                            </a>
-                        </li>
-                    @endforeach
-                </ul>
-            @endforeach
+            @if ($footerCategories->isNotEmpty())
+                <div class="grid content-start gap-1">
+                    <p
+                        class="footer-heading"
+                        role="heading"
+                        aria-level="2"
+                    >
+                        @lang('shop::app.components.layouts.footer.shop')
+                    </p>
+
+                    <ul class="grid content-start gap-1">
+                        @foreach ($footerCategories as $footerCategory)
+                            <li>
+                                <a
+                                    href="{{ $footerCategory->url }}"
+                                    class="footer-link"
+                                >
+                                    {{ $footerCategory->name }}
+                                </a>
+                            </li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
+
+            @if ($footerLinkSections->isNotEmpty())
+                <div class="grid content-start gap-1">
+                    <p
+                        class="footer-heading"
+                        role="heading"
+                        aria-level="2"
+                    >
+                        @lang('shop::app.components.layouts.footer.footer-content')
+                    </p>
+
+                    <div class="flex flex-wrap gap-x-10 gap-y-1">
+                        @foreach ($footerLinkSections as $footerLinkSection)
+                            <ul class="grid content-start gap-1">
+                                @foreach ($footerLinkSection as $link)
+                                    <li>
+                                        <a
+                                            href="{{ $link['url'] }}"
+                                            class="footer-link"
+                                        >
+                                            {{ $link['title'] }}
+                                        </a>
+                                    </li>
+                                @endforeach
+                            </ul>
+                        @endforeach
+                    </div>
+                </div>
+            @endif
         </div>
 
         <!-- Contact and newsletter (first on phones) -->
@@ -84,7 +129,7 @@
                     v-pre
                 >
                     <p
-                        class="mb-1 text-base font-bold text-white"
+                        class="footer-heading"
                         role="heading"
                         aria-level="2"
                     >
@@ -94,7 +139,7 @@
                     @if ($whatsappDigits)
                         <a
                             href="https://wa.me/{{ $whatsappDigits }}"
-                            class="inline-flex min-h-11 items-center text-[15px] font-semibold text-white underline-offset-4 hover:underline"
+                            class="inline-flex min-h-11 items-center text-[15px] font-semibold text-footInk underline-offset-4 hover:underline"
                             target="_blank"
                             rel="noopener"
                         >
@@ -105,7 +150,7 @@
                     @if ($contactEmail)
                         <a
                             href="mailto:{{ $contactEmail }}"
-                            class="inline-flex min-h-11 items-center text-[15px] font-semibold text-white underline-offset-4 hover:underline"
+                            class="inline-flex min-h-11 items-center text-[15px] font-semibold text-footInk underline-offset-4 hover:underline"
                         >
                             {{ $contactEmail }}
                         </a>
@@ -117,9 +162,9 @@
             @if ($footerLinkSections->isNotEmpty())
                 <x-shop::accordion
                     :is-active="false"
-                    class="hidden !w-full !rounded-none !border-0 !border-y !border-white/15 !bg-transparent max-1060:block"
+                    class="hidden !w-full !rounded-none !border-0 !border-y !border-footInk/15 !bg-transparent max-1060:block"
                 >
-                    <x-slot:header class="!bg-transparent !px-0 !py-3.5 text-base font-bold text-white [&_span]:text-white">
+                    <x-slot:header class="!bg-transparent !px-0 !py-3.5 text-base font-bold text-footInk [&_span]:text-footInk">
                         @lang('shop::app.components.layouts.footer.footer-content')
                     </x-slot>
 
@@ -133,7 +178,7 @@
                                     <li>
                                         <a
                                             href="{{ $link['url'] }}"
-                                            class="flex min-h-11 items-center text-[15px] text-[#c7d6cb]"
+                                            class="flex min-h-11 items-center text-[15px] text-footMuted"
                                         >
                                             {{ $link['title'] }}
                                         </a>
@@ -151,14 +196,14 @@
             @if (core()->getConfigData('customer.settings.newsletter.subscription'))
                 <div class="grid gap-2">
                     <p
-                        class="text-base font-bold text-white"
+                        class="footer-heading"
                         role="heading"
                         aria-level="2"
                     >
                         @lang('shop::app.components.layouts.footer.newsletter-text')
                     </p>
 
-                    <p class="text-sm text-[#c7d6cb]">
+                    <p class="text-sm text-footMuted">
                         @lang('shop::app.components.layouts.footer.subscribe-stay-touch')
                     </p>
 
@@ -170,7 +215,7 @@
                             <x-shop::form.control-group.control
                                 type="email"
                                 id="footer-newsletter-email"
-                                class="block h-12 w-full !rounded-full !border-0 bg-white/10 px-5 text-base text-white placeholder:text-[#b9c9bd] focus:bg-white/15 ltr:pr-32 rtl:pl-32"
+                                class="block h-12 w-full !rounded-ui !border-0 bg-footInk/10 px-5 text-base text-footInk placeholder:text-footMuted focus:bg-footInk/15 ltr:pr-32 rtl:pl-32"
                                 name="email"
                                 autocomplete="email"
                                 rules="required|email"
@@ -183,7 +228,7 @@
 
                             <button
                                 type="submit"
-                                class="absolute top-1 flex h-10 items-center rounded-full bg-white px-5 text-[15px] font-bold text-brandDeep transition-transform duration-150 hover:bg-sage active:scale-[0.97] ltr:right-1 rtl:left-1"
+                                class="absolute top-1 flex h-10 items-center rounded-ui bg-footInk px-5 text-[15px] font-bold text-foot transition-transform duration-150 hover:bg-footInk/90 active:scale-[0.97] ltr:right-1 rtl:left-1"
                             >
                                 @lang('shop::app.components.layouts.footer.subscribe')
                             </button>
@@ -196,10 +241,10 @@
         </div>
     </div>
 
-    <div class="flex justify-between border-t border-white/10 px-10 py-4 max-1180:px-8 max-md:justify-center max-md:px-4">
+    <div class="flex justify-between border-t border-footInk/10 px-10 py-4 max-1180:px-8 max-md:justify-center max-md:px-4">
         {!! view_render_event('qubix.shop.layout.footer.footer_text.before') !!}
 
-        <p class="text-sm text-[#b9c9bd] max-md:text-center">
+        <p class="text-sm text-footMuted max-md:text-center">
             @if (core()->getConfigData('general.content.footer.copyright_content'))
                 {!! core()->getConfigData('general.content.footer.copyright_content') !!}
             @else

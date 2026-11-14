@@ -511,6 +511,7 @@ return [
                 'mobile' => [
                     'account' => 'खाता',
                     'back-button' => 'मुख्य मेनू पर वापस जाएं',
+                    'cart' => 'Cart',
                     'qubix' => 'बैगिस्टो',
                     'compare' => 'तुलना करें',
                     'currencies' => 'मुद्राएँ',
@@ -538,6 +539,7 @@ return [
                 'customer-service' => 'ग्राहक सेवा',
                 'email' => 'ईमेल',
                 'footer-content' => 'सहायता और नीतियाँ',
+                'shop' => 'Shop',
                 'talk-to-us' => 'हमसे बात करें',
                 'whatsapp' => 'व्हाट्सऐप',
                 'corporate-enquiry' => 'कॉर्पोरेट पूछताछ',

@@ -511,6 +511,7 @@ return [
                 'mobile' => [
                     'account' => 'حساب کاربری',
                     'back-button' => 'بازگشت به منوی اصلی',
+                    'cart' => 'Cart',
                     'qubix' => 'باگیستو',
                     'compare' => 'مقایسه',
                     'currencies' => 'واحدهای پول',
@@ -538,6 +539,7 @@ return [
                 'customer-service' => 'خدمات مشتری',
                 'email' => 'ایمیل',
                 'footer-content' => 'راهنما و سیاست‌ها',
+                'shop' => 'Shop',
                 'talk-to-us' => 'با ما در تماس باشید',
                 'whatsapp' => 'واتس‌اپ',
                 'corporate-enquiry' => 'استعلام سازمانی',

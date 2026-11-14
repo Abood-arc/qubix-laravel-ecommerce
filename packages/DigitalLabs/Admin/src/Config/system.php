@@ -299,6 +299,36 @@ return [
             ],
         ],
     ], [
+        'key' => 'general.design.store_look',
+        'name' => 'admin::app.configuration.index.general.design.store-look.title',
+        'info' => 'admin::app.configuration.index.general.design.store-look.info',
+        'sort' => 3,
+        'fields' => [
+            [
+                'name' => 'look',
+                'title' => 'admin::app.configuration.index.general.design.store-look.look',
+                'info' => 'admin::app.configuration.index.general.design.store-look.look-info',
+                'type' => 'select',
+                'default' => 'forest-green',
+                'channel_based' => true,
+                'options' => [
+                    [
+                        'title' => 'admin::app.configuration.index.general.design.store-look.forest-green',
+                        'value' => 'forest-green',
+                    ], [
+                        'title' => 'admin::app.configuration.index.general.design.store-look.marigold-indigo',
+                        'value' => 'marigold-indigo',
+                    ], [
+                        'title' => 'admin::app.configuration.index.general.design.store-look.sand-charcoal',
+                        'value' => 'sand-charcoal',
+                    ], [
+                        'title' => 'admin::app.configuration.index.general.design.store-look.minimal-white',
+                        'value' => 'minimal-white',
+                    ],
+                ],
+            ],
+        ],
+    ], [
         'key' => 'general.magic_ai',
         'name' => 'admin::app.configuration.index.general.magic-ai.title',
         'info' => 'admin::app.configuration.index.general.magic-ai.info',

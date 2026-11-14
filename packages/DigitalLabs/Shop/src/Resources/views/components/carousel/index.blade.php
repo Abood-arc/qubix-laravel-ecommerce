@@ -141,12 +141,42 @@
                 />
             </div>
 
-            {{-- No side arrows: the banner advances on its own, swipes on phones, and the dots below jump to a slide. --}}
-
-            <!-- Pagination dots -->
+            {{--
+                The banner advances on its own and swipes on phones. Larger screens get a
+                "‹ 2 / 5 ›" control in the corner; phones keep small dots, which fit the short banner.
+            --}}
             <div
                 v-if="images.length >= 2"
-                class="absolute bottom-3 z-[2] flex w-full justify-center max-sm:bottom-1.5 ltr:left-0 rtl:right-0"
+                class="absolute bottom-4 z-[2] flex items-center gap-1 rounded-ui bg-white/90 p-1 text-zinc-900 shadow-[0_2px_10px_rgba(0,0,0,0.12)] backdrop-blur max-sm:hidden ltr:right-4 rtl:left-4"
+            >
+                <button
+                    type="button"
+                    class="flex h-9 w-9 items-center justify-center rounded-ui transition-colors hover:bg-black/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900/40"
+                    aria-label="@lang('shop::app.components.carousel.previous')"
+                    @click="step(-1)"
+                >
+                    <span class="icon-arrow-left text-xl rtl:icon-arrow-right"></span>
+                </button>
+
+                <span
+                    class="min-w-[3.25rem] text-center text-sm font-bold tabular-nums"
+                    v-text="(currentIndex + 1) + ' / ' + images.length"
+                ></span>
+
+                <button
+                    type="button"
+                    class="flex h-9 w-9 items-center justify-center rounded-ui transition-colors hover:bg-black/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900/40"
+                    aria-label="@lang('shop::app.components.carousel.next')"
+                    @click="step(1)"
+                >
+                    <span class="icon-arrow-right text-xl rtl:icon-arrow-left"></span>
+                </button>
+            </div>
+
+            <!-- Phone dots -->
+            <div
+                v-if="images.length >= 2"
+                class="absolute bottom-1.5 z-[2] flex w-full justify-center sm:hidden ltr:left-0 rtl:right-0"
             >
                 <button
                     v-for="(image, index) in images"
@@ -242,6 +272,13 @@
                         : (this.currentIndex - 1 + len) % len;
                     this.animGen++;
                     this.play();
+                },
+
+                /* The corner control: one slide back or forward, in reading order. */
+                step(delta) {
+                    const len = this.images.length;
+
+                    this.goTo((this.currentIndex + delta + len) % len);
                 },
 
                 goTo(index) {

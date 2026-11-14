@@ -511,6 +511,7 @@ return [
                 'mobile' => [
                     'account' => 'アカウント',
                     'back-button' => 'メインメニューに戻る',
+                    'cart' => 'Cart',
                     'qubix' => 'バギスト',
                     'compare' => '比較',
                     'currencies' => '通貨',
@@ -538,6 +539,7 @@ return [
                 'customer-service' => 'カスタマーサービス',
                 'email' => 'Email',
                 'footer-content' => 'ヘルプとポリシー',
+                'shop' => 'Shop',
                 'talk-to-us' => 'お問い合わせ',
                 'whatsapp' => 'WhatsApp',
                 'corporate-enquiry' => '法人のお問い合わせ',

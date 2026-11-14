@@ -1,10 +1,13 @@
 <!-- Mini Cart Vue Component -->
 <v-mini-cart>
-    <span
-        class="icon-cart cursor-pointer text-2xl text-white"
-        role="button"
-        aria-label="@lang('shop::app.checkout.cart.mini-cart.shopping-cart')"
-    ></span>
+    <span class="header-action max-lg:h-11 max-lg:w-11 max-lg:min-w-0 max-lg:p-0">
+        <span
+            class="icon-cart text-2xl"
+            aria-hidden="true"
+        ></span>
+
+        <span class="header-action-label max-lg:hidden">@lang('shop::app.components.layouts.header.mobile.cart')</span>
+    </span>
 </v-mini-cart>
 
 @pushOnce('scripts')
@@ -20,31 +23,38 @@
                 <x-slot:toggle>
                     {!! view_render_event('qubix.shop.checkout.mini-cart.drawer.toggle.before') !!}
 
-                    {{-- A 44px tap target; the badge sits on the icon's top corner inside it. --}}
+                    {{-- Labelled on desktop; a 44px icon on phones. The count sits on the icon's corner. --}}
                     <span
-                        class="relative inline-flex h-11 w-11 cursor-pointer items-center justify-center rounded-full transition-colors hover:bg-white/10"
+                        class="header-action max-lg:h-11 max-lg:w-11 max-lg:min-w-0 max-lg:p-0"
                         role="button"
                         aria-label="@lang('shop::app.checkout.cart.mini-cart.shopping-cart')"
                         tabindex="0"
                         @click="getCart"
                     >
-                        <span class="icon-cart text-2xl text-white"></span>
+                        <span class="relative inline-flex">
+                            <span
+                                class="icon-cart text-2xl"
+                                aria-hidden="true"
+                            ></span>
 
-                        @if (core()->getConfigData('sales.checkout.my_cart.summary') == 'display_item_quantity')
-                            <span
-                                class="absolute -top-1 rounded-[44px] bg-white px-2 py-1.5 text-xs font-semibold leading-[9px] text-brand ltr:left-[26px] rtl:right-[26px]"
-                                v-if="cart?.items_qty"
-                            >
-                                @{{ cart.items_qty }}
-                            </span>
-                        @else
-                            <span
-                                class="absolute -top-1 rounded-[44px] bg-white px-2 py-1.5 text-xs font-semibold leading-[9px] text-brand ltr:left-[26px] rtl:right-[26px]"
-                                v-if="cart?.items_count"
-                            >
-                                @{{ cart.items_count }}
-                            </span>
-                        @endif
+                            @if (core()->getConfigData('sales.checkout.my_cart.summary') == 'display_item_quantity')
+                                <span
+                                    class="header-badge"
+                                    v-if="cart?.items_qty"
+                                >
+                                    @{{ cart.items_qty }}
+                                </span>
+                            @else
+                                <span
+                                    class="header-badge"
+                                    v-if="cart?.items_count"
+                                >
+                                    @{{ cart.items_count }}
+                                </span>
+                            @endif
+                        </span>
+
+                        <span class="header-action-label max-lg:hidden">@lang('shop::app.components.layouts.header.mobile.cart')</span>
                     </span>
 
                     {!! view_render_event('qubix.shop.checkout.mini-cart.drawer.toggle.after') !!}
@@ -352,24 +362,28 @@
             </x-shop::drawer>
 
         @else
-            <a href="{{ route('shop.checkout.onepage.index') }}">
+            <a
+                href="{{ route('shop.checkout.onepage.index') }}"
+                class="header-action max-lg:h-11 max-lg:w-11 max-lg:min-w-0 max-lg:p-0"
+                aria-label="@lang('shop::app.checkout.cart.mini-cart.shopping-cart')"
+            >
                 {!! view_render_event('qubix.shop.checkout.mini-cart.drawer.toggle.before') !!}
 
-                    <span class="relative">
+                    <span class="relative inline-flex">
                         <span
-                            class="icon-cart cursor-pointer text-2xl text-white"
-                            role="button"
-                            aria-label="@lang('shop::app.checkout.cart.mini-cart.shopping-cart')"
-                            tabindex="0"
+                            class="icon-cart text-2xl"
+                            aria-hidden="true"
                         ></span>
 
                         <span
-                            class="absolute -top-4 rounded-[44px] bg-navyBlue px-2 py-1.5 text-xs font-semibold leading-[9px] text-white ltr:left-5 rtl:right-5 max-md:px-2 max-md:py-1.5 max-md:ltr:left-4 max-md:rtl:right-4"
+                            class="header-badge"
                             v-if="cart?.items_qty"
                         >
                             @{{ cart.items_qty }}
                         </span>
                     </span>
+
+                    <span class="header-action-label max-lg:hidden">@lang('shop::app.components.layouts.header.mobile.cart')</span>
 
                 {!! view_render_event('qubix.shop.checkout.mini-cart.drawer.toggle.after') !!}
             </a>

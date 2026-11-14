@@ -511,6 +511,7 @@ return [
                 'mobile' => [
                     'account' => 'Cuenta',
                     'back-button' => 'Volver al menú principal',
+                    'cart' => 'Cart',
                     'qubix' => 'Qubix',
                     'compare' => 'Comparar',
                     'currencies' => 'Monedas',
@@ -538,6 +539,7 @@ return [
                 'customer-service' => 'Servicio al cliente',
                 'email' => 'Correo Electrónico',
                 'footer-content' => 'Ayuda y políticas',
+                'shop' => 'Shop',
                 'talk-to-us' => 'Habla con nosotros',
                 'whatsapp' => 'WhatsApp',
                 'corporate-enquiry' => 'Consulta para empresas',

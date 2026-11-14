@@ -1,168 +1,105 @@
 {!! view_render_event('qubix.shop.components.layouts.header.desktop.bottom.before') !!}
 
-<div class="relative grid min-h-[84px] w-full grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-x-8 px-10 max-1180:gap-x-5 max-1180:px-8">
-    <!--
-        Categories support first, second, and third levels.
-        Additional levels can be added per project requirements.
-    -->
+{{--
+    Two rows. Row 1: logo, an always-visible search field, then labelled Account, Wishlist,
+    Compare and Cart. Row 2: the categories, with their dropdown menus opening below it.
+    Colours come from the store look (bg-head / text-headInk, bg-nav / text-navInk).
+--}}
+@php
+    $showWishlist = (bool) core()->getConfigData('customer.settings.wishlist.wishlist_option');
+    $showCompare = (bool) core()->getConfigData('catalog.products.settings.compare_option');
+@endphp
 
-    <!-- Logo -->
-    <div class="flex items-center">
-        {!! view_render_event('qubix.shop.components.layouts.header.desktop.bottom.logo.before') !!}
+<div class="w-full">
+    <div class="grid min-h-[76px] w-full grid-cols-[auto_minmax(0,620px)_1fr] items-center gap-x-8 px-10 text-headInk max-1180:gap-x-5 max-1180:px-8">
+        <!-- Logo -->
+        <div class="flex items-center">
+            {!! view_render_event('qubix.shop.components.layouts.header.desktop.bottom.logo.before') !!}
 
-        <a
-            href="{{ route('shop.home.index') }}"
-            aria-label="@lang('shop::app.components.layouts.header.desktop.bottom.qubix')"
-            class="inline-flex items-center"
-        >
-            <img
-                src="{{ core()->getCurrentChannel()->logo_url ?? qubix_asset('images/logo.svg') }}"
-                class="h-14 w-auto object-contain"
-                alt="{{ config('app.name') }}"
+            <a
+                href="{{ route('shop.home.index') }}"
+                aria-label="@lang('shop::app.components.layouts.header.desktop.bottom.qubix')"
+                class="inline-flex items-center"
             >
-        </a>
+                <img
+                    src="{{ core()->getCurrentChannel()->logo_url ?? qubix_asset('images/logo.svg') }}"
+                    class="h-12 w-auto object-contain"
+                    alt="{{ config('app.name') }}"
+                >
+            </a>
 
-        {!! view_render_event('qubix.shop.components.layouts.header.desktop.bottom.logo.after') !!}
-    </div>
-
-    <!-- Categories (centred) -->
-    <div class="min-w-0">
-        {!! view_render_event('qubix.shop.components.layouts.header.desktop.bottom.category.before') !!}
-
-        <v-desktop-category class="min-w-0">
-            <div class="flex items-center gap-5">
-                <span class="w-20 h-6 rounded shimmer" role="presentation"></span>
-                <span class="w-20 h-6 rounded shimmer" role="presentation"></span>
-                <span class="w-20 h-6 rounded shimmer" role="presentation"></span>
-            </div>
-        </v-desktop-category>
-
-        {!! view_render_event('qubix.shop.components.layouts.header.desktop.bottom.category.after') !!}
-    </div>
-
-    <!-- Right Navigation Section: 44px icon buttons -->
-    <div class="flex items-center gap-x-1">
+            {!! view_render_event('qubix.shop.components.layouts.header.desktop.bottom.logo.after') !!}
+        </div>
 
         {!! view_render_event('qubix.shop.components.layouts.header.desktop.bottom.search_bar.before') !!}
 
-        <!-- Search Bar -->
-        {{--
-            Unpositioned `details`: the open panel's `absolute inset-0` covers the whole header row
-            (the row is `relative`), turning the bar into one large search field.
-        --}}
-        <details
-            class="header-search group"
-            @toggle="$event.target.open && $event.target.querySelector('input[name=query]').focus()"
+        <!-- Search: always open -->
+        <form
+            action="{{ route('shop.search.index') }}"
+            class="relative flex w-full items-center text-zinc-700 [&_label.icon-camera]:text-zinc-600 [&_button.icon-camera]:text-zinc-600 [&_svg]:text-zinc-600 [&_svg.animate-spin]:!text-zinc-600 [&_label.absolute]:!top-1/2 [&_label.absolute]:-translate-y-1/2 [&_label.absolute]:mt-0 [&_button.absolute]:!top-1/2 [&_button.absolute]:-translate-y-1/2 [&_button.absolute]:mt-0"
+            role="search"
         >
-            <summary
-                class="inline-flex h-11 w-11 list-none cursor-pointer items-center justify-center rounded-full text-white transition-colors hover:bg-white/10"
-                aria-label="@lang('shop::app.components.layouts.header.desktop.bottom.search')"
+            <label
+                for="organic-search"
+                class="sr-only"
             >
-                <span class="icon-search text-2xl group-open:hidden"></span>
-                <span class="icon-cancel text-2xl hidden group-open:inline-block"></span>
-            </summary>
+                @lang('shop::app.components.layouts.header.desktop.bottom.search')
+            </label>
 
-            <div class="absolute inset-0 z-[70] flex items-center gap-4 bg-brand px-10 max-1180:px-8">
-                <form
-                    action="{{ route('shop.search.index') }}"
-                    class="relative mx-auto flex w-full max-w-[760px] items-center text-zinc-700 [&_label.icon-camera]:text-zinc-600 [&_button.icon-camera]:text-zinc-600 [&_svg]:text-zinc-600 [&_svg.animate-spin]:!text-zinc-600 [&_label.absolute]:!top-1/2 [&_label.absolute]:-translate-y-1/2 [&_label.absolute]:mt-0 [&_button.absolute]:!top-1/2 [&_button.absolute]:-translate-y-1/2 [&_button.absolute]:mt-0"
-                    role="search"
-                >
-                    <label
-                        for="organic-search"
-                        class="sr-only"
-                    >
-                        @lang('shop::app.components.layouts.header.desktop.bottom.search')
-                    </label>
+            <div class="icon-search pointer-events-none absolute top-1/2 z-[1] -translate-y-1/2 text-xl text-zinc-500 ltr:left-4 rtl:right-4"></div>
 
-                    <div
-                        class="icon-search pointer-events-none absolute top-1/2 z-[1] -translate-y-1/2 text-xl text-zinc-500 ltr:left-5 rtl:right-5"
-                    ></div>
+            <input
+                id="organic-search"
+                type="text"
+                name="query"
+                value="{{ request('query') }}"
+                @class([
+                    'block h-11 w-full rounded-ui border-0 bg-field text-[15px] text-zinc-900 placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-headInk/50',
+                    'px-11' => ! core()->getConfigData('catalog.products.settings.image_search'),
+                    'pl-11 pr-14 rtl:pl-14 rtl:pr-11' => core()->getConfigData('catalog.products.settings.image_search'),
+                ])
+                minlength="{{ core()->getConfigData('catalog.products.search.min_query_length') }}"
+                maxlength="{{ core()->getConfigData('catalog.products.search.max_query_length') }}"
+                placeholder="@lang('shop::app.components.layouts.header.desktop.bottom.search-text')"
+                aria-label="@lang('shop::app.components.layouts.header.desktop.bottom.search-text')"
+                aria-required="true"
+                pattern="[^\\]+"
+                required
+            >
 
-                    <input
-                        id="organic-search"
-                        type="text"
-                        name="query"
-                        value="{{ request('query') }}"
-                        @class([
-                            'block h-[52px] w-full rounded-full border-0 bg-white text-base text-zinc-900 placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-white/60',
-                            'px-12' => ! core()->getConfigData('catalog.products.settings.image_search'),
-                            'pl-12 pr-14 rtl:pl-14 rtl:pr-12' => core()->getConfigData('catalog.products.settings.image_search'),
-                        ])
-                        minlength="{{ core()->getConfigData('catalog.products.search.min_query_length') }}"
-                        maxlength="{{ core()->getConfigData('catalog.products.search.max_query_length') }}"
-                        placeholder="@lang('shop::app.components.layouts.header.desktop.bottom.search-text')"
-                        aria-label="@lang('shop::app.components.layouts.header.desktop.bottom.search-text')"
-                        aria-required="true"
-                        pattern="[^\\]+"
-                        required
-                    >
+            @if (core()->getConfigData('catalog.products.settings.image_search'))
+                @include('shop::search.images.index')
+            @endif
 
-                    @if (core()->getConfigData('catalog.products.settings.image_search'))
-                        @include('shop::search.images.index')
-                    @endif
-
-                    <button
-                        type="submit"
-                        class="hidden"
-                        aria-label="@lang('shop::app.components.layouts.header.desktop.bottom.submit')"
-                    >
-                    </button>
-
-                </form>
-
-                <button
-                    type="button"
-                    class="icon-cancel inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-2xl text-white transition-colors hover:bg-white/10"
-                    aria-label="@lang('shop::app.components.layouts.header.desktop.bottom.search')"
-                    @click="$event.currentTarget.closest('details').open = false"
-                ></button>
-            </div>
-        </details>
+            <button
+                type="submit"
+                class="hidden"
+                aria-label="@lang('shop::app.components.layouts.header.desktop.bottom.submit')"
+            >
+            </button>
+        </form>
 
         {!! view_render_event('qubix.shop.components.layouts.header.desktop.bottom.search_bar.after') !!}
 
-        <!-- Right Navigation Icons -->
-        <div class="flex items-center gap-x-1">
-
-            {!! view_render_event('qubix.shop.components.layouts.header.desktop.bottom.compare.before') !!}
-
-            <!-- Compare -->
-            @if(core()->getConfigData('catalog.products.settings.compare_option'))
-                <a
-                    href="{{ route('shop.compare.index') }}"
-                    class="inline-flex h-11 w-11 items-center justify-center rounded-full transition-colors hover:bg-white/10"
-                    aria-label="@lang('shop::app.components.layouts.header.desktop.bottom.compare')"
-                >
-                    <span
-                        class="inline-block text-2xl cursor-pointer text-white icon-compare"
-                        role="presentation"
-                    ></span>
-                </a>
-            @endif
-
-            {!! view_render_event('qubix.shop.components.layouts.header.desktop.bottom.compare.after') !!}
-
-            {!! view_render_event('qubix.shop.components.layouts.header.desktop.bottom.mini_cart.before') !!}
-
-            <!-- Mini cart -->
-            @if(core()->getConfigData('sales.checkout.shopping_cart.cart_page'))
-                @include('shop::checkout.cart.mini-cart')
-            @endif
-
-            {!! view_render_event('qubix.shop.components.layouts.header.desktop.bottom.mini_cart.after') !!}
-
+        <!-- Labelled actions -->
+        <div class="flex items-center justify-end gap-x-1">
             {!! view_render_event('qubix.shop.components.layouts.header.desktop.bottom.profile.before') !!}
 
-            <!-- User profile -->
+            <!-- Account -->
             <x-shop::dropdown position="bottom-{{ core()->getCurrentLocale()->direction === 'ltr' ? 'right' : 'left' }}">
                 <x-slot:toggle>
                     <span
-                        class="inline-flex h-11 w-11 cursor-pointer items-center justify-center rounded-full text-2xl text-white transition-colors hover:bg-white/10 icon-users"
+                        class="header-action"
                         role="button"
-                        aria-label="@lang('shop::app.components.layouts.header.desktop.bottom.profile')"
                         tabindex="0"
-                    ></span>
+                    >
+                        <span
+                            class="icon-users text-2xl"
+                            aria-hidden="true"
+                        ></span>
+
+                        <span class="header-action-label">@lang('shop::app.components.layouts.header.mobile.account')</span>
+                    </span>
                 </x-slot>
 
                 <!-- Guest Dropdown -->
@@ -239,7 +176,7 @@
                                 @lang('shop::app.components.layouts.header.desktop.bottom.orders')
                             </a>
 
-                            @if (core()->getConfigData('customer.settings.wishlist.wishlist_option'))
+                            @if ($showWishlist)
                                 <a
                                     class="px-5 py-2 text-base cursor-pointer hover:bg-zinc-50"
                                     href="{{ route('shop.customers.account.wishlist.index') }}"
@@ -248,21 +185,19 @@
                                 </a>
                             @endif
 
-                            @auth('customer')
-                                <x-shop::form
-                                    method="DELETE"
-                                    action="{{ route('shop.customer.session.destroy') }}"
-                                    id="customerLogout"
-                                />
+                            <x-shop::form
+                                method="DELETE"
+                                action="{{ route('shop.customer.session.destroy') }}"
+                                id="customerLogout"
+                            />
 
-                                <a
-                                    class="px-5 py-2 text-base cursor-pointer hover:bg-zinc-50"
-                                    href="{{ route('shop.customer.session.destroy') }}"
-                                    onclick="event.preventDefault(); document.getElementById('customerLogout').submit();"
-                                >
-                                    @lang('shop::app.components.layouts.header.desktop.bottom.logout')
-                                </a>
-                            @endauth
+                            <a
+                                class="px-5 py-2 text-base cursor-pointer hover:bg-zinc-50"
+                                href="{{ route('shop.customer.session.destroy') }}"
+                                onclick="event.preventDefault(); document.getElementById('customerLogout').submit();"
+                            >
+                                @lang('shop::app.components.layouts.header.desktop.bottom.logout')
+                            </a>
 
                             {!! view_render_event('qubix.shop.components.layouts.header.desktop.bottom.profile_dropdown.links.after') !!}
                         </div>
@@ -271,8 +206,69 @@
             </x-shop::dropdown>
 
             {!! view_render_event('qubix.shop.components.layouts.header.desktop.bottom.profile.after') !!}
+
+            <!-- Wishlist (guests are sent to sign in first) -->
+            @if ($showWishlist)
+                <a
+                    href="{{ route('shop.customers.account.wishlist.index') }}"
+                    class="header-action"
+                >
+                    <span
+                        class="icon-heart text-2xl"
+                        aria-hidden="true"
+                    ></span>
+
+                    <span class="header-action-label">@lang('shop::app.components.layouts.header.desktop.bottom.wishlist')</span>
+                </a>
+            @endif
+
+            {!! view_render_event('qubix.shop.components.layouts.header.desktop.bottom.compare.before') !!}
+
+            <!-- Compare -->
+            @if ($showCompare)
+                <a
+                    href="{{ route('shop.compare.index') }}"
+                    class="header-action"
+                >
+                    <span
+                        class="icon-compare text-2xl"
+                        aria-hidden="true"
+                    ></span>
+
+                    <span class="header-action-label">@lang('shop::app.components.layouts.header.desktop.bottom.compare')</span>
+                </a>
+            @endif
+
+            {!! view_render_event('qubix.shop.components.layouts.header.desktop.bottom.compare.after') !!}
+
+            {!! view_render_event('qubix.shop.components.layouts.header.desktop.bottom.mini_cart.before') !!}
+
+            <!-- Mini cart -->
+            @if (core()->getConfigData('sales.checkout.shopping_cart.cart_page'))
+                @include('shop::checkout.cart.mini-cart')
+            @endif
+
+            {!! view_render_event('qubix.shop.components.layouts.header.desktop.bottom.mini_cart.after') !!}
         </div>
     </div>
+
+    <!-- Row 2: categories -->
+    <nav
+        class="site-nav relative bg-nav px-10 text-navInk max-1180:px-8"
+        aria-label="@lang('shop::app.components.layouts.header.desktop.bottom.categories')"
+    >
+        {!! view_render_event('qubix.shop.components.layouts.header.desktop.bottom.category.before') !!}
+
+        <v-desktop-category>
+            <div class="flex h-12 items-center gap-6">
+                <span class="w-20 h-5 rounded shimmer" role="presentation"></span>
+                <span class="w-20 h-5 rounded shimmer" role="presentation"></span>
+                <span class="w-20 h-5 rounded shimmer" role="presentation"></span>
+            </div>
+        </v-desktop-category>
+
+        {!! view_render_event('qubix.shop.components.layouts.header.desktop.bottom.category.after') !!}
+    </nav>
 </div>
 
 @pushOnce('scripts')
@@ -282,28 +278,30 @@
     >
         <!-- Loading State -->
         <div
-            class="flex items-center justify-center gap-5"
+            class="flex h-12 items-center gap-6"
             v-if="isLoading"
         >
-            <span class="w-20 h-6 rounded shimmer" role="presentation"></span>
-            <span class="w-20 h-6 rounded shimmer" role="presentation"></span>
-            <span class="w-20 h-6 rounded shimmer" role="presentation"></span>
+            <span class="w-20 h-5 rounded shimmer" role="presentation"></span>
+            <span class="w-20 h-5 rounded shimmer" role="presentation"></span>
+            <span class="w-20 h-5 rounded shimmer" role="presentation"></span>
         </div>
 
         <!-- Default category mega-menu layout -->
         <div
-            class="velocity-nav-category-list flex flex-1 flex-wrap items-center justify-center gap-x-1 gap-y-1"
+            class="velocity-nav-category-list flex flex-wrap items-center gap-x-2 ltr:-ml-2.5 rtl:-mr-2.5"
             v-else-if="'{{ core()->getConfigData('general.design.categories.category_view') }}' !== 'sidebar'"
         >
             <div
-                class="velocity-nav-category-group group flex h-[84px] items-center"
+                class="velocity-nav-category-group group flex h-12 items-center"
                 v-for="category in categories"
             >
                 {{-- One hover signal: an underline that grows under the label (it used to be a tinted box plus a separate border 14px lower). --}}
                 <span class="flex h-full items-center">
                     <a
                         :href="category.url"
-                        class="velocity-nav-category-trigger relative inline-flex max-w-[14rem] items-center whitespace-nowrap px-2.5 py-2 text-center text-base font-medium tracking-normal text-white after:absolute after:inset-x-2.5 after:bottom-1 after:h-0.5 after:origin-left after:scale-x-0 after:rounded-full after:bg-white after:transition-transform after:duration-200 after:ease-[cubic-bezier(0.23,1,0.32,1)] after:content-[''] hover:after:scale-x-100 focus-visible:outline-none focus-visible:after:scale-x-100 group-hover:after:scale-x-100 rtl:after:origin-right sm:max-w-none"
+                        :aria-current="isCurrent(category) ? 'page' : null"
+                        :class="{ 'after:scale-x-100': isCurrent(category) }"
+                        class="velocity-nav-category-trigger relative inline-flex items-center whitespace-nowrap px-2.5 py-2 text-[15px] font-semibold text-navInk after:absolute after:inset-x-2.5 after:bottom-0.5 after:h-0.5 after:origin-left after:scale-x-0 after:rounded-full after:bg-navInk after:transition-transform after:duration-200 after:ease-[cubic-bezier(0.23,1,0.32,1)] after:content-[''] hover:after:scale-x-100 focus-visible:outline-none focus-visible:after:scale-x-100 group-hover:after:scale-x-100 rtl:after:origin-right sm:max-w-none"
                     >
                         @{{ category.name }}
                     </a>
@@ -355,7 +353,7 @@
             <div class="flex items-center">
                 <!-- "All" button opens category drawer -->
                 <div
-                    class="flex h-[77px] cursor-pointer items-center border-b-4 border-transparent hover:border-navyBlue"
+                    class="flex h-12 cursor-pointer items-center border-b-2 border-transparent hover:border-navInk"
                     @click="toggleCategoryDrawer"
                 >
                     <span class="flex items-center gap-1 px-5 uppercase">
@@ -366,13 +364,13 @@
 
                 <!-- First 4 categories in main nav -->
                 <div
-                    class="group relative flex h-[77px] items-center border-b-4 border-transparent hover:border-navyBlue"
+                    class="group relative flex h-12 items-center border-b-2 border-transparent hover:border-navInk"
                     v-for="category in categories.slice(0, 4)"
                 >
                     <span>
                         <a
                             :href="category.url"
-                            class="velocity-nav-category-trigger-sidebar inline-block px-5 py-2 text-[18px] font-medium normal-case tracking-normal text-white hover:text-white/90"
+                            class="velocity-nav-category-trigger-sidebar inline-block px-5 py-2 text-[15px] font-semibold text-navInk hover:text-navInk/80"
                         >
                             @{{ category.name }}
                         </a>
@@ -380,7 +378,7 @@
 
                     <!-- Category dropdown -->
                     <div
-                        class="pointer-events-none absolute top-[78px] z-[1] max-h-[580px] w-max max-w-[1260px] translate-y-1 overflow-auto rounded-b-xl border-t border-zinc-100 bg-white p-9 opacity-0 shadow-[0_6px_20px_rgba(6,12,59,0.12)] transition duration-300 ease-out group-hover:pointer-events-auto group-hover:translate-y-0 group-hover:opacity-100 group-hover:duration-200 group-hover:ease-in ltr:-left-9 rtl:-right-9"
+                        class="pointer-events-none absolute top-12 z-[1] max-h-[580px] w-max max-w-[1260px] translate-y-1 overflow-auto rounded-b-xl border-t border-zinc-100 bg-white p-9 opacity-0 shadow-[0_6px_20px_rgba(6,12,59,0.12)] transition duration-300 ease-out group-hover:pointer-events-auto group-hover:translate-y-0 group-hover:opacity-100 group-hover:duration-200 group-hover:ease-in ltr:-left-9 rtl:-right-9"
                         v-if="category.children && category.children.length"
                     >
                         <div class="flex justify-between gap-x-[70px]">
@@ -572,6 +570,17 @@
                             this.categories = [];
                             console.log(error);
                         });
+                },
+
+                /* The category whose page this is gets the underline. */
+                isCurrent(category) {
+                    try {
+                        const path = (url) => new URL(url, window.location.origin).pathname.replace(/\/+$/, '');
+
+                        return path(category.url) === path(window.location.href);
+                    } catch (e) {
+                        return false;
+                    }
                 },
 
                 pairCategoryChildren(category) {

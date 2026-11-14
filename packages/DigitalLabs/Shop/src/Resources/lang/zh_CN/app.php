@@ -511,6 +511,7 @@ return [
                 'mobile' => [
                     'account' => '账户',
                     'back-button' => '返回主菜单',
+                    'cart' => 'Cart',
                     'qubix' => 'Qubix',
                     'compare' => '比较',
                     'currencies' => '货币',
@@ -538,6 +539,7 @@ return [
                 'customer-service' => '客户服务',
                 'email' => '电子邮件',
                 'footer-content' => '帮助与政策',
+                'shop' => 'Shop',
                 'talk-to-us' => '联系我们',
                 'whatsapp' => 'WhatsApp',
                 'corporate-enquiry' => '企业咨询',

@@ -4,110 +4,58 @@
 @endphp
 
 {{--
-    Phone header: menu | logo (centred) | search and cart. Account and compare live in the
-    menu drawer, so the bar stays at three calm controls.
+    Phone header, two rows. Row 1: menu, logo, then wishlist, account and cart as 44px icons.
+    Row 2: the search field, always visible. The category chips sit under the header
+    (header/index.blade.php) so the sticky part stays this tall.
 --}}
-<div class="w-full lg:hidden">
-    <div class="grid h-[60px] w-full grid-cols-[1fr_auto_1fr] items-center px-1.5 text-white">
-        <div class="flex items-center">
-            {!! view_render_event('qubix.shop.components.layouts.header.mobile.drawer.before') !!}
+<div class="w-full text-headInk lg:hidden">
+    <div class="flex h-14 w-full items-center px-1.5">
+        {!! view_render_event('qubix.shop.components.layouts.header.mobile.drawer.before') !!}
 
-            <v-mobile-drawer></v-mobile-drawer>
+        <v-mobile-drawer></v-mobile-drawer>
 
-            {!! view_render_event('qubix.shop.components.layouts.header.mobile.drawer.after') !!}
-        </div>
+        {!! view_render_event('qubix.shop.components.layouts.header.mobile.drawer.after') !!}
 
-        <div class="flex items-center">
-            {!! view_render_event('qubix.shop.components.layouts.header.mobile.logo.before') !!}
+        {!! view_render_event('qubix.shop.components.layouts.header.mobile.logo.before') !!}
+
+        <a
+            href="{{ route('shop.home.index') }}"
+            class="inline-flex items-center ltr:ml-1 rtl:mr-1"
+            aria-label="{{ config('app.name') }}"
+        >
+            <img
+                src="{{ core()->getCurrentChannel()->logo_url ?? qubix_asset('images/logo.svg') }}"
+                alt="{{ config('app.name') }}"
+                class="h-10 w-auto object-contain"
+            >
+        </a>
+
+        {!! view_render_event('qubix.shop.components.layouts.header.mobile.logo.after') !!}
+
+        <div class="flex items-center ltr:ml-auto rtl:mr-auto">
+            @if ($showWishlist)
+                <a
+                    href="{{ route('shop.customers.account.wishlist.index') }}"
+                    class="inline-flex h-11 w-11 items-center justify-center rounded-full transition-colors hover:bg-headInk/10"
+                    aria-label="@lang('shop::app.components.layouts.header.mobile.wishlist')"
+                >
+                    <span
+                        class="icon-heart text-2xl"
+                        aria-hidden="true"
+                    ></span>
+                </a>
+            @endif
 
             <a
-                href="{{ route('shop.home.index') }}"
-                class="inline-flex items-center"
-                aria-label="{{ config('app.name') }}"
+                href="{{ auth()->guard('customer')->check() ? route('shop.customers.account.index') : route('shop.customer.session.create') }}"
+                class="inline-flex h-11 w-11 items-center justify-center rounded-full transition-colors hover:bg-headInk/10"
+                aria-label="@lang('shop::app.components.layouts.header.mobile.account')"
             >
-                <img
-                    src="{{ core()->getCurrentChannel()->logo_url ?? qubix_asset('images/logo.svg') }}"
-                    alt="{{ config('app.name') }}"
-                    class="h-10 w-auto object-contain"
-                >
+                <span
+                    class="icon-users text-2xl"
+                    aria-hidden="true"
+                ></span>
             </a>
-
-            {!! view_render_event('qubix.shop.components.layouts.header.mobile.logo.after') !!}
-        </div>
-
-        <div class="flex items-center justify-end">
-            {!! view_render_event('qubix.shop.components.layouts.header.mobile.search.before') !!}
-
-            {{--
-                Search opens a full-screen sheet (fixed, over the page) with one large field and a
-                close button; visibility follows native `details[open]` via app.css.
-            --}}
-            <details
-                class="header-search mobile-header-details-search"
-                @toggle="$event.target.open && $event.target.querySelector('input[type=search]').focus()"
-            >
-                <summary
-                    class="inline-flex h-11 w-11 list-none cursor-pointer items-center justify-center rounded-full text-white transition-colors hover:bg-white/10"
-                    aria-label="@lang('shop::app.components.layouts.header.mobile.search')"
-                >
-                    <span class="icon-search text-2xl"></span>
-                </summary>
-
-                <div class="mobile-search-panel fixed inset-0 z-[90] hidden flex-col bg-white">
-                    <div class="flex h-[60px] items-center gap-1 bg-brand ltr:pl-3 ltr:pr-1 rtl:pl-1 rtl:pr-3">
-                        <form
-                            action="{{ route('shop.search.index') }}"
-                            class="relative flex flex-1 items-center text-zinc-700 [&_.icon-camera]:text-zinc-600 [&_label.icon-camera]:text-zinc-600"
-                            role="search"
-                        >
-                            <label
-                                for="shop-header-search-mobile-panel"
-                                class="sr-only"
-                            >
-                                @lang('shop::app.components.layouts.header.mobile.search')
-                            </label>
-
-                            <div class="icon-search pointer-events-none absolute top-1/2 -translate-y-1/2 text-xl text-zinc-500 ltr:left-4 rtl:right-4"></div>
-
-                            <input
-                                id="shop-header-search-mobile-panel"
-                                type="search"
-                                name="query"
-                                value="{{ request('query') }}"
-                                class="block h-11 w-full rounded-full border-0 bg-white px-11 text-base text-zinc-900 placeholder:text-zinc-500 focus:outline-none"
-                                minlength="{{ core()->getConfigData('catalog.products.search.min_query_length') }}"
-                                maxlength="{{ core()->getConfigData('catalog.products.search.max_query_length') }}"
-                                placeholder="@lang('shop::app.components.layouts.header.mobile.search-text')"
-                                aria-label="@lang('shop::app.components.layouts.header.mobile.search-text')"
-                                aria-required="true"
-                                pattern="[^\\]+"
-                                autocomplete="search"
-                                required
-                            >
-
-                            @if (core()->getConfigData('catalog.products.settings.image_search'))
-                                @include('shop::search.images.index')
-                            @endif
-
-                            <button
-                                type="submit"
-                                class="hidden"
-                                aria-label="@lang('shop::app.components.layouts.header.desktop.bottom.submit')"
-                            >
-                            </button>
-                        </form>
-
-                        <button
-                            type="button"
-                            class="icon-cancel inline-flex h-11 w-11 shrink-0 items-center justify-center text-2xl text-white"
-                            aria-label="@lang('shop::app.components.layouts.header.mobile.search')"
-                            @click="$event.currentTarget.closest('details').open = false"
-                        ></button>
-                    </div>
-                </div>
-            </details>
-
-            {!! view_render_event('qubix.shop.components.layouts.header.mobile.search.after') !!}
 
             {!! view_render_event('qubix.shop.components.layouts.header.mobile.mini_cart.before') !!}
 
@@ -118,6 +66,55 @@
             {!! view_render_event('qubix.shop.components.layouts.header.mobile.mini_cart.after') !!}
         </div>
     </div>
+
+    {!! view_render_event('qubix.shop.components.layouts.header.mobile.search.before') !!}
+
+    <div class="px-3 pb-3">
+        <form
+            action="{{ route('shop.search.index') }}"
+            class="relative flex items-center text-zinc-700 [&_.icon-camera]:text-zinc-600 [&_label.icon-camera]:text-zinc-600"
+            role="search"
+        >
+            <label
+                for="shop-header-search-mobile"
+                class="sr-only"
+            >
+                @lang('shop::app.components.layouts.header.mobile.search')
+            </label>
+
+            <div class="icon-search pointer-events-none absolute top-1/2 -translate-y-1/2 text-xl text-zinc-500 ltr:left-3.5 rtl:right-3.5"></div>
+
+            <input
+                id="shop-header-search-mobile"
+                type="search"
+                name="query"
+                value="{{ request('query') }}"
+                class="block h-11 w-full rounded-ui border-0 bg-field px-11 text-base text-zinc-900 placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-headInk/50"
+                minlength="{{ core()->getConfigData('catalog.products.search.min_query_length') }}"
+                maxlength="{{ core()->getConfigData('catalog.products.search.max_query_length') }}"
+                placeholder="@lang('shop::app.components.layouts.header.mobile.search-text')"
+                aria-label="@lang('shop::app.components.layouts.header.mobile.search-text')"
+                aria-required="true"
+                pattern="[^\\]+"
+                autocomplete="off"
+                enterkeyhint="search"
+                required
+            >
+
+            @if (core()->getConfigData('catalog.products.settings.image_search'))
+                @include('shop::search.images.index')
+            @endif
+
+            <button
+                type="submit"
+                class="hidden"
+                aria-label="@lang('shop::app.components.layouts.header.desktop.bottom.submit')"
+            >
+            </button>
+        </form>
+    </div>
+
+    {!! view_render_event('qubix.shop.components.layouts.header.mobile.search.after') !!}
 </div>
 
 @pushOnce('scripts')
@@ -130,14 +127,14 @@
         >
             <x-slot:toggle>
                 <span
-                    class="inline-flex h-11 w-11 cursor-pointer items-center justify-center text-2xl text-white icon-hamburger"
+                    class="inline-flex h-11 w-11 cursor-pointer items-center justify-center text-2xl text-headInk icon-hamburger"
                     role="button"
                     tabindex="0"
                     aria-label="@lang('shop::app.components.layouts.header.mobile.menu')"
                 ></span>
             </x-slot>
 
-            <x-slot:header class="!border-brand bg-brand text-white [&_.icon-cancel]:text-white">
+            <x-slot:header class="!border-head bg-head text-headInk [&_.icon-cancel]:text-headInk">
                 <div class="flex items-center justify-between">
                     <a href="{{ route('shop.home.index') }}">
                         <img
@@ -240,7 +237,7 @@
             <x-slot:footer>
                 <!-- Locale & Currency -->
                 @if(core()->getCurrentChannel()->locales()->count() > 1 || core()->getCurrentChannel()->currencies()->count() > 1)
-                    <div class="fixed bottom-0 z-10 grid w-full max-w-full grid-cols-[1fr_auto_1fr] items-center justify-items-center border-t border-brand/10 bg-sage px-5 text-brand ltr:left-0 rtl:right-0">
+                    <div class="fixed bottom-0 z-10 grid w-full max-w-full grid-cols-[1fr_auto_1fr] items-center justify-items-center border-t border-offerInk/10 bg-offer px-5 text-offerInk ltr:left-0 rtl:right-0">
                         <!-- Currency Drawer -->
                         <x-shop::drawer position="bottom" width="100%">
                             <x-slot:toggle>
@@ -271,7 +268,7 @@
                             </x-slot>
                         </x-shop::drawer>
 
-                        <span class="h-5 w-0.5 bg-brand/20"></span>
+                        <span class="h-5 w-0.5 bg-offerInk/20"></span>
 
                         <!-- Locale Drawer -->
                         <x-shop::drawer position="bottom" width="100%">

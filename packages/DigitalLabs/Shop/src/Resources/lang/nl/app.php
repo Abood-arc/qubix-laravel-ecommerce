@@ -511,6 +511,7 @@ return [
                 'mobile' => [
                     'account' => 'Account',
                     'back-button' => 'Terug naar hoofdmenu',
+                    'cart' => 'Cart',
                     'qubix' => 'Qubix',
                     'compare' => 'Vergelijken',
                     'currencies' => 'Valuta',
@@ -538,6 +539,7 @@ return [
                 'customer-service' => 'Klantenservice',
                 'email' => 'E-mail',
                 'footer-content' => 'Hulp & beleid',
+                'shop' => 'Shop',
                 'talk-to-us' => 'Neem contact op',
                 'whatsapp' => 'WhatsApp',
                 'corporate-enquiry' => 'Zakelijke aanvraag',

@@ -511,6 +511,7 @@ return [
                 'mobile' => [
                     'account' => 'অ্যাকাউন্ট',
                     'back-button' => 'প্রধান মেনুতে ফিরে যান',
+                    'cart' => 'Cart',
                     'qubix' => 'বাগিস্টো',
                     'compare' => 'তুলনা করুন',
                     'currencies' => 'মুদ্রা',
@@ -538,6 +539,7 @@ return [
                 'customer-service' => 'গ্রাহক সেবা',
                 'email' => 'ইমেইল',
                 'footer-content' => 'সহায়তা ও নীতিমালা',
+                'shop' => 'Shop',
                 'talk-to-us' => 'আমাদের সাথে কথা বলুন',
                 'whatsapp' => 'হোয়াটসঅ্যাপ',
                 'corporate-enquiry' => 'কর্পোরেট অনুসন্ধান',

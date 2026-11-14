@@ -24,7 +24,7 @@
 --}}
 @if (core()->getConfigData('general.content.header_offer.title'))
     <div
-        class="bg-sage px-4 py-2 text-center text-[13px] font-semibold text-brand lg:hidden"
+        class="bg-offer px-4 py-2 text-center text-[13px] font-semibold text-offerInk lg:hidden"
         v-pre
     >
         {{ core()->getConfigData('general.content.header_offer.title') }}
@@ -54,7 +54,7 @@
     inside the drawer. Same visibility gate as the drawer version.
 --}}
 @if (core()->getCurrentChannel()->locales()->count() > 1 || core()->getCurrentChannel()->currencies()->count() > 1)
-    <div class="grid w-full grid-cols-[1fr_auto_1fr] items-center justify-items-center border-b border-brand/10 bg-sage px-5 text-brand lg:hidden">
+    <div class="grid w-full grid-cols-[1fr_auto_1fr] items-center justify-items-center border-b border-offerInk/10 bg-offer px-5 text-offerInk lg:hidden">
         <!-- Currency Drawer -->
         <x-shop::drawer position="bottom" width="100%">
             <x-slot:toggle>
@@ -85,7 +85,7 @@
             </x-slot>
         </x-shop::drawer>
 
-        <span class="h-4 w-0.5 bg-brand/20"></span>
+        <span class="h-4 w-0.5 bg-offerInk/20"></span>
 
         <!-- Locale Drawer -->
         <x-shop::drawer position="bottom" width="100%">
@@ -131,95 +131,58 @@
 
 <header
     id="main-header"
-    class="sticky top-0 z-10 bg-brand"
+    class="sticky top-0 z-10 bg-head"
 >
     <v-header-switcher>
-        <!-- Desktop Header Shimmer -->
-        <div class="flex flex-wrap max-lg:hidden">
-            <div class="flex min-h-[78px] w-full justify-between border-b border-zinc-100 px-[60px] max-1180:px-8">
-                <!-- Left Navigation Section -->
-                <div class="flex items-center gap-x-10 max-[1180px]:gap-x-5">
-                    <!-- Logo Shimmer -->
-                    <span
-                        class="shimmer block h-[29px] w-[131px] rounded"
-                        role="presentation"
-                    >
-                    </span>
+        <!-- Desktop Header Shimmer (same two rows as the header) -->
+        <div class="max-lg:hidden">
+            <div class="grid min-h-[76px] grid-cols-[auto_minmax(0,620px)_1fr] items-center gap-x-8 px-10 max-1180:gap-x-5 max-1180:px-8">
+                <span class="shimmer block h-12 w-12 rounded-full" role="presentation"></span>
 
-                    <!-- Categories Shimmer -->
-                    <div class="flex items-center gap-5">
-                        <span
-                            class="shimmer h-6 w-20 rounded"
-                            role="presentation"
-                        >
-                        </span>
+                <span class="shimmer block h-11 w-full rounded-ui" role="presentation"></span>
 
-                        <span
-                            class="shimmer h-6 w-20 rounded"
-                            role="presentation"
-                        >
-                        </span>
-
-                        <span
-                            class="shimmer h-6 w-20 rounded"
-                            role="presentation"
-                        >
-                        </span>
-                    </div>
+                <div class="flex justify-end gap-x-4">
+                    <span class="shimmer block h-10 w-12 rounded" role="presentation"></span>
+                    <span class="shimmer block h-10 w-12 rounded" role="presentation"></span>
+                    <span class="shimmer block h-10 w-12 rounded" role="presentation"></span>
                 </div>
+            </div>
 
-                <!-- Right Navigation Section -->
-                <div class="flex items-center gap-x-9 max-[1100px]:gap-x-6 max-lg:gap-x-8">
-                    <!-- Search Bar Shimmer -->
-                    <div class="relative w-full max-w-[445px]">
-                        <span
-                            class="shimmer block h-[42px] w-[250px] rounded-lg px-11 py-3"
-                            role="presentation"
-                        >
-                        </span>
-                    </div>
-
-                    <!-- Right Navigation Icons Shimmer -->
-                    <div class="mt-1.5 flex gap-x-8 max-[1100px]:gap-x-6 max-lg:gap-x-8">
-                        <!-- Compare Icon Shimmer -->
-                        <span
-                            class="shimmer h-6 w-6 rounded"
-                            role="presentation"
-                        >
-                        </span>
-
-                        <!-- Cart Icon Shimmer -->
-                        <span
-                            class="shimmer h-6 w-6 rounded"
-                            role="presentation"
-                        >
-                        </span>
-
-                        <!-- Profile Icon Shimmer -->
-                        <span
-                            class="shimmer h-6 w-6 rounded"
-                            role="presentation"
-                        >
-                        </span>
-                    </div>
-                </div>
+            <div class="site-nav flex h-12 items-center gap-6 bg-nav px-10 max-1180:px-8">
+                <span class="shimmer h-5 w-24 rounded" role="presentation"></span>
+                <span class="shimmer h-5 w-24 rounded" role="presentation"></span>
+                <span class="shimmer h-5 w-24 rounded" role="presentation"></span>
             </div>
         </div>
 
-        <!-- Mobile Header Shimmer (menu | logo | search, cart) -->
-        <div class="grid h-[60px] grid-cols-[1fr_auto_1fr] items-center px-3 lg:hidden">
-            <span class="shimmer block h-6 w-6 rounded" role="presentation"></span>
-
-            <span class="shimmer block h-10 w-10 rounded-full" role="presentation"></span>
-
-            <div class="flex justify-end gap-x-4">
+        <!-- Mobile Header Shimmer (menu, logo, icons; then search) -->
+        <div class="lg:hidden">
+            <div class="flex h-14 items-center gap-2 px-3">
                 <span class="shimmer block h-6 w-6 rounded" role="presentation"></span>
+                <span class="shimmer block h-10 w-10 rounded-full" role="presentation"></span>
 
-                <span class="shimmer block h-6 w-6 rounded" role="presentation"></span>
+                <div class="flex gap-x-4 ltr:ml-auto rtl:mr-auto">
+                    <span class="shimmer block h-6 w-6 rounded" role="presentation"></span>
+                    <span class="shimmer block h-6 w-6 rounded" role="presentation"></span>
+                    <span class="shimmer block h-6 w-6 rounded" role="presentation"></span>
+                </div>
+            </div>
+
+            <div class="px-3 pb-3">
+                <span class="shimmer block h-11 w-full rounded-ui" role="presentation"></span>
             </div>
         </div>
     </v-header-switcher>
 </header>
+
+{{-- Phones: the top categories as one swipeable row of chips, under the sticky header. --}}
+<v-category-chips class="lg:hidden">
+    <div class="flex h-[52px] items-center gap-2 overflow-hidden px-3 lg:hidden">
+        <span class="shimmer h-9 w-24 shrink-0 rounded-ui" role="presentation"></span>
+        <span class="shimmer h-9 w-24 shrink-0 rounded-ui" role="presentation"></span>
+        <span class="shimmer h-9 w-24 shrink-0 rounded-ui" role="presentation"></span>
+    </div>
+</v-category-chips>
 
 {!! view_render_event('qubix.shop.layout.header.after') !!}
 
@@ -278,7 +241,76 @@
         <v-mobile-header v-else></v-mobile-header>
     </script>
 
+    <script
+        type="text/x-template"
+        id="v-category-chips-template"
+    >
+        <nav
+            class="lg:hidden"
+            aria-label="@lang('shop::app.components.layouts.header.desktop.bottom.categories')"
+            v-if="categories.length"
+        >
+            <ul class="category-chips flex h-[52px] items-center gap-2 overflow-x-auto px-3">
+                <li
+                    class="shrink-0"
+                    v-for="category in categories"
+                    :key="category.id"
+                >
+                    <a
+                        :href="category.url"
+                        class="flex h-9 items-center whitespace-nowrap rounded-ui px-3.5 text-sm font-semibold transition-colors"
+                        :class="isCurrent(category) ? 'bg-brand text-white' : 'bg-sand text-brand'"
+                        :aria-current="isCurrent(category) ? 'page' : null"
+                        v-text="category.name"
+                    ></a>
+                </li>
+            </ul>
+        </nav>
+    </script>
+
     <script type="module">
+        app.component('v-category-chips', {
+            template: '#v-category-chips-template',
+
+            data() {
+                return {
+                    categories: [],
+                };
+            },
+
+            mounted() {
+                const stored = window.qubixCategoryNav.read(window.qubixCategoryTreeStamp);
+
+                if (stored) {
+                    this.categories = stored;
+
+                    return;
+                }
+
+                window.qubixCategoryNav.fetchFresh("{{ route('shop.api.categories.tree') }}")
+                    .then(({ categories, stamp }) => {
+                        this.categories = categories;
+
+                        window.qubixCategoryNav.write(categories, stamp);
+                    })
+                    .catch(() => {
+                        this.categories = [];
+                    });
+            },
+
+            methods: {
+                isCurrent(category) {
+                    try {
+                        const path = (url) => new URL(url, window.location.origin).pathname.replace(/\/+$/, '');
+
+                        return path(category.url) === path(window.location.href);
+                    } catch (e) {
+                        return false;
+                    }
+                },
+            },
+        });
+
         app.component('v-header-switcher', {
             template: '#v-header-switcher-template',
 

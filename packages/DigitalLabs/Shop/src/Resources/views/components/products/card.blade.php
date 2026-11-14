@@ -66,7 +66,7 @@
                 <div class="action-items bg-black">
                     <!-- Product Sale Badge -->
                     <p
-                        class="absolute top-1.5 inline-block rounded-[44px] bg-[#b5432f] px-2.5 text-sm font-semibold text-white max-sm:px-2 max-sm:py-0.5 max-sm:text-xs ltr:left-1.5 max-sm:ltr:left-0 max-sm:ltr:rounded-l-none max-sm:ltr:rounded-r-xl rtl:right-5 max-sm:rtl:right-0 max-sm:rtl:rounded-r-none max-sm:rtl:rounded-l-xl"
+                        class="absolute top-1.5 inline-block rounded-[44px] bg-accent px-2.5 text-sm font-semibold text-white max-sm:px-2 max-sm:py-0.5 max-sm:text-xs ltr:left-1.5 max-sm:ltr:left-0 max-sm:ltr:rounded-l-none max-sm:ltr:rounded-r-xl rtl:right-5 max-sm:rtl:right-0 max-sm:rtl:rounded-r-none max-sm:rtl:rounded-l-xl"
                         v-if="product.on_sale"
                     >
                         @lang('shop::app.components.products.card.sale')

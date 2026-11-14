@@ -511,6 +511,7 @@ return [
                 'mobile' => [
                     'account' => 'Обліковий запис',
                     'back-button' => 'Повернутися до головного меню',
+                    'cart' => 'Cart',
                     'qubix' => 'Qubix',
                     'compare' => 'Порівняти',
                     'currencies' => 'Валюти',
@@ -538,6 +539,7 @@ return [
                 'customer-service' => 'Служба підтримки',
                 'email' => 'Електронна пошта',
                 'footer-content' => 'Допомога та правила',
+                'shop' => 'Shop',
                 'talk-to-us' => 'Звʼяжіться з нами',
                 'whatsapp' => 'WhatsApp',
                 'corporate-enquiry' => 'Корпоративний запит',

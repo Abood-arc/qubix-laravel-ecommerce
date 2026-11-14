@@ -511,6 +511,7 @@ return [
                 'mobile' => [
                     'account' => 'חשבון',
                     'back-button' => 'חזרה לתפריט הראשי',
+                    'cart' => 'Cart',
                     'qubix' => 'באגיסטו',
                     'compare' => 'השווה',
                     'currencies' => 'מטבעות',
@@ -538,6 +539,7 @@ return [
                 'customer-service' => 'שירות לקוחות',
                 'email' => 'אימייל',
                 'footer-content' => 'עזרה ומדיניות',
+                'shop' => 'Shop',
                 'talk-to-us' => 'דברו איתנו',
                 'whatsapp' => 'וואטסאפ',
                 'corporate-enquiry' => 'פנייה עסקית',
