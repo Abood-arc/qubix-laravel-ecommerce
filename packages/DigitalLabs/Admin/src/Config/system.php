@@ -326,6 +326,11 @@ return [
                         'value' => 'minimal-white',
                     ],
                 ],
+            ], [
+                'name' => 'look_preview',
+                'title' => 'admin::app.configuration.index.general.design.store-look.look',
+                'type' => 'blade',
+                'path' => 'admin::configuration.custom-views.store-look',
             ],
         ],
     ], [
