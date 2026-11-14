@@ -45,6 +45,15 @@
         <env name="APP_MAINTENANCE_DRIVER" value="file"/>
         <env name="BCRYPT_ROUNDS" value="4"/>
         <env name="CACHE_STORE" value="array"/>
+        <!--
+            Isolated test database: never the everyday dev DB `qubix`. Rebuild it to
+            CI's fresh-install state with scripts/rebuild-test-db.sh. Set in both $_ENV
+            (force) and $_SERVER: Laravel reads $_SERVER first, so an exported
+            DB_DATABASE would otherwise win. tests/TestCase.php aborts the run if the
+            connection is not a `testing*` database anyway.
+        -->
+        <env name="DB_DATABASE" value="testing" force="true"/>
+        <server name="DB_DATABASE" value="testing"/>
         <env name="MAIL_MAILER" value="array"/>
         <env name="PULSE_ENABLED" value="false"/>
         <env name="QUEUE_CONNECTION" value="sync"/>
