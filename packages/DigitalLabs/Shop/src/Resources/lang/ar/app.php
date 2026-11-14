@@ -512,6 +512,8 @@ return [
                     'account' => 'الحساب',
                     'back-button' => 'العودة إلى القائمة الرئيسية',
                     'cart' => 'السلة',
+                    'no-results' => 'لا توجد منتجات تطابق «:query»',
+                    'see-all-results' => 'عرض كل النتائج لـ «:query»',
                     'qubix' => 'Qubix',
                     'compare' => 'مقارنة',
                     'currencies' => 'العملات',

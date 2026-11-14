@@ -512,6 +512,8 @@ return [
                     'account' => 'アカウント',
                     'back-button' => 'メインメニューに戻る',
                     'cart' => 'Cart',
+                    'no-results' => 'No products match “:query”',
+                    'see-all-results' => 'See all results for “:query”',
                     'qubix' => 'バギスト',
                     'compare' => '比較',
                     'currencies' => '通貨',

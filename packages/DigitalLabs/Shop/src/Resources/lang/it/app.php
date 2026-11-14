@@ -512,6 +512,8 @@ return [
                     'account' => 'Account',
                     'back-button' => 'Torna al menu principale',
                     'cart' => 'Cart',
+                    'no-results' => 'No products match “:query”',
+                    'see-all-results' => 'See all results for “:query”',
                     'qubix' => 'Qubix',
                     'compare' => 'Confronta',
                     'currencies' => 'Valute',

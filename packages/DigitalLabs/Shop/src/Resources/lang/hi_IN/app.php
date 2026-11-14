@@ -512,6 +512,8 @@ return [
                     'account' => 'खाता',
                     'back-button' => 'मुख्य मेनू पर वापस जाएं',
                     'cart' => 'Cart',
+                    'no-results' => 'No products match “:query”',
+                    'see-all-results' => 'See all results for “:query”',
                     'qubix' => 'बैगिस्टो',
                     'compare' => 'तुलना करें',
                     'currencies' => 'मुद्राएँ',

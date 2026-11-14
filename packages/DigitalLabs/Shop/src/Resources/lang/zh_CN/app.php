@@ -512,6 +512,8 @@ return [
                     'account' => '账户',
                     'back-button' => '返回主菜单',
                     'cart' => 'Cart',
+                    'no-results' => 'No products match “:query”',
+                    'see-all-results' => 'See all results for “:query”',
                     'qubix' => 'Qubix',
                     'compare' => '比较',
                     'currencies' => '货币',

@@ -205,14 +205,39 @@
                     : (window.pageYOffset || document.documentElement.scrollTop || 0);
             }
 
+            /*
+             * Phones: the two-row header slides away while the shopper scrolls down the page
+             * and comes back as soon as they scroll up. It stays put while the search field
+             * has focus or a drawer has locked the page.
+             */
+            var phone = window.matchMedia('(max-width: 1023px)');
+            var lastY = getY();
+
             function applyScrollState() {
                 var header = document.getElementById('main-header');
                 if (! header) return;
 
-                if (getY() > 80) {
+                var y = getY();
+
+                if (y > 80) {
                     header.classList.add('header-scrolled');
                 } else {
                     header.classList.remove('header-scrolled');
+                }
+
+                var busy = header.contains(document.activeElement) && document.activeElement !== document.body
+                    || document.body.style.overflow === 'hidden';
+
+                if (! phone.matches || busy || y < 160) {
+                    header.classList.remove('header-hidden');
+                } else if (y > lastY + 6) {
+                    header.classList.add('header-hidden');
+                } else if (y < lastY - 6) {
+                    header.classList.remove('header-hidden');
+                }
+
+                if (Math.abs(y - lastY) > 6 || y < 160) {
+                    lastY = y;
                 }
             }
 
@@ -239,6 +264,250 @@
         <v-desktop-header v-if="isDesktop"></v-desktop-header>
         
         <v-mobile-header v-else></v-mobile-header>
+    </script>
+
+    {{--
+        Search suggestions under the header search field (desktop and phone): up to six
+        matching products as the shopper types, then "See all results". The field is passed
+        in as the slot, so the form, its validation and image search stay as they were.
+        Requests carry suggest=1 so keystrokes are not recorded as search terms (the API
+        only records a term when `query` is the sole parameter).
+    --}}
+    <script
+        type="text/x-template"
+        id="v-search-suggestions-template"
+    >
+        <div class="relative w-full">
+            <slot></slot>
+
+            <div
+                class="absolute inset-x-0 top-full z-[80] mt-2 overflow-hidden rounded-xl border border-zinc-200 bg-white text-zinc-900 shadow-[0_18px_40px_-12px_rgba(0,0,0,0.25)]"
+                v-if="isOpen"
+            >
+                <ul
+                    :id="listId"
+                    role="listbox"
+                    class="max-h-[60vh] overflow-y-auto pt-1.5"
+                    @mousedown.prevent
+                >
+                    <li
+                        v-for="(product, index) in products"
+                        :id="listId + '-' + index"
+                        :key="product.id"
+                        role="option"
+                        :aria-selected="index === active ? 'true' : 'false'"
+                    >
+                        <a
+                            :href="productUrl(product)"
+                            class="flex items-center gap-3 px-3 py-2 transition-colors"
+                            :class="index === active ? 'bg-sage' : 'hover:bg-zinc-50'"
+                            tabindex="-1"
+                        >
+                            {{-- Product photos carry wide white margins, so the thumbnail is zoomed in a little. --}}
+                            <span class="h-12 w-12 shrink-0 overflow-hidden rounded-lg bg-white">
+                                <img
+                                    :src="product.base_image?.small_image_url"
+                                    alt=""
+                                    class="h-full w-full scale-[1.3] object-contain"
+                                    loading="lazy"
+                                >
+                            </span>
+
+                            <span class="min-w-0 flex-1">
+                                <span
+                                    class="block truncate text-sm font-semibold"
+                                    v-text="product.name"
+                                ></span>
+
+                                <span
+                                    class="block text-sm text-zinc-600"
+                                    v-text="product.prices?.final?.formatted_price ?? product.min_price"
+                                ></span>
+                            </span>
+                        </a>
+                    </li>
+
+                    <li
+                        class="px-3 py-3 text-sm text-zinc-600"
+                        v-if="! products.length"
+                        v-text="noResultsText"
+                    ></li>
+
+                    <li
+                        :id="listId + '-' + products.length"
+                        role="option"
+                        class="sticky bottom-0 bg-white"
+                        :aria-selected="active === products.length ? 'true' : 'false'"
+                        v-if="products.length"
+                    >
+                        <a
+                            :href="searchUrl"
+                            class="block border-t border-zinc-100 px-3 py-3 text-sm font-semibold text-brand"
+                            :class="active === products.length ? 'bg-sage' : 'hover:bg-zinc-50'"
+                            tabindex="-1"
+                            v-text="seeAllText"
+                        ></a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </script>
+
+    <script type="module">
+        app.component('v-search-suggestions', {
+            template: '#v-search-suggestions-template',
+
+            data() {
+                return {
+                    query: '',
+                    products: [],
+                    isOpen: false,
+                    active: -1,
+                    listId: 'search-suggestions-' + Math.random().toString(36).slice(2, 8),
+                };
+            },
+
+            computed: {
+                searchUrl() {
+                    return "{{ route('shop.search.index') }}?query=" + encodeURIComponent(this.query);
+                },
+
+                seeAllText() {
+                    return @json(trans('shop::app.components.layouts.header.mobile.see-all-results')).replace(':query', this.query);
+                },
+
+                noResultsText() {
+                    return @json(trans('shop::app.components.layouts.header.mobile.no-results')).replace(':query', this.query);
+                },
+            },
+
+            mounted() {
+                this.input = this.$el.querySelector('input[name="query"]');
+
+                if (! this.input) {
+                    return;
+                }
+
+                this.minLength = Math.max(2, parseInt(this.input.getAttribute('minlength') || '0', 10));
+
+                this.input.setAttribute('role', 'combobox');
+                this.input.setAttribute('aria-autocomplete', 'list');
+                this.input.setAttribute('aria-controls', this.listId);
+                this.input.setAttribute('aria-expanded', 'false');
+                this.input.setAttribute('autocomplete', 'off');
+
+                this.onInput = () => this.schedule();
+                this.onKeydown = (event) => this.keydown(event);
+                this.onBlur = () => setTimeout(() => this.close(), 120);
+                this.onFocus = () => { if (this.products.length || this.query) this.open(); };
+
+                this.input.addEventListener('input', this.onInput);
+                this.input.addEventListener('keydown', this.onKeydown);
+                this.input.addEventListener('blur', this.onBlur);
+                this.input.addEventListener('focus', this.onFocus);
+            },
+
+            beforeUnmount() {
+                clearTimeout(this.timer);
+                this.controller?.abort();
+
+                if (this.input) {
+                    this.input.removeEventListener('input', this.onInput);
+                    this.input.removeEventListener('keydown', this.onKeydown);
+                    this.input.removeEventListener('blur', this.onBlur);
+                    this.input.removeEventListener('focus', this.onFocus);
+                }
+            },
+
+            methods: {
+                productUrl(product) {
+                    return "{{ route('shop.product_or_category.index', '') }}/" + product.url_key;
+                },
+
+                schedule() {
+                    clearTimeout(this.timer);
+
+                    const query = this.input.value.trim();
+
+                    if (query.length < this.minLength) {
+                        this.controller?.abort();
+                        this.query = query;
+                        this.products = [];
+                        this.close();
+
+                        return;
+                    }
+
+                    this.timer = setTimeout(() => this.fetch(query), 250);
+                },
+
+                fetch(query) {
+                    this.controller?.abort();
+                    this.controller = new AbortController();
+
+                    this.$axios.get("{{ route('shop.api.products.index') }}", {
+                        params: { query, limit: 6, suggest: 1 },
+                        signal: this.controller.signal,
+                    })
+                        .then((response) => {
+                            this.query = query;
+                            this.products = (response.data.data || []).slice(0, 6);
+                            this.active = -1;
+
+                            if (document.activeElement === this.input) {
+                                this.open();
+                            }
+                        })
+                        .catch(() => {});
+                },
+
+                open() {
+                    if (this.query.length < this.minLength) {
+                        return;
+                    }
+
+                    this.isOpen = true;
+                    this.input.setAttribute('aria-expanded', 'true');
+                },
+
+                close() {
+                    this.isOpen = false;
+                    this.active = -1;
+                    this.input?.setAttribute('aria-expanded', 'false');
+                    this.input?.removeAttribute('aria-activedescendant');
+                },
+
+                keydown(event) {
+                    if (! this.isOpen) {
+                        return;
+                    }
+
+                    const last = this.products.length ? this.products.length : -1;
+
+                    if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+                        event.preventDefault();
+
+                        const step = event.key === 'ArrowDown' ? 1 : -1;
+
+                        this.active = this.active + step > last ? -1 : (this.active + step < -1 ? last : this.active + step);
+
+                        if (this.active >= 0) {
+                            this.input.setAttribute('aria-activedescendant', this.listId + '-' + this.active);
+                        } else {
+                            this.input.removeAttribute('aria-activedescendant');
+                        }
+                    } else if (event.key === 'Enter' && this.active >= 0) {
+                        event.preventDefault();
+
+                        window.location.href = this.active < this.products.length
+                            ? this.productUrl(this.products[this.active])
+                            : this.searchUrl;
+                    } else if (event.key === 'Escape') {
+                        this.close();
+                    }
+                },
+            },
+        });
     </script>
 
     <script

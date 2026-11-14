@@ -512,6 +512,8 @@ return [
                     'account' => 'חשבון',
                     'back-button' => 'חזרה לתפריט הראשי',
                     'cart' => 'Cart',
+                    'no-results' => 'No products match “:query”',
+                    'see-all-results' => 'See all results for “:query”',
                     'qubix' => 'באגיסטו',
                     'compare' => 'השווה',
                     'currencies' => 'מטבעות',

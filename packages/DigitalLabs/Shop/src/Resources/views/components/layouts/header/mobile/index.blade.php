@@ -82,24 +82,26 @@
                 @lang('shop::app.components.layouts.header.mobile.search')
             </label>
 
-            <div class="icon-search pointer-events-none absolute top-1/2 -translate-y-1/2 text-xl text-zinc-500 ltr:left-3.5 rtl:right-3.5"></div>
+            <div class="icon-search pointer-events-none absolute top-1/2 z-[1] -translate-y-1/2 text-xl text-zinc-500 ltr:left-3.5 rtl:right-3.5"></div>
 
-            <input
-                id="shop-header-search-mobile"
-                type="search"
-                name="query"
-                value="{{ request('query') }}"
-                class="block h-11 w-full rounded-ui border-0 bg-field px-11 text-base text-zinc-900 placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-headInk/50"
-                minlength="{{ core()->getConfigData('catalog.products.search.min_query_length') }}"
-                maxlength="{{ core()->getConfigData('catalog.products.search.max_query_length') }}"
-                placeholder="@lang('shop::app.components.layouts.header.mobile.search-text')"
-                aria-label="@lang('shop::app.components.layouts.header.mobile.search-text')"
-                aria-required="true"
-                pattern="[^\\]+"
-                autocomplete="off"
-                enterkeyhint="search"
-                required
-            >
+            <v-search-suggestions>
+                <input
+                    id="shop-header-search-mobile"
+                    type="search"
+                    name="query"
+                    value="{{ request('query') }}"
+                    class="block h-11 w-full rounded-ui border-0 bg-field px-11 text-base text-zinc-900 placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-headInk/50"
+                    minlength="{{ core()->getConfigData('catalog.products.search.min_query_length') }}"
+                    maxlength="{{ core()->getConfigData('catalog.products.search.max_query_length') }}"
+                    placeholder="@lang('shop::app.components.layouts.header.mobile.search-text')"
+                    aria-label="@lang('shop::app.components.layouts.header.mobile.search-text')"
+                    aria-required="true"
+                    pattern="[^\\]+"
+                    autocomplete="off"
+                    enterkeyhint="search"
+                    required
+                >
+            </v-search-suggestions>
 
             @if (core()->getConfigData('catalog.products.settings.image_search'))
                 @include('shop::search.images.index')

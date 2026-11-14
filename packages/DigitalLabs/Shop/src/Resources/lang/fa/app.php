@@ -512,6 +512,8 @@ return [
                     'account' => 'حساب کاربری',
                     'back-button' => 'بازگشت به منوی اصلی',
                     'cart' => 'Cart',
+                    'no-results' => 'No products match “:query”',
+                    'see-all-results' => 'See all results for “:query”',
                     'qubix' => 'باگیستو',
                     'compare' => 'مقایسه',
                     'currencies' => 'واحدهای پول',

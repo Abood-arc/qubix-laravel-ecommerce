@@ -512,6 +512,8 @@ return [
                     'account' => 'Hesap',
                     'back-button' => 'Geri Dön',
                     'cart' => 'Cart',
+                    'no-results' => 'No products match “:query”',
+                    'see-all-results' => 'See all results for “:query”',
                     'qubix' => 'Qubix',
                     'compare' => 'Karşılaştır',
                     'currencies' => 'Para Birimleri',

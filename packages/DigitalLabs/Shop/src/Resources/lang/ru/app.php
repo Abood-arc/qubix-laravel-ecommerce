@@ -512,6 +512,8 @@ return [
                     'account' => 'Аккаунт',
                     'back-button' => 'Назад к главному меню',
                     'cart' => 'Cart',
+                    'no-results' => 'No products match “:query”',
+                    'see-all-results' => 'See all results for “:query”',
                     'qubix' => 'Багисто',
                     'compare' => 'Сравнить',
                     'currencies' => 'Валюты',

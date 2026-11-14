@@ -512,6 +512,8 @@ return [
                     'account' => 'অ্যাকাউন্ট',
                     'back-button' => 'প্রধান মেনুতে ফিরে যান',
                     'cart' => 'Cart',
+                    'no-results' => 'No products match “:query”',
+                    'see-all-results' => 'See all results for “:query”',
                     'qubix' => 'বাগিস্টো',
                     'compare' => 'তুলনা করুন',
                     'currencies' => 'মুদ্রা',

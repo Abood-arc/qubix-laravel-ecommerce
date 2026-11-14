@@ -158,8 +158,10 @@
                     <span class="icon-arrow-left text-xl rtl:icon-arrow-right"></span>
                 </button>
 
+                {{-- dir="ltr": in Arabic the bidi algorithm would otherwise show "5 / 2" for slide 2 of 5. --}}
                 <span
                     class="min-w-[3.25rem] text-center text-sm font-bold tabular-nums"
+                    dir="ltr"
                     v-text="(currentIndex + 1) + ' / ' + images.length"
                 ></span>
 

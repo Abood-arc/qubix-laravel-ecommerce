@@ -48,24 +48,26 @@
 
             <div class="icon-search pointer-events-none absolute top-1/2 z-[1] -translate-y-1/2 text-xl text-zinc-500 ltr:left-4 rtl:right-4"></div>
 
-            <input
-                id="organic-search"
-                type="text"
-                name="query"
-                value="{{ request('query') }}"
-                @class([
-                    'block h-11 w-full rounded-ui border-0 bg-field text-[15px] text-zinc-900 placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-headInk/50',
-                    'px-11' => ! core()->getConfigData('catalog.products.settings.image_search'),
-                    'pl-11 pr-14 rtl:pl-14 rtl:pr-11' => core()->getConfigData('catalog.products.settings.image_search'),
-                ])
-                minlength="{{ core()->getConfigData('catalog.products.search.min_query_length') }}"
-                maxlength="{{ core()->getConfigData('catalog.products.search.max_query_length') }}"
-                placeholder="@lang('shop::app.components.layouts.header.desktop.bottom.search-text')"
-                aria-label="@lang('shop::app.components.layouts.header.desktop.bottom.search-text')"
-                aria-required="true"
-                pattern="[^\\]+"
-                required
-            >
+            <v-search-suggestions>
+                <input
+                    id="organic-search"
+                    type="text"
+                    name="query"
+                    value="{{ request('query') }}"
+                    @class([
+                        'block h-11 w-full rounded-ui border-0 bg-field text-[15px] text-zinc-900 placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-headInk/50',
+                        'px-11' => ! core()->getConfigData('catalog.products.settings.image_search'),
+                        'pl-11 pr-14 rtl:pl-14 rtl:pr-11' => core()->getConfigData('catalog.products.settings.image_search'),
+                    ])
+                    minlength="{{ core()->getConfigData('catalog.products.search.min_query_length') }}"
+                    maxlength="{{ core()->getConfigData('catalog.products.search.max_query_length') }}"
+                    placeholder="@lang('shop::app.components.layouts.header.desktop.bottom.search-text')"
+                    aria-label="@lang('shop::app.components.layouts.header.desktop.bottom.search-text')"
+                    aria-required="true"
+                    pattern="[^\\]+"
+                    required
+                >
+            </v-search-suggestions>
 
             @if (core()->getConfigData('catalog.products.settings.image_search'))
                 @include('shop::search.images.index')
