@@ -234,6 +234,210 @@
             }
         </style>
 
+        {{-- Shoppers can drag the chat button out of the way (thumb or mouse). On release it snaps to
+             the nearest side edge and the spot is remembered on this device (localStorage), on every
+             page. A press that moves under 8px is still a normal tap that opens the chat. The button
+             lives in the widget's open shadow root; it is moved with the CSS translate property, which
+             stacks with the widget's own hover transform instead of replacing it. --}}
+        <script>
+            (function () {
+                var STORE_KEY = 'qubix.chatLauncher';
+                var MARGIN = 12;
+                var SLOP = 8;
+
+                var host, root, button;
+                var dx = 0, dy = 0;
+                var press = null;
+                var swallowClick = false;
+
+                function findButton() {
+                    return root.querySelector('button[aria-label="Open chat"]')
+                        || Array.prototype.find.call(root.querySelectorAll('button'), function (b) {
+                            return getComputedStyle(b).position === 'fixed';
+                        })
+                        || null;
+                }
+
+                function setOffset(x, y, animate) {
+                    dx = x;
+                    dy = y;
+                    button.style.transition = animate ? 'transform .15s, translate .25s cubic-bezier(.2, .8, .2, 1)' : 'transform .15s';
+                    button.style.translate = x + 'px ' + y + 'px';
+                }
+
+                // Where the button sits with no offset (the widget's own spot). Computed left/top and
+                // offsetWidth ignore transforms, so the widget's hover-grow doesn't skew the maths.
+                function baseRect() {
+                    var cs = getComputedStyle(button);
+
+                    return {
+                        left: parseFloat(cs.left) || 0,
+                        top: parseFloat(cs.top) || 0,
+                        width: button.offsetWidth,
+                        height: button.offsetHeight,
+                    };
+                }
+
+                function clampTop(top, height) {
+                    return Math.min(Math.max(top, MARGIN), window.innerHeight - MARGIN - height);
+                }
+
+                function place(side, topRatio, animate) {
+                    var b = baseRect();
+
+                    if (! b.width) {
+                        return;
+                    }
+
+                    var left = side === 'left' ? MARGIN : window.innerWidth - MARGIN - b.width;
+                    var top = clampTop(topRatio * window.innerHeight, b.height);
+
+                    setOffset(left - b.left, top - b.top, animate);
+                }
+
+                function load() {
+                    try {
+                        return JSON.parse(localStorage.getItem(STORE_KEY) || 'null');
+                    } catch (e) {
+                        return null;
+                    }
+                }
+
+                function save(side, topRatio) {
+                    try {
+                        localStorage.setItem(STORE_KEY, JSON.stringify({ side: side, top: topRatio }));
+                    } catch (e) {}
+                }
+
+                function restore() {
+                    var saved = load();
+
+                    if (saved && (saved.side === 'left' || saved.side === 'right') && typeof saved.top === 'number') {
+                        place(saved.side, saved.top, false);
+                    }
+                }
+
+                function onDown(e) {
+                    if (! button || ! button.contains(e.target) || (e.pointerType === 'mouse' && e.button !== 0)) {
+                        return;
+                    }
+
+                    press = { id: e.pointerId, x: e.clientX, y: e.clientY, dx: dx, dy: dy, dragging: false };
+                }
+
+                function onMove(e) {
+                    if (! press || e.pointerId !== press.id) {
+                        return;
+                    }
+
+                    var mx = e.clientX - press.x;
+                    var my = e.clientY - press.y;
+
+                    if (! press.dragging) {
+                        if (Math.abs(mx) < SLOP && Math.abs(my) < SLOP) {
+                            return;
+                        }
+
+                        press.dragging = true;
+
+                        try {
+                            button.setPointerCapture(e.pointerId);
+                        } catch (err) {}
+                    }
+
+                    var b = baseRect();
+                    var left = Math.min(Math.max(b.left + press.dx + mx, MARGIN), window.innerWidth - MARGIN - b.width);
+                    var top = clampTop(b.top + press.dy + my, b.height);
+
+                    setOffset(left - b.left, top - b.top, false);
+                }
+
+                function onUp(e) {
+                    if (! press || e.pointerId !== press.id) {
+                        return;
+                    }
+
+                    var wasDragging = press.dragging;
+
+                    press = null;
+
+                    if (! wasDragging) {
+                        return;
+                    }
+
+                    swallowClick = true;
+                    setTimeout(function () { swallowClick = false; }, 400);
+
+                    var r = button.getBoundingClientRect();
+                    var side = r.left + r.width / 2 < window.innerWidth / 2 ? 'left' : 'right';
+                    var topRatio = r.top / window.innerHeight;
+
+                    place(side, topRatio, true);
+                    save(side, topRatio);
+                }
+
+                function onClick(e) {
+                    if (swallowClick) {
+                        swallowClick = false;
+                        e.stopImmediatePropagation();
+                        e.preventDefault();
+                    }
+                }
+
+                function adopt() {
+                    var found = findButton();
+
+                    if (! found || found === button) {
+                        return;
+                    }
+
+                    button = found;
+                    dx = 0;
+                    dy = 0;
+                    button.style.touchAction = 'none';
+                    restore();
+                }
+
+                function attach(h) {
+                    host = h;
+                    root = h.shadowRoot;
+
+                    if (! root) {
+                        return;
+                    }
+
+                    root.addEventListener('pointerdown', onDown, true);
+                    window.addEventListener('pointermove', onMove, true);
+                    window.addEventListener('pointerup', onUp, true);
+                    window.addEventListener('pointercancel', onUp, true);
+                    root.addEventListener('click', onClick, true);
+
+                    new MutationObserver(adopt).observe(root, { childList: true, subtree: true });
+                    adopt();
+
+                    window.addEventListener('resize', restore);
+                }
+
+                var existing = document.getElementById('zanderio-widget-host');
+
+                if (existing) {
+                    attach(existing);
+                    return;
+                }
+
+                var watcher = new MutationObserver(function () {
+                    var h = document.getElementById('zanderio-widget-host');
+
+                    if (h && h.shadowRoot) {
+                        watcher.disconnect();
+                        attach(h);
+                    }
+                });
+
+                watcher.observe(document.documentElement, { childList: true, subtree: true });
+            })();
+        </script>
+
         {!! view_render_event('qubix.shop.layout.vue-app-mount.before') !!}
         <script>
             /**
