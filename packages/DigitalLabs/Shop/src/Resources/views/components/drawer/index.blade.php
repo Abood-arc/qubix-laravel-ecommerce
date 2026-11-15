@@ -94,10 +94,13 @@
                     leave-active-class="transform transition duration-200 ease-in-out"
                     :leave-to-class="enterFromLeaveToClasses"
                 >
+                {{-- 100dvh, not 100vh: on Android Chrome 100vh is the height with the address bar hidden, so
+                     while the bar shows, the panel's bottom (the cart's Checkout button) sat under the
+                     screen edge. Browsers without dvh ignore it and top:0/bottom:0 size the panel. --}}
                 <div
                     class="fixed z-[1000] overflow-hidden max-md:!w-full"
                     :class="[positionClasses, panelSurfaceClass]"
-                    :style="(position === 'right' || position === 'left') ? 'width:' + width + '; top:0; bottom:0; height:100vh;' : 'width:' + width"
+                    :style="(position === 'right' || position === 'left') ? 'width:' + width + '; top:0; bottom:0; height:100dvh;' : 'width:' + width"
                     v-show="isOpen"
                 >
                     <div

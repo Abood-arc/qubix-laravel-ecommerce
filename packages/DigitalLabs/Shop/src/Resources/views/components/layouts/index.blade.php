@@ -222,6 +222,18 @@
 
         <script src="https://cdn.zanderio.ai/widget/loader.js" data-id="wdg_bDmt03WxuJCWokGT6wmHrX1O" defer></script>
 
+        {{-- The chat button floats above everything (max z-index), so it covered the cart's subtotal
+             and Checkout button. Drawers and modals lock scrolling with body.style.overflow = 'hidden';
+             hide the button while one is open. The widget pins display/visibility/opacity on its host
+             with inline !important, so those can't be overridden; content-visibility: hidden adds paint
+             containment instead, which clips the button (fixed inside the host's shadow root) to the
+             empty host: not drawn, not tappable. --}}
+        <style>
+            body[style*="overflow: hidden"] #zanderio-widget-host {
+                content-visibility: hidden;
+            }
+        </style>
+
         {!! view_render_event('qubix.shop.layout.vue-app-mount.before') !!}
         <script>
             /**
