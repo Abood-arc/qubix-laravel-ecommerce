@@ -7,6 +7,7 @@ use DigitalLabs\Checkout\Models\CartAddress;
 use DigitalLabs\Checkout\Models\CartItem;
 use DigitalLabs\Checkout\Models\CartPayment;
 use DigitalLabs\Checkout\Models\CartShippingRate;
+use DigitalLabs\Core\Models\Currency;
 use DigitalLabs\Customer\Contracts\Customer;
 use DigitalLabs\Razorpay\Models\RazorpayPayment;
 use DigitalLabs\Sales\Transformers\OrderResource;
@@ -99,6 +100,9 @@ trait RazorpayTestBench
         cart()->setCart($cart);
 
         cart()->collectTotals();
+
+        // A fresh install (CI, the `testing` database) only has USD; jjbags.in sells in INR.
+        Currency::firstOrCreate(['code' => 'INR'], ['name' => 'Indian Rupee', 'symbol' => '₹', 'decimal' => 2]);
 
         $cart->refresh()->update(['cart_currency_code' => 'INR']);
 
