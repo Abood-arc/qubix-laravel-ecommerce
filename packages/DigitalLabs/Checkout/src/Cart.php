@@ -70,13 +70,25 @@ class Cart
             $customer = auth()->guard()->user();
         }
 
+        $sessionCart = null;
+
+        if (session()->has('cart')) {
+            $sessionCart = $this->cartRepository->find(session()->get('cart')->id);
+
+            if (! $sessionCart?->is_active) {
+                session()->forget('cart');
+
+                $sessionCart = null;
+            }
+        }
+
         if ($customer) {
             $this->cart = $this->cartRepository->findOneWhere([
                 'customer_id' => $customer->id,
                 'is_active' => 1,
             ]);
-        } elseif (session()->has('cart')) {
-            $this->cart = $this->cartRepository->find(session()->get('cart')->id);
+        } elseif ($sessionCart) {
+            $this->cart = $sessionCart;
         }
     }
 

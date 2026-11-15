@@ -33,6 +33,9 @@ return [
     DigitalLabs\Payment\Providers\PaymentServiceProvider::class,
     DigitalLabs\Paypal\Providers\PaypalServiceProvider::class,
     DigitalLabs\Product\Providers\ProductServiceProvider::class,
+    ...(class_exists(DigitalLabs\Razorpay\Providers\RazorpayServiceProvider::class)
+        ? [DigitalLabs\Razorpay\Providers\RazorpayServiceProvider::class]
+        : []),
     DigitalLabs\Rule\Providers\RuleServiceProvider::class,
     DigitalLabs\Sales\Providers\SalesServiceProvider::class,
     DigitalLabs\Shipping\Providers\ShippingServiceProvider::class,
