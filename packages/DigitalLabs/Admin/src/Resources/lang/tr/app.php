@@ -3713,6 +3713,14 @@ return [
                         'info' => 'Fikri mülkiyetinizi korumak ve marka bilinirliğini artırmak için web sitenizin alt bilgisinde görüntülenen telif hakkı içeriğini yapılandırın.',
                     ],
 
+                    'store-contact' => [
+                        'email' => 'İletişim e-postası',
+                        'info' => 'Alt bilgide ve mobil menüde müşterilere gösterilen WhatsApp numarası ve e-posta.',
+                        'title' => 'Mağaza İletişimi',
+                        'whatsapp-number' => 'WhatsApp numarası',
+                        'whatsapp-number-info' => 'Ülke kodunu ekleyin, ör. +91 98765 43210.',
+                    ],
+
                     'speculation-rules' => [
                         'enable-speculation' => 'Spekülasyon Kurallarını Etkinleştir',
                         'info' => 'Otomatik spekülasyon mantığını etkinleştirmek veya devre dışı bırakmak için ayarları yapılandırın.',
@@ -3773,6 +3781,17 @@ return [
                         'preview-sidebar' => 'Kenar Çubuğu Menüsünü Önizle',
                         'sidebar' => 'Kenar Çubuğu Menüsü',
                         'title' => 'Menü Kategori Görünümü',
+                    ],
+
+                    'store-look' => [
+                        'forest-green' => 'Forest Green',
+                        'info' => 'Choose the colours, fonts and corners of your storefront. The layout stays the same in every look.',
+                        'look' => 'Look',
+                        'look-info' => 'Forest Green: green header, cream panels. Marigold & Indigo: bright yellow header, indigo text. Sand & Charcoal: sand header, charcoal menu, square corners. Minimal White: white header, black text.',
+                        'marigold-indigo' => 'Marigold & Indigo',
+                        'minimal-white' => 'Minimal White',
+                        'sand-charcoal' => 'Sand & Charcoal',
+                        'title' => 'Store Look',
                     ],
                 ],
 

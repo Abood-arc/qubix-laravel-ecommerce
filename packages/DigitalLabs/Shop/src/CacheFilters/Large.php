@@ -37,6 +37,15 @@ class Large implements FilterInterface
         /**
          * Slider image dimensions
          */
+        if (Str::contains(url()->current(), '/theme/')) {
+            /*
+             * Theme images (hero banners) are listed in a srcset beside the uncropped original,
+             * so a resized copy must keep the original's shape; cropping it here made the banner
+             * show a different crop depending on screen size.
+             */
+            return $image->widen(1280, fn ($constraint) => $constraint->upsize());
+        }
+
         return $image->fit(1280, 467);
     }
 }

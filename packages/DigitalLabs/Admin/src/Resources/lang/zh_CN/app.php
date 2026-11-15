@@ -3713,6 +3713,14 @@ return [
                         'info' => '配置在您网站页脚显示的版权内容，以保护您的知识产权并提升品牌知名度。',
                     ],
 
+                    'store-contact' => [
+                        'email' => '联系邮箱',
+                        'info' => '在页脚和移动菜单中向顾客显示的 WhatsApp 号码和邮箱。',
+                        'title' => '店铺联系方式',
+                        'whatsapp-number' => 'WhatsApp 号码',
+                        'whatsapp-number-info' => '请包含国家代码，例如 +91 98765 43210。',
+                    ],
+
                     'speculation-rules' => [
                         'enable-speculation' => '启用猜测规则',
                         'info' => '配置启用或禁用自动猜测逻辑的设置。',
@@ -3773,6 +3781,17 @@ return [
                         'preview-sidebar' => '预览侧边栏菜单',
                         'sidebar' => '侧边栏菜单',
                         'title' => '菜单类别视图',
+                    ],
+
+                    'store-look' => [
+                        'forest-green' => 'Forest Green',
+                        'info' => 'Choose the colours, fonts and corners of your storefront. The layout stays the same in every look.',
+                        'look' => 'Look',
+                        'look-info' => 'Forest Green: green header, cream panels. Marigold & Indigo: bright yellow header, indigo text. Sand & Charcoal: sand header, charcoal menu, square corners. Minimal White: white header, black text.',
+                        'marigold-indigo' => 'Marigold & Indigo',
+                        'minimal-white' => 'Minimal White',
+                        'sand-charcoal' => 'Sand & Charcoal',
+                        'title' => 'Store Look',
                     ],
                 ],
 

@@ -3,115 +3,59 @@
     $showWishlist = (bool) core()->getConfigData('customer.settings.wishlist.wishlist_option');
 @endphp
 
-<div class="flex min-w-0 w-full flex-wrap gap-4 pt-6 pb-4 shadow-sm lg:hidden">
-    <div class="flex w-full min-w-0 items-center justify-between px-4 text-white">
-        <!-- Left Navigation -->
-        <div class="flex items-center gap-x-1.5">
-            {!! view_render_event('qubix.shop.components.layouts.header.mobile.drawer.before') !!}
+{{--
+    Phone header, two rows. Row 1: menu, logo, then wishlist, account and cart as 44px icons.
+    Row 2: the search field, always visible. The category chips sit under the header
+    (header/index.blade.php) so the sticky part stays this tall.
+--}}
+<div class="w-full text-headInk lg:hidden">
+    <div class="flex h-14 w-full items-center px-1.5">
+        {!! view_render_event('qubix.shop.components.layouts.header.mobile.drawer.before') !!}
 
-            <v-mobile-drawer></v-mobile-drawer>
+        <v-mobile-drawer></v-mobile-drawer>
 
-            {!! view_render_event('qubix.shop.components.layouts.header.mobile.drawer.after') !!}
+        {!! view_render_event('qubix.shop.components.layouts.header.mobile.drawer.after') !!}
 
-            {!! view_render_event('qubix.shop.components.layouts.header.mobile.logo.before') !!}
+        {!! view_render_event('qubix.shop.components.layouts.header.mobile.logo.before') !!}
 
-            <a
-                href="{{ route('shop.home.index') }}"
-                class="inline-flex items-center"
-                aria-label="@lang('shop::app.components.layouts.header.mobile.qubix')"
+        <a
+            href="{{ route('shop.home.index') }}"
+            class="inline-flex items-center ltr:ml-1 rtl:mr-1"
+            aria-label="{{ config('app.name') }}"
+        >
+            <img
+                src="{{ core()->getCurrentChannel()->logo_url ?? qubix_asset('images/logo.svg') }}"
+                alt="{{ config('app.name') }}"
+                class="h-10 w-auto object-contain"
             >
-                <img
-                    src="{{ core()->getCurrentChannel()->logo_url ?? qubix_asset('images/logo.svg') }}"
-                    alt="{{ config('app.name') }}"
-                    style="height: 48px; width: auto; object-fit: contain;"
-                >
-            </a>
+        </a>
 
-            {!! view_render_event('qubix.shop.components.layouts.header.mobile.logo.after') !!}
-        </div>
+        {!! view_render_event('qubix.shop.components.layouts.header.mobile.logo.after') !!}
 
-        <!-- Right Navigation -->
-        <div class="flex items-center gap-x-5 max-md:gap-x-4">
-            {!! view_render_event('qubix.shop.components.layouts.header.mobile.search.before') !!}
-
-            {{--
-                Full-width viewport strip: absolute + vw breakout fails here (nested flex + padding).
-                `fixed inset-x-0 w-full` aligns to viewport; visibility follows native `details[open]`
-                via app.css selectors (Tailwind group-open unreliable on v3.3).
-            --}}
-            <details class="header-search mobile-header-details-search relative z-[60]">
-                <summary
-                    class="inline-flex h-10 w-10 list-none cursor-pointer items-center justify-center rounded-full text-white transition-colors hover:bg-white/10"
-                    aria-label="@lang('shop::app.components.layouts.header.mobile.search')"
-                >
-                    <span class="mobile-search-mag icon-search text-2xl"></span>
-                    <span class="mobile-search-cancel icon-cancel hidden text-2xl"></span>
-                </summary>
-
-                <div
-                    class="mobile-search-panel fixed inset-x-0 z-[70] hidden w-full max-w-none flex-col border-b border-white/20 bg-[#1f5f4f] px-4 py-3 shadow-[0_14px_32px_rgba(10,30,24,0.35)]"
-                    style="top: calc(env(safe-area-inset-top, 0px) + 5.75rem)"
-                >
-                    <form
-                        action="{{ route('shop.search.index') }}"
-                        class="relative flex items-center text-white [&_.icon-camera]:text-white [&_label.icon-camera]:text-white"
-                        role="search"
-                    >
-                        <label
-                            for="shop-header-search-mobile-panel"
-                            class="sr-only"
-                        >
-                            @lang('shop::app.components.layouts.header.mobile.search')
-                        </label>
-
-                        <div
-                            class="icon-search pointer-events-none absolute top-[0.72rem] text-xl text-white ltr:left-4 rtl:right-4"
-                        ></div>
-
-                        <input
-                            id="shop-header-search-mobile-panel"
-                            type="search"
-                            name="query"
-                            value="{{ request('query') }}"
-                            class="block w-full rounded-xl border border-white/30 bg-white/10 px-11 py-3 text-sm font-medium text-white placeholder:text-white/70 transition-all hover:border-white/50 focus:border-white focus:outline-none"
-                            minlength="{{ core()->getConfigData('catalog.products.search.min_query_length') }}"
-                            maxlength="{{ core()->getConfigData('catalog.products.search.max_query_length') }}"
-                            placeholder="@lang('shop::app.components.layouts.header.mobile.search-text')"
-                            aria-label="@lang('shop::app.components.layouts.header.mobile.search-text')"
-                            aria-required="true"
-                            pattern="[^\\]+"
-                            autocomplete="search"
-                            required
-                        >
-
-                        @if (core()->getConfigData('catalog.products.settings.image_search'))
-                            @include('shop::search.images.index')
-                        @endif
-
-                        <button
-                            type="submit"
-                            class="hidden"
-                            aria-label="@lang('shop::app.components.layouts.header.desktop.bottom.submit')"
-                        >
-                        </button>
-                    </form>
-                </div>
-            </details>
-
-            {!! view_render_event('qubix.shop.components.layouts.header.mobile.search.after') !!}
-
-            {!! view_render_event('qubix.shop.components.layouts.header.mobile.compare.before') !!}
-
-            @if($showCompare)
+        <div class="flex items-center ltr:ml-auto rtl:mr-auto">
+            @if ($showWishlist)
                 <a
-                    href="{{ route('shop.compare.index') }}"
-                    aria-label="@lang('shop::app.components.layouts.header.mobile.compare')"
+                    href="{{ route('shop.customers.account.wishlist.index') }}"
+                    class="inline-flex h-11 w-11 items-center justify-center rounded-full transition-colors hover:bg-headInk/10"
+                    aria-label="@lang('shop::app.components.layouts.header.mobile.wishlist')"
                 >
-                    <span class="text-2xl cursor-pointer text-white icon-compare"></span>
+                    <span
+                        class="icon-heart text-2xl"
+                        aria-hidden="true"
+                    ></span>
                 </a>
             @endif
 
-            {!! view_render_event('qubix.shop.components.layouts.header.mobile.compare.after') !!}
+            <a
+                href="{{ auth()->guard('customer')->check() ? route('shop.customers.account.index') : route('shop.customer.session.create') }}"
+                class="inline-flex h-11 w-11 items-center justify-center rounded-full transition-colors hover:bg-headInk/10"
+                aria-label="@lang('shop::app.components.layouts.header.mobile.account')"
+            >
+                <span
+                    class="icon-users text-2xl"
+                    aria-hidden="true"
+                ></span>
+            </a>
 
             {!! view_render_event('qubix.shop.components.layouts.header.mobile.mini_cart.before') !!}
 
@@ -120,140 +64,59 @@
             @endif
 
             {!! view_render_event('qubix.shop.components.layouts.header.mobile.mini_cart.after') !!}
-
-            <!-- Profile — tablet (768px–1023px): dropdown -->
-            <div class="max-md:hidden">
-                <x-shop::dropdown position="bottom-{{ core()->getCurrentLocale()->direction === 'ltr' ? 'right' : 'left' }}">
-                    <x-slot:toggle>
-                        <span class="text-2xl cursor-pointer text-white icon-users"></span>
-                    </x-slot>
-
-                    @guest('customer')
-                        <x-slot:content>
-                            <div class="grid gap-2.5">
-                                <p class="text-xl font-dmserif">
-                                    @lang('shop::app.components.layouts.header.mobile.welcome-guest')
-                                </p>
-
-                                <p class="text-sm text-zinc-500">
-                                    @lang('shop::app.components.layouts.header.mobile.dropdown-text')
-                                </p>
-                            </div>
-
-                            <p class="w-full mt-3 border border-zinc-200"></p>
-
-                            {!! view_render_event('qubix.shop.components.layouts.header.mobile.index.customers_action.before') !!}
-
-                            <div class="flex gap-4 mt-6">
-                                {!! view_render_event('qubix.shop.components.layouts.header.mobile.index.sign_in_button.before') !!}
-
-                                <a
-                                    href="{{ route('shop.customer.session.create') }}"
-                                    class="primary-button rounded-2xl px-7 max-md:rounded-lg ltr:ml-0 rtl:mr-0"
-                                >
-                                    @lang('shop::app.components.layouts.header.mobile.sign-in')
-                                </a>
-
-                                <a
-                                    href="{{ route('shop.customers.register.index') }}"
-                                    class="secondary-button rounded-2xl px-7 max-md:rounded-lg max-md:py-3 ltr:ml-0 rtl:mr-0"
-                                >
-                                    @lang('shop::app.components.layouts.header.mobile.sign-up')
-                                </a>
-
-                                {!! view_render_event('qubix.shop.components.layouts.header.mobile.index.sign_in_button.after') !!}
-                            </div>
-
-                            {!! view_render_event('qubix.shop.components.layouts.header.mobile.index.customers_action.after') !!}
-                        </x-slot>
-                    @endguest
-
-                    @auth('customer')
-                        <x-slot:content class="!p-0">
-                            <div class="grid gap-2.5 p-5 pb-0">
-                                <p class="text-xl font-dmserif" v-pre>
-                                    @lang('shop::app.components.layouts.header.mobile.welcome')'
-                                    {{ auth()->guard('customer')->user()->first_name }}
-                                </p>
-
-                                <p class="text-sm text-zinc-500">
-                                    @lang('shop::app.components.layouts.header.mobile.dropdown-text')
-                                </p>
-                            </div>
-
-                            <p class="w-full mt-3 border border-zinc-200"></p>
-
-                            <div class="mt-2.5 grid gap-1 pb-2.5">
-                                {!! view_render_event('qubix.shop.components.layouts.header.mobile.index.profile_dropdown.links.before') !!}
-
-                                <a
-                                    class="px-5 py-2 text-base cursor-pointer hover:bg-zinc-50"
-                                    href="{{ route('shop.customers.account.profile.index') }}"
-                                >
-                                    @lang('shop::app.components.layouts.header.mobile.profile')
-                                </a>
-
-                                <a
-                                    class="px-5 py-2 text-base cursor-pointer hover:bg-zinc-50"
-                                    href="{{ route('shop.customers.account.orders.index') }}"
-                                >
-                                    @lang('shop::app.components.layouts.header.mobile.orders')
-                                </a>
-
-                                @if ($showWishlist)
-                                    <a
-                                        class="px-5 py-2 text-base cursor-pointer hover:bg-zinc-50"
-                                        href="{{ route('shop.customers.account.wishlist.index') }}"
-                                    >
-                                        @lang('shop::app.components.layouts.header.mobile.wishlist')
-                                    </a>
-                                @endif
-
-                                @auth('customer')
-                                    <x-shop::form
-                                        method="DELETE"
-                                        action="{{ route('shop.customer.session.destroy') }}"
-                                        id="customerLogoutMobile"
-                                    />
-
-                                    <a
-                                        class="px-5 py-2 text-base cursor-pointer hover:bg-zinc-50"
-                                        href="{{ route('shop.customer.session.destroy') }}"
-                                        onclick="event.preventDefault(); document.getElementById('customerLogoutMobile').submit();"
-                                    >
-                                        @lang('shop::app.components.layouts.header.mobile.logout')
-                                    </a>
-                                @endauth
-
-                                {!! view_render_event('qubix.shop.components.layouts.header.mobile.index.profile_dropdown.links.after') !!}
-                            </div>
-                        </x-slot>
-                    @endauth
-                </x-shop::dropdown>
-            </div>
-
-            <!-- Profile — small screen (<768px): direct link -->
-            <div class="md:hidden">
-                @guest('customer')
-                    <a
-                        href="{{ route('shop.customer.session.create') }}"
-                        aria-label="@lang('shop::app.components.layouts.header.mobile.account')"
-                    >
-                        <span class="text-2xl cursor-pointer text-white icon-users"></span>
-                    </a>
-                @endguest
-
-                @auth('customer')
-                    <a
-                        href="{{ route('shop.customers.account.index') }}"
-                        aria-label="@lang('shop::app.components.layouts.header.mobile.account')"
-                    >
-                        <span class="text-2xl cursor-pointer text-white icon-users"></span>
-                    </a>
-                @endauth
-            </div>
         </div>
     </div>
+
+    {!! view_render_event('qubix.shop.components.layouts.header.mobile.search.before') !!}
+
+    <div class="px-3 pb-3">
+        <form
+            action="{{ route('shop.search.index') }}"
+            class="relative flex items-center text-zinc-700 [&_.icon-camera]:text-zinc-600 [&_label.icon-camera]:text-zinc-600"
+            role="search"
+        >
+            <label
+                for="shop-header-search-mobile"
+                class="sr-only"
+            >
+                @lang('shop::app.components.layouts.header.mobile.search')
+            </label>
+
+            <div class="icon-search pointer-events-none absolute top-1/2 z-[1] -translate-y-1/2 text-xl text-zinc-500 ltr:left-3.5 rtl:right-3.5"></div>
+
+            <v-search-suggestions>
+                <input
+                    id="shop-header-search-mobile"
+                    type="search"
+                    name="query"
+                    value="{{ request('query') }}"
+                    class="block h-11 w-full rounded-ui border-0 bg-field px-11 text-base text-zinc-900 placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-headInk/50"
+                    minlength="{{ core()->getConfigData('catalog.products.search.min_query_length') }}"
+                    maxlength="{{ core()->getConfigData('catalog.products.search.max_query_length') }}"
+                    placeholder="@lang('shop::app.components.layouts.header.mobile.search-text')"
+                    aria-label="@lang('shop::app.components.layouts.header.mobile.search-text')"
+                    aria-required="true"
+                    pattern="[^\\]+"
+                    autocomplete="off"
+                    enterkeyhint="search"
+                    required
+                >
+            </v-search-suggestions>
+
+            @if (core()->getConfigData('catalog.products.settings.image_search'))
+                @include('shop::search.images.index')
+            @endif
+
+            <button
+                type="submit"
+                class="hidden"
+                aria-label="@lang('shop::app.components.layouts.header.desktop.bottom.submit')"
+            >
+            </button>
+        </form>
+    </div>
+
+    {!! view_render_event('qubix.shop.components.layouts.header.mobile.search.after') !!}
 </div>
 
 @pushOnce('scripts')
@@ -261,21 +124,25 @@
         <x-shop::drawer
             position="left"
             width="100%"
-            panel-class="shop-mobile-nav-drawer bg-[#1f5f4f]"
+            panel-class="shop-mobile-nav-drawer bg-white"
             @close="onDrawerClose"
         >
             <x-slot:toggle>
-                <span class="text-2xl cursor-pointer text-white icon-hamburger"></span>
+                <span
+                    class="inline-flex h-11 w-11 cursor-pointer items-center justify-center text-2xl text-headInk icon-hamburger"
+                    role="button"
+                    tabindex="0"
+                    aria-label="@lang('shop::app.components.layouts.header.mobile.menu')"
+                ></span>
             </x-slot>
 
-            <x-slot:header class="!border-white/15 text-white [&_.icon-cancel]:text-white [&_.icon-cancel]:opacity-95">
+            <x-slot:header class="!border-head bg-head text-headInk [&_.icon-cancel]:text-headInk">
                 <div class="flex items-center justify-between">
                     <a href="{{ route('shop.home.index') }}">
                         <img
                             src="{{ core()->getCurrentChannel()->logo_url ?? qubix_asset('images/logo.svg') }}"
                             alt="{{ config('app.name') }}"
-                            style="height: 48px; width: auto; object-fit: contain;"
-                            class="rounded-lg bg-white px-2.5 py-2 shadow-[0_3px_10px_rgba(0,0,0,0.18)]"
+                            class="h-10 w-auto object-contain"
                         >
                     </a>
                 </div>
@@ -283,35 +150,36 @@
 
             <x-slot:content class="!p-0 shop-mobile-nav-drawer-content">
                 <!-- Account Profile Section -->
-                <div class="border-b border-white/15 p-4">
-                    <div class="grid grid-cols-[auto_1fr] items-center gap-4 rounded-xl border border-white/20 bg-white/5 p-2.5">
+                <div class="border-b border-zinc-200 p-4">
+                    <div class="grid grid-cols-[auto_1fr] items-center gap-4 rounded-xl bg-sage p-3">
                         <div>
                             <img
                                 src="{{ auth()->user()?->image_url ?? qubix_asset('images/user-placeholder.png') }}"
-                                class="h-[60px] w-[60px] rounded-full"
+                                class="h-12 w-12 rounded-full"
                             >
                         </div>
 
                         @guest('customer')
                             <a
                                 href="{{ route('shop.customer.session.create') }}"
-                                class="flex text-base font-medium text-white"
+                                class="flex items-center text-base font-semibold text-brand"
                             >
                                 @lang('shop::app.components.layouts.header.mobile.login')
 
-                                <i class="icon-double-arrow text-2xl text-white/90 ltr:ml-2.5 rtl:mr-2.5"></i>
+                                <i class="icon-double-arrow text-xl ltr:ml-2 rtl:mr-2"></i>
                             </a>
                         @endguest
 
                         @auth('customer')
-                            <div
-                                class="flex flex-col justify-between gap-2.5 max-md:gap-0"
+                            <a
+                                href="{{ route('shop.customers.account.index') }}"
+                                class="flex min-w-0 flex-col"
                                 v-pre
                             >
-                                <p class="text-2xl break-all font-medium max-md:text-xl text-white">Hello! {{ auth()->user()?->first_name }}</p>
+                                <span class="break-words text-lg font-bold text-zinc-900">Hello! {{ auth()->user()?->first_name }}</span>
 
-                                <p class="no-underline max-md:text-sm text-white/65">{{ auth()->user()?->email }}</p>
-                            </div>
+                                <span class="truncate text-sm text-zinc-500">{{ auth()->user()?->email }}</span>
+                            </a>
                         @endauth
                     </div>
                 </div>
@@ -321,12 +189,57 @@
                 <v-mobile-category ref="mobileCategory"></v-mobile-category>
 
                 {!! view_render_event('qubix.shop.components.layouts.header.mobile.drawer.categories.after') !!}
+
+                @php
+                    $drawerWhatsappDigits = preg_replace('/\D+/', '', (string) core()->getConfigData('general.content.store_contact.whatsapp_number'));
+                    $drawerContactEmail = core()->getConfigData('general.content.store_contact.email');
+                @endphp
+
+                {{-- Ways to reach the store; WhatsApp and email appear once set in admin (Store Contact). --}}
+                <div class="mx-6 grid border-t border-zinc-200 py-3">
+                    <a
+                        href="{{ route('shop.home.contact_us') }}"
+                        class="flex min-h-12 items-center text-base font-semibold text-brand"
+                    >
+                        @lang('shop::app.components.layouts.footer.corporate-enquiry')
+                    </a>
+
+                    @if ($showCompare)
+                        <a
+                            href="{{ route('shop.compare.index') }}"
+                            class="flex min-h-12 items-center text-base font-semibold text-brand"
+                        >
+                            @lang('shop::app.components.layouts.header.mobile.compare')
+                        </a>
+                    @endif
+
+                    @if ($drawerWhatsappDigits)
+                        <a
+                            href="https://wa.me/{{ $drawerWhatsappDigits }}"
+                            class="flex min-h-12 items-center text-base font-semibold text-brand"
+                            target="_blank"
+                            rel="noopener"
+                        >
+                            @lang('shop::app.components.layouts.footer.whatsapp')
+                        </a>
+                    @endif
+
+                    @if ($drawerContactEmail)
+                        <a
+                            href="mailto:{{ $drawerContactEmail }}"
+                            class="flex min-h-12 items-center text-base font-semibold text-brand"
+                            v-pre
+                        >
+                            {{ $drawerContactEmail }}
+                        </a>
+                    @endif
+                </div>
             </x-slot>
 
             <x-slot:footer>
                 <!-- Locale & Currency -->
                 @if(core()->getCurrentChannel()->locales()->count() > 1 || core()->getCurrentChannel()->currencies()->count() > 1)
-                    <div class="fixed bottom-0 z-10 grid w-full max-w-full grid-cols-[1fr_auto_1fr] items-center justify-items-center border-t border-white/15 bg-[#184a3d] px-5 text-white ltr:left-0 rtl:right-0">
+                    <div class="fixed bottom-0 z-10 grid w-full max-w-full grid-cols-[1fr_auto_1fr] items-center justify-items-center border-t border-offerInk/10 bg-offer px-5 text-offerInk ltr:left-0 rtl:right-0">
                         <!-- Currency Drawer -->
                         <x-shop::drawer position="bottom" width="100%">
                             <x-slot:toggle>
@@ -357,7 +270,7 @@
                             </x-slot>
                         </x-shop::drawer>
 
-                        <span class="h-5 w-0.5 bg-white/25"></span>
+                        <span class="h-5 w-0.5 bg-offerInk/20"></span>
 
                         <!-- Locale Drawer -->
                         <x-shop::drawer position="bottom" width="100%">
@@ -408,9 +321,10 @@
         type="text/x-template"
         id="v-mobile-category-template"
     >
-        <div class="relative h-full overflow-hidden">
+        {{-- Sized to its content (not h-full) so the store links below the list stay on screen. --}}
+        <div class="relative overflow-hidden">
             <div
-                class="flex h-full transition-transform duration-300"
+                class="flex transition-transform duration-300"
                 :class="{
                     'ltr:translate-x-0 rtl:translate-x-0': currentViewLevel !== 'third',
                     'ltr:-translate-x-full rtl:translate-x-full': currentViewLevel === 'third'
@@ -418,14 +332,15 @@
             >
                 <!-- First level -->
                 <div class="flex-shrink-0 w-full h-full px-6 overflow-auto">
-                    <div class="py-4">
+                    <div class="py-2">
                         <div
                             v-for="category in categories"
                             :key="category.id"
-                            :class="{'mb-2': category.children && category.children.length}"
+                            class="border-b border-zinc-200 last:border-b-0"
+                            :class="{'pb-2': category.children && category.children.length}"
                         >
-                            <div class="flex items-center justify-between py-2 transition-colors duration-200 cursor-pointer">
-                                <a :href="category.url" class="text-base font-medium text-white hover:text-white/90">
+                            <div class="flex items-center justify-between transition-colors duration-200 cursor-pointer">
+                                <a :href="category.url" class="flex min-h-12 flex-1 items-center text-base font-bold text-zinc-900 hover:text-brand">
                                     @{{ category.name }}
                                 </a>
                             </div>
@@ -440,13 +355,13 @@
                                         class="flex items-center justify-between py-2 transition-colors duration-200 cursor-pointer"
                                         @click="showThirdLevel(secondLevelCategory, category, $event)"
                                     >
-                                        <a :href="secondLevelCategory.url" class="text-sm font-normal text-white/85 hover:text-white">
+                                        <a :href="secondLevelCategory.url" class="flex min-h-11 items-center text-base text-zinc-700 hover:text-brand ltr:pl-3 rtl:pr-3">
                                             @{{ secondLevelCategory.name }}
                                         </a>
 
                                         <span
                                             v-if="secondLevelCategory.children && secondLevelCategory.children.length"
-                                            class="icon-arrow-right rtl:icon-arrow-left text-white/50"
+                                            class="icon-arrow-right rtl:icon-arrow-left text-zinc-400"
                                         ></span>
                                     </div>
                                 </div>
@@ -460,14 +375,14 @@
                     class="flex-shrink-0 w-full h-full"
                     v-if="currentViewLevel === 'third'"
                 >
-                    <div class="border-b border-white/15 px-6 py-4">
+                    <div class="border-b border-zinc-200 px-6 py-4">
                         <button
                             @click="goBackToMainView"
-                            class="flex items-center justify-center gap-2 text-white focus:outline-none"
+                            class="flex min-h-11 items-center justify-center gap-2 text-zinc-900 focus:outline-none"
                             aria-label="Go back"
                         >
-                            <span class="text-lg icon-arrow-left rtl:icon-arrow-right text-white"></span>
-                            <div class="text-base font-medium text-white">
+                            <span class="text-lg icon-arrow-left rtl:icon-arrow-right"></span>
+                            <div class="text-base font-semibold">
                                 @lang('shop::app.components.layouts.header.mobile.back-button')
                             </div>
                         </button>
@@ -481,7 +396,7 @@
                         >
                             <a
                                 :href="thirdLevelCategory.url"
-                                class="block py-2 text-sm text-white/80 transition-colors duration-200 hover:text-white"
+                                class="flex min-h-11 items-center text-base text-zinc-700 transition-colors duration-200 hover:text-brand"
                             >
                                 @{{ thirdLevelCategory.name }}
                             </a>

@@ -3713,6 +3713,14 @@ return [
                         'info' => 'আপনার ওয়েবসাইটের ফুটারে প্রদর্শিত কপিরাইট বিষয়বস্তু কনফিগার করুন যাতে আপনার মেধাস্বত্ব সুরক্ষিত থাকে এবং ব্র্যান্ড স্বীকৃতি বৃদ্ধি পায়।',
                     ],
 
+                    'store-contact' => [
+                        'email' => 'যোগাযোগের ইমেল',
+                        'info' => 'ফুটার ও মোবাইল মেনুতে ক্রেতাদের দেখানো হোয়াটসঅ্যাপ নম্বর ও ইমেল।',
+                        'title' => 'স্টোর যোগাযোগ',
+                        'whatsapp-number' => 'হোয়াটসঅ্যাপ নম্বর',
+                        'whatsapp-number-info' => 'দেশের কোড দিন, যেমন +91 98765 43210।',
+                    ],
+
                     'speculation-rules' => [
                         'enable-speculation' => 'অনুমান নিয়ম সক্রিয় করুন',
                         'info' => 'স্বয়ংক্রিয় অনুমান যুক্তি সক্রিয় বা নিষ্ক্রিয় করার জন্য কনফিগারেশন সেট করুন।',
@@ -3773,6 +3781,17 @@ return [
                         'preview-sidebar' => 'সাইডবার মেনু প্রিভিউ',
                         'sidebar' => 'সাইডবার মেনু',
                         'title' => 'মেনু ক্যাটাগরি ভিউ',
+                    ],
+
+                    'store-look' => [
+                        'forest-green' => 'Forest Green',
+                        'info' => 'Choose the colours, fonts and corners of your storefront. The layout stays the same in every look.',
+                        'look' => 'Look',
+                        'look-info' => 'Forest Green: green header, cream panels. Marigold & Indigo: bright yellow header, indigo text. Sand & Charcoal: sand header, charcoal menu, square corners. Minimal White: white header, black text.',
+                        'marigold-indigo' => 'Marigold & Indigo',
+                        'minimal-white' => 'Minimal White',
+                        'sand-charcoal' => 'Sand & Charcoal',
+                        'title' => 'Store Look',
                     ],
                 ],
 

@@ -3713,6 +3713,14 @@ return [
                         'info' => 'Configure o conteúdo de direitos autorais exibido no rodapé do seu site para proteger sua propriedade intelectual e aumentar o reconhecimento da marca.',
                     ],
 
+                    'store-contact' => [
+                        'email' => 'E-mail de contato',
+                        'info' => 'Número do WhatsApp e e-mail exibidos no rodapé e no menu móvel.',
+                        'title' => 'Contato da loja',
+                        'whatsapp-number' => 'Número do WhatsApp',
+                        'whatsapp-number-info' => 'Inclua o código do país, ex.: +91 98765 43210.',
+                    ],
+
                     'speculation-rules' => [
                         'enable-speculation' => 'Ativar regras de especulação',
                         'info' => 'Configure as definições para ativar ou desativar a lógica automática de especulação.',
@@ -3773,6 +3781,17 @@ return [
                         'preview-sidebar' => 'Visualizar menu lateral',
                         'sidebar' => 'Menu lateral',
                         'title' => 'Visualização de categoria do menu',
+                    ],
+
+                    'store-look' => [
+                        'forest-green' => 'Forest Green',
+                        'info' => 'Choose the colours, fonts and corners of your storefront. The layout stays the same in every look.',
+                        'look' => 'Look',
+                        'look-info' => 'Forest Green: green header, cream panels. Marigold & Indigo: bright yellow header, indigo text. Sand & Charcoal: sand header, charcoal menu, square corners. Minimal White: white header, black text.',
+                        'marigold-indigo' => 'Marigold & Indigo',
+                        'minimal-white' => 'Minimal White',
+                        'sand-charcoal' => 'Sand & Charcoal',
+                        'title' => 'Store Look',
                     ],
                 ],
 

@@ -3713,6 +3713,14 @@ return [
                         'info' => 'Configura el contingut de drets d\'autor que es mostra al peu de pàgina del teu lloc web per protegir la teva propietat intel·lectual i millorar el reconeixement de la marca.',
                     ],
 
+                    'store-contact' => [
+                        'email' => 'Correu de contacte',
+                        'info' => 'Número de WhatsApp i correu que es mostren al peu de pàgina i al menú mòbil.',
+                        'title' => 'Contacte de la botiga',
+                        'whatsapp-number' => 'Número de WhatsApp',
+                        'whatsapp-number-info' => 'Inclou el prefix del país, p. ex. +91 98765 43210.',
+                    ],
+
                     'speculation-rules' => [
                         'enable-speculation' => 'Habilita les regles d’especulació',
                         'info' => 'Configura els paràmetres per habilitar o deshabilitar la lògica automàtica d’especulació.',
@@ -3773,6 +3781,17 @@ return [
                         'preview-sidebar' => 'Previsualització del menú lateral',
                         'sidebar' => 'Menú lateral',
                         'title' => 'Vista de la categoria del menú',
+                    ],
+
+                    'store-look' => [
+                        'forest-green' => 'Forest Green',
+                        'info' => 'Choose the colours, fonts and corners of your storefront. The layout stays the same in every look.',
+                        'look' => 'Look',
+                        'look-info' => 'Forest Green: green header, cream panels. Marigold & Indigo: bright yellow header, indigo text. Sand & Charcoal: sand header, charcoal menu, square corners. Minimal White: white header, black text.',
+                        'marigold-indigo' => 'Marigold & Indigo',
+                        'minimal-white' => 'Minimal White',
+                        'sand-charcoal' => 'Sand & Charcoal',
+                        'title' => 'Store Look',
                     ],
                 ],
 

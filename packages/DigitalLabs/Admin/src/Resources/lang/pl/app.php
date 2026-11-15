@@ -3713,6 +3713,14 @@ return [
                         'info' => 'Skonfiguruj treść praw autorskich wyświetlaną w stopce swojej witryny, aby chronić swoją własność intelektualną i zwiększyć rozpoznawalność marki.',
                     ],
 
+                    'store-contact' => [
+                        'email' => 'E-mail kontaktowy',
+                        'info' => 'Numer WhatsApp i e-mail widoczne dla klientów w stopce i menu mobilnym.',
+                        'title' => 'Kontakt sklepu',
+                        'whatsapp-number' => 'Numer WhatsApp',
+                        'whatsapp-number-info' => 'Podaj numer kierunkowy kraju, np. +91 98765 43210.',
+                    ],
+
                     'speculation-rules' => [
                         'enable-speculation' => 'Włącz reguły spekulacji',
                         'info' => 'Skonfiguruj ustawienia włączania lub wyłączania automatycznej logiki spekulacji.',
@@ -3773,6 +3781,17 @@ return [
                         'preview-sidebar' => 'Podgląd menu bocznego',
                         'sidebar' => 'Menu boczne',
                         'title' => 'Widok kategorii menu',
+                    ],
+
+                    'store-look' => [
+                        'forest-green' => 'Forest Green',
+                        'info' => 'Choose the colours, fonts and corners of your storefront. The layout stays the same in every look.',
+                        'look' => 'Look',
+                        'look-info' => 'Forest Green: green header, cream panels. Marigold & Indigo: bright yellow header, indigo text. Sand & Charcoal: sand header, charcoal menu, square corners. Minimal White: white header, black text.',
+                        'marigold-indigo' => 'Marigold & Indigo',
+                        'minimal-white' => 'Minimal White',
+                        'sand-charcoal' => 'Sand & Charcoal',
+                        'title' => 'Store Look',
                     ],
                 ],
 

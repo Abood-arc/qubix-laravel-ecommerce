@@ -85,7 +85,7 @@
             
                                     <div class="text-xs font-normal">
                                         <p
-                                            class="text-sm font-semibold text-blue-600"
+                                            class="text-sm font-semibold text-navyBlue"
                                             v-html="record.product_name"
                                         >
                                         </p>

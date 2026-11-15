@@ -40,11 +40,21 @@
 
     {!! view_render_event('qubix.shop.categories.view.banner_path.after') !!}
 
+    {{-- The page had no heading: the admin description ("Canvas Bag", 12px on phones) was the only text above the grid. --}}
+    <div class="container mt-10 px-[60px] max-lg:px-8 max-md:mt-6 max-md:px-4">
+        <h1
+            class="font-dmserif text-4xl leading-tight text-brand max-md:text-[28px] max-sm:text-2xl"
+            v-pre
+        >
+            {{ $category->name }}
+        </h1>
+    </div>
+
     {!! view_render_event('qubix.shop.categories.view.description.before') !!}
 
     @if (in_array($category->display_mode, [null, 'description_only', 'products_and_description']))
         @if ($category->description)
-            <div class="container mt-[34px] px-[60px] max-lg:px-8 max-md:mt-4 max-md:px-4 max-md:text-sm max-sm:text-xs">
+            <div class="container mt-3 max-w-[1440px] px-[60px] text-base text-zinc-600 max-lg:px-8 max-md:mt-2 max-md:px-4 max-md:text-sm">
                 {!! $category->description !!}
             </div>
         @endif
@@ -66,7 +76,14 @@
             id="v-category-template"
         >
             <div class="container px-[60px] max-lg:px-8 max-md:px-4">
-                <div class="flex items-start gap-10 max-lg:gap-5 md:mt-10">
+                <p
+                    class="mt-2 text-sm text-zinc-500"
+                    v-if="total !== null"
+                    v-text="productCountLabel"
+                >
+                </p>
+
+                <div class="flex items-start gap-10 max-lg:gap-5 md:mt-8 max-md:mt-4">
                     <!-- Product Listing Filters -->
                     @include('shop::categories.filters')
 
@@ -227,11 +244,21 @@
 
                         links: {},
 
+                        total: null,
+
                         loader: false,
                     }
                 },
 
                 computed: {
+                    productCountLabel() {
+                        const label = this.total === 1
+                            ? @json(trans('shop::app.categories.view.product-count-one'))
+                            : @json(trans('shop::app.categories.view.product-count'));
+
+                        return label.replace(':count', this.total);
+                    },
+
                     queryParams() {
                         let queryParams = Object.assign({}, this.filters.filter, this.filters.toolbar.applied);
 
@@ -241,6 +268,17 @@
                     queryString() {
                         return this.jsonToQueryString(this.queryParams);
                     },
+                },
+
+                mounted() {
+                    /* Follow the viewport live: the phone filter bar vs the desktop sidebar was picked once at load. */
+                    this.mobileQuery = window.matchMedia('(max-width: 767px)');
+
+                    this.mobileQuery.addEventListener('change', this.onMobileQueryChange);
+                },
+
+                beforeUnmount() {
+                    this.mobileQuery?.removeEventListener('change', this.onMobileQueryChange);
                 },
 
                 watch: {
@@ -254,6 +292,10 @@
                 },
 
                 methods: {
+                    onMobileQueryChange(event) {
+                        this.isMobile = event.matches;
+                    },
+
                     setFilters(type, filters) {
                         this.filters[type] = filters;
                     },
@@ -282,6 +324,8 @@
                                 this.products = response.data.data;
 
                                 this.links = response.data.links;
+
+                                this.total = response.data.meta?.total ?? null;
                             }).catch(error => {
                                 console.log(error);
                             });

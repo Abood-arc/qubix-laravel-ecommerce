@@ -139,16 +139,18 @@
 
                 <!-- Vat ID -->
                 <x-shop::form.control-group>
+                    {{-- India's tax number is the GSTIN (see VatValidator); other countries keep the VAT label. --}}
                     <x-shop::form.control-group.label>
-                        @lang('shop::app.customers.account.addresses.edit.vat-id')
+                        <template v-if="addressData.country === 'IN'">@lang('shop::app.checkout.onepage.address.gstin')</template>
+                        <template v-else>@lang('shop::app.customers.account.addresses.edit.vat-id')</template>
                     </x-shop::form.control-group.label>
 
                     <x-shop::form.control-group.control
                         type="text"
                         name="vat_id"
                         :value="old('vat_id') ?? $address->vat_id"
-                        :label="trans('shop::app.customers.account.addresses.edit.vat-id')"
-                        :placeholder="trans('shop::app.customers.account.addresses.edit.vat-id')"
+                        ::label="addressData.country === 'IN' ? {{ json_encode(trans('shop::app.checkout.onepage.address.gstin')) }} : {{ json_encode(trans('shop::app.customers.account.addresses.edit.vat-id')) }}"
+                        ::placeholder="addressData.country === 'IN' ? {{ json_encode(trans('shop::app.checkout.onepage.address.gstin-placeholder')) }} : {{ json_encode(trans('shop::app.customers.account.addresses.edit.vat-id')) }}"
                     />
 
                     <x-shop::form.control-group.error control-name="vat_id" />

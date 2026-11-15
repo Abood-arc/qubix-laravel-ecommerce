@@ -11,6 +11,7 @@ use Spatie\ResponseCache\Facades\ResponseCache;
 use DigitalLabs\Core\Core as CoreService;
 use DigitalLabs\Attribute\Models\Attribute;
 use DigitalLabs\CMS\Models\Page;
+use DigitalLabs\Core\Models\Locale;
 use DigitalLabs\FPC\Support\CacheClearer;
 use DigitalLabs\Theme\Models\ThemeCustomization;
 use DigitalLabs\User\Models\Admin;
@@ -95,6 +96,11 @@ it('clears the whole cache when a category is created, since the home page embed
 
 it('clears the whole cache when a category is updated, including a second locale of the home page', function () {
     // Arrange.
+    // The channel needs the second locale, otherwise the 'ar' request falls back to 'en' and
+    // shares its cache entry. A fresh install only has 'en'; the transaction rolls this back.
+    $arabic = Locale::firstOrCreate(['code' => 'ar'], ['name' => 'Arabic', 'direction' => 'rtl']);
+    core()->getDefaultChannel()->locales()->syncWithoutDetaching([$arabic->id]);
+
     $category = (new CategoryFaker)->factory()->create(['parent_id' => 1]);
 
     $attributes = Attribute::where('is_filterable', 1)->pluck('id')->toArray();

@@ -9,6 +9,24 @@
     // The home page already computes this (HomeController) and passes it in via
     // the categoryTreeStamp prop, so this only re-queries on every other page.
     $categoryTreeStamp ??= app(\DigitalLabs\Category\Repositories\CategoryRepository::class)->getCategoryTreeStamp();
+
+    // Store look (Admin > Configuration > General > Design > Store Look): colours, fonts and
+    // corners only, via data-look and the tokens in app.css. Each look's Google font is added
+    // to the one font request; Forest Green uses Karla, which every page already loads.
+    $storeLookFonts = [
+        'forest-green'    => '',
+        'marigold-indigo' => '&family=Baloo+2:wght@500;600;700;800&family=Mukta:wght@400;500;600;700;800',
+        'sand-charcoal'   => '&family=Archivo:wght@400;500;600;700;800',
+        'minimal-white'   => '&family=Manrope:wght@400;500;600;700;800',
+    ];
+
+    $storeLook = core()->getConfigData('general.design.store_look.look');
+
+    if (! array_key_exists($storeLook, $storeLookFonts)) {
+        $storeLook = 'forest-green';
+    }
+
+    $fontsUrl = 'https://fonts.googleapis.com/css2?family=Karla:wght@400;500;600;700;800&family=Poppins:wght@400;500;600;700;800&family=DM+Serif+Display&family=Noto+Sans+Arabic:wght@400;500;600;700'.$storeLookFonts[$storeLook].'&display=swap';
 @endphp
 
 <!DOCTYPE html>
@@ -16,6 +34,7 @@
 <html
     lang="{{ app()->getLocale() }}"
     dir="{{ core()->getCurrentLocale()->direction }}"
+    data-look="{{ $storeLook }}"
 >
     <head>
 
@@ -70,12 +89,12 @@
 
         <link
             rel="preload" as="style"
-            href="https://fonts.googleapis.com/css2?family=Karla:wght@400;500;600;700&family=Poppins:wght@400;500;600;700;800&family=DM+Serif+Display&family=Noto+Sans+Arabic:wght@400;500;600;700&display=swap"
+            href="{{ $fontsUrl }}"
         />
 
         <link
             rel="stylesheet"
-            href="https://fonts.googleapis.com/css2?family=Karla:wght@400;500;600;700&family=Poppins:wght@400;500;600;700;800&family=DM+Serif+Display&family=Noto+Sans+Arabic:wght@400;500;600;700&display=swap"
+            href="{{ $fontsUrl }}"
         />
 
         @stack('styles')

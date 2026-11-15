@@ -338,7 +338,7 @@
                         <!-- Spinner -->
                         <template v-if="isLoading">
                             <img
-                                class="h-5 w-5 animate-spin text-blue-600"
+                                class="h-5 w-5 animate-spin text-navyBlue"
                                 src="{{ qubix_asset('images/spinner.svg') }}"
                             />
 
@@ -457,7 +457,7 @@
                             <!-- Spinner -->
                             <template v-if="isLoading">
                                 <img
-                                    class="h-5 w-5 animate-spin text-blue-600"
+                                    class="h-5 w-5 animate-spin text-navyBlue"
                                     src="{{ qubix_asset('images/spinner.svg') }}"
                                 />
 

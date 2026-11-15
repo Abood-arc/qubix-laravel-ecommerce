@@ -19,101 +19,203 @@
         'theme_code' => $channel->theme,
         'channel_id' => $channel->id,
     ]);
+
+    // Footer link groups (admin: Themes > Footer Links), each sorted by its sort order.
+    $footerLinkSections = collect($customization?->options ?? [])->map(function ($section) {
+        usort($section, fn ($a, $b) => $a['sort_order'] - $b['sort_order']);
+
+        return $section;
+    });
+
+    // Admin: Configuration > General > Content > Store Contact. wa.me links need digits only.
+    $whatsappDisplay = core()->getConfigData('general.content.store_contact.whatsapp_number');
+    $whatsappDigits = preg_replace('/\D+/', '', (string) $whatsappDisplay);
+    $contactEmail = core()->getConfigData('general.content.store_contact.email');
+
+    // The "Shop" column: the same top-level categories as the header menu.
+    $footerCategories = app(\DigitalLabs\Category\Repositories\CategoryRepository::class)
+        ->getVisibleCategoryTree($channel->root_category_id)
+        ->take(8);
 @endphp
 
-<footer class="mt-9 bg-lightOrange max-sm:mt-10">
-    <div class="flex justify-between gap-x-6 gap-y-8 p-[60px] max-1060:flex-col-reverse max-md:gap-5 max-md:p-8 max-sm:px-4 max-sm:py-5">
-        <!-- For Desktop View -->
+{{--
+    Footer in the store look's colours: logo, a Shop column (top categories), the admin's link
+    groups under "Help & Policies", then contact and newsletter.
+    On phones the contact block comes first, the links fold under "Help & Policies", and the
+    newsletter follows.
+--}}
+<footer class="mt-16 bg-foot text-footInk max-md:mt-12">
+    <div class="grid grid-cols-[minmax(0,0.8fr)_minmax(0,2.4fr)_minmax(0,1.3fr)] gap-10 px-10 pb-10 pt-12 max-1180:px-8 max-1060:grid-cols-1 max-1060:gap-0 max-md:px-4 max-md:pb-4 max-md:pt-8">
+        <!-- Logo -->
+        <div class="max-1060:hidden">
+            <a
+                href="{{ route('shop.home.index') }}"
+                class="inline-flex"
+                aria-label="{{ config('app.name') }}"
+            >
+                <img
+                    src="{{ $channel->logo_url ?? qubix_asset('images/logo.svg') }}"
+                    alt="{{ config('app.name') }}"
+                    class="h-14 w-auto rounded-full bg-white object-contain"
+                >
+            </a>
+        </div>
+
+        <!-- Links: headed columns on desktop -->
         <div
-            class="flex flex-wrap items-start gap-24 max-1180:gap-6 max-1060:hidden"
+            class="flex flex-wrap gap-x-12 gap-y-8 max-1060:hidden"
             v-pre
         >
-            @if ($customization?->options)
-                @foreach ($customization->options as $footerLinkSection)
-                    <ul class="grid gap-5 text-sm">
-                        @php
-                            usort($footerLinkSection, function ($a, $b) {
-                                return $a['sort_order'] - $b['sort_order'];
-                            });
-                        @endphp
+            @if ($footerCategories->isNotEmpty())
+                <div class="grid content-start gap-1">
+                    <p
+                        class="footer-heading"
+                        role="heading"
+                        aria-level="2"
+                    >
+                        @lang('shop::app.components.layouts.footer.shop')
+                    </p>
 
-                        @foreach ($footerLinkSection as $link)
+                    <ul class="grid content-start gap-1">
+                        @foreach ($footerCategories as $footerCategory)
                             <li>
-                                <a href="{{ $link['url'] }}">
-                                    {{ $link['title'] }}
+                                <a
+                                    href="{{ $footerCategory->url }}"
+                                    class="footer-link"
+                                >
+                                    {{ $footerCategory->name }}
                                 </a>
                             </li>
                         @endforeach
                     </ul>
-                @endforeach
+                </div>
+            @endif
+
+            @if ($footerLinkSections->isNotEmpty())
+                <div class="grid content-start gap-1">
+                    <p
+                        class="footer-heading"
+                        role="heading"
+                        aria-level="2"
+                    >
+                        @lang('shop::app.components.layouts.footer.footer-content')
+                    </p>
+
+                    <div class="flex flex-wrap gap-x-10 gap-y-1">
+                        @foreach ($footerLinkSections as $footerLinkSection)
+                            <ul class="grid content-start gap-1">
+                                @foreach ($footerLinkSection as $link)
+                                    <li>
+                                        <a
+                                            href="{{ $link['url'] }}"
+                                            class="footer-link"
+                                        >
+                                            {{ $link['title'] }}
+                                        </a>
+                                    </li>
+                                @endforeach
+                            </ul>
+                        @endforeach
+                    </div>
+                </div>
             @endif
         </div>
 
-        <!-- For Mobile view -->
-        <x-shop::accordion
-            :is-active="false"
-            class="hidden !w-full rounded-xl !border-2 !border-[#e9decc] max-1060:block max-sm:rounded-lg"
-        >
-            <x-slot:header class="rounded-t-lg bg-[#F1EADF] font-medium max-md:p-2.5 max-sm:px-3 max-sm:py-2 max-sm:text-sm">
-                @lang('shop::app.components.layouts.footer.footer-content')
-            </x-slot>
-
-            <x-slot:content class="flex justify-between !bg-transparent !p-4">
-                @if ($customization?->options)
-                    @foreach ($customization->options as $footerLinkSection)
-                        <ul
-                            class="grid gap-5 text-sm"
-                            v-pre
-                        >
-                            @php
-                                usort($footerLinkSection, function ($a, $b) {
-                                    return $a['sort_order'] - $b['sort_order'];
-                                });
-                            @endphp
-
-                            @foreach ($footerLinkSection as $link)
-                                <li>
-                                    <a
-                                        href="{{ $link['url'] }}"
-                                        class="text-sm font-medium max-sm:text-xs"
-                                    >
-                                        {{ $link['title'] }}
-                                    </a>
-                                </li>
-                            @endforeach
-                        </ul>
-                    @endforeach
-                @endif
-            </x-slot>
-        </x-shop::accordion>
-
-        {!! view_render_event('qubix.shop.layout.footer.newsletter_subscription.before') !!}
-
-        <!-- News Letter subscription -->
-        @if (core()->getConfigData('customer.settings.newsletter.subscription'))
-            <div class="grid gap-2.5">
-                <p
-                    class="max-w-[288px] text-3xl italic leading-[45px] text-navyBlue max-md:text-2xl max-sm:text-lg"
-                    role="heading"
-                    aria-level="2"
+        <!-- Contact and newsletter (first on phones) -->
+        <div class="grid content-start gap-8 max-1060:gap-6 max-1060:pb-2">
+            @if ($whatsappDigits || $contactEmail)
+                <div
+                    class="grid content-start gap-1"
+                    v-pre
                 >
-                    @lang('shop::app.components.layouts.footer.newsletter-text')
-                </p>
+                    <p
+                        class="footer-heading"
+                        role="heading"
+                        aria-level="2"
+                    >
+                        @lang('shop::app.components.layouts.footer.talk-to-us')
+                    </p>
 
-                <p class="text-xs">
-                    @lang('shop::app.components.layouts.footer.subscribe-stay-touch')
-                </p>
+                    @if ($whatsappDigits)
+                        <a
+                            href="https://wa.me/{{ $whatsappDigits }}"
+                            class="inline-flex min-h-11 items-center text-[15px] font-semibold text-footInk underline-offset-4 hover:underline"
+                            target="_blank"
+                            rel="noopener"
+                        >
+                            @lang('shop::app.components.layouts.footer.whatsapp'): {{ $whatsappDisplay }}
+                        </a>
+                    @endif
 
-                <div>
+                    @if ($contactEmail)
+                        <a
+                            href="mailto:{{ $contactEmail }}"
+                            class="inline-flex min-h-11 items-center text-[15px] font-semibold text-footInk underline-offset-4 hover:underline"
+                        >
+                            {{ $contactEmail }}
+                        </a>
+                    @endif
+                </div>
+            @endif
+
+            <!-- Links: one folded group on phones -->
+            @if ($footerLinkSections->isNotEmpty())
+                <x-shop::accordion
+                    :is-active="false"
+                    class="hidden !w-full !rounded-none !border-0 !border-y !border-footInk/15 !bg-transparent max-1060:block"
+                >
+                    <x-slot:header class="!bg-transparent !px-0 !py-3.5 text-base font-bold text-footInk [&_span]:text-footInk">
+                        @lang('shop::app.components.layouts.footer.footer-content')
+                    </x-slot>
+
+                    <x-slot:content class="grid !bg-transparent !px-0 !pb-4 !pt-0">
+                        @foreach ($footerLinkSections as $footerLinkSection)
+                            <ul
+                                class="grid gap-0"
+                                v-pre
+                            >
+                                @foreach ($footerLinkSection as $link)
+                                    <li>
+                                        <a
+                                            href="{{ $link['url'] }}"
+                                            class="flex min-h-11 items-center text-[15px] text-footMuted"
+                                        >
+                                            {{ $link['title'] }}
+                                        </a>
+                                    </li>
+                                @endforeach
+                            </ul>
+                        @endforeach
+                    </x-slot>
+                </x-shop::accordion>
+            @endif
+
+            {!! view_render_event('qubix.shop.layout.footer.newsletter_subscription.before') !!}
+
+            <!-- News Letter subscription -->
+            @if (core()->getConfigData('customer.settings.newsletter.subscription'))
+                <div class="grid gap-2">
+                    <p
+                        class="footer-heading"
+                        role="heading"
+                        aria-level="2"
+                    >
+                        @lang('shop::app.components.layouts.footer.newsletter-text')
+                    </p>
+
+                    <p class="text-sm text-footMuted">
+                        @lang('shop::app.components.layouts.footer.subscribe-stay-touch')
+                    </p>
+
                     <x-shop::form
                         :action="route('shop.subscription.store')"
-                        class="mt-2.5 rounded max-sm:mt-0"
+                        class="mt-1"
                     >
-                        <div class="relative w-full">
+                        <div class="relative w-full max-w-[420px] max-1060:max-w-none">
                             <x-shop::form.control-group.control
                                 type="email"
                                 id="footer-newsletter-email"
-                                class="block w-[420px] max-w-full rounded-xl border-2 border-[#e9decc] bg-[#F1EADF] px-5 py-4 text-base max-1060:w-full max-md:p-3.5 max-sm:mb-0 max-sm:rounded-lg max-sm:border-2 max-sm:p-2 max-sm:text-sm"
+                                class="block h-12 w-full !rounded-ui !border-0 bg-footInk/10 px-5 text-base text-footInk placeholder:text-footMuted focus:bg-footInk/15 ltr:pr-32 rtl:pl-32"
                                 name="email"
                                 autocomplete="email"
                                 rules="required|email"
@@ -121,28 +223,28 @@
                                 :aria-label="trans('shop::app.components.layouts.footer.email')"
                                 placeholder="email@example.com"
                             />
-    
+
                             <x-shop::form.control-group.error control-name="email" />
-    
+
                             <button
                                 type="submit"
-                                class="absolute top-1.5 flex w-max items-center rounded-xl bg-white px-7 py-2.5 font-medium hover:bg-zinc-100 ltr:right-2 rtl:left-2 max-md:top-1 max-md:px-5 max-md:text-xs max-sm:mt-0 max-sm:rounded-lg max-sm:px-4 max-sm:py-2"
+                                class="absolute top-1 flex h-10 items-center rounded-ui bg-footInk px-5 text-[15px] font-bold text-foot transition-transform duration-150 hover:bg-footInk/90 active:scale-[0.97] ltr:right-1 rtl:left-1"
                             >
                                 @lang('shop::app.components.layouts.footer.subscribe')
                             </button>
                         </div>
                     </x-shop::form>
                 </div>
-            </div>
-        @endif
+            @endif
 
-        {!! view_render_event('qubix.shop.layout.footer.newsletter_subscription.after') !!}
+            {!! view_render_event('qubix.shop.layout.footer.newsletter_subscription.after') !!}
+        </div>
     </div>
 
-    <div class="flex justify-between bg-[#F1EADF] px-[60px] py-3.5 max-md:justify-center max-sm:px-5">
+    <div class="flex justify-between border-t border-footInk/10 px-10 py-4 max-1180:px-8 max-md:justify-center max-md:px-4">
         {!! view_render_event('qubix.shop.layout.footer.footer_text.before') !!}
 
-        <p class="text-sm text-zinc-600 max-md:text-center">
+        <p class="text-sm text-footMuted max-md:text-center">
             @if (core()->getConfigData('general.content.footer.copyright_content'))
                 {!! core()->getConfigData('general.content.footer.copyright_content') !!}
             @else

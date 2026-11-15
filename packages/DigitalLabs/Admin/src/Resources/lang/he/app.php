@@ -3713,6 +3713,14 @@ return [
                         'info' => 'הגדר את תוכן זכויות היוצרים המוצג בכותרת התחתונה של האתר שלך כדי להגן על הקניין הרוחני שלך ולחזק את זיהוי המותג.',
                     ],
 
+                    'store-contact' => [
+                        'email' => 'אימייל ליצירת קשר',
+                        'info' => 'מספר וואטסאפ ואימייל שמוצגים לקונים בכותרת התחתונה ובתפריט הנייד.',
+                        'title' => 'פרטי קשר של החנות',
+                        'whatsapp-number' => 'מספר וואטסאפ',
+                        'whatsapp-number-info' => 'כללו קידומת מדינה, לדוגמה +91 98765 43210.',
+                    ],
+
                     'speculation-rules' => [
                         'enable-speculation' => 'הפעלת כללי ספקולציה',
                         'info' => 'הגדר הגדרות להפעלה או השבתה של לוגיקת ספקולציה אוטומטית.',
@@ -3773,6 +3781,17 @@ return [
                         'preview-sidebar' => 'תצוגה מקדימה של תפריט צדדי',
                         'sidebar' => 'תפריט צדדי',
                         'title' => 'תצוגת קטגוריית תפריט',
+                    ],
+
+                    'store-look' => [
+                        'forest-green' => 'Forest Green',
+                        'info' => 'Choose the colours, fonts and corners of your storefront. The layout stays the same in every look.',
+                        'look' => 'Look',
+                        'look-info' => 'Forest Green: green header, cream panels. Marigold & Indigo: bright yellow header, indigo text. Sand & Charcoal: sand header, charcoal menu, square corners. Minimal White: white header, black text.',
+                        'marigold-indigo' => 'Marigold & Indigo',
+                        'minimal-white' => 'Minimal White',
+                        'sand-charcoal' => 'Sand & Charcoal',
+                        'title' => 'Store Look',
                     ],
                 ],
 

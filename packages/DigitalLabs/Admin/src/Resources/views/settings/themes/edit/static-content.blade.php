@@ -172,12 +172,19 @@
                     });
                 },
 
+                /*
+                 * Each editor sends only its own field. Check which field arrived, not whether
+                 * it is empty: testing `value.html` read an emptied HTML box as a CSS change
+                 * and saved the CSS as blank.
+                 */
                 editorData(value) {
-                    if (value.html) {
+                    if (Object.prototype.hasOwnProperty.call(value, 'html')) {
                         this.options.html = value.html;
-                    } else {
+                    }
+
+                    if (Object.prototype.hasOwnProperty.call(value, 'css')) {
                         this.options.css = value.css;
-                    } 
+                    }
                 },
 
                 storeImage($event) {

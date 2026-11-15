@@ -141,35 +141,58 @@
                 />
             </div>
 
-            <!-- Prev arrow -->
-            <button
-                v-if="images.length >= 2"
-                class="icon-arrow-left absolute top-1/2 z-[2] -translate-y-1/2 hidden rounded-full border border-white/70 bg-white/80 p-3 text-2xl font-bold text-zinc-900 opacity-80 shadow-md backdrop-blur transition-all hover:bg-white hover:opacity-100 focus:outline-none md:inline-block ltr:left-4 rtl:right-4"
-                aria-label="@lang('shop::components.carousel.previous')"
-                @click="navigate('prev')"
-            ></button>
-
-            <!-- Next arrow -->
-            <button
-                v-if="images.length >= 2"
-                class="icon-arrow-right absolute top-1/2 z-[2] -translate-y-1/2 hidden rounded-full border border-white/70 bg-white/80 p-3 text-2xl font-bold text-zinc-900 opacity-80 shadow-md backdrop-blur transition-all hover:bg-white hover:opacity-100 focus:outline-none md:inline-block ltr:right-4 rtl:left-4"
-                aria-label="@lang('shop::components.carousel.next')"
-                @click="navigate('next')"
-            ></button>
-
-            <!-- Pagination dots -->
+            {{--
+                The banner advances on its own and swipes on phones. Larger screens get a
+                "‹ 2 / 5 ›" control in the corner; phones keep small dots, which fit the short banner.
+            --}}
             <div
                 v-if="images.length >= 2"
-                class="absolute bottom-5 z-[2] flex w-full justify-center max-md:bottom-3.5 max-sm:bottom-2.5 ltr:left-0 rtl:right-0"
+                class="absolute bottom-4 z-[2] flex items-center gap-1 rounded-ui bg-white/90 p-1 text-zinc-900 shadow-[0_2px_10px_rgba(0,0,0,0.12)] backdrop-blur max-sm:hidden ltr:right-4 rtl:left-4"
+            >
+                <button
+                    type="button"
+                    class="flex h-9 w-9 items-center justify-center rounded-ui transition-colors hover:bg-black/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900/40"
+                    aria-label="@lang('shop::app.components.carousel.previous')"
+                    @click="step(-1)"
+                >
+                    <span class="icon-arrow-left text-xl rtl:icon-arrow-right"></span>
+                </button>
+
+                {{-- dir="ltr": in Arabic the bidi algorithm would otherwise show "5 / 2" for slide 2 of 5. --}}
+                <span
+                    class="min-w-[3.25rem] text-center text-sm font-bold tabular-nums"
+                    dir="ltr"
+                    v-text="(currentIndex + 1) + ' / ' + images.length"
+                ></span>
+
+                <button
+                    type="button"
+                    class="flex h-9 w-9 items-center justify-center rounded-ui transition-colors hover:bg-black/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900/40"
+                    aria-label="@lang('shop::app.components.carousel.next')"
+                    @click="step(1)"
+                >
+                    <span class="icon-arrow-right text-xl rtl:icon-arrow-left"></span>
+                </button>
+            </div>
+
+            <!-- Phone dots -->
+            <div
+                v-if="images.length >= 2"
+                class="absolute bottom-1.5 z-[2] flex w-full justify-center sm:hidden ltr:left-0 rtl:right-0"
             >
                 <button
                     v-for="(image, index) in images"
                     :key="'dot-' + index"
-                    class="mx-1 h-3 w-3 rounded-full border border-white/50 transition-colors focus:outline-none max-md:h-2 max-md:w-2 max-sm:h-1.5 max-sm:w-1.5"
-                    :class="index === currentIndex ? 'bg-white scale-110' : 'bg-white/30'"
+                    class="group/dot flex h-6 w-6 items-center justify-center focus:outline-none"
                     :aria-label="'Go to slide ' + (index + 1)"
+                    :aria-current="index === currentIndex ? 'true' : null"
                     @click="goTo(index)"
-                ></button>
+                >
+                    <span
+                        class="block h-2 w-2 rounded-full shadow-[0_0_0_1px_rgba(0,0,0,0.15)] transition-colors duration-200 group-focus-visible/dot:ring-2 group-focus-visible/dot:ring-white"
+                        :class="index === currentIndex ? 'bg-white' : 'bg-white/45'"
+                    ></span>
+                </button>
             </div>
         </div>
     </script>
@@ -251,6 +274,13 @@
                         : (this.currentIndex - 1 + len) % len;
                     this.animGen++;
                     this.play();
+                },
+
+                /* The corner control: one slide back or forward, in reading order. */
+                step(delta) {
+                    const len = this.images.length;
+
+                    this.goTo((this.currentIndex + delta + len) % len);
                 },
 
                 goTo(index) {

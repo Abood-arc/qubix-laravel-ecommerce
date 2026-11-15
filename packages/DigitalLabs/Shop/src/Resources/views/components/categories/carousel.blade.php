@@ -14,69 +14,80 @@
         type="text/x-template"
         id="v-categories-carousel-template"
     >
+        {{--
+            Photo tiles instead of small circles with labels wrapping to five lines. Up to four
+            categories fill a grid (2x2 on phones, one row on desktop); more become a swipeable
+            row whose next tile peeks in. Arrows show only when the row actually overflows.
+            Category photos sit on a canvas tone with multiply so their white backgrounds blend in.
+        --}}
         <div
-            class="container mt-14 max-lg:px-8 max-md:mt-7 max-md:!px-0 max-sm:mt-5"
+            class="container mt-14 max-lg:px-8 max-md:mt-8 max-md:!px-4"
             v-if="! isLoading && categories?.length"
         >
-            <div class="relative">
+            <div
+                class="mb-6 flex items-end justify-between gap-4 max-md:mb-4"
+                v-if="title || hasOverflow"
+            >
+                <h2
+                    class="w-full text-center font-dmserif text-[38px] leading-tight text-brand max-md:text-[28px] max-sm:text-2xl"
+                    v-if="title"
+                    v-text="title"
+                >
+                </h2>
+
                 <div
-                    ref="swiperContainer"
-                    class="scrollbar-hide flex gap-10 overflow-auto scroll-smooth max-lg:gap-4"
+                    class="flex gap-2 ltr:ml-auto rtl:mr-auto max-lg:hidden"
+                    v-if="hasOverflow"
                 >
-                    <div
-                        class="grid min-w-[120px] max-w-[120px] grid-cols-1 justify-items-center gap-4 font-medium max-md:min-w-20 max-md:max-w-20 max-md:gap-2.5 max-md:first:ltr:ml-4 max-md:first:rtl:mr-4 max-sm:min-w-[60px] max-sm:max-w-[60px] max-sm:gap-1.5"
-                        v-for="category in categories"
-                    >
-                        <a
-                            :href="category.slug"
-                            class="h-[110px] w-[110px] rounded-full bg-zinc-100 max-md:h-20 max-md:w-20 max-sm:h-[60px] max-sm:w-[60px]"
-                            :aria-label="category.name"
-                        >
-                            <x-shop::media.images.lazy
-                                ::src="category.logo?.small_image_url || fallback"
-                                ::srcset="`
-                                    ${(category.logo?.small_image_url || fallback)} 60w,
-                                    ${(category.logo?.medium_image_url || fallback)} 110w,
-                                    ${(category.logo?.large_image_url || fallback)} 300w
-                                `"
-                                sizes="(max-width: 640px) 60px, 110px"
-                                width="110"
-                                height="110"
-                                class="w-full rounded-full max-sm:h-[60px] max-sm:w-[60px]"
-                                ::alt="category.name"
-                            />
-                        </a>
+                    <button
+                        type="button"
+                        class="icon-arrow-left-stylish rtl:icon-arrow-right-stylish flex h-11 w-11 items-center justify-center rounded-full border border-zinc-300 text-2xl transition-colors duration-150 hover:border-navyBlue hover:bg-navyBlue hover:text-white"
+                        aria-label="@lang('shop::app.components.carousel.previous')"
+                        @click="swipeLeft"
+                    ></button>
 
-                        <a
-                            :href="category.slug"
-                            class=""
-                        >
-                            <p
-                                class="text-center text-lg text-black max-md:text-base max-md:font-normal max-sm:text-sm"
-                                v-text="category.name"
-                            >
-                            </p>
-                        </a>
-                    </div>
+                    <button
+                        type="button"
+                        class="icon-arrow-right-stylish rtl:icon-arrow-left-stylish flex h-11 w-11 items-center justify-center rounded-full border border-zinc-300 text-2xl transition-colors duration-150 hover:border-navyBlue hover:bg-navyBlue hover:text-white"
+                        aria-label="@lang('shop::app.components.carousel.next')"
+                        @click="swipeRight"
+                    ></button>
                 </div>
+            </div>
 
-                <span
-                    class="absolute top-9 flex h-[50px] w-[50px] cursor-pointer items-center justify-center rounded-full border border-black bg-white text-2xl transition hover:bg-black hover:text-white max-md:hidden ltr:icon-arrow-left-stylish ltr:-left-10 max-lg:ltr:-left-7 rtl:icon-arrow-right-stylish rtl:-right-10 max-lg:rtl:-right-7"
-                    role="button"
-                    aria-label="@lang('shop::components.carousel.previous')"
-                    tabindex="0"
-                    @click="swipeLeft"
+            <div
+                ref="swiperContainer"
+                :class="useGrid
+                    ? 'grid grid-cols-2 gap-3 md:grid-cols-4 md:gap-6'
+                    : 'scrollbar-hide flex snap-x gap-3 overflow-auto scroll-smooth md:gap-6'"
+            >
+                <a
+                    v-for="category in categories"
+                    :href="`{{ route('shop.product_or_category.index', '') }}/${category.slug}`"
+                    class="group block"
+                    :class="useGrid ? '' : 'w-[42%] shrink-0 snap-start md:w-[calc(25%-18px)]'"
                 >
-                </span>
+                    <span class="block aspect-square overflow-hidden rounded-md bg-sand">
+                        <x-shop::media.images.lazy
+                            ::src="category.logo?.large_image_url || fallback"
+                            ::srcset="`
+                                ${(category.logo?.large_image_url || fallback)} 165w,
+                                ${(category.logo?.original_image_url || category.logo?.large_image_url || fallback)} 1200w
+                            `"
+                            sizes="(max-width: 768px) 45vw, 300px"
+                            width="300"
+                            height="300"
+                            class="h-full w-full object-contain mix-blend-multiply transition-transform duration-300 ease-[cubic-bezier(0.23,1,0.32,1)] 1180:group-hover:scale-105"
+                            ::alt="category.name"
+                        />
+                    </span>
 
-                <span
-                    class="absolute top-9 flex h-[50px] w-[50px] cursor-pointer items-center justify-center rounded-full border border-black bg-white text-2xl transition hover:bg-black hover:text-white max-md:hidden ltr:icon-arrow-right-stylish ltr:-right-6 max-lg:ltr:-right-7 rtl:icon-arrow-left-stylish rtl:-left-6 max-lg:rtl:-left-7"
-                    role="button"
-                    aria-label="@lang('shop::components.carousel.next')"
-                    tabindex="0"
-                    @click="swipeRight"
-                >
-                </span>
+                    <span
+                        class="mt-3 line-clamp-2 block text-center text-[17px] font-bold leading-6 text-brand max-sm:mt-2 max-sm:text-[15px] max-sm:leading-5"
+                        v-text="category.name"
+                    >
+                    </span>
+                </a>
             </div>
         </div>
 
@@ -107,12 +118,26 @@
 
                     offset: 323,
 
+                    hasOverflow: false,
+
                     fallback: "{{ qubix_asset('images/small-product-placeholder.webp') }}"
                 };
             },
 
+            computed: {
+                useGrid() {
+                    return this.categories.length <= 4;
+                },
+            },
+
             mounted() {
                 this.getCategories();
+
+                window.addEventListener('resize', this.measureOverflow, { passive: true });
+            },
+
+            beforeUnmount() {
+                window.removeEventListener('resize', this.measureOverflow);
             },
 
             methods: {
@@ -122,9 +147,17 @@
                             this.isLoading = false;
 
                             this.categories = response.data.data;
+
+                            this.$nextTick(this.measureOverflow);
                         }).catch(error => {
                             console.log(error);
                         });
+                },
+
+                measureOverflow() {
+                    const container = this.$refs.swiperContainer;
+
+                    this.hasOverflow = !! container && container.scrollWidth > container.clientWidth + 1;
                 },
 
                 swipeLeft() {

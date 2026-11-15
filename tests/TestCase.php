@@ -6,6 +6,7 @@ use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Storage;
 
 abstract class TestCase extends BaseTestCase
 {
@@ -21,6 +22,8 @@ abstract class TestCase extends BaseTestCase
         parent::setUp();
 
         $this->abortUnlessUsingTestDatabase();
+
+        $this->fakeAllDisks();
     }
 
     /**
@@ -50,6 +53,19 @@ abstract class TestCase extends BaseTestCase
             }
 
             self::$testDatabaseInstalled = true;
+        }
+    }
+
+    /**
+     * Give every test throwaway disks. The test database is separate, but the disks were the
+     * real storage/app folders: deleting a test product or category ran the observers'
+     * Storage::deleteDirectory('product/{id}') against the store's own images, and tests left
+     * sitemaps, logos and uploads behind.
+     */
+    private function fakeAllDisks(): void
+    {
+        foreach (array_keys(config('filesystems.disks')) as $disk) {
+            Storage::fake($disk);
         }
     }
 }

@@ -3713,6 +3713,14 @@ return [
                         'info' => 'Настройте содержимое авторских прав, отображаемое в нижнем колонтитуле вашего сайта, чтобы защитить вашу интеллектуальную собственность и повысить узнаваемость бренда.',
                     ],
 
+                    'store-contact' => [
+                        'email' => 'Контактный e-mail',
+                        'info' => 'Номер WhatsApp и e-mail, которые покупатели видят в подвале и мобильном меню.',
+                        'title' => 'Контакты магазина',
+                        'whatsapp-number' => 'Номер WhatsApp',
+                        'whatsapp-number-info' => 'Укажите код страны, напр. +91 98765 43210.',
+                    ],
+
                     'speculation-rules' => [
                         'enable-speculation' => 'Включить правила спекуляции',
                         'info' => 'Настройте параметры для включения или отключения автоматической логики спекуляции.',
@@ -3773,6 +3781,17 @@ return [
                         'preview-sidebar' => 'Предпросмотр бокового меню',
                         'sidebar' => 'Боковое меню',
                         'title' => 'Просмотр категории меню',
+                    ],
+
+                    'store-look' => [
+                        'forest-green' => 'Forest Green',
+                        'info' => 'Choose the colours, fonts and corners of your storefront. The layout stays the same in every look.',
+                        'look' => 'Look',
+                        'look-info' => 'Forest Green: green header, cream panels. Marigold & Indigo: bright yellow header, indigo text. Sand & Charcoal: sand header, charcoal menu, square corners. Minimal White: white header, black text.',
+                        'marigold-indigo' => 'Marigold & Indigo',
+                        'minimal-white' => 'Minimal White',
+                        'sand-charcoal' => 'Sand & Charcoal',
+                        'title' => 'Store Look',
                     ],
                 ],
 

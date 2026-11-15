@@ -29,7 +29,8 @@ class VatValidator
         'HR' => '\d{11}',
         'HU' => '\d{8}',
         'IE' => '[A-Z\d]{8}|[A-Z\d]{9}',
-        'IN' => 'V\d{11}',
+        // GSTIN: 2-digit state code, 10-character PAN, entity number, "Z", check character.
+        'IN' => '\d{2}[A-Z]{5}\d{4}[A-Z][1-9A-Z]Z[0-9A-Z]',
         'IT' => '\d{11}',
         'LT' => '(\d{9}|\d{12})',
         'LU' => '\d{8}',

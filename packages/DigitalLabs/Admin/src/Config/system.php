@@ -113,6 +113,28 @@ return [
             ],
         ],
     ], [
+        // Shown to shoppers in the storefront footer and mobile menu only when filled in.
+        'key' => 'general.content.store_contact',
+        'name' => 'admin::app.configuration.index.general.content.store-contact.title',
+        'info' => 'admin::app.configuration.index.general.content.store-contact.info',
+        'sort' => 3,
+        'fields' => [
+            [
+                'name' => 'whatsapp_number',
+                'title' => 'admin::app.configuration.index.general.content.store-contact.whatsapp-number',
+                'info' => 'admin::app.configuration.index.general.content.store-contact.whatsapp-number-info',
+                'type' => 'text',
+                'validation' => 'max:20',
+                'channel_based' => true,
+            ], [
+                'name' => 'email',
+                'title' => 'admin::app.configuration.index.general.content.store-contact.email',
+                'type' => 'text',
+                'validation' => 'email',
+                'channel_based' => true,
+            ],
+        ],
+    ], [
         'key' => 'general.content.speculation_rules',
         'name' => 'admin::app.configuration.index.general.content.speculation-rules.title',
         'info' => 'admin::app.configuration.index.general.content.speculation-rules.info',
@@ -274,6 +296,41 @@ return [
                 'title' => 'admin::app.configuration.index.general.gdpr.agreement.checkbox-label',
                 'type' => 'blade',
                 'path' => 'admin::configuration.custom-views.category-menu',
+            ],
+        ],
+    ], [
+        'key' => 'general.design.store_look',
+        'name' => 'admin::app.configuration.index.general.design.store-look.title',
+        'info' => 'admin::app.configuration.index.general.design.store-look.info',
+        'sort' => 3,
+        'fields' => [
+            [
+                'name' => 'look',
+                'title' => 'admin::app.configuration.index.general.design.store-look.look',
+                'info' => 'admin::app.configuration.index.general.design.store-look.look-info',
+                'type' => 'select',
+                'default' => 'forest-green',
+                'channel_based' => true,
+                'options' => [
+                    [
+                        'title' => 'admin::app.configuration.index.general.design.store-look.forest-green',
+                        'value' => 'forest-green',
+                    ], [
+                        'title' => 'admin::app.configuration.index.general.design.store-look.marigold-indigo',
+                        'value' => 'marigold-indigo',
+                    ], [
+                        'title' => 'admin::app.configuration.index.general.design.store-look.sand-charcoal',
+                        'value' => 'sand-charcoal',
+                    ], [
+                        'title' => 'admin::app.configuration.index.general.design.store-look.minimal-white',
+                        'value' => 'minimal-white',
+                    ],
+                ],
+            ], [
+                'name' => 'look_preview',
+                'title' => 'admin::app.configuration.index.general.design.store-look.look',
+                'type' => 'blade',
+                'path' => 'admin::configuration.custom-views.store-look',
             ],
         ],
     ], [

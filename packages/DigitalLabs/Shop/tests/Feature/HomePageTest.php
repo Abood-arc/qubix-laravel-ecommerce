@@ -2,9 +2,9 @@
 
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
-use DigitalLabs\Category\Models\Category;
 use DigitalLabs\Core\Models\SubscribersList;
 use DigitalLabs\Customer\Models\CompareItem;
+use Webkul\Faker\Helpers\Category as CategoryFaker;
 use Webkul\Faker\Helpers\Product as ProductFaker;
 use DigitalLabs\Shop\Mail\Customer\SubscriptionNotification;
 
@@ -93,7 +93,8 @@ it('should returns the home page of the store', function () {
 it('lists category-linked catalog products via the same API the legacy home carousel uses', function () {
     config(['shop.home.layout_mode' => 'legacy']);
 
-    $category = Category::findOrFail(3);
+    // Its own category: a fixed id (it was 3) only exists in some databases.
+    $category = (new CategoryFaker)->factory()->create(['parent_id' => 1]);
 
     $product = (new ProductFaker([
         'attributes' => [
@@ -122,7 +123,7 @@ it('lists category-linked catalog products via the same API the legacy home caro
         ->hasAttached($category)
         ->create();
 
-    $carouselQuery = ['category_id' => '3', 'sort' => 'name-desc', 'limit' => 12];
+    $carouselQuery = ['category_id' => (string) $category->id, 'sort' => 'name-desc', 'limit' => 12];
 
     get(route('shop.home.index'))
         ->assertOk();

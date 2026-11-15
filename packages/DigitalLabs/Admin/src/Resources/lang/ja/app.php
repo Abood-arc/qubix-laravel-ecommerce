@@ -3713,6 +3713,14 @@ return [
                         'info' => '知的財産を保護し、ブランド認知を高めるために、ウェブサイトのフッターに表示される著作権コンテンツを設定してください。',
                     ],
 
+                    'store-contact' => [
+                        'email' => '連絡先メール',
+                        'info' => 'フッターとモバイルメニューで表示する WhatsApp 番号とメールアドレス。',
+                        'title' => 'ストアの連絡先',
+                        'whatsapp-number' => 'WhatsApp番号',
+                        'whatsapp-number-info' => '国番号を含めてください。例: +91 98765 43210',
+                    ],
+
                     'speculation-rules' => [
                         'enable-speculation' => '投機ルールを有効にする',
                         'info' => '自動投機ロジックの有効化または無効化の設定を構成します。',
@@ -3773,6 +3781,17 @@ return [
                         'preview-sidebar' => 'サイドバーメニューのプレビュー',
                         'sidebar' => 'サイドバーメニュー',
                         'title' => 'メニューカテゴリの表示',
+                    ],
+
+                    'store-look' => [
+                        'forest-green' => 'Forest Green',
+                        'info' => 'Choose the colours, fonts and corners of your storefront. The layout stays the same in every look.',
+                        'look' => 'Look',
+                        'look-info' => 'Forest Green: green header, cream panels. Marigold & Indigo: bright yellow header, indigo text. Sand & Charcoal: sand header, charcoal menu, square corners. Minimal White: white header, black text.',
+                        'marigold-indigo' => 'Marigold & Indigo',
+                        'minimal-white' => 'Minimal White',
+                        'sand-charcoal' => 'Sand & Charcoal',
+                        'title' => 'Store Look',
                     ],
                 ],
 

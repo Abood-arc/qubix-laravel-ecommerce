@@ -3713,6 +3713,14 @@ return [
                         'info' => 'ඔබගේ වෙබ් අඩවියේ පාදක කොටසේ පෙන්වන කතෘ හිමිකම් අන්තර්ගතය වින්‍යාස කර ඔබගේ බුද්ධිමය දේපළ ආරක්ෂා කරමින් වෙළඳ නාම හඳුනාගැනීම වැඩි කරන්න.',
                     ],
 
+                    'store-contact' => [
+                        'email' => 'සම්බන්ධතා ඊමේල්',
+                        'info' => 'පාදකයේ සහ ජංගම මෙනුවේ පාරිභෝගිකයින්ට පෙන්වන WhatsApp අංකය සහ ඊමේල්.',
+                        'title' => 'වෙළඳසැල් සම්බන්ධතා',
+                        'whatsapp-number' => 'WhatsApp අංකය',
+                        'whatsapp-number-info' => 'රට කේතය ඇතුළත් කරන්න, උදා. +91 98765 43210.',
+                    ],
+
                     'speculation-rules' => [
                         'enable-speculation' => 'අනුමාන නීති සක්‍රීය කරන්න',
                         'info' => 'ස්වයංක්‍රීය අනුමාන තර්කය සක්‍රීය කිරීම හෝ අක්‍රීය කිරීම සඳහා සැකසුම් සකසන්න.',
@@ -3773,6 +3781,17 @@ return [
                         'preview-sidebar' => 'පැත්තුව මෙනු පූර්වදසුන',
                         'sidebar' => 'පැත්තුව මෙනුව',
                         'title' => 'මෙනු කාණ්ඩ දසුන',
+                    ],
+
+                    'store-look' => [
+                        'forest-green' => 'Forest Green',
+                        'info' => 'Choose the colours, fonts and corners of your storefront. The layout stays the same in every look.',
+                        'look' => 'Look',
+                        'look-info' => 'Forest Green: green header, cream panels. Marigold & Indigo: bright yellow header, indigo text. Sand & Charcoal: sand header, charcoal menu, square corners. Minimal White: white header, black text.',
+                        'marigold-indigo' => 'Marigold & Indigo',
+                        'minimal-white' => 'Minimal White',
+                        'sand-charcoal' => 'Sand & Charcoal',
+                        'title' => 'Store Look',
                     ],
                 ],
 

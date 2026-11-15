@@ -3713,6 +3713,14 @@ return [
                         'info' => 'Configureer de auteursrechtinhoud die in de voettekst van uw website wordt weergegeven om uw intellectuele eigendom te beschermen en de merkherkenning te verbeteren.',
                     ],
 
+                    'store-contact' => [
+                        'email' => 'Contact-e-mail',
+                        'info' => 'WhatsApp-nummer en e-mail die klanten zien in de footer en het mobiele menu.',
+                        'title' => 'Winkelcontact',
+                        'whatsapp-number' => 'WhatsApp-nummer',
+                        'whatsapp-number-info' => 'Met landcode, bijv. +91 98765 43210.',
+                    ],
+
                     'speculation-rules' => [
                         'enable-speculation' => 'Speculatieregels inschakelen',
                         'info' => 'Stel instellingen in voor het in- of uitschakelen van geautomatiseerde speculatie-logica.',
@@ -3773,6 +3781,17 @@ return [
                         'preview-sidebar' => 'Voorbeeld zijbalkmenu',
                         'sidebar' => 'Zijbalkmenu',
                         'title' => 'Menucategorie weergave',
+                    ],
+
+                    'store-look' => [
+                        'forest-green' => 'Forest Green',
+                        'info' => 'Choose the colours, fonts and corners of your storefront. The layout stays the same in every look.',
+                        'look' => 'Look',
+                        'look-info' => 'Forest Green: green header, cream panels. Marigold & Indigo: bright yellow header, indigo text. Sand & Charcoal: sand header, charcoal menu, square corners. Minimal White: white header, black text.',
+                        'marigold-indigo' => 'Marigold & Indigo',
+                        'minimal-white' => 'Minimal White',
+                        'sand-charcoal' => 'Sand & Charcoal',
+                        'title' => 'Store Look',
                     ],
                 ],
 

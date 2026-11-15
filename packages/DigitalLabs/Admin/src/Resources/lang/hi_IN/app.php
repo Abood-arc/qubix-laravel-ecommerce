@@ -3713,6 +3713,14 @@ return [
                         'info' => 'अपनी बौद्धिक संपत्ति की सुरक्षा और ब्रांड पहचान को मजबूत करने के लिए अपनी वेबसाइट के फुटर में प्रदर्शित कॉपीराइट सामग्री को कॉन्फ़िगर करें।',
                     ],
 
+                    'store-contact' => [
+                        'email' => 'संपर्क ईमेल',
+                        'info' => 'फ़ुटर और मोबाइल मेनू में ग्राहकों को दिखने वाला व्हाट्सऐप नंबर और ईमेल।',
+                        'title' => 'स्टोर संपर्क',
+                        'whatsapp-number' => 'व्हाट्सऐप नंबर',
+                        'whatsapp-number-info' => 'देश कोड शामिल करें, जैसे +91 98765 43210।',
+                    ],
+
                     'speculation-rules' => [
                         'enable-speculation' => 'स्पेकुलेशन नियम सक्षम करें',
                         'info' => 'स्वचालित स्पेकुलेशन लॉजिक को सक्षम या अक्षम करने के लिए सेटिंग्स कॉन्फ़िगर करें।',
@@ -3773,6 +3781,17 @@ return [
                         'preview-sidebar' => 'साइडबार मेनू पूर्वावलोकन',
                         'sidebar' => 'साइडबार मेनू',
                         'title' => 'मेनू श्रेणी दृश्य',
+                    ],
+
+                    'store-look' => [
+                        'forest-green' => 'Forest Green',
+                        'info' => 'Choose the colours, fonts and corners of your storefront. The layout stays the same in every look.',
+                        'look' => 'Look',
+                        'look-info' => 'Forest Green: green header, cream panels. Marigold & Indigo: bright yellow header, indigo text. Sand & Charcoal: sand header, charcoal menu, square corners. Minimal White: white header, black text.',
+                        'marigold-indigo' => 'Marigold & Indigo',
+                        'minimal-white' => 'Minimal White',
+                        'sand-charcoal' => 'Sand & Charcoal',
+                        'title' => 'Store Look',
                     ],
                 ],
 

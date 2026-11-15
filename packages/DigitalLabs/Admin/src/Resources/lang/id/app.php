@@ -3713,6 +3713,14 @@ return [
                         'info' => 'Configura il contenuto del copyright visualizzato nel piè di pagina del tuo sito web per proteggere la tua proprietà intellettuale e migliorare il riconoscimento del marchio.',
                     ],
 
+                    'store-contact' => [
+                        'email' => 'Email Kontak',
+                        'info' => 'Nomor WhatsApp dan email yang ditampilkan di footer dan menu seluler.',
+                        'title' => 'Kontak Toko',
+                        'whatsapp-number' => 'Nomor WhatsApp',
+                        'whatsapp-number-info' => 'Sertakan kode negara, mis. +91 98765 43210.',
+                    ],
+
                     'speculation-rules' => [
                         'enable-speculation' => 'Aktifkan Aturan Spekulasi',
                         'info' => 'Atur preferensi untuk mengaktifkan atau menonaktifkan logika spekulasi otomatis.',
@@ -3773,6 +3781,17 @@ return [
                         'preview-sidebar' => 'Pratinjau Menu Sidebar',
                         'sidebar' => 'Menu Sidebar',
                         'title' => 'Tampilan Kategori Menu',
+                    ],
+
+                    'store-look' => [
+                        'forest-green' => 'Forest Green',
+                        'info' => 'Choose the colours, fonts and corners of your storefront. The layout stays the same in every look.',
+                        'look' => 'Look',
+                        'look-info' => 'Forest Green: green header, cream panels. Marigold & Indigo: bright yellow header, indigo text. Sand & Charcoal: sand header, charcoal menu, square corners. Minimal White: white header, black text.',
+                        'marigold-indigo' => 'Marigold & Indigo',
+                        'minimal-white' => 'Minimal White',
+                        'sand-charcoal' => 'Sand & Charcoal',
+                        'title' => 'Store Look',
                     ],
                 ],
 

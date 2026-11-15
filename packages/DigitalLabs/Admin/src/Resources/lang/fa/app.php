@@ -3713,6 +3713,14 @@ return [
                         'info' => 'محتوای حق نشر نمایش‌داده‌شده در فوتر وب‌سایت خود را پیکربندی کنید تا از مالکیت فکری خود محافظت کرده و شناخت برند را افزایش دهید.',
                     ],
 
+                    'store-contact' => [
+                        'email' => 'ایمیل تماس',
+                        'info' => 'شماره واتس‌اپ و ایمیلی که در پاورقی و منوی موبایل به خریداران نشان داده می‌شود.',
+                        'title' => 'اطلاعات تماس فروشگاه',
+                        'whatsapp-number' => 'شماره واتس‌اپ',
+                        'whatsapp-number-info' => 'کد کشور را وارد کنید، مثلاً +91 98765 43210.',
+                    ],
+
                     'speculation-rules' => [
                         'enable-speculation' => 'فعال‌سازی قوانین حدس',
                         'info' => 'تنظیمات مربوط به فعال یا غیرفعال کردن منطق خودکار حدس را پیکربندی کنید.',
@@ -3773,6 +3781,17 @@ return [
                         'preview-sidebar' => 'پیش‌نمایش منوی کناری',
                         'sidebar' => 'منوی کناری',
                         'title' => 'نمایش دسته‌بندی منو',
+                    ],
+
+                    'store-look' => [
+                        'forest-green' => 'Forest Green',
+                        'info' => 'Choose the colours, fonts and corners of your storefront. The layout stays the same in every look.',
+                        'look' => 'Look',
+                        'look-info' => 'Forest Green: green header, cream panels. Marigold & Indigo: bright yellow header, indigo text. Sand & Charcoal: sand header, charcoal menu, square corners. Minimal White: white header, black text.',
+                        'marigold-indigo' => 'Marigold & Indigo',
+                        'minimal-white' => 'Minimal White',
+                        'sand-charcoal' => 'Sand & Charcoal',
+                        'title' => 'Store Look',
                     ],
                 ],
 
