@@ -5,9 +5,9 @@ namespace DigitalLabs\Core\Repositories;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Event;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use DigitalLabs\Core\Eloquent\Repository;
+use DigitalLabs\Core\StoredFiles;
 
 class CoreConfigRepository extends Repository
 {
@@ -93,9 +93,7 @@ class CoreConfigRepository extends Repository
                     ]);
                 } else {
                     foreach ($coreConfigValue as $coreConfig) {
-                        if (request()->hasFile($fieldName)) {
-                            Storage::delete($coreConfig['value']);
-                        }
+                        $replacedFile = request()->hasFile($fieldName) ? $coreConfig['value'] : null;
 
                         if (isset($value['delete'])) {
                             parent::delete($coreConfig['id']);
@@ -107,6 +105,9 @@ class CoreConfigRepository extends Repository
                                 'channel_code' => $channelBased ? $channel : null,
                             ], $coreConfig->id);
                         }
+
+                        // After the update, so this row no longer counts as a user of the old file.
+                        StoredFiles::deleteIfUnused($replacedFile);
                     }
                 }
             }

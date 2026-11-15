@@ -3,7 +3,7 @@
 namespace DigitalLabs\Core\Repositories;
 
 use DigitalLabs\Core\Eloquent\Repository;
-use Illuminate\Support\Facades\Storage;
+use DigitalLabs\Core\StoredFiles;
 
 class ChannelRepository extends Repository
 {
@@ -86,23 +86,23 @@ class ChannelRepository extends Repository
                 $file = $type.'.'.$imageId;
 
                 if (request()->hasFile($file)) {
-                    if ($channel->{$type}) {
-                        Storage::delete($channel->{$type});
-                    }
+                    $replacedFile = $channel->{$type};
 
                     $channel->{$type} = request()->file($file)->store('channel/'.$channel->id);
 
                     $channel->save();
+
+                    StoredFiles::deleteIfUnused($replacedFile);
                 }
             }
         } else {
-            if ($channel->{$type}) {
-                Storage::delete($channel->{$type});
-            }
+            $replacedFile = $channel->{$type};
 
             $channel->{$type} = null;
 
             $channel->save();
+
+            StoredFiles::deleteIfUnused($replacedFile);
         }
     }
 }
