@@ -6,17 +6,9 @@ use Illuminate\Http\Request;
 use DigitalLabs\Category\Repositories\CategoryRepository;
 use DigitalLabs\Marketing\Repositories\URLRewriteRepository;
 use DigitalLabs\Product\Repositories\ProductRepository;
-use DigitalLabs\Theme\Repositories\ThemeCustomizationRepository;
 
 class ProductsCategoriesProxyController extends Controller
 {
-    /**
-     * Using const variable for status
-     *
-     * @var int Status
-     */
-    const STATUS = 1;
-
     /**
      * Create a new controller instance.
      *
@@ -25,7 +17,6 @@ class ProductsCategoriesProxyController extends Controller
     public function __construct(
         protected CategoryRepository $categoryRepository,
         protected ProductRepository $productRepository,
-        protected ThemeCustomizationRepository $themeCustomizationRepository,
         protected URLRewriteRepository $urlRewriteRepository
     ) {}
 
@@ -40,16 +31,10 @@ class ProductsCategoriesProxyController extends Controller
 
         /**
          * Support url for chinese, japanese, arabic and english with numbers.
+         * Anything else (e.g. "/wp-login.php", "/.env") can never be a slug.
          */
         if (! preg_match('/^([\p{L}\p{N}\p{M}\x{0900}-\x{097F}\x{0590}-\x{05FF}\x{0600}-\x{06FF}\x{0400}-\x{04FF}_-]+\/?)+$/u', $slugOrURLKey)) {
-            visitor()->visit();
-
-            $customizations = $this->themeCustomizationRepository->orderBy('sort_order')->findWhere([
-                'status' => self::STATUS,
-                'channel_id' => core()->getCurrentChannel()->id,
-            ]);
-
-            return view('shop::home.index', compact('customizations'));
+            abort(404);
         }
 
         $category = $this->categoryRepository->findBySlug($slugOrURLKey);
