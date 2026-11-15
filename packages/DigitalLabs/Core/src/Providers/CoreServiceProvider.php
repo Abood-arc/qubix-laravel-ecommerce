@@ -3,6 +3,8 @@
 namespace DigitalLabs\Core\Providers;
 
 use Illuminate\Console\Scheduling\Schedule;
+use Illuminate\Foundation\Http\Events\RequestHandled;
+use Illuminate\Queue\Events\JobProcessing;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
 use DigitalLabs\Theme\ViewRenderEventManager;
@@ -39,6 +41,13 @@ class CoreServiceProvider extends ServiceProvider
         Event::listen('qubix.admin.layout.head', static function (ViewRenderEventManager $viewRenderEventManager) {
             $viewRenderEventManager->addTemplate('core::blade.tracer.style');
         });
+
+        // The queue worker is one long-lived process: re-read settings for every job, so a
+        // change saved in admin reaches queued mails and imports without a worker restart.
+        Event::listen(JobProcessing::class, static fn () => system_config()->flushCoreConfig());
+
+        // Same for anything that serves several requests in one process (the test client, Octane).
+        Event::listen(RequestHandled::class, static fn () => system_config()->flushCoreConfig());
 
         $this->callAfterResolving(Schedule::class, function (Schedule $schedule) {
             $schedule->command('invoice:cron')->dailyAt('3:00');

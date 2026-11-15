@@ -143,9 +143,17 @@ return [
             'except' => null,
         ],
 
+        /*
+         * Off for every repository (2026-11-16). The cache key includes the page URL, so each
+         * page kept its own copy for 7 days, and the list of keys used to clear them on save
+         * (storage/framework/cache/repository-cache-keys.json) is rewritten by every web worker
+         * at once and loses entries: jjbags.in had 2,596 cached copies but only 395 listed, so a
+         * saved setting showed on some pages and not others. Settings are now read once per
+         * request instead (DigitalLabs\Core\SystemConfig::coreConfigRows()).
+         */
         'repositories' => [
             'DigitalLabs\Core\Repositories\CoreConfigRepository' => [
-                'enabled' => true,
+                'enabled' => false,
 
                 // 'minutes'    => 10080,
 
@@ -167,23 +175,23 @@ return [
             ],
 
             'DigitalLabs\Core\Repositories\ChannelRepository' => [
-                'enabled' => true,
+                'enabled' => false,
             ],
 
             'DigitalLabs\Core\Repositories\CountryRepository' => [
-                'enabled' => true,
+                'enabled' => false,
             ],
 
             'DigitalLabs\Core\Repositories\CountryStateRepository' => [
-                'enabled' => true,
+                'enabled' => false,
             ],
 
             'DigitalLabs\Core\Repositories\CurrencyRepository' => [
-                'enabled' => true,
+                'enabled' => false,
             ],
 
             'DigitalLabs\Core\Repositories\LocaleRepository' => [
-                'enabled' => true,
+                'enabled' => false,
             ],
         ],
     ],

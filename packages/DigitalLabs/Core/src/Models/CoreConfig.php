@@ -39,6 +39,16 @@ class CoreConfig extends Model implements CoreConfigContract
     protected $hidden = ['token'];
 
     /**
+     * A saved or deleted setting must show on the very next read, in this process too.
+     */
+    protected static function booted(): void
+    {
+        static::saved(static fn () => system_config()->flushCoreConfig());
+
+        static::deleted(static fn () => system_config()->flushCoreConfig());
+    }
+
+    /**
      * Create a new factory instance for the model
      */
     protected static function newFactory(): Factory

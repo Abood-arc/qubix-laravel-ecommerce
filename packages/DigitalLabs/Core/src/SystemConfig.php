@@ -17,6 +17,11 @@ class SystemConfig
     public array $items = [];
 
     /**
+     * Saved configuration rows, loaded on first read (see coreConfigRows()).
+     */
+    protected ?Collection $coreConfigRows = null;
+
+    /**
      * Create a new class instance.
      *
      * @return void
@@ -164,33 +169,36 @@ class SystemConfig
     {
         $fields = $this->getConfigField($field);
 
-        if (! empty($fields['channel_based'])) {
-            if (! empty($fields['locale_based'])) {
-                $coreConfigValue = $this->coreConfigRepository->findOneWhere([
-                    'code' => $field,
-                    'channel_code' => $channel,
-                    'locale_code' => $locale,
-                ]);
-            } else {
-                $coreConfigValue = $this->coreConfigRepository->findOneWhere([
-                    'code' => $field,
-                    'channel_code' => $channel,
-                ]);
-            }
-        } else {
-            if (! empty($fields['locale_based'])) {
-                $coreConfigValue = $this->coreConfigRepository->findOneWhere([
-                    'code' => $field,
-                    'locale_code' => $locale,
-                ]);
-            } else {
-                $coreConfigValue = $this->coreConfigRepository->findOneWhere([
-                    'code' => $field,
-                ]);
-            }
-        }
+        $matchChannel = ! empty($fields['channel_based']);
 
-        return $coreConfigValue;
+        $matchLocale = ! empty($fields['locale_based']);
+
+        return $this->coreConfigRows()->first(function (CoreConfig $row) use ($field, $channel, $locale, $matchChannel, $matchLocale) {
+            return $row->code === $field
+                && (! $matchChannel || $row->channel_code === $channel)
+                && (! $matchLocale || $row->locale_code === $locale);
+        });
+    }
+
+    /**
+     * All saved configuration rows, read once and kept until a row is saved or deleted
+     * (CoreConfig model events), a request ends or a queued job starts (CoreServiceProvider).
+     *
+     * This replaces the repository cache, which kept one copy per page URL for 7 days and
+     * forgot most of them when a setting was saved: an admin change then showed on some
+     * pages and not others. The table holds a few hundred short rows at most.
+     */
+    protected function coreConfigRows(): Collection
+    {
+        return $this->coreConfigRows ??= $this->coreConfigRepository->all()->sortBy('id')->values();
+    }
+
+    /**
+     * Forget the loaded configuration rows so the next read sees the database.
+     */
+    public function flushCoreConfig(): void
+    {
+        $this->coreConfigRows = null;
     }
 
     /**
