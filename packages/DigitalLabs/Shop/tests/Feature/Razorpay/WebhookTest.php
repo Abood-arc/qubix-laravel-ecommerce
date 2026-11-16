@@ -107,7 +107,7 @@ it('rejects a bad signature and logs it, so a wrong webhook secret is noticed', 
 
     sendWebhook(webhookBody('order_any'), 'bad')->assertStatus(400);
 
-    Log::shouldHaveReceived('warning')->withArgs(fn ($message, $context = []) => str_contains($message, 'RAZORPAY_WEBHOOK_SECRET')
+    Log::shouldHaveReceived('error')->withArgs(fn ($message, $context = []) => str_contains($message, 'RAZORPAY_WEBHOOK_SECRET')
         && ($context['secret_set'] ?? null) === true)->once();
 });
 

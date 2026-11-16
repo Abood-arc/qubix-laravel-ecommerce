@@ -128,8 +128,9 @@ class RazorpayController extends Controller
 
         if (! $this->client->isWebhookSignatureValid($body, (string) $request->header('X-Razorpay-Signature'))) {
             // Usually a webhook secret in .env that differs from the one in Razorpay's dashboard.
-            // Razorpay disables a webhook after a day of failures, so make every refusal visible.
-            Log::warning('Razorpay webhook refused: its signature does not match RAZORPAY_WEBHOOK_SECRET.', [
+            // Razorpay disables a webhook after a day of failures, so this is logged as an error:
+            // production records errors only.
+            Log::error('Razorpay webhook refused: its signature does not match RAZORPAY_WEBHOOK_SECRET.', [
                 'secret_set' => filled(config('razorpay.webhook_secret')),
                 'ip' => $request->ip(),
             ]);
