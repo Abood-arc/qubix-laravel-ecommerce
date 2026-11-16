@@ -35,6 +35,9 @@ it('freezes the order and opens the popup with the right amount', function () {
         ->assertDontSee('test_webhook_secret')
         ->assertSee('checkout.razorpay.com/v1/checkout.js', false);
 
+    // A reopened tab must ask the server again, never reopen Razorpay from a stored copy.
+    expect($response->headers->get('Cache-Control'))->toContain('no-store');
+
     Http::assertSent(fn (Request $request) => $request['amount'] === $expected);
 });
 

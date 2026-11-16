@@ -36,6 +36,14 @@
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 
     <script>
+        // A page restored from the browser's memory (back button, reopened tab) belongs to a
+        // Razorpay order that may already be paid: reload so the server decides what to show.
+        window.addEventListener('pageshow', function (event) {
+            if (event.persisted) {
+                window.location.reload();
+            }
+        });
+
         (function () {
             const callbackUrl = @json(route('razorpay.callback'));
             const cancelUrl = @json(route('razorpay.cancel'));

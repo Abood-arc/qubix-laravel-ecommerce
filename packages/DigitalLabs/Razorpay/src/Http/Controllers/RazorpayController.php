@@ -13,10 +13,10 @@ use DigitalLabs\Sales\Transformers\OrderResource;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
-use Illuminate\View\View;
 
 class RazorpayController extends Controller
 {
@@ -27,8 +27,12 @@ class RazorpayController extends Controller
 
     /**
      * Freeze the order and open the payment popup.
+     *
+     * The page is never cached: a browser restoring it (e.g. Chrome reopening a closed tab)
+     * must ask again, so a paid cart lands on the cart page instead of reopening Razorpay
+     * for an order it has already been paid for.
      */
-    public function redirect(): View|RedirectResponse
+    public function redirect(): Response|RedirectResponse
     {
         $cart = Cart::getCart();
 
@@ -67,10 +71,12 @@ class RazorpayController extends Controller
             'snapshot' => $snapshot,
         ]);
 
-        return view('razorpay::redirect', [
-            'payment' => $payment,
-            'checkoutOptions' => $this->checkoutOptions($method, $payment),
-        ]);
+        return response()
+            ->view('razorpay::redirect', [
+                'payment' => $payment,
+                'checkoutOptions' => $this->checkoutOptions($method, $payment),
+            ])
+            ->header('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
     }
 
     /**
