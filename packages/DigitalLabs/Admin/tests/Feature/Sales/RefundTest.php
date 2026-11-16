@@ -16,6 +16,7 @@ use DigitalLabs\Sales\Models\OrderAddress;
 use DigitalLabs\Sales\Models\OrderItem;
 use DigitalLabs\Sales\Models\OrderPayment;
 use DigitalLabs\Sales\Models\Refund;
+use DigitalLabs\Sales\Models\RefundItem;
 use DigitalLabs\Shop\Mail\Order\RefundedNotification as ShopRefundedNotification;
 
 use function Pest\Laravel\get;
@@ -1215,13 +1216,29 @@ it('should return the view page of refund', function () {
         'order_id' => $order->id,
     ]);
 
+    // A refund with an item: the page shows each item's SKU through its product type.
+    RefundItem::create([
+        'refund_id' => $refund->id,
+        'order_item_id' => $orderItem->id,
+        'product_id' => $product->id,
+        'product_type' => $orderItem->product_type,
+        'name' => $product->name,
+        'sku' => $product->sku,
+        'qty' => 1,
+        'price' => $orderItem->price,
+        'base_price' => $orderItem->base_price,
+        'total' => $orderItem->price,
+        'base_total' => $orderItem->base_price,
+    ]);
+
     // Act and Assert.
     $this->loginAsAdmin();
 
     get(route('admin.sales.refunds.view', $refund->id))
         ->assertOk()
         ->assertSeeText(trans('admin::app.sales.refunds.view.title', ['refund_id' => $refund->id]))
-        ->assertSeeText(trans('admin::app.sales.refunds.view.product-ordered'));
+        ->assertSeeText(trans('admin::app.sales.refunds.view.product-ordered'))
+        ->assertSeeText($product->sku);
 
     $cart->refresh();
 

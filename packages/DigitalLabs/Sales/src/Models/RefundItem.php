@@ -2,8 +2,9 @@
 
 namespace DigitalLabs\Sales\Models;
 
-use Illuminate\Database\Eloquent\Model;
+use DigitalLabs\Product\Type\AbstractType;
 use DigitalLabs\Sales\Contracts\RefundItem as RefundItemContract;
+use Illuminate\Database\Eloquent\Model;
 
 class RefundItem extends Model implements RefundItemContract
 {
@@ -16,6 +17,15 @@ class RefundItem extends Model implements RefundItemContract
     protected $casts = [
         'additional' => 'array',
     ];
+
+    /**
+     * Retrieve type instance (the admin refund page reads each item's SKU through it,
+     * as InvoiceItem and ShipmentItem already allow).
+     */
+    public function getTypeInstance(): AbstractType
+    {
+        return $this->order_item->getTypeInstance();
+    }
 
     /**
      * Get the Refund record associated with the Refund item.
