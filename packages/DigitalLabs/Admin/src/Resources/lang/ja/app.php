@@ -569,6 +569,7 @@ return [
                 'qty-to-refund' => '返金数量',
                 'refund-btn' => '返金',
                 'refund-limit-error' => '返金金額 :amount は処理できません。',
+                'in-progress' => 'Another refund for this order is still being processed. Wait a moment, then check the order before trying again.',
                 'refund-shipping' => '送料を返金',
                 'sku' => 'SKU - :sku',
                 'subtotal' => '小計',

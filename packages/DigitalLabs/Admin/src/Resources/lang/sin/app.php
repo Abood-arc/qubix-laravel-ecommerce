@@ -569,6 +569,7 @@ return [
                 'qty-to-refund' => 'ආදාන කිරීමට :qty',
                 'refund-btn' => 'ආදානය',
                 'refund-limit-error' => 'ආදාන මුදල :amount වලින් හෝඳින්න නොහැක.',
+                'in-progress' => 'Another refund for this order is still being processed. Wait a moment, then check the order before trying again.',
                 'refund-shipping' => 'භාරය කිරීම',
                 'sku' => 'SKU - :sku',
                 'subtotal' => 'උප මුදල',

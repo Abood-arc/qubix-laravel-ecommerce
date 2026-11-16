@@ -569,6 +569,7 @@ return [
                 'qty-to-refund' => 'الكمية المراد استردادها',
                 'refund-btn' => 'استرداد',
                 'refund-limit-error' => 'لا يمكن معالجة مبلغ الاسترداد :amount.',
+                'in-progress' => 'Another refund for this order is still being processed. Wait a moment, then check the order before trying again.',
                 'refund-shipping' => 'استرداد تكلفة الشحن',
                 'sku' => 'رمز المنتج - :sku',
                 'subtotal' => 'المجموع الفرعي',

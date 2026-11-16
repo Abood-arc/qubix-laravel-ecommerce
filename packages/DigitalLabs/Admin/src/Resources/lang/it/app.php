@@ -569,6 +569,7 @@ return [
                 'qty-to-refund' => 'QTA da rimborsare',
                 'refund-btn' => 'Rimborsa',
                 'refund-limit-error' => 'L\'importo del rimborso :amount non può essere elaborato.',
+                'in-progress' => 'Another refund for this order is still being processed. Wait a moment, then check the order before trying again.',
                 'refund-shipping' => 'Rimborsa Spedizione',
                 'sku' => 'SKU - :sku',
                 'subtotal' => 'Subtotale',

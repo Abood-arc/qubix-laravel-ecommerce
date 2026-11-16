@@ -569,6 +569,7 @@ return [
                 'qty-to-refund' => 'تعداد برای بازپرداخت',
                 'refund-btn' => 'بازپرداخت',
                 'refund-limit-error' => 'مقدار بازپرداخت :amount نمی‌تواند ادامه پیدا کند.',
+                'in-progress' => 'Another refund for this order is still being processed. Wait a moment, then check the order before trying again.',
                 'refund-shipping' => 'بازپرداخت هزینه حمل و نقل',
                 'sku' => 'کد SKU - :sku',
                 'subtotal' => 'جمع جزئی',

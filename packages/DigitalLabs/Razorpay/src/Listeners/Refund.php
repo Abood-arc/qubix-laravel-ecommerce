@@ -4,6 +4,7 @@ namespace DigitalLabs\Razorpay\Listeners;
 
 use DigitalLabs\Razorpay\Exceptions\RazorpayException;
 use DigitalLabs\Razorpay\Exceptions\RazorpayRefundFailedException;
+use DigitalLabs\Razorpay\Exceptions\RazorpayUnknownOutcomeException;
 use DigitalLabs\Razorpay\Models\RazorpayPayment;
 use DigitalLabs\Razorpay\Services\RazorpayClient;
 use Throwable;
@@ -44,6 +45,10 @@ class Refund
                 $amount,
                 'admin-'.$order->id.'-'.(int) round($order->grand_total_refunded * 100)
             );
+        } catch (RazorpayUnknownOutcomeException $exception) {
+            // Razorpay may have sent the money even though it did not confirm. A retry with the
+            // same amount reuses the same idempotency key, so Razorpay would not pay twice.
+            throw RazorpayRefundFailedException::unknownOutcome($exception);
         } catch (RazorpayException $exception) {
             $available = $this->refundableBalance();
 

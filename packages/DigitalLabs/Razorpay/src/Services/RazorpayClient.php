@@ -3,6 +3,7 @@
 namespace DigitalLabs\Razorpay\Services;
 
 use DigitalLabs\Razorpay\Exceptions\RazorpayException;
+use DigitalLabs\Razorpay\Exceptions\RazorpayUnknownOutcomeException;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Support\Facades\Http;
 
@@ -119,7 +120,11 @@ class RazorpayClient
                 ->timeout(15)
                 ->send($method, $path, $data ? ['json' => $data] : []);
         } catch (ConnectionException $exception) {
-            throw new RazorpayException('Razorpay could not be reached.', 0, $exception);
+            throw new RazorpayUnknownOutcomeException('Razorpay could not be reached.', 0, $exception);
+        }
+
+        if ($response->serverError()) {
+            throw new RazorpayUnknownOutcomeException('Razorpay API error '.$response->status().' (outcome unknown)');
         }
 
         if ($response->failed()) {

@@ -569,6 +569,7 @@ return [
                 'qty-to-refund' => 'כמות להחזר',
                 'refund-btn' => 'החזר',
                 'refund-limit-error' => 'אי אפשר לבצע החזר של :amount.',
+                'in-progress' => 'Another refund for this order is still being processed. Wait a moment, then check the order before trying again.',
                 'refund-shipping' => 'החזר משלוח',
                 'sku' => 'קוד מוצר - :sku',
                 'subtotal' => 'סכום חלקי',

@@ -569,6 +569,7 @@ return [
                 'qty-to-refund' => 'Quantité à rembourser',
                 'refund-btn' => 'Rembourser',
                 'refund-limit-error' => 'Le montant du remboursement :amount ne peut pas être traité.',
+                'in-progress' => 'Another refund for this order is still being processed. Wait a moment, then check the order before trying again.',
                 'refund-shipping' => 'Remboursement de l’expédition',
                 'sku' => 'SKU - :sku',
                 'subtotal' => 'Sous-total',

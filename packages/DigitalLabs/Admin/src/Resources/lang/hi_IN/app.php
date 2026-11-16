@@ -569,6 +569,7 @@ return [
                 'qty-to-refund' => 'वापसी करने के लिए मात्रा',
                 'refund-btn' => 'वापसी',
                 'refund-limit-error' => 'वापसी राशि :amount प्रोसेस नहीं की जा सकती है।',
+                'in-progress' => 'Another refund for this order is still being processed. Wait a moment, then check the order before trying again.',
                 'refund-shipping' => 'शिपिंग वापसी',
                 'sku' => 'एसकेयू - :sku',
                 'subtotal' => 'उपकुल',

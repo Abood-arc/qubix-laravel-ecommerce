@@ -569,6 +569,7 @@ return [
                 'qty-to-refund' => 'Количество для возврата',
                 'refund-btn' => 'Возврат',
                 'refund-limit-error' => 'Сумма возврата :amount не может быть выполнена.',
+                'in-progress' => 'Another refund for this order is still being processed. Wait a moment, then check the order before trying again.',
                 'refund-shipping' => 'Возврат стоимости доставки',
                 'sku' => 'Артикул - :sku',
                 'subtotal' => 'Подытог',

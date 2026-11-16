@@ -569,6 +569,7 @@ return [
                 'qty-to-refund' => 'Menge zur Rückerstattung',
                 'refund-btn' => 'Rückerstattung',
                 'refund-limit-error' => 'Rückerstattungsbetrag :amount kann nicht verarbeitet werden.',
+                'in-progress' => 'Another refund for this order is still being processed. Wait a moment, then check the order before trying again.',
                 'refund-shipping' => 'Versandkosten zurückerstatten',
                 'sku' => 'Artikelnummer (SKU) - :sku',
                 'subtotal' => 'Zwischensumme',

@@ -569,6 +569,7 @@ return [
                 'qty-to-refund' => 'Jumlah yang Dikembalikan',
                 'refund-btn' => 'Kembalikan Dana',
                 'refund-limit-error' => 'Jumlah pengembalian dana :amount tidak dapat diproses.',
+                'in-progress' => 'Another refund for this order is still being processed. Wait a moment, then check the order before trying again.',
                 'refund-shipping' => 'Pengembalian Biaya Pengiriman',
                 'sku' => 'SKU - :sku',
                 'subtotal' => 'Subtotal',

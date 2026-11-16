@@ -569,6 +569,7 @@ return [
                 'qty-to-refund' => 'Aantal om terug te betalen',
                 'refund-btn' => 'Terugbetaling',
                 'refund-limit-error' => 'Terugbetaling Bedrag :amount kan niet worden verwerkt.',
+                'in-progress' => 'Another refund for this order is still being processed. Wait a moment, then check the order before trying again.',
                 'refund-shipping' => 'Verzendkosten terugbetalen',
                 'sku' => 'Artikelnummer - :sku',
                 'subtotal' => 'Subtotaal',

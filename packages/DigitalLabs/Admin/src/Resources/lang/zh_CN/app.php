@@ -569,6 +569,7 @@ return [
                 'qty-to-refund' => '待退款数量',
                 'refund-btn' => '退款',
                 'refund-limit-error' => '退款金额 :amount 无法进行。',
+                'in-progress' => 'Another refund for this order is still being processed. Wait a moment, then check the order before trying again.',
                 'refund-shipping' => '退款运费',
                 'sku' => 'SKU - :sku',
                 'subtotal' => '小计',

@@ -1,7 +1,9 @@
 <?php
 
 use DigitalLabs\Razorpay\Exceptions\RazorpayException;
+use DigitalLabs\Razorpay\Exceptions\RazorpayUnknownOutcomeException;
 use DigitalLabs\Razorpay\Services\RazorpayClient;
+use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\Request;
 use Illuminate\Support\Facades\Http;
 
@@ -38,6 +40,30 @@ it('throws when the api rejects a request', function () {
 
     app(RazorpayClient::class)->fetchPayment('pay_1');
 })->throws(RazorpayException::class);
+
+it('reports an unknown outcome when razorpay cannot be reached or fails on its side', function (Closure $reply) {
+    Http::fake(['api.razorpay.com/*' => $reply]);
+
+    expect(fn () => app(RazorpayClient::class)->refundPayment('pay_1', 100, 'admin-1-100'))
+        ->toThrow(RazorpayUnknownOutcomeException::class);
+})->with([
+    'timeout' => [fn () => fn () => throw new ConnectionException('Operation timed out')],
+    'server error' => [fn () => fn () => Http::response([], 502)],
+]);
+
+it('keeps a plain rejection when razorpay answers with a client error', function () {
+    Http::fake(['api.razorpay.com/*' => Http::response(['error' => ['code' => 'BAD_REQUEST_ERROR']], 400)]);
+
+    try {
+        app(RazorpayClient::class)->refundPayment('pay_1', 100, 'admin-1-100');
+    } catch (RazorpayException $exception) {
+        expect($exception)->not->toBeInstanceOf(RazorpayUnknownOutcomeException::class);
+
+        return;
+    }
+
+    $this->fail('A rejected request should throw.');
+});
 
 it('checks a payment signature', function () {
     $client = app(RazorpayClient::class);

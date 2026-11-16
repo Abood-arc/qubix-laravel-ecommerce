@@ -25,6 +25,7 @@ return [
         'payment-invalid' => 'We could not verify this payment. If money was deducted, your order will be confirmed or the money returned shortly.',
         'admin-refund-failed' => 'Razorpay could not process this refund, so nothing was changed. Check the Razorpay dashboard and balance, then try again.',
         'admin-refund-low-balance' => 'Not enough money in your Razorpay balance (:balance) to refund :amount, so nothing was changed. Add funds in the Razorpay dashboard, then try again.',
+        'admin-refund-unknown' => "Razorpay didn't confirm this refund in time, so it was not recorded here, but Razorpay may still have sent the money. Check the payment in the Razorpay dashboard before trying again. If you retry, use exactly the same amount.",
     ],
 
     'refund' => [

@@ -569,6 +569,7 @@ return [
                 'qty-to-refund' => 'Qty To Refund',
                 'refund-btn' => 'Refund',
                 'refund-limit-error' => 'Refund Amount :amount can not proceed.',
+                'in-progress' => 'Another refund for this order is still being processed. Wait a moment, then check the order before trying again.',
                 'refund-shipping' => 'Refund Shipping',
                 'sku' => 'SKU - :sku',
                 'subtotal' => 'Subtotal',

@@ -569,6 +569,7 @@ return [
                 'qty-to-refund' => 'İade Edilecek Miktar',
                 'refund-btn' => 'İade Et',
                 'refund-limit-error' => 'İade Tutarı :amount işlemi gerçekleştirilemez.',
+                'in-progress' => 'Another refund for this order is still being processed. Wait a moment, then check the order before trying again.',
                 'refund-shipping' => 'Kargo İadesi',
                 'sku' => 'Ürün Kodu - :sku',
                 'subtotal' => 'Ara Toplam',

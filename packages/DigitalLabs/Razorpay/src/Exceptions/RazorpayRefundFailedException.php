@@ -29,6 +29,18 @@ class RazorpayRefundFailedException extends RazorpayException
     }
 
     /**
+     * Razorpay did not confirm the refund, so it may still have been paid out.
+     */
+    public static function unknownOutcome(?Throwable $previous = null): static
+    {
+        $exception = new static('Razorpay did not confirm the refund; outcome unknown', 0, $previous);
+
+        $exception->adminMessage = trans('razorpay::app.errors.admin-refund-unknown');
+
+        return $exception;
+    }
+
+    /**
      * Show the admin a message instead of the generic 500 page.
      */
     public function render(): RedirectResponse

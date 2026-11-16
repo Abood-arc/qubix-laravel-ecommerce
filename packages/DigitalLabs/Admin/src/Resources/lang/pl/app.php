@@ -569,6 +569,7 @@ return [
                 'qty-to-refund' => 'Ilość do zwrotu',
                 'refund-btn' => 'Zwrot',
                 'refund-limit-error' => 'Nie można przetworzyć zwrotu w kwocie :amount.',
+                'in-progress' => 'Another refund for this order is still being processed. Wait a moment, then check the order before trying again.',
                 'refund-shipping' => 'Zwrot kosztów dostawy',
                 'sku' => 'SKU - :sku',
                 'subtotal' => 'Suma częściowa',

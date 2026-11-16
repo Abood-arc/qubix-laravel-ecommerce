@@ -569,6 +569,7 @@ return [
                 'qty-to-refund' => 'ফেরত দেওয়া পরিমাণ',
                 'refund-btn' => 'ফেরত দিন',
                 'refund-limit-error' => 'ফেরত পরিমাণ :amount চালান করা যাবে না।',
+                'in-progress' => 'Another refund for this order is still being processed. Wait a moment, then check the order before trying again.',
                 'refund-shipping' => 'শিপিং ফেরত',
                 'sku' => 'SKU - :sku',
                 'subtotal' => 'সাবটোটাল',

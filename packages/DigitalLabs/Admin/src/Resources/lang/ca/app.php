@@ -569,6 +569,7 @@ return [
                 'qty-to-refund' => 'Quantitat a Reembossar',
                 'refund-btn' => 'Reembossar',
                 'refund-limit-error' => 'No es pot processar un import de reembossament de :amount.',
+                'in-progress' => 'Another refund for this order is still being processed. Wait a moment, then check the order before trying again.',
                 'refund-shipping' => 'Reembossament d\'Enviament',
                 'sku' => 'SKU - :sku',
                 'subtotal' => 'Subtotal',
