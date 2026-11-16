@@ -68,6 +68,14 @@ class RazorpayClient
     }
 
     /**
+     * The account balance refunds are paid from (amounts in paise).
+     */
+    public function fetchBalance(): array
+    {
+        return $this->send('GET', 'balance');
+    }
+
+    /**
      * Check the signature the checkout popup returned.
      */
     public function isPaymentSignatureValid(string $orderId, string $paymentId, string $signature): bool
@@ -115,7 +123,7 @@ class RazorpayClient
         }
 
         if ($response->failed()) {
-            throw new RazorpayException('Razorpay API error '.$response->status().': '.$response->json('error.code'));
+            throw new RazorpayException(trim('Razorpay API error '.$response->status().': '.$response->json('error.code').' '.$response->json('error.description')));
         }
 
         return $response->json();

@@ -27,6 +27,7 @@ return [
         'cancelled' => 'Payment cancelled. Your cart is still here.',
         'payment-invalid' => 'We could not verify this payment. If money was deducted, your order will be confirmed or the money returned shortly.',
         'admin-refund-failed' => 'Razorpay could not process this refund, so nothing was changed. Check the Razorpay dashboard and balance, then try again.',
+        'admin-refund-low-balance' => 'Not enough money in your Razorpay balance (:balance) to refund :amount, so nothing was changed. Add funds in the Razorpay dashboard, then try again.',
     ],
 
     'refund' => [

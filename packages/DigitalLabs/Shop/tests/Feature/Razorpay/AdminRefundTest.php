@@ -57,6 +57,54 @@ it('rolls the refund back when razorpay fails', function () {
     expect($order->refunds()->count())->toBe(0);
 });
 
+it('tells the admin when the razorpay balance is too low for a refund', function () {
+    [$order] = paidRazorpayOrder($this, 400);
+
+    Http::fake(['api.razorpay.com/v1/balance' => Http::response(['balance' => 7200, 'refund_credits' => 0])]);
+
+    try {
+        app(RefundRepository::class)->create(razorpayRefundData($order));
+
+        $this->fail('The refund should have been refused.');
+    } catch (RazorpayRefundFailedException $exception) {
+        $exception->render();
+    }
+
+    expect(session('error'))->toBe(trans('razorpay::app.errors.admin-refund-low-balance', [
+        'balance' => core()->formatPrice(72, 'INR'),
+        'amount' => core()->formatPrice($order->items->first()->total, 'INR'),
+    ]))
+        ->and($order->refunds()->count())->toBe(0);
+});
+
+it('keeps the general message when the balance covers the refund', function () {
+    [$order] = paidRazorpayOrder($this, 400);
+
+    Http::fake(['api.razorpay.com/v1/balance' => Http::response(['balance' => 100000000])]);
+
+    try {
+        app(RefundRepository::class)->create(razorpayRefundData($order));
+    } catch (RazorpayRefundFailedException $exception) {
+        $exception->render();
+    }
+
+    expect(session('error'))->toBe(trans('razorpay::app.errors.admin-refund-failed'));
+});
+
+it('keeps the general message when the balance cannot be read', function () {
+    [$order] = paidRazorpayOrder($this, 400);
+
+    Http::fake(['api.razorpay.com/v1/balance' => Http::response(['error' => ['code' => 'BAD_REQUEST_ERROR']], 400)]);
+
+    try {
+        app(RefundRepository::class)->create(razorpayRefundData($order));
+    } catch (RazorpayRefundFailedException $exception) {
+        $exception->render();
+    }
+
+    expect(session('error'))->toBe(trans('razorpay::app.errors.admin-refund-failed'));
+});
+
 it('does not call razorpay for other payment methods', function () {
     [$order] = paidRazorpayOrder($this);
 
