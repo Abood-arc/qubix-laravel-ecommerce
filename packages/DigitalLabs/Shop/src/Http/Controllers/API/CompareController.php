@@ -67,6 +67,15 @@ class CompareController extends APIController
             ]))->response()->setStatusCode(Response::HTTP_UNPROCESSABLE_ENTITY);
         }
 
+        $limit = (int) config('shop.compare.limit');
+
+        if ($this->compareItemRepository->findByField('customer_id', auth()->guard('customer')->user()->id)->count() >= $limit) {
+            return (new JsonResource([
+                'message' => trans('shop::app.compare.limit-reached', ['max' => $limit]),
+                'reason' => 'compare-limit',
+            ]))->response()->setStatusCode(Response::HTTP_UNPROCESSABLE_ENTITY);
+        }
+
         Event::dispatch('customer.compare.create.before');
 
         $compareProduct = $this->compareItemRepository->create([

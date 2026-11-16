@@ -913,6 +913,8 @@ return [
         'delete-all' => 'Удалить все',
         'empty-text' => 'У вас нет товаров в списке сравнения',
         'item-add-success' => 'Товар успешно добавлен в список сравнения',
+        'limit-link' => 'Open compare',
+        'limit-reached' => 'You can compare up to :max',
         'product-compare' => 'Сравнение товаров',
         'remove-all-success' => 'Все товары успешно удалены.',
         'remove-error' => 'Что-то пошло не так. Попробуйте еще раз позже.',

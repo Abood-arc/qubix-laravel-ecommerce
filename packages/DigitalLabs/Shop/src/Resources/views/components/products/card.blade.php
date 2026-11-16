@@ -389,6 +389,8 @@
         </div>
     </script>
 
+    @include('shop::components.compare.list')
+
     <script type="module">
         app.component('v-product-card', {
             template: '#v-product-card-template',
@@ -432,6 +434,10 @@
                                 this.$emitter.emit('add-flash', { type: 'success', message: response.data.data.message });
                             })
                             .catch(error => {
+                                if (this.$compareList.handleLimitError(error)) {
+                                    return;
+                                }
+
                                 if ([400, 422].includes(error.response.status)) {
                                     this.$emitter.emit('add-flash', { type: 'warning', message: error.response.data.data.message });
 
@@ -445,36 +451,16 @@
                     }
 
                     /**
-                     * This will handle for guests.
+                     * This will handle for guests. $compareList keeps the list within the compare limit
+                     * and shows the limit message itself.
                      */
-                    let items = this.getStorageValue() ?? [];
+                    const result = this.$compareList.addForGuest(productId);
 
-                    if (items.length) {
-                        if (! items.includes(productId)) {
-                            items.push(productId);
-
-                            localStorage.setItem('compare_items', JSON.stringify(items));
-
-                            this.$emitter.emit('add-flash', { type: 'success', message: "@lang('shop::app.components.products.card.add-to-compare-success')" });
-                        } else {
-                            this.$emitter.emit('add-flash', { type: 'warning', message: "@lang('shop::app.components.products.card.already-in-compare')" });
-                        }
-                    } else {
-                        localStorage.setItem('compare_items', JSON.stringify([productId]));
-
+                    if (result === 'added') {
                         this.$emitter.emit('add-flash', { type: 'success', message: "@lang('shop::app.components.products.card.add-to-compare-success')" });
-
+                    } else if (result === 'already') {
+                        this.$emitter.emit('add-flash', { type: 'warning', message: "@lang('shop::app.components.products.card.already-in-compare')" });
                     }
-                },
-
-                getStorageValue(key) {
-                    let value = localStorage.getItem('compare_items');
-
-                    if (! value) {
-                        return [];
-                    }
-
-                    return JSON.parse(value);
                 },
 
                 addToCart() {

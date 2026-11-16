@@ -913,6 +913,8 @@ return [
         'delete-all' => 'Esborrar-ho tot',
         'empty-text' => 'No tens articles a la teva llista de comparació',
         'item-add-success' => 'L\'article s\'ha afegit correctament a la llista de comparació',
+        'limit-link' => 'Open compare',
+        'limit-reached' => 'You can compare up to :max',
         'product-compare' => 'Comparació de productes',
         'remove-all-success' => 'Tots els articles s\'han eliminat correctament.',
         'remove-error' => 'Alguna cosa ha anat malament. Si us plau, intenta-ho més tard.',

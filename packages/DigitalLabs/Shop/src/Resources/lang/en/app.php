@@ -913,6 +913,8 @@ return [
         'delete-all' => 'Delete All',
         'empty-text' => 'You have no items in your compare list',
         'item-add-success' => 'Item added successfully to compare list',
+        'limit-link' => 'Open compare',
+        'limit-reached' => 'You can compare up to :max',
         'product-compare' => 'Product Compare',
         'remove-all-success' => 'All items removed successfully.',
         'remove-error' => 'Something went wrong, please try again later.',

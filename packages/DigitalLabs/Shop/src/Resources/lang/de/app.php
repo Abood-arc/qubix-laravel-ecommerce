@@ -913,6 +913,8 @@ return [
         'delete-all' => 'Alle löschen',
         'empty-text' => 'Sie haben keine Artikel in Ihrer Vergleichsliste',
         'item-add-success' => 'Artikel erfolgreich zur Vergleichsliste hinzugefügt',
+        'limit-link' => 'Open compare',
+        'limit-reached' => 'You can compare up to :max',
         'product-compare' => 'Produktvergleich',
         'remove-all-success' => 'Alle Artikel erfolgreich entfernt.',
         'remove-error' => 'Etwas ist schiefgelaufen. Bitte versuchen Sie es später erneut.',

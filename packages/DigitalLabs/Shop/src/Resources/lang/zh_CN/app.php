@@ -913,6 +913,8 @@ return [
         'delete-all' => '删除所有',
         'empty-text' => '您的比较列表中没有任何项目',
         'item-add-success' => '产品成功添加到比较列表。',
+        'limit-link' => 'Open compare',
+        'limit-reached' => 'You can compare up to :max',
         'product-compare' => '产品比较',
         'remove-all-success' => '所有项目已成功移除。',
         'remove-error' => '出了点问题，请稍后再试。',

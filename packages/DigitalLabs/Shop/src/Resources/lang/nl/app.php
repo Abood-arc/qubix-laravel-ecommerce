@@ -913,6 +913,8 @@ return [
         'delete-all' => 'Alles Verwijderen',
         'empty-text' => 'Je hebt geen items in je vergelijkingslijst',
         'item-add-success' => 'Item succesvol toegevoegd aan de vergelijkingslijst',
+        'limit-link' => 'Open compare',
+        'limit-reached' => 'You can compare up to :max',
         'product-compare' => 'Producten Vergelijken',
         'remove-all-success' => 'Alle items succesvol verwijderd.',
         'remove-error' => 'Er is iets misgegaan, probeer het later opnieuw.',

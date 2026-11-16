@@ -913,6 +913,8 @@ return [
         'delete-all' => 'සියල්ල මකන්න',
         'empty-text' => 'ඔබට ඔබේ සලකුණු ලැයිස්තුවේ අයිතමයන් නොමැත',
         'item-add-success' => 'අයිතමය සාර්ථකයි, සලකුණු ලැයිස්තුවට එකතු කරන ලදි',
+        'limit-link' => 'Open compare',
+        'limit-reached' => 'You can compare up to :max',
         'product-compare' => 'නිෂ්පාදන තීරුව',
         'remove-all-success' => 'සියල්ල සාර්ථකව ඉවත් කරන ලදි.',
         'remove-error' => 'මෙම්ම දෝෂයක්, කරුණු නැවත උත්සාහ කරන්න.',

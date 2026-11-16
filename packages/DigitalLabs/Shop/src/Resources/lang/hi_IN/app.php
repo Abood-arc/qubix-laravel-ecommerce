@@ -913,6 +913,8 @@ return [
         'delete-all' => 'सभी को हटाएं',
         'empty-text' => 'आपकी तुलना सूची में कोई आइटम नहीं है',
         'item-add-success' => 'आइटम को सफलतापूर्वक तुलना सूची में जोड़ दिया गया',
+        'limit-link' => 'Open compare',
+        'limit-reached' => 'You can compare up to :max',
         'product-compare' => 'उत्पाद तुलना',
         'remove-all-success' => 'सभी आइटम सफलतापूर्वक हटा दिए गए हैं।',
         'remove-error' => 'कुछ गलत हो गया है, कृपया बाद में पुनः प्रयास करें।',

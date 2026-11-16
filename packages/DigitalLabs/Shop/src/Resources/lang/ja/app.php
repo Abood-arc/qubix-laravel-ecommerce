@@ -913,6 +913,8 @@ return [
         'delete-all' => 'すべて削除',
         'empty-text' => '比較リストにアイテムがありません',
         'item-add-success' => 'アイテムが比較リストに正常に追加されました',
+        'limit-link' => 'Open compare',
+        'limit-reached' => 'You can compare up to :max',
         'product-compare' => '製品比較',
         'remove-all-success' => 'すべてのアイテムが正常に削除されました。',
         'remove-error' => '問題が発生しました。後でもう一度試してください。',

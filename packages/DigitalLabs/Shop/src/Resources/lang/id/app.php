@@ -913,6 +913,8 @@ return [
         'delete-all' => 'Hapus Semua',
         'empty-text' => 'Anda tidak memiliki item dalam daftar perbandingan',
         'item-add-success' => 'Item berhasil ditambahkan ke daftar perbandingan',
+        'limit-link' => 'Open compare',
+        'limit-reached' => 'You can compare up to :max',
         'product-compare' => 'Perbandingan Produk',
         'remove-all-success' => 'Semua item berhasil dihapus.',
         'remove-error' => 'Terjadi kesalahan, silakan coba lagi nanti.',

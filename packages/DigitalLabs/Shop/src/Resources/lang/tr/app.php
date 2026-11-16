@@ -913,6 +913,8 @@ return [
         'delete-all' => 'Tümünü Sil',
         'empty-text' => 'Karşılaştırma listeniz boş.',
         'item-add-success' => 'Ürün listeye eklendi.',
+        'limit-link' => 'Open compare',
+        'limit-reached' => 'You can compare up to :max',
         'product-compare' => 'Ürün Karşılaştırma',
         'remove-all-success' => 'Tüm ürünler kaldırıldı.',
         'remove-error' => 'Bir hata oluştu.',

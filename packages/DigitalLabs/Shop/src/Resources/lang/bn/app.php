@@ -913,6 +913,8 @@ return [
         'delete-all' => 'সব মুছুন',
         'empty-text' => 'আপনার তুলনা তালিকায় আপনি কোনও আইটেম নেই',
         'item-add-success' => 'আইটেম সফলভাবে তুলনা তালিকায় যোগ করা হয়েছে',
+        'limit-link' => 'Open compare',
+        'limit-reached' => 'You can compare up to :max',
         'product-compare' => 'পণ্য তুলনা',
         'remove-all-success' => 'সমস্ত আইটেম সফলভাবে সরানো হয়েছে',
         'remove-error' => 'কিছু ভুল হয়েছে, দয়া করে পরে আবার চেষ্টা করুন।',

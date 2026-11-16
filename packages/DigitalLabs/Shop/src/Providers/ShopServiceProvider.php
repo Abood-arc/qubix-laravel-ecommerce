@@ -72,5 +72,10 @@ class ShopServiceProvider extends ServiceProvider
             dirname(__DIR__).'/Config/home.php',
             'shop.home'
         );
+
+        $this->mergeConfigFrom(
+            dirname(__DIR__).'/Config/compare.php',
+            'shop.compare'
+        );
     }
 }

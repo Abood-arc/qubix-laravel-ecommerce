@@ -25,6 +25,13 @@
                 ></span>
 
                 @{{ flash.message }}
+
+                <a
+                    class="font-semibold underline ltr:ml-1.5 rtl:mr-1.5"
+                    :href="flash.link.url"
+                    v-text="flash.link.label"
+                    v-if="flash.link"
+                ></a>
             </p>
 
 			<span

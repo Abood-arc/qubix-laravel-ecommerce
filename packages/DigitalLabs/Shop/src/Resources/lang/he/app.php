@@ -913,6 +913,8 @@ return [
         'delete-all' => 'מחק הכל',
         'empty-text' => 'אין לך פריטים ברשימת ההשוואה שלך',
         'item-add-success' => 'הפריט התווסף לרשימת ההשוואה בהצלחה',
+        'limit-link' => 'Open compare',
+        'limit-reached' => 'You can compare up to :max',
         'product-compare' => 'השוואת מוצרים',
         'remove-all-success' => 'הפריטים נמחקו בהצלחה',
         'remove-error' => 'משהו השתבש, אנא נסה שוב מאוחר יותר',

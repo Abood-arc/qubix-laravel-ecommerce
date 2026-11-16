@@ -913,6 +913,8 @@ return [
         'delete-all' => 'حذف همه',
         'empty-text' => 'شما موردی در لیست مقایسه ندارید',
         'item-add-success' => 'مورد با موفقیت به لیست مقایسه افزوده شد',
+        'limit-link' => 'Open compare',
+        'limit-reached' => 'You can compare up to :max',
         'product-compare' => 'مقایسه محصولات',
         'remove-all-success' => 'تمام موارد با موفقیت حذف شدند.',
         'remove-error' => 'مشکلی پیش آمده است، لطفاً بعداً دوباره تلاش کنید.',
