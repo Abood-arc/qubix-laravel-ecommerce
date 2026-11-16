@@ -13,6 +13,7 @@ use DigitalLabs\Sales\Models\Order;
 use DigitalLabs\Sales\Models\OrderAddress;
 use DigitalLabs\Sales\Models\OrderItem;
 use DigitalLabs\Sales\Models\OrderPayment;
+use Illuminate\Support\Str;
 
 use function Pest\Laravel\get;
 use function Pest\Laravel\getJson;
@@ -136,12 +137,21 @@ it('should view the order', function () {
     // Act and Assert.
     $this->loginAsCustomer($customer);
 
-    get(route('shop.customers.account.orders.view', $order->id))
+    $response = get(route('shop.customers.account.orders.view', $order->id))
         ->assertOk()
         ->assertSeeText(trans('shop::app.customers.account.orders.view.information.sku'))
         ->assertSeeText(trans('shop::app.customers.account.orders.view.information.product-name'))
         ->assertSeeText(trans('shop::app.customers.account.orders.view.information.total-due'))
         ->assertSeeText(trans('shop::app.customers.account.orders.view.page-title', ['order_id' => $order->increment_id]));
+
+    // The phone layout sits inside `v-pre`, so Vue never builds anything there: the items
+    // must use the browser's own <details>, not the Vue accordion, or phones show none.
+    $mobileItems = Str::between($response->getContent(), '<!-- Item Ordered -->', '<!--Summary -->');
+
+    expect($mobileItems)
+        ->toContain('<details')
+        ->toContain($orderItem->name)
+        ->not->toContain('<v-accordion');
 
     $cart->refresh();
 

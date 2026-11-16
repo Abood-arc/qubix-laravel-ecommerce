@@ -504,15 +504,17 @@
                         </div>
 
                         <!-- Item Ordered -->
-                        <x-shop::accordion
-                            :is-active="true"
-                            class="overflow-hidden rounded-lg !border-none !bg-gray-100"
+                        <details
+                            open
+                            class="group overflow-hidden rounded-lg bg-gray-100"
                         >
-                            <x-slot:header class="bg-gray-100 !px-4 py-3 text-sm font-medium max-sm:py-2">
+                            <summary class="flex cursor-pointer select-none list-none items-center justify-between p-4 bg-gray-100 !px-4 py-3 text-sm font-medium max-sm:py-2 [&::-webkit-details-marker]:hidden">
                                @lang('shop::app.customers.account.orders.view.item-ordered')
-                            </x-slot>
+                                <span class="icon-arrow-down text-2xl group-open:hidden"></span>
+                                <span class="icon-arrow-up hidden text-2xl group-open:inline"></span>
+                            </summary>
 
-                            <x-slot:content class="grid gap-2.5 !bg-gray-100 !p-0">
+                            <div class="z-10 rounded-lg p-1.5 grid gap-2.5 !bg-gray-100 !p-0">
                                 @foreach ($order->items as $item)
                                     <div class="rounded-md rounded-t-none border border-t-0 bg-white px-4 py-2">
                                         <p class="pb-2 text-sm font-medium">
@@ -668,8 +670,8 @@
                                         </div>
                                     </div>
                                 @endforeach
-                            </x-slot>
-                        </x-shop::accordion>
+                            </div>
+                        </details>
 
                         <!--Summary -->
                         <div class="w-full rounded-md bg-gray-100">
@@ -908,15 +910,17 @@
                                     </div>
 
                                     <!-- Item  Invoiced -->
-                                    <x-shop::accordion
-                                        :is-active="true"
-                                        class="overflow-hidden rounded-lg !border-none !bg-gray-100"
+                                    <details
+                                        open
+                                        class="group overflow-hidden rounded-lg bg-gray-100"
                                     >
-                                        <x-slot:header class="!mb-0 rounded-t-md bg-gray-100 !px-4 py-3 text-sm font-medium max-sm:py-2">
+                                        <summary class="flex cursor-pointer select-none list-none items-center justify-between p-4 !mb-0 rounded-t-md bg-gray-100 !px-4 py-3 text-sm font-medium max-sm:py-2 [&::-webkit-details-marker]:hidden">
                                             @lang('shop::app.customers.account.orders.view.item-invoiced')
-                                        </x-slot>
+                                            <span class="icon-arrow-down text-2xl group-open:hidden"></span>
+                                            <span class="icon-arrow-up hidden text-2xl group-open:inline"></span>
+                                        </summary>
 
-                                        <x-slot:content class="grid gap-2.5 !bg-gray-100 !p-0">
+                                        <div class="z-10 rounded-lg p-1.5 grid gap-2.5 !bg-gray-100 !p-0">
                                             @foreach ($invoice->items as $item)
                                                 <div class="rounded-md rounded-t-none border border-t-0 bg-white px-4 py-2">
                                                     <p class="pb-2 text-sm font-medium">
@@ -1010,8 +1014,8 @@
                                                     </div>
                                                 </div>
                                             @endforeach
-                                        </x-slot>
-                                    </x-shop::accordion>
+                                        </div>
+                                    </details>
 
                                     <!--Summary -->
                                     <div class="w-full rounded-md bg-gray-100">
@@ -1491,15 +1495,17 @@
                                         </div>
                                     </div>
 
-                                    <x-shop::accordion
-                                        :is-active="true"
-                                        class="overflow-hidden rounded-lg !border-none !bg-gray-100"
+                                    <details
+                                        open
+                                        class="group overflow-hidden rounded-lg bg-gray-100"
                                     >
-                                        <x-slot:header class="!mb-0 rounded-t-md bg-gray-100 !px-4 py-3 text-sm font-medium max-sm:py-2">
+                                        <summary class="flex cursor-pointer select-none list-none items-center justify-between p-4 !mb-0 rounded-t-md bg-gray-100 !px-4 py-3 text-sm font-medium max-sm:py-2 [&::-webkit-details-marker]:hidden">
                                             @lang('shop::app.customers.account.orders.view.item-shipped')
-                                        </x-slot>
+                                            <span class="icon-arrow-down text-2xl group-open:hidden"></span>
+                                            <span class="icon-arrow-up hidden text-2xl group-open:inline"></span>
+                                        </summary>
 
-                                        <x-slot:content class="grid gap-2.5 !bg-gray-100 !p-0">
+                                        <div class="z-10 rounded-lg p-1.5 grid gap-2.5 !bg-gray-100 !p-0">
                                             @foreach ($shipment->items as $item)
                                                 <div class="rounded-md rounded-t-none border border-t-0 bg-white px-4 py-2">
                                                     <p class="pb-2 text-sm font-medium">
@@ -1529,8 +1535,8 @@
                                                     </div>
                                                 </div>
                                             @endforeach
-                                        </x-slot>
-                                    </x-shop::accordion>
+                                        </div>
+                                    </details>
                                 </div>
                             @endforeach
                         </div>
@@ -1669,15 +1675,17 @@
                                     </div>
                                 </div>
 
-                                <x-shop::accordion
-                                    :is-active="true"
-                                    class="overflow-hidden rounded-lg !border-none !bg-gray-100"
+                                <details
+                                    open
+                                    class="group overflow-hidden rounded-lg bg-gray-100"
                                 >
-                                    <x-slot:header class="!mb-0 rounded-t-md bg-gray-100 !px-4 py-3 text-sm font-medium max-sm:py-2">
+                                    <summary class="flex cursor-pointer select-none list-none items-center justify-between p-4 !mb-0 rounded-t-md bg-gray-100 !px-4 py-3 text-sm font-medium max-sm:py-2 [&::-webkit-details-marker]:hidden">
                                         @lang('shop::app.customers.account.orders.view.item-refunded')
-                                    </x-slot>
+                                        <span class="icon-arrow-down text-2xl group-open:hidden"></span>
+                                        <span class="icon-arrow-up hidden text-2xl group-open:inline"></span>
+                                    </summary>
 
-                                    <x-slot:content class="grid gap-2.5 !bg-gray-100 !p-0">
+                                    <div class="z-10 rounded-lg p-1.5 grid gap-2.5 !bg-gray-100 !p-0">
                                         @foreach ($invoice->items as $item)
                                             <div class="rounded-md rounded-t-none border border-t-0 bg-white px-4 py-2">
                                                 <p class="pb-2 text-sm font-medium">
@@ -1763,8 +1771,8 @@
                                                 </div>
                                             </div>
                                         @endforeach
-                                    </x-slot>
-                                </x-shop::accordion>
+                                    </div>
+                                </details>
 
                                 <!-- Summary -->
                                 <div class="w-full rounded-md bg-gray-100">
