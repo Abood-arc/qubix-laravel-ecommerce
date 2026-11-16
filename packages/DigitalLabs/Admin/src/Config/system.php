@@ -334,6 +334,54 @@ return [
             ],
         ],
     ], [
+        'key' => 'general.design.product_card',
+        'name' => 'admin::app.configuration.index.general.design.product-card.title',
+        'info' => 'admin::app.configuration.index.general.design.product-card.info',
+        'sort' => 4,
+        'fields' => [
+            [
+                'name' => 'style',
+                'title' => 'admin::app.configuration.index.general.design.product-card.style',
+                'info' => 'admin::app.configuration.index.general.design.product-card.style-info',
+                'type' => 'select',
+                'default' => 'classic',
+                'channel_based' => true,
+                'options' => [
+                    [
+                        'title' => 'admin::app.configuration.index.general.design.product-card.classic',
+                        'value' => 'classic',
+                    ], [
+                        'title' => 'admin::app.configuration.index.general.design.product-card.swipe',
+                        'value' => 'swipe',
+                    ], [
+                        'title' => 'admin::app.configuration.index.general.design.product-card.deck',
+                        'value' => 'deck',
+                    ],
+                ],
+            ], [
+                'name' => 'style_preview',
+                'title' => 'admin::app.configuration.index.general.design.product-card.style',
+                'type' => 'blade',
+                'path' => 'admin::configuration.custom-views.product-card',
+            ], [
+                'name' => 'size_unit',
+                'title' => 'admin::app.configuration.index.general.design.product-card.size-unit',
+                'info' => 'admin::app.configuration.index.general.design.product-card.size-unit-info',
+                'type' => 'select',
+                'default' => 'in',
+                'channel_based' => true,
+                'options' => [
+                    [
+                        'title' => 'admin::app.configuration.index.general.design.product-card.inches',
+                        'value' => 'in',
+                    ], [
+                        'title' => 'admin::app.configuration.index.general.design.product-card.centimetres',
+                        'value' => 'cm',
+                    ],
+                ],
+            ],
+        ],
+    ], [
         'key' => 'general.magic_ai',
         'name' => 'admin::app.configuration.index.general.magic-ai.title',
         'info' => 'admin::app.configuration.index.general.magic-ai.info',

@@ -3783,6 +3783,20 @@ return [
                         'title' => 'মেনু ক্যাটাগরি ভিউ',
                     ],
 
+                    'product-card' => [
+                        'centimetres' => 'Centimetres',
+                        'classic' => 'Classic',
+                        'deck' => 'Photo deck',
+                        'inches' => 'Inches',
+                        'info' => 'Choose how product cards look in grids across the storefront: home page sections, categories, search, related products and up-sells. List view, the cart page and the compare page keep the Classic card.',
+                        'size-unit' => 'Size unit',
+                        'size-unit-info' => 'The unit of the Width, Height and Length you type on each product. The Swipe card shows a size line only when Width and Height are filled in.',
+                        'style' => 'Card style',
+                        'style-info' => 'Classic: the card your store has today. Swipe, named and sized: shoppers swipe the photo, or move the mouse across it, to see every photo, with the size on the card. Photo deck: the photos sit in a small stack, with a round add-to-cart button on the photo. Both new cards turn Add to cart into a − 1 + control and collect compare picks in a tray at the bottom of the screen.',
+                        'swipe' => 'Swipe, named and sized',
+                        'title' => 'Product card',
+                    ],
+
                     'store-look' => [
                         'forest-green' => 'Forest Green',
                         'info' => 'Choose the colours, fonts and corners of your storefront. The layout stays the same in every look.',
