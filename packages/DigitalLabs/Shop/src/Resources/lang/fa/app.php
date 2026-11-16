@@ -146,7 +146,6 @@ return [
                     'state' => 'استان',
                     'street-address' => 'آدرس خیابان',
                     'title' => 'آدرس',
-                    'vat-id' => 'شناسه مالیاتی',
                 ],
 
                 'edit' => [
@@ -164,7 +163,6 @@ return [
                     'street-address' => 'آدرس خیابان',
                     'title' => 'آدرس',
                     'update-btn' => 'به روز رسانی',
-                    'vat-id' => 'شناسه مالیاتی',
                 ],
             ],
 
@@ -1040,11 +1038,7 @@ return [
                 'street-address' => 'آدرس خیابان',
                 'telephone' => 'تلفن',
                 'pin-code' => 'کد پستی (PIN)',
-                'gstin' => 'GSTIN',
-                'gstin-placeholder' => 'مثال: 27AAPFU0939F1ZV',
-                'gst-invoice-toggle' => 'فاکتور GST لازم دارید؟ شرکت و GSTIN را اضافه کنید',
                 'title' => 'آدرس',
-                'vat-id' => 'شناسه مالیاتی',
             ],
 
             'index' => [

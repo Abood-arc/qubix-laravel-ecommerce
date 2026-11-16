@@ -146,7 +146,6 @@ return [
                     'state' => 'Provinsi',
                     'street-address' => 'Alamat Jalan',
                     'title' => 'Alamat',
-                    'vat-id' => 'ID Pajak (NPWP)',
                 ],
 
                 'edit' => [
@@ -164,7 +163,6 @@ return [
                     'street-address' => 'Alamat Jalan',
                     'title' => 'Alamat',
                     'update-btn' => 'Perbarui',
-                    'vat-id' => 'ID Pajak (NPWP)',
                 ],
             ],
 
@@ -1040,11 +1038,7 @@ return [
                 'street-address' => 'Alamat Jalan',
                 'telephone' => 'Telepon',
                 'pin-code' => 'Kode pos (PIN)',
-                'gstin' => 'GSTIN',
-                'gstin-placeholder' => 'mis. 27AAPFU0939F1ZV',
-                'gst-invoice-toggle' => 'Perlu faktur GST? Tambahkan perusahaan dan GSTIN',
                 'title' => 'Alamat',
-                'vat-id' => 'Nomor NPWP',
             ],
 
             'index' => [

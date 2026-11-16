@@ -146,7 +146,6 @@ return [
                     'state' => 'Bundesland',
                     'street-address' => 'Straße und Hausnummer',
                     'title' => 'Adresse',
-                    'vat-id' => 'USt-IdNr.',
                 ],
 
                 'edit' => [
@@ -164,7 +163,6 @@ return [
                     'street-address' => 'Straße und Hausnummer',
                     'title' => 'Adresse',
                     'update-btn' => 'Aktualisieren',
-                    'vat-id' => 'USt-IdNr.',
                 ],
             ],
 
@@ -1040,11 +1038,7 @@ return [
                 'street-address' => 'Straßenadresse',
                 'telephone' => 'Telefon',
                 'pin-code' => 'Postleitzahl (PIN)',
-                'gstin' => 'GSTIN',
-                'gstin-placeholder' => 'z. B. 27AAPFU0939F1ZV',
-                'gst-invoice-toggle' => 'GST-Rechnung benötigt? Firma und GSTIN hinzufügen',
                 'title' => 'Adresse',
-                'vat-id' => 'USt-IdNr.',
             ],
 
             'index' => [

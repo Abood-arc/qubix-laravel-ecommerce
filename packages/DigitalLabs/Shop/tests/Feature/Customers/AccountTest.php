@@ -240,7 +240,7 @@ it('should returns the create page of address', function () {
         ->assertSeeText(trans('shop::app.customers.account.addresses.index.add-address'))
         ->assertSeeText(trans('shop::app.customers.account.addresses.create.first-name'))
         ->assertSeeText(trans('shop::app.customers.account.addresses.create.last-name'))
-        ->assertSeeText(trans('shop::app.customers.account.addresses.create.vat-id'))
+        ->assertDontSee('name="vat_id"', false)
         ->assertSeeText(trans('shop::app.customers.account.addresses.create.street-address'))
         ->assertSeeText(trans('shop::app.customers.account.addresses.create.company-name'));
 });
@@ -317,7 +317,8 @@ it('should edit the customer address', function () {
         ->assertOk()
         ->assertSeeText(trans('shop::app.customers.account.addresses.edit.edit'))
         ->assertSeeText(trans('shop::app.customers.account.addresses.edit.title'))
-        ->assertSeeText(trans('shop::app.customers.account.addresses.edit.update-btn'));
+        ->assertSeeText(trans('shop::app.customers.account.addresses.edit.update-btn'))
+        ->assertDontSee('name="vat_id"', false);
 });
 
 it('should fails the validation error when certain inputs not provided update the customer address', function () {

@@ -146,7 +146,6 @@ return [
                     'state' => 'පළාත',
                     'street-address' => 'වීදි ලිපිනය',
                     'title' => 'ලිපිනය',
-                    'vat-id' => 'වැට් අංකය',
                 ],
 
                 'edit' => [
@@ -164,7 +163,6 @@ return [
                     'street-address' => 'වීදි ලිපිනය',
                     'title' => 'ලිපිනය',
                     'update-btn' => 'යාවත්කාල කරන්න',
-                    'vat-id' => 'වැට් අංකය',
                 ],
             ],
 
@@ -1040,11 +1038,7 @@ return [
                 'street-address' => 'වීදි ලිපිනය',
                 'telephone' => 'දුරකථන අංකය',
                 'pin-code' => 'තැපැල් කේතය (PIN)',
-                'gstin' => 'GSTIN',
-                'gstin-placeholder' => 'උදා. 27AAPFU0939F1ZV',
-                'gst-invoice-toggle' => 'GST ඉන්වොයිසියක් අවශ්‍යද? සමාගම සහ GSTIN එක් කරන්න',
                 'title' => 'ලිපිනය',
-                'vat-id' => 'වැට් අංකය',
             ],
 
             'index' => [

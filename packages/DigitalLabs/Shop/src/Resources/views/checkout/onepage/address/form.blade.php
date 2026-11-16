@@ -266,60 +266,22 @@
 
             {!! view_render_event('qubix.shop.checkout.onepage.address.form.phone.after') !!}
 
-            {{--
-                Company and tax ID sit last. For an Indian address most shoppers never need them, so
-                they open behind a "GST invoice" link and the tax field is labelled GSTIN (VatValidator
-                checks the GSTIN format for IN). Other countries see both fields as before, labelled VAT.
-            --}}
-            <template v-if="! isIndia || showBusinessFields">
-                <!-- Company Name -->
-                <x-shop::form.control-group>
-                    <x-shop::form.control-group.label>
-                        @lang('shop::app.checkout.onepage.address.company-name')
-                    </x-shop::form.control-group.label>
+            <!-- Company Name (optional; the storefront asks for no tax number) -->
+            <x-shop::form.control-group>
+                <x-shop::form.control-group.label>
+                    @lang('shop::app.checkout.onepage.address.company-name')
+                </x-shop::form.control-group.label>
 
-                    <x-shop::form.control-group.control
-                        type="text"
-                        ::name="controlName + '.company_name'"
-                        ::value="address.company_name"
-                        autocomplete="organization"
-                        :placeholder="trans('shop::app.checkout.onepage.address.company-name')"
-                    />
-                </x-shop::form.control-group>
+                <x-shop::form.control-group.control
+                    type="text"
+                    ::name="controlName + '.company_name'"
+                    ::value="address.company_name"
+                    autocomplete="organization"
+                    :placeholder="trans('shop::app.checkout.onepage.address.company-name')"
+                />
+            </x-shop::form.control-group>
 
-                {!! view_render_event('qubix.shop.checkout.onepage.address.form.company_name.after') !!}
-
-                <!-- Vat ID / GSTIN -->
-                <template v-if="controlName=='billing'">
-                    <x-shop::form.control-group>
-                        <x-shop::form.control-group.label>
-                            <template v-if="isIndia">@lang('shop::app.checkout.onepage.address.gstin')</template>
-                            <template v-else>@lang('shop::app.checkout.onepage.address.vat-id')</template>
-                        </x-shop::form.control-group.label>
-
-                        <x-shop::form.control-group.control
-                            type="text"
-                            ::name="controlName + '.vat_id'"
-                            ::value="address.vat_id"
-                            ::label="isIndia ? {{ json_encode(trans('shop::app.checkout.onepage.address.gstin')) }} : {{ json_encode(trans('shop::app.checkout.onepage.address.vat-id')) }}"
-                            ::placeholder="isIndia ? {{ json_encode(trans('shop::app.checkout.onepage.address.gstin-placeholder')) }} : {{ json_encode(trans('shop::app.checkout.onepage.address.vat-id')) }}"
-                        />
-
-                        <x-shop::form.control-group.error ::name="controlName + '.vat_id'" />
-                    </x-shop::form.control-group>
-
-                    {!! view_render_event('qubix.shop.checkout.onepage.address.form.vat_id.after') !!}
-                </template>
-            </template>
-
-            <button
-                type="button"
-                class="mb-4 py-2 text-sm font-medium text-brand underline underline-offset-4"
-                v-else
-                @click="showBusinessFields = true"
-            >
-                @lang('shop::app.checkout.onepage.address.gst-invoice-toggle')
-            </button>
+            {!! view_render_event('qubix.shop.checkout.onepage.address.form.company_name.after') !!}
         </div>
     </script>
 
@@ -360,8 +322,6 @@
                     defaultCountry,
 
                     selectedCountry: this.address.country || defaultCountry,
-
-                    showBusinessFields: !! (this.address.company_name || this.address.vat_id),
 
                     countries: [],
 

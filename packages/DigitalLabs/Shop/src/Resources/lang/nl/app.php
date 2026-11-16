@@ -146,7 +146,6 @@ return [
                     'state' => 'Provincie',
                     'street-address' => 'Straatnaam en Huisnummer',
                     'title' => 'Adres',
-                    'vat-id' => 'BTW-nummer',
                 ],
 
                 'edit' => [
@@ -164,7 +163,6 @@ return [
                     'street-address' => 'Straatnaam en Huisnummer',
                     'title' => 'Adres',
                     'update-btn' => 'Bijwerken',
-                    'vat-id' => 'BTW-nummer',
                 ],
             ],
 
@@ -1040,11 +1038,7 @@ return [
                 'street-address' => 'Straatadres',
                 'telephone' => 'Telefoon',
                 'pin-code' => 'Postcode (PIN)',
-                'gstin' => 'GSTIN',
-                'gstin-placeholder' => 'bijv. 27AAPFU0939F1ZV',
-                'gst-invoice-toggle' => 'GST-factuur nodig? Voeg bedrijf en GSTIN toe',
                 'title' => 'Adres',
-                'vat-id' => 'BTW-nummer',
             ],
 
             'index' => [

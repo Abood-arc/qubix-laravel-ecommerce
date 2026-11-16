@@ -146,7 +146,6 @@ return [
                     'state' => 'État',
                     'street-address' => 'Adresse',
                     'title' => 'Adresse',
-                    'vat-id' => 'Numéro de TVA',
                 ],
 
                 'edit' => [
@@ -164,7 +163,6 @@ return [
                     'street-address' => 'Adresse',
                     'title' => 'Adresse',
                     'update-btn' => 'Mettre à jour',
-                    'vat-id' => 'Numéro de TVA',
                 ],
             ],
 
@@ -1040,11 +1038,7 @@ return [
                 'street-address' => 'Adresse de rue',
                 'telephone' => 'Téléphone',
                 'pin-code' => 'Code postal (PIN)',
-                'gstin' => 'GSTIN',
-                'gstin-placeholder' => 'ex. 27AAPFU0939F1ZV',
-                'gst-invoice-toggle' => 'Besoin d\'une facture GST ? Ajoutez la société et le GSTIN',
                 'title' => 'Adresse',
-                'vat-id' => 'Numéro de TVA',
             ],
 
             'index' => [

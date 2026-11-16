@@ -146,7 +146,6 @@ return [
                     'state' => '州/省',
                     'street-address' => '街道地址',
                     'title' => '地址',
-                    'vat-id' => 'VAT号码',
                 ],
 
                 'edit' => [
@@ -164,7 +163,6 @@ return [
                     'street-address' => '街道地址',
                     'title' => '地址',
                     'update-btn' => '更新',
-                    'vat-id' => 'VAT号码',
                 ],
             ],
 
@@ -1040,11 +1038,7 @@ return [
                 'street-address' => '街道地址',
                 'telephone' => '电话',
                 'pin-code' => '邮政编码 (PIN)',
-                'gstin' => 'GSTIN',
-                'gstin-placeholder' => '例如 27AAPFU0939F1ZV',
-                'gst-invoice-toggle' => '需要 GST 发票？添加公司和 GSTIN',
                 'title' => '地址',
-                'vat-id' => 'VAT号码',
             ],
 
             'index' => [

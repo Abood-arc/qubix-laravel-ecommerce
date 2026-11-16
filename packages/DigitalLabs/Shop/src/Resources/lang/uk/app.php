@@ -146,7 +146,6 @@ return [
                     'state' => 'Область',
                     'street-address' => 'Вулиця та номер будинку',
                     'title' => 'Адреса',
-                    'vat-id' => 'Ідентифікаційний номер ПДВ',
                 ],
 
                 'edit' => [
@@ -164,7 +163,6 @@ return [
                     'street-address' => 'Вулиця та номер будинку',
                     'title' => 'Адреса',
                     'update-btn' => 'Оновити',
-                    'vat-id' => 'Ідентифікаційний номер ПДВ',
                 ],
             ],
 
@@ -1040,11 +1038,7 @@ return [
                 'street-address' => 'Вулиця',
                 'telephone' => 'Телефон',
                 'pin-code' => 'Поштовий індекс (PIN)',
-                'gstin' => 'GSTIN',
-                'gstin-placeholder' => 'напр. 27AAPFU0939F1ZV',
-                'gst-invoice-toggle' => 'Потрібен рахунок із GST? Додайте компанію та GSTIN',
                 'title' => 'Адреса',
-                'vat-id' => 'Ідентифікаційний номер ПДВ',
             ],
 
             'index' => [

@@ -146,7 +146,6 @@ return [
                     'state' => '都道府県',
                     'street-address' => '住所',
                     'title' => '住所',
-                    'vat-id' => 'VAT番号',
                 ],
 
                 'edit' => [
@@ -164,7 +163,6 @@ return [
                     'street-address' => '住所',
                     'title' => '住所',
                     'update-btn' => '更新する',
-                    'vat-id' => 'VAT番号',
                 ],
             ],
 
@@ -1040,11 +1038,7 @@ return [
                 'street-address' => '住所',
                 'telephone' => '電話番号',
                 'pin-code' => '郵便番号 (PIN)',
-                'gstin' => 'GSTIN',
-                'gstin-placeholder' => '例: 27AAPFU0939F1ZV',
-                'gst-invoice-toggle' => 'GST請求書が必要ですか？会社名とGSTINを追加',
                 'title' => '住所',
-                'vat-id' => 'VAT番号',
             ],
 
             'index' => [

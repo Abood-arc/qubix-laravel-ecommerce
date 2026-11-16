@@ -146,7 +146,6 @@ return [
                     'state' => 'Şehir / Bölge',
                     'street-address' => 'Adres Detayı',
                     'title' => 'Adres',
-                    'vat-id' => 'Vergi/KDV No',
                 ],
 
                 'edit' => [
@@ -164,7 +163,6 @@ return [
                     'street-address' => 'Adres Detayı',
                     'title' => 'Adresi Düzenle',
                     'update-btn' => 'Güncelle',
-                    'vat-id' => 'Vergi/KDV No',
                 ],
             ],
 
@@ -1040,11 +1038,7 @@ return [
                 'street-address' => 'Adres Detayı',
                 'telephone' => 'Telefon',
                 'pin-code' => 'Posta kodu (PIN)',
-                'gstin' => 'GSTIN',
-                'gstin-placeholder' => 'ör. 27AAPFU0939F1ZV',
-                'gst-invoice-toggle' => 'GST faturası mı gerekiyor? Şirket ve GSTIN ekleyin',
                 'title' => 'Adres Bilgileri',
-                'vat-id' => 'Vergi/KDV No',
             ],
 
             'index' => [

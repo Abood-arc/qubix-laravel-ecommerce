@@ -146,7 +146,6 @@ return [
                     'state' => 'राज्य',
                     'street-address' => 'सड़क का पता',
                     'title' => 'पता',
-                    'vat-id' => 'वैट आईडी',
                 ],
 
                 'edit' => [
@@ -164,7 +163,6 @@ return [
                     'street-address' => 'सड़क का पता',
                     'title' => 'पता',
                     'update-btn' => 'अपडेट करें',
-                    'vat-id' => 'वैट आईडी',
                 ],
             ],
 
@@ -1040,11 +1038,7 @@ return [
                 'street-address' => 'स्ट्रीट पता',
                 'telephone' => 'टेलीफोन',
                 'pin-code' => 'पिन कोड',
-                'gstin' => 'GSTIN',
-                'gstin-placeholder' => 'उदा. 27AAPFU0939F1ZV',
-                'gst-invoice-toggle' => 'GST बिल चाहिए? कंपनी और GSTIN जोड़ें',
                 'title' => 'पता',
-                'vat-id' => 'वैट आईडी',
             ],
 
             'index' => [

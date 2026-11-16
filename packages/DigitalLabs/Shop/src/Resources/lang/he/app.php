@@ -146,7 +146,6 @@ return [
                     'state' => 'מדינה',
                     'street-address' => 'כתובת',
                     'title' => 'כתובת',
-                    'vat-id' => 'מספר עוסק מורשה',
                 ],
 
                 'edit' => [
@@ -164,7 +163,6 @@ return [
                     'street-address' => 'כתובת',
                     'title' => 'כתובת',
                     'update-btn' => 'עדכון',
-                    'vat-id' => 'מספר עוסק מורשה',
                 ],
             ],
 
@@ -1040,11 +1038,7 @@ return [
                 'street-address' => 'כתובת',
                 'telephone' => 'טלפון',
                 'pin-code' => 'מיקוד (PIN)',
-                'gstin' => 'GSTIN',
-                'gstin-placeholder' => 'לדוגמה 27AAPFU0939F1ZV',
-                'gst-invoice-toggle' => 'צריכים חשבונית GST? הוסיפו חברה ו-GSTIN',
                 'title' => 'כתובת',
-                'vat-id' => 'מספר עוסק מורשה',
             ],
 
             'index' => [

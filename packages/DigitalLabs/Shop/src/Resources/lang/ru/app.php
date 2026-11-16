@@ -146,7 +146,6 @@ return [
                     'state' => 'Область',
                     'street-address' => 'Улица и номер дома',
                     'title' => 'Адрес',
-                    'vat-id' => 'Идентификационный номер НДС',
                 ],
 
                 'edit' => [
@@ -164,7 +163,6 @@ return [
                     'street-address' => 'Улица и номер дома',
                     'title' => 'Адрес',
                     'update-btn' => 'Обновить',
-                    'vat-id' => 'Идентификационный номер НДС',
                 ],
             ],
 
@@ -1040,11 +1038,7 @@ return [
                 'street-address' => 'Улица, дом',
                 'telephone' => 'Телефон',
                 'pin-code' => 'Почтовый индекс (PIN)',
-                'gstin' => 'GSTIN',
-                'gstin-placeholder' => 'напр. 27AAPFU0939F1ZV',
-                'gst-invoice-toggle' => 'Нужен счёт с GST? Добавьте компанию и GSTIN',
                 'title' => 'Адрес',
-                'vat-id' => 'Идентификационный номер НДС',
             ],
 
             'index' => [

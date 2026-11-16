@@ -146,7 +146,6 @@ return [
                     'state' => 'State',
                     'street-address' => 'Street Address',
                     'title' => 'Address',
-                    'vat-id' => 'Vat ID',
                 ],
 
                 'edit' => [
@@ -164,7 +163,6 @@ return [
                     'street-address' => 'Street Address',
                     'title' => 'Address',
                     'update-btn' => 'Update',
-                    'vat-id' => 'Vat ID',
                 ],
             ],
 
@@ -1040,11 +1038,7 @@ return [
                 'street-address' => 'Street Address',
                 'telephone' => 'Telephone',
                 'pin-code' => 'PIN code',
-                'gstin' => 'GSTIN',
-                'gstin-placeholder' => 'e.g. 27AAPFU0939F1ZV',
-                'gst-invoice-toggle' => 'Need a GST invoice? Add company and GSTIN',
                 'title' => 'Address',
-                'vat-id' => 'Vat ID',
             ],
 
             'index' => [
