@@ -220,6 +220,9 @@
 
         @stack('scripts')
 
+        {{-- No chatbot on the checkout page: nothing should float over the address and payment
+             steps, and the page loads lighter without the widget. --}}
+        @unless (request()->routeIs('shop.checkout.onepage.index'))
         <script src="https://cdn.zanderio.ai/widget/loader.js" data-id="wdg_bDmt03WxuJCWokGT6wmHrX1O" defer></script>
 
         {{-- The chat button floats above everything (max z-index), so it covered the cart's subtotal
@@ -437,6 +440,7 @@
                 watcher.observe(document.documentElement, { childList: true, subtree: true });
             })();
         </script>
+        @endunless
 
         {!! view_render_event('qubix.shop.layout.vue-app-mount.before') !!}
         <script>
