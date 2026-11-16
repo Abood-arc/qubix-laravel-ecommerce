@@ -96,7 +96,7 @@ class RazorpayClient
      */
     protected function isSignatureValid(string $payload, string $signature, string $secretField): bool
     {
-        $secret = (string) $this->setting($secretField);
+        $secret = $this->credential($secretField);
 
         if ($secret === '' || $signature === '') {
             return false;
@@ -112,7 +112,7 @@ class RazorpayClient
     {
         try {
             $response = Http::baseUrl(self::BASE_URL)
-                ->withBasicAuth((string) $this->setting('key_id'), (string) $this->setting('key_secret'))
+                ->withBasicAuth($this->credential('key_id'), $this->credential('key_secret'))
                 ->withHeaders($headers)
                 ->acceptJson()
                 ->connectTimeout(5)
@@ -130,10 +130,10 @@ class RazorpayClient
     }
 
     /**
-     * Read a Razorpay setting.
+     * Read an API key from the server's .env (config/razorpay.php).
      */
-    protected function setting(string $field): mixed
+    protected function credential(string $field): string
     {
-        return core()->getConfigData('sales.payment_methods.razorpay.'.$field);
+        return (string) config('razorpay.'.$field);
     }
 }

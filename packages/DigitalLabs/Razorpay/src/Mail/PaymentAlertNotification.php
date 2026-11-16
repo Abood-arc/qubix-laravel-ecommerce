@@ -13,6 +13,7 @@ class PaymentAlertNotification extends Mailable
         public string $paymentReference,
         public string $formattedAmount,
         public string $problem,
+        public array $details = [],
     ) {}
 
     public function envelope(): Envelope

@@ -16,6 +16,7 @@ use Illuminate\Contracts\Cache\LockTimeoutException;
 use Illuminate\Contracts\Mail\Mailable;
 use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Throwable;
 
@@ -168,6 +169,8 @@ class PaymentFinalizer
             || (int) ($remote['amount'] ?? 0) !== (int) $payment->amount
             || ($remote['currency'] ?? null) !== $payment->currency
         ) {
+            $this->alertMismatch($payment, $razorpayPaymentId, $remote);
+
             return false;
         }
 
@@ -375,6 +378,41 @@ class PaymentFinalizer
             (string) ($payment->razorpay_payment_id ?? $payment->razorpay_order_id),
             core()->formatPrice($payment->amount / 100, $payment->currency),
             $problem,
+        ));
+    }
+
+    /**
+     * A payment that does not match its order should never happen, since Razorpay charges
+     * exactly the order amount; if one that really took money does, tell the admin once
+     * instead of leaving it silent.
+     */
+    protected function alertMismatch(RazorpayPayment $payment, string $razorpayPaymentId, array $remote): void
+    {
+        if (! in_array($remote['status'] ?? null, ['authorized', 'captured'], true)) {
+            return;
+        }
+
+        if (! Cache::add('razorpay:mismatch-alert:'.$razorpayPaymentId, true, now()->addDay())) {
+            return;
+        }
+
+        Log::error('Razorpay payment does not match its order.', [
+            'payment' => $razorpayPaymentId,
+            'razorpay_order' => $payment->razorpay_order_id,
+            'paid_order' => $remote['order_id'] ?? null,
+            'paid' => ($remote['amount'] ?? null).' '.($remote['currency'] ?? null),
+            'expected' => $payment->amount.' '.$payment->currency,
+        ]);
+
+        $this->sendMail(new PaymentAlertNotification(
+            $razorpayPaymentId,
+            core()->formatPrice($payment->amount / 100, $payment->currency),
+            'payment_mismatch',
+            [
+                'received' => core()->formatPrice(((int) ($remote['amount'] ?? 0)) / 100, (string) ($remote['currency'] ?? $payment->currency)),
+                'expected' => core()->formatPrice($payment->amount / 100, $payment->currency),
+                'order' => $payment->razorpay_order_id,
+            ],
         ));
     }
 
