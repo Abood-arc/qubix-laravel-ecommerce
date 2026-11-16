@@ -276,6 +276,8 @@ return [
                         'telephone' => '電話番号',
                         'title' => '住所',
                         'vat-id' => 'VAT番号',
+                        'gstin' => 'GSTIN',
+                        'gstin-placeholder' => 'e.g. 27AAPFU0939F1ZV',
                     ],
 
                     'payment' => [
@@ -1779,6 +1781,8 @@ return [
                         'street-address' => '住所',
                         'title' => '住所を作成',
                         'vat-id' => 'VAT ID',
+                        'gstin' => 'GSTIN',
+                        'gstin-placeholder' => 'e.g. 27AAPFU0939F1ZV',
                     ],
 
                     'edit' => [
@@ -1798,6 +1802,8 @@ return [
                         'street-address' => '住所',
                         'title' => '住所を編集',
                         'vat-id' => 'VAT ID',
+                        'gstin' => 'GSTIN',
+                        'gstin-placeholder' => 'e.g. 27AAPFU0939F1ZV',
                     ],
 
                     'address-delete-success' => '住所が正常に削除されました',
@@ -4372,6 +4378,7 @@ return [
                         'title' => '出荷元',
                         'title-info' => '出荷元は、商品や製品が目的地に輸送される前に起源する場所を指します。',
                         'vat-number' => 'VAT番号',
+                        'vat-number-info' => 'India: your 15-character GSTIN, e.g. 27AAPFU0939F1ZV. Other countries: your VAT registration number.',
                         'zip' => '郵便番号',
                     ],
                 ],

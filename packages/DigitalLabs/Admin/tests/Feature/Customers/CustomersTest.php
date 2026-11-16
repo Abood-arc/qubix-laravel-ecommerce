@@ -350,3 +350,44 @@ it('should delete a specific customer', function () {
         'id' => $customer->id,
     ]);
 });
+
+it('labels the tax number GSTIN for an Indian address and VAT ID otherwise', function () {
+    $customer = (new CustomerFaker)->factory()->create();
+
+    $this->loginAsAdmin();
+
+    // The label is switched in the browser by the selected country, so both are on the page.
+    get(route('admin.customers.customers.view', $customer->id))
+        ->assertOk()
+        ->assertSee("v-if=\"country === 'IN'\"", false)
+        ->assertSee("v-if=\"address.country === 'IN'\"", false)
+        ->assertSeeText(trans('admin::app.customers.customers.view.address.create.gstin'))
+        ->assertSeeText(trans('admin::app.customers.customers.view.address.create.vat-id'));
+});
+
+it('checks the GSTIN format when an admin saves an Indian address', function (string $gstin, bool $valid) {
+    $customer = (new CustomerFaker)->factory()->create();
+
+    $this->loginAsAdmin();
+
+    $response = postJson(route('admin.customers.customers.addresses.store', $customer->id), [
+        'customer_id' => $customer->id,
+        'first_name' => 'Asha',
+        'last_name' => 'Rao',
+        'email' => $customer->email,
+        'address' => ['12 MG Road'],
+        'country' => 'IN',
+        'state' => 'MH',
+        'city' => 'Mumbai',
+        'postcode' => '400001',
+        'phone' => '9876543210',
+        'vat_id' => $gstin,
+    ]);
+
+    $valid
+        ? $response->assertJsonMissingValidationErrors('vat_id')
+        : $response->assertJsonValidationErrors(['vat_id' => trans('customer::app.validations.vat-id.invalid-gstin-format')]);
+})->with([
+    'real GSTIN' => ['27AAPFU0939F1ZV', true],
+    'not a GSTIN' => ['V12345678901', false],
+]);

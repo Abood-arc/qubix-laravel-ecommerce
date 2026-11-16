@@ -276,6 +276,8 @@ return [
                         'telephone' => 'تلفن',
                         'title' => 'آدرس',
                         'vat-id' => 'شناسه مالیاتی',
+                        'gstin' => 'GSTIN',
+                        'gstin-placeholder' => 'e.g. 27AAPFU0939F1ZV',
                     ],
 
                     'payment' => [
@@ -1779,6 +1781,8 @@ return [
                         'street-address' => 'آدرس خیابانی',
                         'title' => 'ایجاد آدرس',
                         'vat-id' => 'شناسه مالیاتی (VAT)',
+                        'gstin' => 'GSTIN',
+                        'gstin-placeholder' => 'e.g. 27AAPFU0939F1ZV',
                     ],
 
                     'edit' => [
@@ -1798,6 +1802,8 @@ return [
                         'street-address' => 'آدرس خیابانی',
                         'title' => 'ویرایش آدرس',
                         'vat-id' => 'شناسه مالیاتی (VAT)',
+                        'gstin' => 'GSTIN',
+                        'gstin-placeholder' => 'e.g. 27AAPFU0939F1ZV',
                     ],
 
                     'address-delete-success' => 'آدرس با موفقیت حذف شد',
@@ -4372,6 +4378,7 @@ return [
                         'title' => 'مبدا',
                         'title-info' => 'مبدا حمل و نقل به مکانی اشاره دارد که کالاها یا محصولات قبل از انتقال به مقصد خود از آنجا شروع می شوند.',
                         'vat-number' => 'شماره مالیات بر ارزش افزوده',
+                        'vat-number-info' => 'India: your 15-character GSTIN, e.g. 27AAPFU0939F1ZV. Other countries: your VAT registration number.',
                         'zip' => 'کد پستی',
                     ],
                 ],

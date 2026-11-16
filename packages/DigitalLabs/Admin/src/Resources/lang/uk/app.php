@@ -276,6 +276,8 @@ return [
                         'telephone' => 'Телефон',
                         'title' => 'Адреса',
                         'vat-id' => 'ІПН',
+                        'gstin' => 'GSTIN',
+                        'gstin-placeholder' => 'e.g. 27AAPFU0939F1ZV',
                     ],
 
                     'payment' => [
@@ -1779,6 +1781,8 @@ return [
                         'street-address' => 'Вулиця',
                         'title' => 'Створити адресу',
                         'vat-id' => 'Ідентифікаційний номер ПДВ',
+                        'gstin' => 'GSTIN',
+                        'gstin-placeholder' => 'e.g. 27AAPFU0939F1ZV',
                     ],
 
                     'edit' => [
@@ -1798,6 +1802,8 @@ return [
                         'street-address' => 'Вулиця',
                         'title' => 'Редагувати адресу',
                         'vat-id' => 'Ідентифікаційний номер ПДВ',
+                        'gstin' => 'GSTIN',
+                        'gstin-placeholder' => 'e.g. 27AAPFU0939F1ZV',
                     ],
 
                     'address-delete-success' => 'Адресу успішно видалено',
@@ -4372,6 +4378,7 @@ return [
                         'title' => 'Походження',
                         'title-info' => 'Місце походження доставки відноситься до місця, де товари або продукти походять перед транспортуванням до місця призначення.',
                         'vat-number' => 'Номер ПДВ',
+                        'vat-number-info' => 'India: your 15-character GSTIN, e.g. 27AAPFU0939F1ZV. Other countries: your VAT registration number.',
                         'zip' => 'Поштовий індекс',
                     ],
                 ],

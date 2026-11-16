@@ -276,6 +276,8 @@ return [
                         'telephone' => 'දුරකථන',
                         'title' => 'ලිපිනය',
                         'vat-id' => 'වැට් අංකය',
+                        'gstin' => 'GSTIN',
+                        'gstin-placeholder' => 'e.g. 27AAPFU0939F1ZV',
                     ],
 
                     'payment' => [
@@ -1779,6 +1781,8 @@ return [
                         'street-address' => 'වීදුරු ලිපිනය',
                         'title' => 'ලිපිනය සාදන්න',
                         'vat-id' => 'VAT හැඳුනුම්',
+                        'gstin' => 'GSTIN',
+                        'gstin-placeholder' => 'e.g. 27AAPFU0939F1ZV',
                     ],
 
                     'edit' => [
@@ -1798,6 +1802,8 @@ return [
                         'street-address' => 'වීදුරු ලිපිනය',
                         'title' => 'ලිපිනය සංස්කරණය කිරීම',
                         'vat-id' => 'VAT හැඳුනුම්',
+                        'gstin' => 'GSTIN',
+                        'gstin-placeholder' => 'e.g. 27AAPFU0939F1ZV',
                     ],
 
                     'address-delete-success' => 'ලිපිනය සාර්ථකව මකා දමා ඇත',
@@ -4372,6 +4378,7 @@ return [
                         'title' => 'මුල් ආරම්භය',
                         'title-info' => 'ආනයන ආරම්භය යනු භාණ්ඩ හෝ නිෂ්පාදන ගමනාන්තයට යවන පෙර ආරම්භ කරන ස්ථානයයි.',
                         'vat-number' => 'VAT අංකය',
+                        'vat-number-info' => 'India: your 15-character GSTIN, e.g. 27AAPFU0939F1ZV. Other countries: your VAT registration number.',
                         'zip' => 'පිස්සු කේතය',
                     ],
                 ],

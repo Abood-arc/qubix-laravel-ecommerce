@@ -276,6 +276,8 @@ return [
                         'telephone' => 'Telephone',
                         'title' => 'Address',
                         'vat-id' => 'Vat ID',
+                        'gstin' => 'GSTIN',
+                        'gstin-placeholder' => 'e.g. 27AAPFU0939F1ZV',
                     ],
 
                     'payment' => [
@@ -1779,6 +1781,8 @@ return [
                         'street-address' => 'Street Address',
                         'title' => 'Create Address',
                         'vat-id' => 'Vat ID',
+                        'gstin' => 'GSTIN',
+                        'gstin-placeholder' => 'e.g. 27AAPFU0939F1ZV',
                     ],
 
                     'edit' => [
@@ -1798,6 +1802,8 @@ return [
                         'street-address' => 'Street Address',
                         'title' => 'Edit Address',
                         'vat-id' => 'Vat ID',
+                        'gstin' => 'GSTIN',
+                        'gstin-placeholder' => 'e.g. 27AAPFU0939F1ZV',
                     ],
 
                     'address-delete-success' => 'Address Deleted Successfully',
@@ -4371,7 +4377,8 @@ return [
                         'street-address' => 'Street Address',
                         'title' => 'Origin',
                         'title-info' => 'Shipping origin refers to the location where goods or products originate before being transported to their destination.',
-                        'vat-number' => 'Vat Number',
+                        'vat-number' => 'GSTIN / VAT Number',
+                        'vat-number-info' => 'India: your 15-character GSTIN, e.g. 27AAPFU0939F1ZV. Other countries: your VAT registration number.',
                         'zip' => 'Zip',
                     ],
                 ],

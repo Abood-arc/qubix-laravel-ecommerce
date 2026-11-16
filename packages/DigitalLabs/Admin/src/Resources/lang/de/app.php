@@ -276,6 +276,8 @@ return [
                         'telephone' => 'Telefon',
                         'title' => 'Adresse',
                         'vat-id' => 'USt-IdNr.',
+                        'gstin' => 'GSTIN',
+                        'gstin-placeholder' => 'e.g. 27AAPFU0939F1ZV',
                     ],
 
                     'payment' => [
@@ -1779,6 +1781,8 @@ return [
                         'street-address' => 'Straßenadresse',
                         'title' => 'Adresse erstellen',
                         'vat-id' => 'USt-IdNr.',
+                        'gstin' => 'GSTIN',
+                        'gstin-placeholder' => 'e.g. 27AAPFU0939F1ZV',
                     ],
 
                     'edit' => [
@@ -1798,6 +1802,8 @@ return [
                         'street-address' => 'Straßenadresse',
                         'title' => 'Adresse bearbeiten',
                         'vat-id' => 'USt-IdNr.',
+                        'gstin' => 'GSTIN',
+                        'gstin-placeholder' => 'e.g. 27AAPFU0939F1ZV',
                     ],
 
                     'address-delete-success' => 'Adresse erfolgreich gelöscht',
@@ -4372,6 +4378,7 @@ return [
                         'title' => 'Herkunft',
                         'title-info' => 'Der Versandursprung bezieht sich auf den Ort, an dem Waren oder Produkte vor dem Transport zu ihrem Bestimmungsort hergestellt werden.',
                         'vat-number' => 'Umsatzsteuer-Identifikationsnummer',
+                        'vat-number-info' => 'India: your 15-character GSTIN, e.g. 27AAPFU0939F1ZV. Other countries: your VAT registration number.',
                         'zip' => 'Postleitzahl',
                     ],
                 ],

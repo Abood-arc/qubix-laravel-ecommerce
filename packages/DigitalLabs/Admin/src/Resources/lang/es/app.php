@@ -276,6 +276,8 @@ return [
                         'telephone' => 'Teléfono',
                         'title' => 'Dirección',
                         'vat-id' => 'NIF',
+                        'gstin' => 'GSTIN',
+                        'gstin-placeholder' => 'e.g. 27AAPFU0939F1ZV',
                     ],
 
                     'payment' => [
@@ -1779,6 +1781,8 @@ return [
                         'street-address' => 'Dirección',
                         'title' => 'Crear dirección',
                         'vat-id' => 'ID de IVA',
+                        'gstin' => 'GSTIN',
+                        'gstin-placeholder' => 'e.g. 27AAPFU0939F1ZV',
                     ],
 
                     'edit' => [
@@ -1798,6 +1802,8 @@ return [
                         'street-address' => 'Dirección',
                         'title' => 'Editar dirección',
                         'vat-id' => 'ID de IVA',
+                        'gstin' => 'GSTIN',
+                        'gstin-placeholder' => 'e.g. 27AAPFU0939F1ZV',
                     ],
 
                     'address-delete-success' => 'Dirección eliminada exitosamente',
@@ -4372,6 +4378,7 @@ return [
                         'title' => 'Origen',
                         'title-info' => 'El origen del envío se refiere al lugar donde los bienes o productos se originan antes de ser transportados a su destino.',
                         'vat-number' => 'Número de IVA',
+                        'vat-number-info' => 'India: your 15-character GSTIN, e.g. 27AAPFU0939F1ZV. Other countries: your VAT registration number.',
                         'zip' => 'Código postal',
                     ],
                 ],

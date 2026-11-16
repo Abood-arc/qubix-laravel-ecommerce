@@ -276,6 +276,8 @@ return [
                         'telephone' => 'Telèfon',
                         'title' => 'Adreça',
                         'vat-id' => 'NIF',
+                        'gstin' => 'GSTIN',
+                        'gstin-placeholder' => 'e.g. 27AAPFU0939F1ZV',
                     ],
 
                     'payment' => [
@@ -1779,6 +1781,8 @@ return [
                         'street-address' => 'Adreça',
                         'title' => 'Crear adreça',
                         'vat-id' => 'ID d\'IVA',
+                        'gstin' => 'GSTIN',
+                        'gstin-placeholder' => 'e.g. 27AAPFU0939F1ZV',
                     ],
 
                     'edit' => [
@@ -1798,6 +1802,8 @@ return [
                         'street-address' => 'Adreça',
                         'title' => 'Editar adreça',
                         'vat-id' => 'ID d\'IVA',
+                        'gstin' => 'GSTIN',
+                        'gstin-placeholder' => 'e.g. 27AAPFU0939F1ZV',
                     ],
 
                     'address-delete-success' => 'Adreça eliminada amb éxit',
@@ -4372,6 +4378,7 @@ return [
                         'title' => 'Origen',
                         'title-info' => 'L\'origen de l\'enviament fa referència al lloc on els béns o productes es generen abans de ser transportats a la seva destinació.',
                         'vat-number' => 'Número de l\'IVA',
+                        'vat-number-info' => 'India: your 15-character GSTIN, e.g. 27AAPFU0939F1ZV. Other countries: your VAT registration number.',
                         'zip' => 'Codi postal',
                     ],
                 ],

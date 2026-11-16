@@ -276,6 +276,8 @@ return [
                         'telephone' => 'טלפון',
                         'title' => 'כתובת',
                         'vat-id' => 'מספר ת.מ.',
+                        'gstin' => 'GSTIN',
+                        'gstin-placeholder' => 'e.g. 27AAPFU0939F1ZV',
                     ],
 
                     'payment' => [
@@ -1779,6 +1781,8 @@ return [
                         'street-address' => 'כתובת',
                         'title' => 'צור כתובת',
                         'vat-id' => 'מספר ת.מ',
+                        'gstin' => 'GSTIN',
+                        'gstin-placeholder' => 'e.g. 27AAPFU0939F1ZV',
                     ],
 
                     'edit' => [
@@ -1798,6 +1802,8 @@ return [
                         'street-address' => 'כתובת',
                         'title' => 'ערוך כתובת',
                         'vat-id' => 'מספר ת.מ',
+                        'gstin' => 'GSTIN',
+                        'gstin-placeholder' => 'e.g. 27AAPFU0939F1ZV',
                     ],
 
                     'address-delete-success' => 'הכתובת נמחקה בהצלחה',
@@ -4372,6 +4378,7 @@ return [
                         'title' => 'מקור',
                         'title-info' => 'מקור המשלוח מתייחס למיקום ממנו מוצאים הסחורות או המוצרים לפני הובלתם ליעדם.',
                         'vat-number' => 'מספר מע"מ',
+                        'vat-number-info' => 'India: your 15-character GSTIN, e.g. 27AAPFU0939F1ZV. Other countries: your VAT registration number.',
                         'zip' => 'מיקוד',
                     ],
                 ],

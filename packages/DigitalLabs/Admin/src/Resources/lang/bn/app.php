@@ -276,6 +276,8 @@ return [
                         'telephone' => 'টেলিফোন',
                         'title' => 'ঠিকানা',
                         'vat-id' => 'ভ্যাট আইডি',
+                        'gstin' => 'GSTIN',
+                        'gstin-placeholder' => 'e.g. 27AAPFU0939F1ZV',
                     ],
 
                     'payment' => [
@@ -1779,6 +1781,8 @@ return [
                         'street-address' => 'স্ট্রীট ঠিকানা',
                         'title' => 'ঠিকানা তৈরি করুন',
                         'vat-id' => 'ভ্যাট আইডি',
+                        'gstin' => 'GSTIN',
+                        'gstin-placeholder' => 'e.g. 27AAPFU0939F1ZV',
                     ],
 
                     'edit' => [
@@ -1798,6 +1802,8 @@ return [
                         'street-address' => 'স্ট্রীট ঠিকানা',
                         'title' => 'ঠিকানা সম্পাদনা',
                         'vat-id' => 'ভ্যাট আইডি',
+                        'gstin' => 'GSTIN',
+                        'gstin-placeholder' => 'e.g. 27AAPFU0939F1ZV',
                     ],
 
                     'address-delete-success' => 'ঠিকানা সফলভাবে মোছা হয়েছে',
@@ -4372,6 +4378,7 @@ return [
                         'title' => 'উত্স',
                         'title-info' => 'শিপিং উত্স বলতে বোঝায় যে পণ্য বা পণ্য যেখান থেকে পরিবহণ করা হয় তার গঠনের আগের অবস্থান।',
                         'vat-number' => 'ভ্যাট নম্বর',
+                        'vat-number-info' => 'India: your 15-character GSTIN, e.g. 27AAPFU0939F1ZV. Other countries: your VAT registration number.',
                         'zip' => 'জিপ',
                     ],
                 ],

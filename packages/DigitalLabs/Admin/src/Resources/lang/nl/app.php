@@ -276,6 +276,8 @@ return [
                         'telephone' => 'Telefoonnummer',
                         'title' => 'Adres',
                         'vat-id' => 'BTW-nummer',
+                        'gstin' => 'GSTIN',
+                        'gstin-placeholder' => 'e.g. 27AAPFU0939F1ZV',
                     ],
 
                     'payment' => [
@@ -1779,6 +1781,8 @@ return [
                         'street-address' => 'Straatadres',
                         'title' => 'Adres Aanmaken',
                         'vat-id' => 'BTW-nummer',
+                        'gstin' => 'GSTIN',
+                        'gstin-placeholder' => 'e.g. 27AAPFU0939F1ZV',
                     ],
 
                     'edit' => [
@@ -1798,6 +1802,8 @@ return [
                         'street-address' => 'Straatadres',
                         'title' => 'Adres Bewerken',
                         'vat-id' => 'BTW-nummer',
+                        'gstin' => 'GSTIN',
+                        'gstin-placeholder' => 'e.g. 27AAPFU0939F1ZV',
                     ],
 
                     'address-delete-success' => 'Adres succesvol verwijderd',
@@ -4372,6 +4378,7 @@ return [
                         'title' => 'Herkomst',
                         'title-info' => 'Verzendherkomst verwijst naar de locatie waar goederen of producten vandaan komen voordat ze naar hun bestemming worden vervoerd.',
                         'vat-number' => 'BTW-nummer',
+                        'vat-number-info' => 'India: your 15-character GSTIN, e.g. 27AAPFU0939F1ZV. Other countries: your VAT registration number.',
                         'zip' => 'Postcode',
                     ],
                 ],

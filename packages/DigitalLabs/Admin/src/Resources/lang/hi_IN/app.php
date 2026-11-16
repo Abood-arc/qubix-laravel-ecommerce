@@ -276,6 +276,8 @@ return [
                         'telephone' => 'टेलीफोन',
                         'title' => 'पता',
                         'vat-id' => 'वैट आईडी',
+                        'gstin' => 'GSTIN',
+                        'gstin-placeholder' => 'e.g. 27AAPFU0939F1ZV',
                     ],
 
                     'payment' => [
@@ -1779,6 +1781,8 @@ return [
                         'street-address' => 'स्ट्रीट पता',
                         'title' => 'पता बनाएं',
                         'vat-id' => 'वैट आईडी',
+                        'gstin' => 'GSTIN',
+                        'gstin-placeholder' => 'e.g. 27AAPFU0939F1ZV',
                     ],
 
                     'edit' => [
@@ -1798,6 +1802,8 @@ return [
                         'street-address' => 'स्ट्रीट पता',
                         'title' => 'पता संपादित करें',
                         'vat-id' => 'वैट आईडी',
+                        'gstin' => 'GSTIN',
+                        'gstin-placeholder' => 'e.g. 27AAPFU0939F1ZV',
                     ],
 
                     'address-delete-success' => 'पता सफलतापूर्वक हटा दिया गया',
@@ -4371,7 +4377,8 @@ return [
                         'street-address' => 'सड़क पता',
                         'title' => 'मूल',
                         'title-info' => 'शिपिंग मूल उस स्थान को संदर्भित करता है जहां सामान या उत्पाद उनके गंतव्य को पहुंचाने से पहले उत्पन्न होते हैं।',
-                        'vat-number' => 'वैट नंबर',
+                        'vat-number' => 'GSTIN / वैट नंबर',
+                        'vat-number-info' => 'India: your 15-character GSTIN, e.g. 27AAPFU0939F1ZV. Other countries: your VAT registration number.',
                         'zip' => 'पिन कोड',
                     ],
                 ],

@@ -30,16 +30,18 @@
 
             <!-- VatId Name -->
             <x-admin::form.control-group>
+                {{-- India's tax number is the GSTIN (see VatValidator); other countries keep the VAT label. --}}
                 <x-admin::form.control-group.label>
-                    @lang('admin::app.sales.orders.create.cart.address.vat-id')
+                    <template v-if="selectedCountry === 'IN'">@lang('admin::app.sales.orders.create.cart.address.gstin')</template>
+                    <template v-else>@lang('admin::app.sales.orders.create.cart.address.vat-id')</template>
                 </x-admin::form.control-group.label>
 
                 <x-admin::form.control-group.control
                     type="text"
                     ::name="controlName + '.vat_id'"
                     ::value="address.vat_id"
-                    :label="trans('admin::app.sales.orders.create.cart.address.vat-id')"
-                    :placeholder="trans('admin::app.sales.orders.create.cart.address.vat-id')"
+                    ::label="selectedCountry === 'IN' ? {{ json_encode(trans('admin::app.sales.orders.create.cart.address.gstin')) }} : {{ json_encode(trans('admin::app.sales.orders.create.cart.address.vat-id')) }}"
+                    ::placeholder="selectedCountry === 'IN' ? {{ json_encode(trans('admin::app.sales.orders.create.cart.address.gstin-placeholder')) }} : {{ json_encode(trans('admin::app.sales.orders.create.cart.address.vat-id')) }}"
                 />
 
                 <x-admin::form.control-group.error ::name="controlName + '.vat_id'" />

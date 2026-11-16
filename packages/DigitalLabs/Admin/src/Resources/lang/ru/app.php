@@ -276,6 +276,8 @@ return [
                         'telephone' => 'Телефон',
                         'title' => 'Адрес',
                         'vat-id' => 'ИНН',
+                        'gstin' => 'GSTIN',
+                        'gstin-placeholder' => 'e.g. 27AAPFU0939F1ZV',
                     ],
 
                     'payment' => [
@@ -1779,6 +1781,8 @@ return [
                         'street-address' => 'Улица и номер дома',
                         'title' => 'Создать адрес',
                         'vat-id' => 'Идентификационный номер НДС',
+                        'gstin' => 'GSTIN',
+                        'gstin-placeholder' => 'e.g. 27AAPFU0939F1ZV',
                     ],
 
                     'edit' => [
@@ -1798,6 +1802,8 @@ return [
                         'street-address' => 'Улица и номер дома',
                         'title' => 'Редактировать адрес',
                         'vat-id' => 'Идентификационный номер НДС',
+                        'gstin' => 'GSTIN',
+                        'gstin-placeholder' => 'e.g. 27AAPFU0939F1ZV',
                     ],
 
                     'address-delete-success' => 'Адрес успешно удален',
@@ -4372,6 +4378,7 @@ return [
                         'title' => 'Место отправления',
                         'title-info' => 'Место отправления относится к месту, где товары или продукты происходят до транспортировки в пункт назначения.',
                         'vat-number' => 'Номер НДС',
+                        'vat-number-info' => 'India: your 15-character GSTIN, e.g. 27AAPFU0939F1ZV. Other countries: your VAT registration number.',
                         'zip' => 'Почтовый индекс',
                     ],
                 ],

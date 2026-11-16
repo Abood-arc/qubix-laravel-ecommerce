@@ -276,6 +276,8 @@ return [
                         'telephone' => 'Telefono',
                         'title' => 'Indirizzo',
                         'vat-id' => 'Partita IVA',
+                        'gstin' => 'GSTIN',
+                        'gstin-placeholder' => 'e.g. 27AAPFU0939F1ZV',
                     ],
 
                     'payment' => [
@@ -1779,6 +1781,8 @@ return [
                         'street-address' => 'Indirizzo',
                         'title' => 'Crea Indirizzo',
                         'vat-id' => 'Partita IVA',
+                        'gstin' => 'GSTIN',
+                        'gstin-placeholder' => 'e.g. 27AAPFU0939F1ZV',
                     ],
 
                     'edit' => [
@@ -1798,6 +1802,8 @@ return [
                         'street-address' => 'Indirizzo',
                         'title' => 'Modifica Indirizzo',
                         'vat-id' => 'Partita IVA',
+                        'gstin' => 'GSTIN',
+                        'gstin-placeholder' => 'e.g. 27AAPFU0939F1ZV',
                     ],
 
                     'address-delete-success' => 'Indirizzo eliminato con successo',
@@ -4372,6 +4378,7 @@ return [
                         'title' => 'Origine',
                         'title-info' => "L'origine della spedizione si riferisce al luogo in cui i beni o i prodotti hanno origine prima di essere trasportati alla loro destinazione.",
                         'vat-number' => 'Numero di Partita IVA',
+                        'vat-number-info' => 'India: your 15-character GSTIN, e.g. 27AAPFU0939F1ZV. Other countries: your VAT registration number.',
                         'zip' => 'CAP',
                     ],
                 ],
