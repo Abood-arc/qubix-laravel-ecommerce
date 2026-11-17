@@ -281,9 +281,19 @@
                     /**
                      * − or +. The control shows the new quantity at once; $cardCart sends it when the
                      * writes before it are done, and rolls back to the cart's own if the cart refuses.
+                     * The outcome is read out: the new quantity, or why the cart said no (else the
+                     * quantity it went back to). A change that a quicker click took over says nothing.
                      */
                     async step(change) {
-                        if (! await this.$cardCart.setQuantity(this.product.id, this.quantity + change)) {
+                        const { outcome, message } = await this.$cardCart.setQuantity(this.product.id, this.quantity + change);
+
+                        if (outcome === 'superseded') {
+                            return;
+                        }
+
+                        if (outcome === 'refused' && message) {
+                            this.$cardAnnounce(this.$el, message);
+
                             return;
                         }
 

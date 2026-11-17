@@ -130,6 +130,8 @@ for (const style of ["Swipe, named and sized", "Photo deck"] as CardStyle[]) {
 
             await expect(page.getByText(REFUSED).first()).toBeVisible();
             await expect(stepper(page, 1)).toBeVisible();
+            // Screen readers hear why, not silence (the shop's messages have no live region of their own).
+            await expect(styledCard(page, product).getByRole("status")).toHaveText(REFUSED);
             expect(await cartQuantityOf(page, product)).toBe(1);
         });
 
@@ -193,10 +195,11 @@ test.describe("Photo deck on a phone", () => {
         await expect.poll(async () => (await group.boundingBox())!.width).toBeGreaterThan(3 * 44);
 
         const card = (await styledCard(page, product).boundingBox())!;
-        const plus = (await addOne(page).boundingBox())!;
 
         expect((await group.boundingBox())!.width).toBeLessThanOrEqual(card.width);
-        expect(plus.width).toBeGreaterThanOrEqual(44);
-        expect(plus.height).toBeGreaterThanOrEqual(44);
+
+        // The control scales up from 94% as it appears: measure + once that has finished.
+        await expect.poll(async () => (await addOne(page).boundingBox())!.width).toBeGreaterThanOrEqual(44);
+        expect((await addOne(page).boundingBox())!.height).toBeGreaterThanOrEqual(44);
     });
 });

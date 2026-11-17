@@ -306,14 +306,17 @@
             },
 
             load() {
-                this.loading ??= this.enqueue(() => this.fetch());
+                this.loading ??= this.enqueue(() => this.readCart(cart => this.apply(cart)));
 
                 return this.loading;
             },
 
-            fetch() {
+            /**
+             * Read the cart and hand it to `use`. A failed read changes nothing; the cards keep what they show.
+             */
+            readCart(use) {
                 return axios.get(routes.cart)
-                    .then(response => this.apply(response.data.data))
+                    .then(response => use(response.data.data))
                     .catch(() => {});
             },
 
@@ -381,13 +384,15 @@
             },
 
             /**
-             * Ask for `quantity` of a product that has a line (0 removes the line). Resolves true once
-             * the cart holds what this call asked for and nothing newer is waiting; false when the cart
-             * refused it, or when a later call took it over.
+             * Ask for `quantity` of a product that has a line (0 removes the line). Resolves with how it
+             * went: { outcome: 'done' } once the cart holds what this call asked for and nothing newer is
+             * waiting; { outcome: 'superseded' } when a later call took it over (that call reports);
+             * { outcome: 'refused', message } when the cart said no (message: the cart's reason, if it
+             * gave one), by which time the card shows what the cart really holds again.
              */
             setQuantity(productId, quantity) {
                 if (! this.lines[productId]) {
-                    return Promise.resolve(false);
+                    return Promise.resolve({ outcome: 'refused' });
                 }
 
                 this.wanted[productId] = Math.max(0, quantity);
@@ -402,7 +407,7 @@
             },
 
             /**
-             * Send the product's wanted quantity, if it still differs from the cart's.
+             * Send the product's wanted quantity, if it still differs from the cart's (see setQuantity()).
              */
             async write(productId) {
                 const quantity = this.wanted[productId];
@@ -410,7 +415,7 @@
                 const line = this.lines[productId];
 
                 if (quantity === undefined) {
-                    return false;
+                    return { outcome: 'superseded' };
                 }
 
                 if (! line || quantity === line.quantity) {
@@ -418,14 +423,14 @@
 
                     this.changed();
 
-                    return Boolean(line);
+                    return { outcome: line ? 'done' : 'refused' };
                 }
 
-                const done = quantity > 0
+                const refusal = quantity > 0
                     ? await this.update(line.itemId, quantity)
                     : await this.destroy(line.itemId);
 
-                if (! done) {
+                if (refusal) {
                     // Back to what the cart really holds, then make sure of it.
                     delete this.wanted[productId];
 
@@ -433,23 +438,33 @@
 
                     await this.refresh();
 
-                    return false;
+                    return { outcome: 'refused', message: refusal.message };
                 }
 
                 if (this.wanted[productId] !== quantity) {
-                    return false;
+                    return { outcome: 'superseded' };
                 }
 
                 delete this.wanted[productId];
 
                 this.changed();
 
-                return true;
+                return { outcome: 'done' };
+            },
+
+            /**
+             * Show a refusal and hand it back as { message } (the message can be empty).
+             */
+            refused(type, message) {
+                flash(type, message);
+
+                return { message };
             },
 
             /**
              * The cart page's quantity call (and the mini cart's): a message next to the cart means it
              * worked; otherwise data.message says why not (for example the inventory warning).
+             * Resolves null when it worked, else the refusal.
              */
             async update(itemId, quantity) {
                 try {
@@ -458,19 +473,18 @@
                     if (response.data.message) {
                         emitter.emit('update-mini-cart', response.data.data);
 
-                        return true;
+                        return null;
                     }
 
-                    flash('warning', response.data.data.message);
+                    return this.refused('warning', response.data.data.message);
                 } catch (error) {
-                    flash('error', error.response?.data?.message);
+                    return this.refused('error', error.response?.data?.message);
                 }
-
-                return false;
             },
 
             /**
              * The mini cart's remove call, without its confirm dialog at 0 (the design's behaviour).
+             * Resolves null when it worked, else the refusal.
              */
             async destroy(itemId) {
                 try {
@@ -480,11 +494,9 @@
 
                     flash('success', response.data.message);
 
-                    return true;
+                    return null;
                 } catch (error) {
-                    flash('error', error.response?.data?.message);
-
-                    return false;
+                    return this.refused('error', error.response?.data?.message);
                 }
             },
 
@@ -492,9 +504,7 @@
              * After a refused change: read the cart again and tell everyone (the header count too).
              */
             refresh() {
-                return axios.get(routes.cart)
-                    .then(response => emitter.emit('update-mini-cart', response.data.data))
-                    .catch(() => {});
+                return this.readCart(cart => emitter.emit('update-mini-cart', cart));
             },
 
             changed() {

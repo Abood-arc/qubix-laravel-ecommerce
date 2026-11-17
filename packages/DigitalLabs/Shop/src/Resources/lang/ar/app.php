@@ -653,7 +653,7 @@ return [
                 'added' => 'تمت الإضافة',
                 'adding' => 'جارٍ الإضافة',
                 'already-in-compare' => 'العنصر مضاف بالفعل إلى قائمة المقارنة.',
-                'cart-quantity' => 'في السلة :count',
+                'cart-quantity' => ':count في السلة',
                 'compare' => 'قارن',
                 'compare-added' => 'أُضيف إلى المقارنة (:count من :max)',
                 'compare-product' => 'قارن :name',
