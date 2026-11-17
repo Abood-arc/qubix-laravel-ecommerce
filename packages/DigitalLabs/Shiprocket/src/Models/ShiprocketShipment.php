@@ -56,6 +56,7 @@ class ShiprocketShipment extends Model
         'status',
         'shiprocket_order_id',
         'shipment_id',
+        'channel_order_id',
         'awb_code',
         'courier_name',
         'label_url',
