@@ -1184,11 +1184,16 @@
     }
 }
 
-/* The control covers the "1 / 4" counter; the arrow keys on the photo still change photos. */
+/*
+ * The control grows across the bottom of the photo, where the "1 / 4" counter sits: the counter moves up
+ * above it (12px clear of its 44px), so it stays in reach of a tap, on the same side as before.
+ */
+.pc-deck-next {
+    transition: inset-block-end 320ms var(--pc-ease-out);
+}
+
 .pc-card--deck:has(.pc-buy--round[data-state="qty"]) .pc-deck-next {
-    opacity: 0;
-    visibility: hidden;
-    pointer-events: none;
+    inset-block-end: 68px;
 }
 
 @media (max-width: 767px) {
@@ -1206,7 +1211,8 @@
         animation: none;
     }
 
-    .pc-buy--round {
+    .pc-buy--round,
+    .pc-deck-next {
         transition: none;
     }
 }

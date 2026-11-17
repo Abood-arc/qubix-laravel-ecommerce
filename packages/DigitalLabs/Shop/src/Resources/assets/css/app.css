@@ -30,7 +30,7 @@
     --c-muted: 90 98 93;          /* #5a625d secondary text (4.5:1 on white) */
     --c-line: 226 227 222;        /* #e2e3de hairlines */
     --c-line-strong: 196 198 192; /* #c4c6c0 hover and dashed borders */
-    --c-control: 155 158 152;     /* #9b9e98 tick box outline */
+    --c-control: 138 142 136;     /* #8a8e88 tick box outline (3:1 on white) */
     --c-surface: 255 255 255;     /* buttons and chips on the photo */
     --c-surface-soft: 242 242 239; /* #f2f2ef hover fill */
     --c-on-brand: 255 255 255;    /* text and icons on brand, accent */
@@ -62,7 +62,7 @@
     --c-muted: 86 90 117;         /* #565a75 secondary text (4.5:1 on white) */
     --c-line: 230 226 212;        /* #e6e2d4 hairlines */
     --c-line-strong: 200 196 180; /* #c8c4b4 hover and dashed borders */
-    --c-control: 152 150 168;     /* #9896a8 tick box outline */
+    --c-control: 134 132 154;     /* #86849a tick box outline (3:1 on white) */
     --c-surface: 255 255 255;     /* buttons and chips on the photo */
     --c-surface-soft: 247 243 232; /* #f7f3e8 hover fill */
     --c-on-brand: 255 255 255;    /* text and icons on brand, accent */
@@ -94,7 +94,7 @@
     --c-muted: 99 92 79;          /* #635c4f secondary text (4.5:1 on white) */
     --c-line: 226 216 196;        /* #e2d8c4 hairlines */
     --c-line-strong: 196 184 160; /* #c4b8a0 hover and dashed borders */
-    --c-control: 160 148 126;     /* #a0947e tick box outline */
+    --c-control: 142 130 108;     /* #8e826c tick box outline (3:1 on white) */
     --c-surface: 255 255 255;     /* buttons and chips on the photo */
     --c-surface-soft: 246 241 230; /* #f6f1e6 hover fill */
     --c-on-brand: 255 255 255;    /* text and icons on brand, accent */
@@ -126,7 +126,7 @@
     --c-muted: 92 92 88;          /* #5c5c58 secondary text (4.5:1 on white) */
     --c-line: 231 231 228;        /* #e7e7e4 hairlines */
     --c-line-strong: 196 196 192; /* #c4c4c0 hover and dashed borders */
-    --c-control: 158 158 154;     /* #9e9e9a tick box outline */
+    --c-control: 138 138 134;     /* #8a8a86 tick box outline (3:1 on white) */
     --c-surface: 255 255 255;     /* buttons and chips on the photo */
     --c-surface-soft: 243 243 241; /* #f3f3f1 hover fill */
     --c-on-brand: 255 255 255;    /* text and icons on brand, accent */
