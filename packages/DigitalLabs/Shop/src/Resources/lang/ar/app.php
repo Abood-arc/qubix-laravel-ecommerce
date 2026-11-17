@@ -936,6 +936,7 @@ return [
             'minimum-order-message' => 'الحد الأدنى للطلب هو',
             'missing-fields' => 'بعض الحقول المطلوبة مفقودة لهذا المنتج.',
             'missing-options' => 'الخيارات مفقودة لهذا المنتج.',
+            'payment-method-unavailable' => 'This payment method is not available for this order.',
             'paypal-payment-cancelled' => 'تم إلغاء الدفع باي بال.',
             'qty-missing' => 'يجب أن يكون لديك على الأقل منتج واحد بكمية أكبر من 1.',
             'return-to-shop' => 'العودة للتسوق',

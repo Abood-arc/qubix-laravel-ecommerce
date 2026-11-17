@@ -298,14 +298,9 @@ class Order extends Model implements OrderContract
      */
     public function hasOpenInvoice(): bool
     {
-        $pendingInvoice = $this->invoices()
-            ->where('state', Invoice::STATUS_PENDING)
-            ->orWhere('state', Invoice::STATUS_PENDING_PAYMENT)
-            ->first();
-
-        return $pendingInvoice
-            ? true
-            : false;
+        return $this->invoices()
+            ->whereIn('state', [Invoice::STATUS_PENDING, Invoice::STATUS_PENDING_PAYMENT])
+            ->exists();
     }
 
     /**

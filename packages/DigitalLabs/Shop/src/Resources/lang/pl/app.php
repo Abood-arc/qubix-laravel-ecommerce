@@ -936,6 +936,7 @@ return [
             'minimum-order-message' => 'Minimalna wartość zamówienia wynosi',
             'missing-fields' => 'Brakujące wymagane pola dla tego produktu',
             'missing-options' => 'Brakujące opcje dla tego produktu',
+            'payment-method-unavailable' => 'This payment method is not available for this order.',
             'paypal-payment-cancelled' => 'Płatność PayPal została anulowana.',
             'qty-missing' => 'Przynajmniej jeden produkt musi mieć ilość większą niż 1',
             'return-to-shop' => 'Wróć do sklepu',

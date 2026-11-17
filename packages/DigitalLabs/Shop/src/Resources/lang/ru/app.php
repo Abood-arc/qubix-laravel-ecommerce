@@ -936,6 +936,7 @@ return [
             'minimum-order-message' => 'Минимальная сумма заказа составляет',
             'missing-fields' => 'Отсутствуют некоторые обязательные поля для этого товара.',
             'missing-options' => 'Отсутствуют варианты для этого товара.',
+            'payment-method-unavailable' => 'This payment method is not available for this order.',
             'paypal-payment-cancelled' => 'Платеж через PayPal был отменен.',
             'qty-missing' => 'Как минимум один товар должен иметь количество больше 1.',
             'return-to-shop' => 'Вернуться в магазин',

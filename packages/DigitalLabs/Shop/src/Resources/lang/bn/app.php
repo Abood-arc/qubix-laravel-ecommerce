@@ -936,6 +936,7 @@ return [
             'minimum-order-message' => 'সর্বনিম্ন অর্ডার পরিমাণ হলো',
             'missing-fields' => 'এই পণ্যের জন্য কিছু প্রয়োজনীয় ক্ষেত্র অনুপস্থিত।',
             'missing-options' => 'এই পণ্যের জন্য বিকল্প অনুপস্থিত।',
+            'payment-method-unavailable' => 'This payment method is not available for this order.',
             'paypal-payment-cancelled' => 'পেপ্যাল পেমেন্ট বাতিল করা হয়েছে.',
             'qty-missing' => 'কমপক্ষে একটি পণ্য করে একটি পরিমাণ থাকতে হবে।',
             'return-to-shop' => 'দোকানে ফিরে যান',

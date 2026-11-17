@@ -24,6 +24,16 @@ abstract class Payment
     }
 
     /**
+     * Why an active method cannot take this order, shown to the customer next to the greyed-out method.
+     *
+     * Null keeps an unavailable method hidden.
+     */
+    public function getUnavailableReason(): ?string
+    {
+        return null;
+    }
+
+    /**
      * Get payment method code.
      *
      * @return string

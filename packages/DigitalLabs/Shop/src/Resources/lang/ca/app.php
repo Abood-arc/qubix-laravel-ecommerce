@@ -936,6 +936,7 @@ return [
             'minimum-order-message' => 'L\'import mínim de la comanda és',
             'missing-fields' => 'Falten alguns camps obligatoris per aquest producte.',
             'missing-options' => 'Falten opcions per aquest producte.',
+            'payment-method-unavailable' => 'This payment method is not available for this order.',
             'paypal-payment-cancelled' => 'El pagament de Paypal ha estat cancel·lat.',
             'qty-missing' => 'Almenys un producte ha de tenir una quantitat superior a 1.',
             'return-to-shop' => 'Tornar a la Botiga',
