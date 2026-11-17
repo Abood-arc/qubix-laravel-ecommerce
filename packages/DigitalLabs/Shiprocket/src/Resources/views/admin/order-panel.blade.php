@@ -29,7 +29,10 @@
 
         $bookConfirm = null;
 
-        if ($canBook) {
+        // Only a first booking is measured: booking again after a cancel sends the parcel
+        // the store shipment already holds (its items count as shipped, so the order's
+        // weight left to ship says nothing about it).
+        if ($canBook && ! $shiprocket?->store_shipment_id) {
             $weight = app(ParcelBuilder::class)->weightKg($order);
 
             if ($weight > Settings::maxWeightKg() || $weight < 0.01) {
@@ -100,7 +103,7 @@
                     </div>
                 @endif
 
-                @if (filled($shiprocket?->label_url) && bouncer()->hasPermission('sales.shipments.view'))
+                @if (ShipmentController::hasLabel($shiprocket) && bouncer()->hasPermission('sales.shipments.view'))
                     <a
                         href="{{ route('admin.shiprocket.label', $order->id) }}"
                         class="text-blue-600 hover:underline"

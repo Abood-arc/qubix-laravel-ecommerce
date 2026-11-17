@@ -194,3 +194,38 @@ it('leaves a cancelled booking alone', function () {
     expect($row->fresh()->status)->toBe(ShiprocketShipment::STATUS_CANCELLED)
         ->and($row->order->fresh()->invoices)->toHaveCount(0);
 });
+
+it('follows a parcel whose booking failed after the courier was booked', function () {
+    $order = shiprocketDeliveryOrder('cashondelivery');
+
+    $row = shiprocketDeliveryRow($order, ShiprocketShipment::STATUS_FAILED);
+
+    sendParcelStatus(parcelStatusPayload($row, 'IN TRANSIT'))->assertOk();
+
+    expect($row->fresh()->status)->toBe(ShiprocketShipment::STATUS_IN_TRANSIT);
+
+    sendParcelStatus(parcelStatusPayload($row, 'DELIVERED'))->assertOk();
+
+    expect($row->fresh()->status)->toBe(ShiprocketShipment::STATUS_DELIVERED)
+        ->and($order->fresh()->status)->toBe(Order::STATUS_COMPLETED);
+});
+
+it('records a failed booking without a courier, but never moves it', function () {
+    $row = shiprocketDeliveryRow(shiprocketDeliveryOrder(), ShiprocketShipment::STATUS_FAILED);
+
+    // A row without an AWB is never found by a webhook; the model refuses it all the same.
+    $row->update(['awb_code' => null]);
+
+    expect($row->fresh()->advanceTo(ShiprocketShipment::STATUS_IN_TRANSIT))->toBeFalse()
+        ->and($row->fresh()->status)->toBe(ShiprocketShipment::STATUS_FAILED);
+});
+
+it('starts a new booking generation when shiprocket reports a cancel', function () {
+    $row = shiprocketDeliveryRow(shiprocketDeliveryOrder());
+
+    sendParcelStatus(parcelStatusPayload($row, 'CANCELED'))->assertOk();
+
+    expect($row->fresh())
+        ->status->toBe(ShiprocketShipment::STATUS_CANCELLED)
+        ->generation->toBe(1);
+});

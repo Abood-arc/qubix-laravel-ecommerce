@@ -28,7 +28,7 @@ function autoSendConfig(string $code, mixed $value): void
 /**
  * A placed, not yet invoiced order for one stocked product.
  */
-function autoSendOrder(string $method = 'razorpay', int $qty = 1): Order
+function autoSendOrder(string $method = 'razorpay', int $qty = 1, string $type = 'simple'): Order
 {
     $product = (new ProductFaker)->getSimpleProductFactory()->create();
 
@@ -52,7 +52,7 @@ function autoSendOrder(string $method = 'razorpay', int $qty = 1): Order
         'order_id' => $order->id,
         'product_id' => $product->id,
         'sku' => $product->sku,
-        'type' => 'simple',
+        'type' => $type,
         'name' => 'Leather Tote',
         'weight' => 500,
         'qty_ordered' => $qty,
@@ -115,7 +115,32 @@ it('queues the booking of a fully invoiced and paid razorpay order, after the co
     // itself here, and for real (sync queue, real transaction) in the next test.
     Queue::assertPushed(BookShipment::class, fn (BookShipment $job) => $job->orderId === $order->id
         && $job->manual === false
+        && $job->generation === 0
         && $job->afterCommit === true);
+});
+
+it('sends the job for the current booking of a pending row', function () {
+    Queue::fake();
+
+    $order = autoSendOrder();
+
+    ShiprocketShipment::create(['order_id' => $order->id, 'generation' => 2]);
+
+    autoSendInvoice($order);
+
+    Queue::assertPushed(BookShipment::class, fn (BookShipment $job) => $job->generation === 2);
+});
+
+it('does not send a paid order with nothing to ship', function () {
+    Queue::fake();
+
+    $order = autoSendOrder(type: 'virtual');
+
+    autoSendInvoice($order);
+
+    Queue::assertNotPushed(BookShipment::class);
+
+    expect(ShiprocketShipment::where('order_id', $order->id)->exists())->toBeFalse();
 });
 
 it('books only once the surrounding transaction commits, and never when it rolls back', function () {

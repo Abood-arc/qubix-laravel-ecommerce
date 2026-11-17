@@ -1,8 +1,11 @@
 <?php
 
 use DigitalLabs\Shiprocket\Contracts\ShiprocketApi;
+use DigitalLabs\Shiprocket\Providers\ShiprocketServiceProvider;
 use DigitalLabs\Shiprocket\Services\FakeShiprocketClient;
+use DigitalLabs\Shiprocket\Services\ShiprocketClient;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 
 beforeEach(function () {
     config(['shiprocket.fake' => true]);
@@ -12,6 +15,28 @@ beforeEach(function () {
 
 it('is the api bound when shiprocket is faked', function () {
     expect(app(ShiprocketApi::class))->toBeInstanceOf(FakeShiprocketClient::class);
+});
+
+it('is never bound in production, and says so once at boot', function () {
+    $environment = app()['env'];
+
+    app()['env'] = 'production';
+
+    try {
+        Log::spy();
+
+        $provider = new ShiprocketServiceProvider(app());
+        $provider->register();
+        $provider->boot();
+
+        expect(app(ShiprocketApi::class))->toBeInstanceOf(ShiprocketClient::class);
+
+        Log::shouldHaveReceived('error')
+            ->withArgs(fn ($message) => str_contains($message, 'SHIPROCKET_FAKE'))
+            ->once();
+    } finally {
+        app()['env'] = $environment;
+    }
 });
 
 it('decides serviceability from the delivery pin', function (string $pin, array $expected) {

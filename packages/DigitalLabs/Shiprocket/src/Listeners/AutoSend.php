@@ -11,7 +11,8 @@ use DigitalLabs\Shiprocket\Support\Settings;
 use Throwable;
 
 /**
- * Sends a paid-online order to Shiprocket once it is fully invoiced and every invoice is paid.
+ * Sends a paid-online order to Shiprocket once it is fully invoiced and every invoice is
+ * paid, if it has something to ship (an order of only virtual items has not).
  *
  * Runs inside the invoice's DB transaction, so the job is queued only after the commit (a
  * worker must never see an invoice that is then rolled back), and it never throws: a
@@ -32,7 +33,9 @@ class AutoSend
             $order = OrderProxy::modelClass()::query()->find($invoice->order_id);
 
             if ($order && $this->shouldSend($order)) {
-                BookShipment::dispatch($order->id)->afterCommit();
+                $generation = (int) ShiprocketShipment::where('order_id', $order->id)->value('generation');
+
+                BookShipment::dispatch($order->id, generation: $generation)->afterCommit();
             }
         } catch (Throwable $exception) {
             report($exception);
@@ -42,6 +45,7 @@ class AutoSend
     protected function shouldSend(Order $order): bool
     {
         return in_array($order->payment?->method, Settings::prepaidMethods(), true)
+            && $order->canShip()
             && $order->items->every(fn ($item) => $item->qty_invoiced >= $item->qty_ordered)
             && $order->invoices()->exists()
             && $order->invoices()->where('state', '!=', Invoice::STATUS_PAID)->doesntExist()

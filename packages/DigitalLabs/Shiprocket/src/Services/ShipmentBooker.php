@@ -20,23 +20,29 @@ use Illuminate\Contracts\Cache\LockTimeoutException;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Throwable;
 
 /**
- * Books one order with Shiprocket: order, courier (AWB), pickup and label, then the store
- * Shipment that tells the customer.
+ * Books one order with Shiprocket: order, courier (AWB) and pickup, then the store Shipment
+ * that tells the customer, then (best effort) the label.
  *
  * Every step is saved on the order's row as soon as Shiprocket confirms it, so a booking
  * that stopped half way (timeout, worker restart) resumes where it stopped instead of
  * booking a second parcel. One booking per order runs at a time.
+ *
+ * Every cancel starts a new booking generation (the row's `generation`). A booking job
+ * carries the generation it was sent for, and a job left over from before a cancel does
+ * nothing: only a new request (an admin's Ship after the cancel) books the parcel again.
  */
 class ShipmentBooker
 {
     /**
-     * How long one booking may hold the order. Longer than the worst booking (each call is
-     * capped at 25 s) and than the queue's 90 s retry_after, so a job the queue hands out
-     * again while the first run is still busy waits instead of booking in parallel.
+     * How long one booking may hold the order. Longer than the worst booking (the job is
+     * stopped after 85 s, see BookShipment) and than the queue's 90 s retry_after, so a job
+     * the queue hands out again while the first run is still busy waits instead of booking
+     * in parallel.
      */
     protected const LOCK_SECONDS = 180;
 
@@ -66,13 +72,18 @@ class ShipmentBooker
      * email the admin. An unknown outcome leaves it `booking` and is rethrown, so the
      * caller can try again later.
      *
+     * A request for an earlier booking generation (a retry queued before a cancel) leaves
+     * the row as it is, and so does a request without a generation once the parcel was
+     * cancelled: booking again after a cancel needs the current generation.
+     *
      * @param  bool  $manual  an admin asked for it: the weight limits do not apply
+     * @param  int|null  $generation  the booking generation the request was made for
      *
      * @throws ShiprocketUnknownOutcomeException
      */
-    public function book(Order $order, bool $manual = false): ShiprocketShipment
+    public function book(Order $order, bool $manual = false, ?int $generation = null): ShiprocketShipment
     {
-        return $this->attempt($order, $manual)
+        return $this->attempt($order, $manual, $generation)
             ?? ShiprocketShipment::firstOrNew(['order_id' => $order->id]);
     }
 
@@ -81,11 +92,11 @@ class ShipmentBooker
      *
      * @throws ShiprocketUnknownOutcomeException
      */
-    public function attempt(Order $order, bool $manual = false): ?ShiprocketShipment
+    public function attempt(Order $order, bool $manual = false, ?int $generation = null): ?ShiprocketShipment
     {
         try {
             return $this->lock($order->id)
-                ->block(static::LOCK_WAIT_SECONDS, fn () => $this->bookLocked($order->id, $manual));
+                ->block(static::LOCK_WAIT_SECONDS, fn () => $this->bookLocked($order->id, $manual, $generation));
         } catch (LockTimeoutException) {
             return null;
         }
@@ -110,13 +121,15 @@ class ShipmentBooker
 
     /**
      * Give up on a booking that kept ending without a clear answer (the queue's last try).
+     * A job of an earlier generation gives up on nothing: the booking now running is not its own.
      */
-    public function markFailed(int $orderId, string $reason): void
+    public function markFailed(int $orderId, string $reason, ?int $generation = null): void
     {
         $row = ShiprocketShipment::where('order_id', $orderId)->first();
 
         if (
             ! $row
+            || ($generation !== null && $generation !== $row->generation)
             || $row->status === ShiprocketShipment::STATUS_CANCELLED
             || $this->isDone($row)
         ) {
@@ -126,14 +139,36 @@ class ShipmentBooker
         $this->fail($row, 'booking_failed', $reason);
     }
 
+    /**
+     * Fetch and store the label of a booked parcel that has none yet, and return its URL.
+     *
+     * @throws ShiprocketException when Shiprocket has no label for it (yet)
+     */
+    public function label(ShiprocketShipment $row): string
+    {
+        if (! $row->label_url) {
+            if (! $row->shipment_id || ! $row->awb_code) {
+                throw new ShiprocketException(trans('shiprocket::app.admin.cannot-ship'));
+            }
+
+            $row->update(['label_url' => $this->api->generateLabel($row->shipment_id)]);
+        }
+
+        return $row->label_url;
+    }
+
     protected function lock(int $orderId): Lock
     {
         return Cache::lock('shiprocket:book:'.$orderId, static::LOCK_SECONDS);
     }
 
-    protected function bookLocked(int $orderId, bool $manual): ShiprocketShipment
+    protected function bookLocked(int $orderId, bool $manual, ?int $generation): ShiprocketShipment
     {
         $row = ShiprocketShipment::firstOrCreate(['order_id' => $orderId]);
+
+        if (! $this->isCurrent($row, $generation)) {
+            return $row;
+        }
 
         if ($this->isDone($row)) {
             return $row;
@@ -170,10 +205,6 @@ class ShipmentBooker
 
             $this->api->requestPickup($row->shipment_id);
 
-            if (! $row->label_url) {
-                $row->update(['label_url' => $this->api->generateLabel($row->shipment_id)]);
-            }
-
             $this->recordStoreShipment($row, $orderId, $storeShipment, $sourceId);
         } catch (ShiprocketUnknownOutcomeException $exception) {
             throw $exception;
@@ -181,12 +212,54 @@ class ShipmentBooker
             return $this->fail($row, 'booking_failed', $exception->getMessage());
         }
 
+        $this->tryLabel($row);
+
         return $row;
     }
 
     /**
+     * Whether a request for $generation may work on the row now (see book()). A request
+     * that may not is logged and left alone.
+     */
+    protected function isCurrent(ShiprocketShipment $row, ?int $generation): bool
+    {
+        $stale = $generation !== null && $generation !== $row->generation;
+
+        if (! $stale && ($generation !== null || $row->status !== ShiprocketShipment::STATUS_CANCELLED)) {
+            return true;
+        }
+
+        Log::info('Shiprocket booking request skipped: it is not for the current booking of the order.', [
+            'order_id' => $row->order_id,
+            'status' => $row->status,
+            'generation' => $row->generation,
+            'requested_generation' => $generation,
+        ]);
+
+        return false;
+    }
+
+    /**
+     * The label is not needed to ship: courier, pickup and customer email are done. When
+     * Shiprocket has none yet the row stays without one, and the admin's "Download label"
+     * asks again.
+     */
+    protected function tryLabel(ShiprocketShipment $row): void
+    {
+        try {
+            $this->label($row);
+        } catch (ShiprocketException $exception) {
+            Log::warning('Shiprocket label not generated; it is fetched when the admin downloads it.', [
+                'order_id' => $row->order_id,
+                'shipment_id' => $row->shipment_id,
+                'error' => $exception->getMessage(),
+            ]);
+        }
+    }
+
+    /**
      * Every step is done (pickup and store Shipment), or the parcel has moved on since. A
-     * `booked` row still needs its pickup, label and store Shipment; cancelled and failed
+     * `booked` row still needs its pickup and store Shipment; cancelled and failed
      * bookings may be booked again.
      */
     protected function isDone(ShiprocketShipment $row): bool
@@ -516,7 +589,11 @@ class ShipmentBooker
             }
         }
 
-        $shipment->update(['status' => ShiprocketShipment::STATUS_CANCELLED]);
+        // A new generation: no booking job queued before this cancel can book the parcel again.
+        $shipment->update([
+            'status' => ShiprocketShipment::STATUS_CANCELLED,
+            'generation' => $shipment->generation + 1,
+        ]);
     }
 
     protected function fail(ShiprocketShipment $row, string $problem, string $reason, array $details = []): ShiprocketShipment

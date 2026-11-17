@@ -97,15 +97,36 @@ class ShipmentController extends Controller
         return $this->back($order, 'success', trans('shiprocket::app.admin.cancelled'));
     }
 
-    public function label(int $id): RedirectResponse
+    /**
+     * Send the admin to the parcel's label, asking Shiprocket for it first when booking
+     * could not get one.
+     */
+    public function label(int $id, ShipmentBooker $booker): RedirectResponse
     {
         $order = $this->orderRepository->findOrFail($id);
 
-        $url = $this->shipmentFor($order)?->label_url;
+        $shipment = $this->shipmentFor($order);
 
-        abort_unless(filled($url), 404);
+        abort_unless($shipment && self::hasLabel($shipment), 404);
+
+        try {
+            $url = $booker->label($shipment);
+        } catch (ShiprocketException $exception) {
+            return $this->back($order, 'error', trans('shiprocket::app.admin.reason', ['reason' => $exception->getMessage()]));
+        }
 
         return redirect()->away($url);
+    }
+
+    /**
+     * Whether the parcel has a label, or can get one: the courier is booked and the
+     * booking was not cancelled (a cancelled AWB's label must not end up on a parcel).
+     */
+    public static function hasLabel(?ShiprocketShipment $shipment): bool
+    {
+        return $shipment
+            && $shipment->status !== ShiprocketShipment::STATUS_CANCELLED
+            && (filled($shipment->label_url) || (filled($shipment->awb_code) && $shipment->shipment_id));
     }
 
     protected function book(int $id): RedirectResponse
@@ -118,8 +139,11 @@ class ShipmentController extends Controller
             return $this->back($order, 'error', trans('shiprocket::app.admin.cannot-ship'));
         }
 
-        // Booked by hand: the weight guards are the admin's call (the panel asks first).
-        BookShipment::dispatch($order->id, manual: true);
+        // Booked by hand: the weight guards are the admin's call (the panel asks first). Sent
+        // for the current booking generation, so after a cancel this books the parcel again.
+        $generation = (int) $this->shipmentFor($order)?->generation;
+
+        BookShipment::dispatch($order->id, manual: true, generation: $generation);
 
         return $this->back($order, 'success', trans('shiprocket::app.admin.queued'));
     }

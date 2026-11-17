@@ -1,9 +1,11 @@
 <?php
 
 use DigitalLabs\Sales\Models\Order;
+use DigitalLabs\Shiprocket\Contracts\ShiprocketApi;
 use DigitalLabs\Shiprocket\Exceptions\ShiprocketException;
 use DigitalLabs\Shiprocket\Jobs\BookShipment;
 use DigitalLabs\Shiprocket\Models\ShiprocketShipment;
+use DigitalLabs\Shiprocket\Services\FakeShiprocketClient;
 use DigitalLabs\Shiprocket\Services\ShipmentBooker;
 use DigitalLabs\Shiprocket\Support\Settings;
 use DigitalLabs\User\Models\Admin as AdminModel;
@@ -277,12 +279,93 @@ it('sends the admin to the label, or 404 when there is none', function () {
     get(route('admin.shiprocket.label', $order->id))->assertNotFound();
 
     $row = shiprocketDeliveryRow($order);
-
-    get(route('admin.shiprocket.label', $order->id))->assertNotFound();
-
     $row->update(['label_url' => 'https://labels.example.com/1.pdf']);
 
     get(route('admin.shiprocket.label', $order->id))->assertRedirect('https://labels.example.com/1.pdf');
+
+    // A cancelled AWB's label is never handed out.
+    $row->update(['status' => ShiprocketShipment::STATUS_CANCELLED]);
+
+    get(route('admin.shiprocket.label', $order->id))->assertNotFound();
+});
+
+it('fetches the label from shiprocket when booking could not get one', function () {
+    $this->loginAsAdmin();
+
+    $api = new class extends FakeShiprocketClient
+    {
+        public ?string $refuse = null;
+
+        public int $calls = 0;
+
+        public function generateLabel(int $shipmentId): string
+        {
+            $this->calls++;
+
+            if ($this->refuse) {
+                throw new ShiprocketException($this->refuse);
+            }
+
+            return parent::generateLabel($shipmentId);
+        }
+    };
+
+    app()->instance(ShiprocketApi::class, $api);
+
+    $order = shiprocketDeliveryOrder();
+    $row = shiprocketDeliveryRow($order);
+
+    viewShiprocketPanel($order)->assertSee(route('admin.shiprocket.label', $order->id), false);
+
+    $api->refuse = 'Label not ready';
+
+    get(route('admin.shiprocket.label', $order->id))
+        ->assertRedirect(route('admin.sales.orders.view', $order->id))
+        ->assertSessionHas('error', trans('shiprocket::app.admin.reason', ['reason' => 'Label not ready']));
+
+    expect($row->fresh()->label_url)->toBeNull();
+
+    $api->refuse = null;
+
+    $label = 'https://example.test/labels/'.$row->shipment_id.'.pdf';
+
+    get(route('admin.shiprocket.label', $order->id))->assertRedirect($label);
+
+    expect($row->fresh()->label_url)->toBe($label);
+
+    // Stored: the next download does not ask again.
+    get(route('admin.shiprocket.label', $order->id))->assertRedirect($label);
+
+    expect($api->calls)->toBe(2);
+});
+
+it('does not ask about the weight when booking a cancelled parcel again', function () {
+    // The order's items all count as shipped (the store shipment stays), so the weight
+    // left to ship is 0 kg, which a first booking would question.
+    $this->loginAsAdmin();
+
+    $order = shiprocketDeliveryOrder();
+
+    shiprocketDeliveryRow($order, ShiprocketShipment::STATUS_CANCELLED);
+
+    viewShiprocketPanel($order)
+        ->assertSee(route('admin.shiprocket.ship', $order->id), false)
+        ->assertDontSee('data-confirm="'.e(trans('shiprocket::app.admin.confirm-heavy', ['weight' => 0])).'"', false);
+});
+
+it('queues a booking for the current generation after a cancel', function () {
+    Queue::fake();
+
+    $this->loginAsAdmin();
+
+    $order = shiprocketDeliveryOrder();
+
+    shiprocketDeliveryRow($order, ShiprocketShipment::STATUS_CANCELLED)->update(['generation' => 2]);
+
+    post(route('admin.shiprocket.ship', $order->id))
+        ->assertSessionHas('success', trans('shiprocket::app.admin.queued'));
+
+    Queue::assertPushed(BookShipment::class, fn (BookShipment $job) => $job->generation === 2 && $job->manual);
 });
 
 it('lets only admins who may create shipments ship, retry or cancel', function (string $route) {

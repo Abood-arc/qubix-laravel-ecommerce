@@ -51,11 +51,27 @@ class ShiprocketClient implements ShiprocketApi
     protected const TOKEN_DAYS = 9;
 
     /**
-     * Sized so one booking (login + four calls, one 401 retry) stays inside the worker's 90 s retry_after.
+     * Seconds to connect, and for a whole booking call (BookShipment has the budget: a first
+     * booking is login + four calls, 5 × 12 s, well inside the job's 85 s).
      */
     protected const CONNECT_TIMEOUT = 5;
 
-    protected const TIMEOUT = 20;
+    protected const TIMEOUT = 12;
+
+    /**
+     * Seconds for a serviceability call, and the login it may need: a checkout step waits
+     * for it, and fails open when it runs out.
+     */
+    protected const SERVICEABILITY_TIMEOUT = 3;
+
+    /**
+     * How Shiprocket words "no courier for this PIN" on a 404 or 422, and (more strictly,
+     * since a success message may mention serviceability) on a 200 without a courier list.
+     * Any other answer without a courier list is an error, never "not deliverable".
+     */
+    protected const NO_COURIER = '/no courier|not serviceable|serviceab/i';
+
+    protected const NO_COURIER_ON_SUCCESS = '/no courier|not serviceable/i';
 
     /**
      * How Shiprocket words "this was done already" for an AWB and for a pickup.
@@ -78,16 +94,25 @@ class ShiprocketClient implements ShiprocketApi
             'delivery_postcode' => $deliveryPin,
             'weight' => $weightKg,
             'cod' => $cod ? 1 : 0,
-        ]);
+        ], self::SERVICEABILITY_TIMEOUT);
 
-        // "No courier" comes back as a 404, or a 422 that is not a validation error.
-        if ($response->status() === 404 || ($response->status() === 422 && $response->json('errors') === null)) {
-            return ['deliverable' => false, 'cod' => false];
+        $companies = $response->successful() ? $response->json('data.available_courier_companies') : null;
+
+        if (! is_array($companies)) {
+            // Only a clear "no courier" is an answer (and cached for hours); anything else
+            // is an error, so checkout fails open.
+            $noCourier = match ($response->status()) {
+                404, 422 => self::NO_COURIER,
+                200 => self::NO_COURIER_ON_SUCCESS,
+                default => null,
+            };
+
+            if ($noCourier && preg_match($noCourier, (string) $this->message($response))) {
+                return ['deliverable' => false, 'cod' => false];
+            }
+
+            throw $this->refusal($response);
         }
-
-        $companies = $this->data($response)['data']['available_courier_companies'] ?? [];
-
-        $companies = is_array($companies) ? $companies : [];
 
         return [
             'deliverable' => $companies !== [],
@@ -206,23 +231,23 @@ class ShiprocketClient implements ShiprocketApi
     /**
      * Send an authenticated request. A rejected token is renewed once and the request retried once.
      */
-    protected function call(string $method, string $path, array $data = []): Response
+    protected function call(string $method, string $path, array $data = [], int $timeout = self::TIMEOUT): Response
     {
-        $response = $this->send($method, $path, $data, $this->token());
+        $response = $this->send($method, $path, $data, $this->token($timeout), $timeout);
 
         if ($response->status() === 401) {
             Cache::forget($this->tokenCacheKey());
 
-            $response = $this->send($method, $path, $data, $this->token());
+            $response = $this->send($method, $path, $data, $this->token($timeout), $timeout);
         }
 
         return $response;
     }
 
     /**
-     * The cached API token, logging in when there is none.
+     * The cached API token, logging in (within $timeout seconds) when there is none.
      */
-    protected function token(): string
+    protected function token(int $timeout = self::TIMEOUT): string
     {
         $token = Cache::get($this->tokenCacheKey());
 
@@ -233,7 +258,7 @@ class ShiprocketClient implements ShiprocketApi
         $response = $this->send('POST', self::PATH_LOGIN, [
             'email' => Settings::email(),
             'password' => Settings::password(),
-        ]);
+        ], null, $timeout);
 
         $token = $this->data($response)['token'] ?? null;
 
@@ -255,12 +280,12 @@ class ShiprocketClient implements ShiprocketApi
      * Send one request. No answer, a failure on Shiprocket's side, or a rate limit (the request
      * was not carried out, so a later retry is right) leaves the outcome unknown.
      */
-    protected function send(string $method, string $path, array $data = [], ?string $token = null): Response
+    protected function send(string $method, string $path, array $data = [], ?string $token = null, int $timeout = self::TIMEOUT): Response
     {
         $request = Http::baseUrl(self::BASE_URL)
             ->acceptJson()
-            ->connectTimeout(self::CONNECT_TIMEOUT)
-            ->timeout(self::TIMEOUT);
+            ->connectTimeout(min(self::CONNECT_TIMEOUT, $timeout))
+            ->timeout($timeout);
 
         if ($token !== null) {
             $request->withToken($token);

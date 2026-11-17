@@ -81,6 +81,8 @@ class ParcelBuilder
 
     /**
      * Per-unit amounts: the selling price includes the item's tax, and `tax` is its rate (%).
+     * The discount is sent once, as the order's `total_discount` (see amounts()), never per
+     * item as well, so Shiprocket cannot take it off twice.
      */
     protected function itemLine($item): array
     {
@@ -89,7 +91,7 @@ class ParcelBuilder
             'sku' => $item->sku,
             'units' => (int) $item->qty_to_ship,
             'selling_price' => round(($item->total + $item->tax_amount) / $item->qty_ordered, 2),
-            'discount' => round($item->discount_amount / $item->qty_ordered, 2),
+            'discount' => 0.0,
             'tax' => (float) $item->tax_percent,
         ];
     }
@@ -101,6 +103,10 @@ class ParcelBuilder
      * exactly `grand_total` (sub_total + tax + shipping - discount): item tax goes into
      * `sub_total`, shipping tax into `shipping_charges`. The rest of a partly shipped,
      * refunded or cancelled order declares only the units in this parcel, without shipping.
+     *
+     * The item lines carry no discount, so this is the only place it is sent. Not yet
+     * confirmed against Shiprocket itself: on the first live discounted COD booking, check
+     * that the amount Shiprocket shows to collect equals the order's grand_total.
      */
     protected function amounts(Order $order, Collection $items): array
     {

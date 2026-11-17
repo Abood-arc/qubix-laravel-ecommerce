@@ -53,13 +53,23 @@ class OrderCancel
     }
 
     /**
-     * A Shiprocket order exists and is not cancelled: booked or scheduled for pickup, or a
-     * booking that stopped part way (it may already hold a courier).
+     * A booking is running, or stopped part way (it may already hold a Shiprocket order and
+     * a courier), or a Shiprocket order exists and is not cancelled.
+     *
+     * A `booking` row always goes through the booker's cancel, Shiprocket order id or not:
+     * the cancel waits for the order's booking lock, so it can never slip past a booking
+     * that is about to book a courier. If that booking is still running after the wait,
+     * the order cancel is stopped with `cancel.failed` ("could not cancel: Booking…"), not
+     * `cancel.blocked`, which tells the admin the courier has the parcel; trying again a
+     * moment later succeeds.
      */
     protected function hasLiveBooking(ShiprocketShipment $shipment): bool
     {
+        if ($shipment->status === ShiprocketShipment::STATUS_BOOKING) {
+            return true;
+        }
+
         return $shipment->shiprocket_order_id && in_array($shipment->status, [
-            ShiprocketShipment::STATUS_BOOKING,
             ShiprocketShipment::STATUS_BOOKED,
             ShiprocketShipment::STATUS_PICKUP_SCHEDULED,
             ShiprocketShipment::STATUS_FAILED,
