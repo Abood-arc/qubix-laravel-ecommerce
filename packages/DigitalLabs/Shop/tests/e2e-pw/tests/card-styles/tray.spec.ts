@@ -47,9 +47,6 @@ async function recordTrayMotion(page: Page): Promise<void> {
 const trayMotion = (page: Page): Promise<string[]> => page.evaluate(() => (window as any).trayMotion);
 
 /**
- * How many points of a 5 × 3 grid over the element (clear of its rounded corners) have something else on top.
- */
-/**
  * The focused element, if it is a new card's Compare control: whether it sits in a card, and its state.
  * (The control carries data-compare-product; checked in the page, as focus has no locator.)
  */
@@ -86,6 +83,9 @@ async function showRelatedProducts(page: Page, product: CardProduct): Promise<vo
  */
 const productPageCompare = (page: Page) => page.getByRole("button", { name: /^[^A-Za-z]*Compare$/ });
 
+/**
+ * How many points of a 5 × 3 grid over the element (clear of its rounded corners) have something else on top.
+ */
 const coveredPoints = (target: Locator): Promise<number> =>
     target.evaluate((element) => {
         const box = element.getBoundingClientRect();

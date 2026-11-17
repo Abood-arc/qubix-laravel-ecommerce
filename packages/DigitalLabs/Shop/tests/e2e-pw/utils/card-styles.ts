@@ -147,11 +147,7 @@ export function transformAnimationCount(page: Page, within = "body"): Promise<nu
 /**
  * The store look's brand colour as computed CSS ("rgb(47, 93, 72)").
  */
-export async function brandColour(page: Page): Promise<string> {
-    const channels = await page.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue("--c-brand").trim());
-
-    return `rgb(${channels.split(/\s+/).join(", ")})`;
-}
+export const brandColour = (page: Page): Promise<string> => lookColour(page, "--c-brand");
 
 /**
  * The throwaway customer that the suite's global setup seeds (CardStylesE2eSeeder) and its teardown removes.
@@ -223,4 +219,15 @@ export async function cartQuantityOf(page: Page, product: CardProduct): Promise<
     const { data } = await (await page.request.get("api/checkout/cart")).json();
 
     return Number(data?.items?.find((item: any) => item.product_id === product.id)?.quantity ?? 0);
+}
+
+/**
+ * One of the store look's colour tokens (`--c-ink`, `--c-line`, …) as computed CSS ("rgb(29, 34, 31)").
+ */
+export async function lookColour(page: Page, token: string): Promise<string> {
+    const channels = await page.evaluate((name) => getComputedStyle(document.documentElement).getPropertyValue(name).trim(), token);
+
+    expect(channels, `The store look has no ${token}`).not.toBe("");
+
+    return `rgb(${channels.split(/\s+/).join(", ")})`;
 }
