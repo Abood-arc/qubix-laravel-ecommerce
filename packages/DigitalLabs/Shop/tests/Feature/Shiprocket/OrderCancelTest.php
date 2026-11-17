@@ -137,6 +137,11 @@ beforeEach(function () {
 
     CoreConfig::query()->where('code', 'general.general.locale_options.weight_unit')->get()->each->delete();
     CoreConfig::create(['code' => 'general.general.locale_options.weight_unit', 'value' => 'g', 'channel_code' => 'default']);
+
+    foreach (['length' => '30', 'breadth' => '25', 'height' => '10'] as $side => $cm) {
+        CoreConfig::query()->where('code', 'sales.shipping.shiprocket.'.$side)->get()->each->delete();
+        CoreConfig::create(['code' => 'sales.shipping.shiprocket.'.$side, 'value' => $cm, 'channel_code' => 'default']);
+    }
 });
 
 it('cancels the shiprocket booking with the order before pickup', function () {

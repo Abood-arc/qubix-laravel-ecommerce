@@ -9,6 +9,11 @@ namespace DigitalLabs\Shiprocket\Contracts;
 interface ShiprocketApi
 {
     /**
+     * Log in afresh with the API user, ignoring a cached token, so a wrong user shows now.
+     */
+    public function checkLogin(): void;
+
+    /**
      * @return array{deliverable: bool, cod: bool}
      */
     public function checkServiceability(string $pickupPin, string $deliveryPin, float $weightKg, bool $cod): array;
@@ -33,9 +38,28 @@ interface ShiprocketApi
     public function requestPickup(int $shipmentId): void;
 
     /**
+     * Shiprocket asks for the manifest right after a pickup request.
+     *
+     * @return string|null the manifest PDF URL, or null when the shipment has one already
+     */
+    public function generateManifest(int $shipmentId): ?string;
+
+    /**
      * @return string the label PDF URL
      */
     public function generateLabel(int $shipmentId): string;
 
     public function cancelOrder(int $shiprocketOrderId): void;
+
+    /**
+     * The account's pickup locations, by the exact name an order's `pickup_location` uses.
+     *
+     * @return array<int, array{pickup_location: string, pin_code: string}>
+     */
+    public function listPickupLocations(): array;
+
+    /**
+     * One order as Shiprocket recorded it (its "data" object).
+     */
+    public function getOrder(int $shiprocketOrderId): array;
 }

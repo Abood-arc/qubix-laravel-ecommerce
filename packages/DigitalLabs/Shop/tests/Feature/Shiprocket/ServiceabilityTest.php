@@ -38,6 +38,11 @@ function bindShiprocketServiceabilityApi(): object
         /** @var array<int, array{pickup: string, pin: string, weight: float, cod: bool}> */
         public array $calls = [];
 
+        public function checkLogin(): void
+        {
+            throw new LogicException('Not used');
+        }
+
         /** Throws on the call with this COD flag (null = both), when set. */
         public ?Throwable $failure = null;
 
@@ -72,6 +77,21 @@ function bindShiprocketServiceabilityApi(): object
         }
 
         public function requestPickup(int $shipmentId): void
+        {
+            throw new LogicException('Not used');
+        }
+
+        public function generateManifest(int $shipmentId): ?string
+        {
+            throw new LogicException('Not used');
+        }
+
+        public function listPickupLocations(): array
+        {
+            throw new LogicException('Not used');
+        }
+
+        public function getOrder(int $shiprocketOrderId): array
         {
             throw new LogicException('Not used');
         }

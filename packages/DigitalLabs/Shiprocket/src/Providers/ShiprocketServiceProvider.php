@@ -3,6 +3,7 @@
 namespace DigitalLabs\Shiprocket\Providers;
 
 use DigitalLabs\Shipping\Contracts\DeliveryCheck as DeliveryCheckContract;
+use DigitalLabs\Shiprocket\Console\Commands\CheckCommand;
 use DigitalLabs\Shiprocket\Contracts\ShiprocketApi;
 use DigitalLabs\Shiprocket\Payment\CashOnDelivery;
 use DigitalLabs\Shiprocket\Services\DeliveryCheck;
@@ -49,6 +50,10 @@ class ShiprocketServiceProvider extends ServiceProvider
         $this->loadViewsFrom(dirname(__DIR__).'/Resources/views', 'shiprocket');
 
         $this->registerViewHooks();
+
+        if ($this->app->runningInConsole()) {
+            $this->commands([CheckCommand::class]);
+        }
     }
 
     /**
@@ -61,7 +66,8 @@ class ShiprocketServiceProvider extends ServiceProvider
     }
 
     /**
-     * The admin order panel and the customer's "Track your parcel" links.
+     * The admin order panel, the settings' browser validation and the customer's "Track
+     * your parcel" links.
      */
     protected function registerViewHooks(): void
     {

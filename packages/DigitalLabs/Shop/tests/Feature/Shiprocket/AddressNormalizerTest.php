@@ -122,3 +122,14 @@ it('caps the second line at 80 characters', function () {
     expect($lines['address'])->toBe('Line one')
         ->and(mb_strlen($lines['address_2']))->toBe(80);
 });
+
+it('cuts a city to shiprocket\'s 30 characters', function (string $city, string $expected) {
+    expect(normalizeShiprocketAddress(['city' => $city])['city'])->toBe($expected);
+})->with([
+    'short city kept' => ['  Pune ', 'Pune'],
+    'exactly 30 kept' => [str_repeat('a', 30), str_repeat('a', 30)],
+    'cut at a word break' => ['Thiruvananthapuram Cantonment North', 'Thiruvananthapuram Cantonment'],
+    'no break: cut at 30' => [str_repeat('x', 35), str_repeat('x', 30)],
+    'no dangling punctuation' => ['Sri Ganganagar Cantonment, Rajasthan', 'Sri Ganganagar Cantonment'],
+    'multibyte' => [str_repeat('पुणे', 10), mb_substr(str_repeat('पुणे', 10), 0, 30)],
+]);

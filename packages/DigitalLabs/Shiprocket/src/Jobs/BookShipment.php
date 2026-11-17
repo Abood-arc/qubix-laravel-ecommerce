@@ -24,9 +24,11 @@ use Throwable;
  * Time budget: production runs `queue:work redis --tries=3` with retry_after 90 s. The job
  * is stopped after 85 s ($timeout), before the queue would hand it to a second worker.
  * Each Shiprocket call is capped at 12 s (ShiprocketClient), so a first booking (login,
- * order, courier, pickup, label: 5 × 12 s) plus the 3 s lock wait takes at most 63 s, and a
- * resumed one (one more lookup) 75 s. Only a rare worst case (a token renewal on top)
- * can run past 85 s; it is then stopped and resumed by the next try, since every step is saved.
+ * order, courier, pickup, manifest, label: 6 × 12 s) plus the 3 s lock wait takes at most
+ * 75 s. A resumed one (one more lookup) can reach 87 s, and a token renewal adds more; the
+ * job is then stopped during the manifest or label, which come after the store Shipment is
+ * saved, so the next try finds the booking done (the label is fetched when the admin
+ * downloads it). A stop earlier on is resumed by the next try, since every step is saved.
  */
 class BookShipment implements ShouldQueue
 {

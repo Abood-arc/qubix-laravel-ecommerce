@@ -30,6 +30,8 @@ class ShiprocketClient implements ShiprocketApi
 
     protected const PATH_ORDERS = 'orders';
 
+    protected const PATH_ORDER = 'orders/show/';
+
     protected const PATH_ASSIGN_AWB = 'courier/assign/awb';
 
     protected const PATH_SHIPMENT = 'shipments/';
@@ -38,7 +40,11 @@ class ShiprocketClient implements ShiprocketApi
 
     protected const PATH_LABEL = 'courier/generate/label';
 
+    protected const PATH_MANIFEST = 'manifests/generate';
+
     protected const PATH_CANCEL = 'orders/cancel';
+
+    protected const PATH_PICKUP_LOCATIONS = 'settings/company/pickup';
 
     /**
      * Followed by a hash of the API user's email, so a new user never reuses an old token.
@@ -80,12 +86,21 @@ class ShiprocketClient implements ShiprocketApi
 
     protected const PICKUP_ALREADY_SCHEDULED = '/already/i';
 
+    protected const MANIFEST_ALREADY_GENERATED = '/already\s+generated/i';
+
     /**
      * The order search row's status field, and the values that mean the order was cancelled.
      */
     protected const ORDER_STATUS_FIELD = 'status';
 
     protected const ORDER_CANCELLED = '/^\s*cancel+ed\s*$/i';
+
+    public function checkLogin(): void
+    {
+        Cache::forget($this->tokenCacheKey());
+
+        $this->token();
+    }
 
     public function checkServiceability(string $pickupPin, string $deliveryPin, float $weightKg, bool $cod): array
     {
@@ -135,7 +150,10 @@ class ShiprocketClient implements ShiprocketApi
 
     public function findOrderByChannelOrderId(string $channelOrderId): ?array
     {
-        $response = $this->call('GET', self::PATH_ORDERS, ['search' => $channelOrderId]);
+        $response = $this->call('GET', self::PATH_ORDERS, [
+            'filter_by' => 'channel_order_id',
+            'filter' => $channelOrderId,
+        ]);
 
         $rows = $this->data($response)['data'] ?? [];
 
@@ -192,6 +210,30 @@ class ShiprocketClient implements ShiprocketApi
         $this->data($response);
     }
 
+    public function generateManifest(int $shipmentId): ?string
+    {
+        $response = $this->call('POST', self::PATH_MANIFEST, ['shipment_id' => [$shipmentId]]);
+
+        if (
+            $response->failed()
+            && (
+                in_array($shipmentId, (array) $response->json('already_manifested_shipment_ids'), false)
+                || preg_match(self::MANIFEST_ALREADY_GENERATED, (string) $this->message($response))
+            )
+        ) {
+            return null;
+        }
+
+        $url = $this->data($response)['manifest_url'] ?? null;
+
+        // Shiprocket answers a missing field or invalid data with a 200 and an empty URL.
+        if (! is_string($url) || $url === '') {
+            throw $this->refusal($response);
+        }
+
+        return $url;
+    }
+
     public function generateLabel(int $shipmentId): string
     {
         $response = $this->call('POST', self::PATH_LABEL, ['shipment_id' => [$shipmentId]]);
@@ -208,6 +250,33 @@ class ShiprocketClient implements ShiprocketApi
     public function cancelOrder(int $shiprocketOrderId): void
     {
         $this->data($this->call('POST', self::PATH_CANCEL, ['ids' => [$shiprocketOrderId]]));
+    }
+
+    public function listPickupLocations(): array
+    {
+        $locations = $this->data($this->call('GET', self::PATH_PICKUP_LOCATIONS))['data']['shipping_address'] ?? [];
+
+        return collect(is_array($locations) ? $locations : [])
+            ->filter(fn ($location) => is_array($location))
+            ->map(fn (array $location) => [
+                'pickup_location' => (string) ($location['pickup_location'] ?? ''),
+                'pin_code' => (string) ($location['pin_code'] ?? ''),
+            ])
+            ->values()
+            ->all();
+    }
+
+    public function getOrder(int $shiprocketOrderId): array
+    {
+        $response = $this->call('GET', self::PATH_ORDER.$shiprocketOrderId);
+
+        $order = $this->data($response)['data'] ?? null;
+
+        if (! is_array($order) || $order === []) {
+            throw $this->refusal($response);
+        }
+
+        return $order;
     }
 
     /**

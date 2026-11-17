@@ -26,7 +26,8 @@ use Throwable;
 
 /**
  * Books one order with Shiprocket: order, courier (AWB) and pickup, then the store Shipment
- * that tells the customer, then (best effort) the label.
+ * that tells the customer, then (best effort) the manifest Shiprocket asks for after a
+ * pickup request, and the label.
  *
  * Every step is saved on the order's row as soon as Shiprocket confirms it, so a booking
  * that stopped half way (timeout, worker restart) resumes where it stopped instead of
@@ -212,6 +213,8 @@ class ShipmentBooker
             return $this->fail($row, 'booking_failed', $exception->getMessage());
         }
 
+        $this->tryManifest($row);
+
         $this->tryLabel($row);
 
         return $row;
@@ -237,6 +240,30 @@ class ShipmentBooker
         ]);
 
         return false;
+    }
+
+    /**
+     * Shiprocket's pickup docs: "You will have to call the 'Generate Manifest' API after the
+     * successful response of this API." It runs once the store Shipment is saved, so it can
+     * never hold the booking up; when Shiprocket refuses or does not answer, the reason is
+     * logged and the manifest can be made in Shiprocket's panel.
+     */
+    protected function tryManifest(ShiprocketShipment $row): void
+    {
+        $context = ['order_id' => $row->order_id, 'shipment_id' => $row->shipment_id];
+
+        try {
+            $url = $this->api->generateManifest($row->shipment_id);
+        } catch (ShiprocketException $exception) {
+            Log::warning('Shiprocket manifest not generated; generate it in the Shiprocket panel before the pickup.', [
+                ...$context,
+                'error' => $exception->getMessage(),
+            ]);
+
+            return;
+        }
+
+        Log::info('Shiprocket manifest generated.', [...$context, 'manifest_url' => $url]);
     }
 
     /**
