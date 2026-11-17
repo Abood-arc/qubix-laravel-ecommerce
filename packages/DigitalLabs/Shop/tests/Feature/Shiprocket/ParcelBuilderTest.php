@@ -368,7 +368,7 @@ it('only accepts a parcel size above 0.5 cm in the settings', function (string $
     foreach (['length', 'breadth', 'height'] as $field) {
         $rules = system_config()->getConfigField('sales.shipping.shiprocket.'.$field)['validation'];
 
-        expect($rules)->toContain('numeric')->toContain('gt:0.5')
+        expect($rules)->toContain('numeric')->toContain('min:0.51')
             ->and(validator(['active' => '1', 'value' => $value], ['value' => $rules])->passes())->toBe($valid);
     }
 })->with([

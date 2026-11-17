@@ -283,7 +283,7 @@ it('creates a test order, reads back what shiprocket recorded and cancels it, ne
 
     [$code, $output] = runShiprocketCheck(['--order' => $order->increment_id, '--create-test-order' => true, '--force' => true]);
 
-    $channelOrderId = 'CHECK-'.$order->increment_id.'-20261118103015';
+    $channelOrderId = $order->increment_id.'-20261118103015';
 
     expect($code)->toBe(0)
         ->and($output)->toContain('Created Shiprocket order 9001 (shipment 9101) as '.$channelOrderId)
@@ -329,7 +329,7 @@ it('cancels the test order even when it cannot be read back', function () {
 
     expect($code)->toBe(1)
         ->and($output)->toContain('Could not read the test order back: Order ID not found')
-        ->toContain('Cancelled test order CHECK-'.$order->increment_id)
+        ->toContain('Cancelled test order '.$order->increment_id)
         ->and(shiprocketCheckSent('orders/cancel'))->toBe(1);
 });
 
@@ -356,7 +356,7 @@ it('asks before creating the test order and creates nothing when the answer is n
 
     $this->artisan('shiprocket:check', ['--order' => $order->increment_id, '--create-test-order' => true])
         ->expectsConfirmation(
-            'Create test order CHECK-'.$order->increment_id.'-20261118103015 in Shiprocket? It is cancelled straight after; no courier is booked.',
+            'Create test order '.$order->increment_id.'-20261118103015 in Shiprocket? It is cancelled straight after; no courier is booked.',
             'no'
         )
         ->expectsOutputToContain('No test order created.')

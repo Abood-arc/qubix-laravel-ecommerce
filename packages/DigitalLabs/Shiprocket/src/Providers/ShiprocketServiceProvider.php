@@ -75,13 +75,6 @@ class ShiprocketServiceProvider extends ServiceProvider
             $viewRenderEventManager->addTemplate('shiprocket::admin.order-panel');
         });
 
-        // The settings page only: the parcel size settings need the browser's `gt` rule.
-        Event::listen('qubix.admin.layout.vue-app-mount.before', function ($viewRenderEventManager) {
-            if (request()->routeIs('admin.configuration.index')) {
-                $viewRenderEventManager->addTemplate('shiprocket::admin.gt-rule');
-            }
-        });
-
         Event::listen('qubix.shop.emails.orders.shipped.track_number.after', function ($viewRenderEventManager) {
             $viewRenderEventManager->addTemplate('shiprocket::shop.tracking-link-email');
         });

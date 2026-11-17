@@ -17,7 +17,7 @@ use Illuminate\Support\Arr;
 /**
  * Checks the Shiprocket setup against the real account: the API user, the pickup location
  * and serviceability. Read-only, except --create-test-order, which creates one order under
- * a CHECK- number, reads it back and cancels it. It never assigns a courier (AWB), requests
+ * a test number ({increment_id}-{YmdHis}, digits only as Shiprocket's docs advise), reads it back and cancels it. It never assigns a courier (AWB), requests
  * a pickup or makes a manifest or label, so nothing is booked or charged to the wallet.
  *
  * Works while Shiprocket is switched off in admin: only the API user in .env is needed.
@@ -28,7 +28,7 @@ class CheckCommand extends Command
         {--pin=* : Delivery PIN code to check (repeatable; default 110001, 400001, 560001, 700001)}
         {--order= : A store order number, to build its Shiprocket payload}
         {--payload : With --order: print the payload as JSON and stop}
-        {--create-test-order : With --order: create it in Shiprocket as a CHECK- order, read it back and cancel it}
+        {--create-test-order : With --order: create it in Shiprocket under a test number, read it back and cancel it}
         {--force : With --create-test-order: do not ask first}';
 
     protected $description = 'Check the Shiprocket API user, pickup location and serviceability (and, on request, a test order)';
@@ -248,7 +248,7 @@ class CheckCommand extends Command
     }
 
     /**
-     * Create the store order in Shiprocket under a CHECK- number, show what Shiprocket
+     * Create the store order in Shiprocket under a test number ({increment_id}-{YmdHis}, digits only as Shiprocket's docs advise), show what Shiprocket
      * recorded next to the store's amounts, and cancel it. No courier, pickup, manifest or
      * label is ever asked for.
      */
@@ -270,7 +270,7 @@ class CheckCommand extends Command
             return;
         }
 
-        $channelOrderId = 'CHECK-'.$order->increment_id.'-'.now()->format('YmdHis');
+        $channelOrderId = $order->increment_id.'-'.now()->format('YmdHis');
 
         $payload['order_id'] = $channelOrderId;
 
