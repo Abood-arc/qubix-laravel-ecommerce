@@ -146,7 +146,6 @@ return [
                     'state' => 'المنطقة',
                     'street-address' => 'عنوان الشارع',
                     'title' => 'العنوان',
-                    'vat-id' => 'رقم الضريبة',
                 ],
 
                 'edit' => [
@@ -164,7 +163,6 @@ return [
                     'street-address' => 'عنوان الشارع',
                     'title' => 'العنوان',
                     'update-btn' => 'تحديث',
-                    'vat-id' => 'رقم الضريبة',
                 ],
             ],
 
@@ -976,6 +974,7 @@ return [
             'minimum-order-message' => 'الحد الأدنى للطلب هو',
             'missing-fields' => 'بعض الحقول المطلوبة مفقودة لهذا المنتج.',
             'missing-options' => 'الخيارات مفقودة لهذا المنتج.',
+            'payment-method-unavailable' => 'This payment method is not available for this order.',
             'paypal-payment-cancelled' => 'تم إلغاء الدفع باي بال.',
             'qty-missing' => 'يجب أن يكون لديك على الأقل منتج واحد بكمية أكبر من 1.',
             'return-to-shop' => 'العودة للتسوق',
@@ -1078,11 +1077,7 @@ return [
                 'street-address' => 'عنوان الشارع',
                 'telephone' => 'الهاتف',
                 'pin-code' => 'الرمز البريدي (PIN)',
-                'gstin' => 'GSTIN',
-                'gstin-placeholder' => 'مثال: 27AAPFU0939F1ZV',
-                'gst-invoice-toggle' => 'تحتاج فاتورة GST؟ أضف الشركة و GSTIN',
                 'title' => 'العنوان',
-                'vat-id' => 'رقم الضريبة',
             ],
 
             'index' => [

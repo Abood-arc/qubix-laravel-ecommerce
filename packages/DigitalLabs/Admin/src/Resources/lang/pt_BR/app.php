@@ -276,6 +276,8 @@ return [
                         'telephone' => 'Telefone',
                         'title' => 'Endereço',
                         'vat-id' => 'NIF',
+                        'gstin' => 'GSTIN',
+                        'gstin-placeholder' => 'e.g. 27AAPFU0939F1ZV',
                     ],
 
                     'payment' => [
@@ -567,6 +569,7 @@ return [
                 'qty-to-refund' => 'Qtd Para Reembolso',
                 'refund-btn' => 'Reembolsar',
                 'refund-limit-error' => 'O Valor do Reembolso :amount não pode ser processado.',
+                'in-progress' => 'Another refund for this order is still being processed. Wait a moment, then check the order before trying again.',
                 'refund-shipping' => 'Reembolso do Envio',
                 'sku' => 'SKU - :sku',
                 'subtotal' => 'Subtotal',
@@ -1779,6 +1782,8 @@ return [
                         'street-address' => 'Endereço',
                         'title' => 'Criar Endereço',
                         'vat-id' => 'ID do VAT',
+                        'gstin' => 'GSTIN',
+                        'gstin-placeholder' => 'e.g. 27AAPFU0939F1ZV',
                     ],
 
                     'edit' => [
@@ -1798,6 +1803,8 @@ return [
                         'street-address' => 'Endereço',
                         'title' => 'Editar Endereço',
                         'vat-id' => 'ID do VAT',
+                        'gstin' => 'GSTIN',
+                        'gstin-placeholder' => 'e.g. 27AAPFU0939F1ZV',
                     ],
 
                     'address-delete-success' => 'Endereço excluído com sucesso',
@@ -4386,6 +4393,7 @@ return [
                         'title' => 'Origem',
                         'title-info' => 'A origem do envio refere-se ao local onde os produtos são originados antes de serem transportados para o destino.',
                         'vat-number' => 'Número de IVA',
+                        'vat-number-info' => 'India: your 15-character GSTIN, e.g. 27AAPFU0939F1ZV. Other countries: your VAT registration number.',
                         'zip' => 'Código Postal',
                     ],
                 ],

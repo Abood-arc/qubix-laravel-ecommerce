@@ -146,7 +146,6 @@ return [
                     'state' => 'Область',
                     'street-address' => 'Вулиця та номер будинку',
                     'title' => 'Адреса',
-                    'vat-id' => 'Ідентифікаційний номер ПДВ',
                 ],
 
                 'edit' => [
@@ -164,7 +163,6 @@ return [
                     'street-address' => 'Вулиця та номер будинку',
                     'title' => 'Адреса',
                     'update-btn' => 'Оновити',
-                    'vat-id' => 'Ідентифікаційний номер ПДВ',
                 ],
             ],
 
@@ -976,6 +974,7 @@ return [
             'minimum-order-message' => 'Мінімальна сума замовлення становить',
             'missing-fields' => 'Відсутні деякі обов\'язкові поля для цього товару.',
             'missing-options' => 'Відсутні варіанти для цього товару.',
+            'payment-method-unavailable' => 'This payment method is not available for this order.',
             'paypal-payment-cancelled' => 'Платіж Paypal скасовано.',
             'qty-missing' => 'Принаймні один товар повинен мати кількість більше 1.',
             'return-to-shop' => 'Повернутися в магазин',
@@ -1078,11 +1077,7 @@ return [
                 'street-address' => 'Вулиця',
                 'telephone' => 'Телефон',
                 'pin-code' => 'Поштовий індекс (PIN)',
-                'gstin' => 'GSTIN',
-                'gstin-placeholder' => 'напр. 27AAPFU0939F1ZV',
-                'gst-invoice-toggle' => 'Потрібен рахунок із GST? Додайте компанію та GSTIN',
                 'title' => 'Адреса',
-                'vat-id' => 'Ідентифікаційний номер ПДВ',
             ],
 
             'index' => [

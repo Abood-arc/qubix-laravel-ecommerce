@@ -146,7 +146,6 @@ return [
                     'state' => 'Stato',
                     'street-address' => 'Indirizzo',
                     'title' => 'Indirizzo',
-                    'vat-id' => 'Partita IVA',
                 ],
 
                 'edit' => [
@@ -164,7 +163,6 @@ return [
                     'street-address' => 'Indirizzo',
                     'title' => 'Indirizzo',
                     'update-btn' => 'Aggiorna',
-                    'vat-id' => 'Partita IVA',
                 ],
             ],
 
@@ -976,6 +974,7 @@ return [
             'minimum-order-message' => 'L\'importo minimo dell\'ordine è',
             'missing-fields' => 'Mancano alcuni campi obbligatori per questo prodotto.',
             'missing-options' => 'Mancano opzioni per questo prodotto.',
+            'payment-method-unavailable' => 'This payment method is not available for this order.',
             'paypal-payment-cancelled' => 'Il pagamento Paypal è stato annullato.',
             'qty-missing' => 'Almeno un prodotto deve avere una quantità maggiore di 1.',
             'return-to-shop' => 'Torna allo shopping',
@@ -1078,11 +1077,7 @@ return [
                 'street-address' => 'Indirizzo',
                 'telephone' => 'Telefono',
                 'pin-code' => 'Codice postale (PIN)',
-                'gstin' => 'GSTIN',
-                'gstin-placeholder' => 'es. 27AAPFU0939F1ZV',
-                'gst-invoice-toggle' => 'Ti serve una fattura GST? Aggiungi azienda e GSTIN',
                 'title' => 'Indirizzo',
-                'vat-id' => 'Partita IVA',
             ],
 
             'index' => [

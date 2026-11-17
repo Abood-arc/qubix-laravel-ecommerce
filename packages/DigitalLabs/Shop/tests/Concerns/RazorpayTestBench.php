@@ -31,7 +31,12 @@ trait RazorpayTestBench
         ], $overrides);
 
         foreach ($settings as $field => $value) {
-            config()->set('payment_methods.razorpay.'.$field, $value);
+            // The API keys come from .env (config/razorpay.php); the rest from admin settings.
+            $key = in_array($field, ['key_id', 'key_secret', 'webhook_secret'], true)
+                ? 'razorpay.'.$field
+                : 'payment_methods.razorpay.'.$field;
+
+            config()->set($key, $value);
         }
     }
 

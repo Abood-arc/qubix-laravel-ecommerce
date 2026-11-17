@@ -2,6 +2,7 @@
 
 use DigitalLabs\Payment\Facades\Payment;
 use DigitalLabs\Razorpay\Payment\Razorpay;
+use Illuminate\Support\Facades\DB;
 use Webkul\Faker\Helpers\Customer as CustomerFaker;
 
 function razorpayIsAvailable(): bool
@@ -72,4 +73,23 @@ it('is listed ahead of cash on delivery', function () {
     $codes = collect(Payment::getPaymentMethods())->pluck('method')->all();
 
     expect(array_search('razorpay', $codes))->toBeLessThan(array_search('cashondelivery', $codes));
+});
+
+it('keeps the api keys out of the admin settings', function (string $field) {
+    expect(system_config()->getConfigField('sales.payment_methods.razorpay.'.$field))->toBeNull();
+})->with(['key_id', 'key_secret', 'webhook_secret']);
+
+it('removes keys that were saved through the admin panel', function () {
+    foreach (['key_id', 'key_secret', 'webhook_secret', 'test_customer_email'] as $field) {
+        DB::table('core_config')->insert([
+            'code' => 'sales.payment_methods.razorpay.'.$field,
+            'value' => 'old-'.$field,
+            'channel_code' => 'default',
+        ]);
+    }
+
+    (require base_path('packages/DigitalLabs/Razorpay/src/Database/Migrations/2026_11_16_000001_remove_razorpay_keys_from_core_config.php'))->up();
+
+    expect(DB::table('core_config')->where('code', 'like', 'sales.payment_methods.razorpay.%')->pluck('code')->all())
+        ->toBe(['sales.payment_methods.razorpay.test_customer_email']);
 });

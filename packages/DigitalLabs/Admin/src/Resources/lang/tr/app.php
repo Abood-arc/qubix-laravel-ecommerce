@@ -276,6 +276,8 @@ return [
                         'telephone' => 'Telefon',
                         'title' => 'Adres',
                         'vat-id' => 'Vergi Kimlik Numarası',
+                        'gstin' => 'GSTIN',
+                        'gstin-placeholder' => 'e.g. 27AAPFU0939F1ZV',
                     ],
 
                     'payment' => [
@@ -567,6 +569,7 @@ return [
                 'qty-to-refund' => 'İade Edilecek Miktar',
                 'refund-btn' => 'İade Et',
                 'refund-limit-error' => 'İade Tutarı :amount işlemi gerçekleştirilemez.',
+                'in-progress' => 'Another refund for this order is still being processed. Wait a moment, then check the order before trying again.',
                 'refund-shipping' => 'Kargo İadesi',
                 'sku' => 'Ürün Kodu - :sku',
                 'subtotal' => 'Ara Toplam',
@@ -1779,6 +1782,8 @@ return [
                         'street-address' => 'Cadde Adresi',
                         'title' => 'Adres Oluştur',
                         'vat-id' => 'KDV Kimlik Numarası',
+                        'gstin' => 'GSTIN',
+                        'gstin-placeholder' => 'e.g. 27AAPFU0939F1ZV',
                     ],
 
                     'edit' => [
@@ -1798,6 +1803,8 @@ return [
                         'street-address' => 'Cadde Adresi',
                         'title' => 'Adresi Düzenle',
                         'vat-id' => 'KDV Kimlik Numarası',
+                        'gstin' => 'GSTIN',
+                        'gstin-placeholder' => 'e.g. 27AAPFU0939F1ZV',
                     ],
 
                     'address-delete-success' => 'Adres Başarıyla Silindi',
@@ -4386,6 +4393,7 @@ return [
                         'title' => 'Kaynak',
                         'title-info' => 'Nakliye kaynağı, malların veya ürünlerin hedeflerine ulaşmadan önce kaynaklandığı konumu ifade eder.',
                         'vat-number' => 'KDV Numarası',
+                        'vat-number-info' => 'India: your 15-character GSTIN, e.g. 27AAPFU0939F1ZV. Other countries: your VAT registration number.',
                         'zip' => 'Posta Kodu',
                     ],
                 ],

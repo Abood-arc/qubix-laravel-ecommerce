@@ -125,26 +125,6 @@
 
                     {!! view_render_event('qubix.shop.customers.account.addresses.create_form_controls.email.after') !!}
 
-                    <!-- Vat Id -->
-                    <x-shop::form.control-group>
-                        {{-- India's tax number is the GSTIN (see VatValidator); other countries keep the VAT label. --}}
-                        <x-shop::form.control-group.label>
-                            <template v-if="country === 'IN'">@lang('shop::app.checkout.onepage.address.gstin')</template>
-                            <template v-else>@lang('shop::app.customers.account.addresses.create.vat-id')</template>
-                        </x-shop::form.control-group.label>
-
-                        <x-shop::form.control-group.control
-                            type="text"
-                            name="vat_id"
-                            :value="old('vat_id')"
-                            ::label="country === 'IN' ? {{ json_encode(trans('shop::app.checkout.onepage.address.gstin')) }} : {{ json_encode(trans('shop::app.customers.account.addresses.create.vat-id')) }}"
-                            ::placeholder="country === 'IN' ? {{ json_encode(trans('shop::app.checkout.onepage.address.gstin-placeholder')) }} : {{ json_encode(trans('shop::app.customers.account.addresses.create.vat-id')) }}"
-                        />
-
-                        <x-shop::form.control-group.error control-name="vat_id" />
-                    </x-shop::form.control-group>
-
-                    {!! view_render_event('qubix.shop.customers.account.addresses.create_form_controls.vat_id.after') !!}
 
                     <!-- Street Address -->
                     <x-shop::form.control-group>

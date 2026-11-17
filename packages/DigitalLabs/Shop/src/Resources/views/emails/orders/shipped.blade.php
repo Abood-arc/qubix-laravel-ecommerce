@@ -67,6 +67,8 @@
                             @lang('shop::app.emails.orders.tracking-number', ['tracking_number' =>  $shipment->track_number])
                         </span>
                     </div>
+
+                    {!! view_render_event('qubix.shop.emails.orders.shipped.track_number.after', ['shipment' => $shipment]) !!}
                 </div>
 
                 @php $additionalDetails = \DigitalLabs\Payment\Payment::getAdditionalDetails($shipment->order->payment->method); @endphp

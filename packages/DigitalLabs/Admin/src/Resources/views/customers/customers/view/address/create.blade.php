@@ -72,15 +72,17 @@
 
                         <!-- Vat Id -->
                         <x-admin::form.control-group class="w-full">
+                            {{-- India's tax number is the GSTIN (see VatValidator); other countries keep the VAT label. --}}
                             <x-admin::form.control-group.label>
-                                @lang('admin::app.customers.customers.view.address.create.vat-id')
+                                <template v-if="country === 'IN'">@lang('admin::app.customers.customers.view.address.create.gstin')</template>
+                                <template v-else>@lang('admin::app.customers.customers.view.address.create.vat-id')</template>
                             </x-admin::form.control-group.label>
 
                             <x-admin::form.control-group.control
                                 type="text"
                                 name="vat_id"
-                                :label="trans('admin::app.customers.customers.view.address.create.vat-id')"
-                                :placeholder="trans('admin::app.customers.customers.view.address.create.vat-id')"
+                                ::label="country === 'IN' ? {{ json_encode(trans('admin::app.customers.customers.view.address.create.gstin')) }} : {{ json_encode(trans('admin::app.customers.customers.view.address.create.vat-id')) }}"
+                                ::placeholder="country === 'IN' ? {{ json_encode(trans('admin::app.customers.customers.view.address.create.gstin-placeholder')) }} : {{ json_encode(trans('admin::app.customers.customers.view.address.create.vat-id')) }}"
                             />
 
                             <x-admin::form.control-group.error control-name="vat_id" />

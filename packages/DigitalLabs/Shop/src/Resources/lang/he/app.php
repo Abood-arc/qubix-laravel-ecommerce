@@ -146,7 +146,6 @@ return [
                     'state' => 'מדינה',
                     'street-address' => 'כתובת',
                     'title' => 'כתובת',
-                    'vat-id' => 'מספר עוסק מורשה',
                 ],
 
                 'edit' => [
@@ -164,7 +163,6 @@ return [
                     'street-address' => 'כתובת',
                     'title' => 'כתובת',
                     'update-btn' => 'עדכון',
-                    'vat-id' => 'מספר עוסק מורשה',
                 ],
             ],
 
@@ -976,6 +974,7 @@ return [
             'minimum-order-message' => 'סכום הזמנה מינימלי הוא ',
             'missing-fields' => 'חלק מהשדות החובה חסרים עבור מוצר זה.',
             'missing-options' => 'אפשרויות חסרות עבור מוצר זה.',
+            'payment-method-unavailable' => 'This payment method is not available for this order.',
             'paypal-payment-cancelled' => 'התשלום בפייפאל בוטל.',
             'qty-missing' => 'לפחות מוצר אחד צריך להיות בו יותר מכמות 1.',
             'return-to-shop' => 'חזרה לחנות',
@@ -1078,11 +1077,7 @@ return [
                 'street-address' => 'כתובת',
                 'telephone' => 'טלפון',
                 'pin-code' => 'מיקוד (PIN)',
-                'gstin' => 'GSTIN',
-                'gstin-placeholder' => 'לדוגמה 27AAPFU0939F1ZV',
-                'gst-invoice-toggle' => 'צריכים חשבונית GST? הוסיפו חברה ו-GSTIN',
                 'title' => 'כתובת',
-                'vat-id' => 'מספר עוסק מורשה',
             ],
 
             'index' => [

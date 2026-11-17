@@ -276,6 +276,8 @@ return [
                         'telephone' => 'تلفن',
                         'title' => 'آدرس',
                         'vat-id' => 'شناسه مالیاتی',
+                        'gstin' => 'GSTIN',
+                        'gstin-placeholder' => 'e.g. 27AAPFU0939F1ZV',
                     ],
 
                     'payment' => [
@@ -567,6 +569,7 @@ return [
                 'qty-to-refund' => 'تعداد برای بازپرداخت',
                 'refund-btn' => 'بازپرداخت',
                 'refund-limit-error' => 'مقدار بازپرداخت :amount نمی‌تواند ادامه پیدا کند.',
+                'in-progress' => 'Another refund for this order is still being processed. Wait a moment, then check the order before trying again.',
                 'refund-shipping' => 'بازپرداخت هزینه حمل و نقل',
                 'sku' => 'کد SKU - :sku',
                 'subtotal' => 'جمع جزئی',
@@ -1779,6 +1782,8 @@ return [
                         'street-address' => 'آدرس خیابانی',
                         'title' => 'ایجاد آدرس',
                         'vat-id' => 'شناسه مالیاتی (VAT)',
+                        'gstin' => 'GSTIN',
+                        'gstin-placeholder' => 'e.g. 27AAPFU0939F1ZV',
                     ],
 
                     'edit' => [
@@ -1798,6 +1803,8 @@ return [
                         'street-address' => 'آدرس خیابانی',
                         'title' => 'ویرایش آدرس',
                         'vat-id' => 'شناسه مالیاتی (VAT)',
+                        'gstin' => 'GSTIN',
+                        'gstin-placeholder' => 'e.g. 27AAPFU0939F1ZV',
                     ],
 
                     'address-delete-success' => 'آدرس با موفقیت حذف شد',
@@ -4386,6 +4393,7 @@ return [
                         'title' => 'مبدا',
                         'title-info' => 'مبدا حمل و نقل به مکانی اشاره دارد که کالاها یا محصولات قبل از انتقال به مقصد خود از آنجا شروع می شوند.',
                         'vat-number' => 'شماره مالیات بر ارزش افزوده',
+                        'vat-number-info' => 'India: your 15-character GSTIN, e.g. 27AAPFU0939F1ZV. Other countries: your VAT registration number.',
                         'zip' => 'کد پستی',
                     ],
                 ],

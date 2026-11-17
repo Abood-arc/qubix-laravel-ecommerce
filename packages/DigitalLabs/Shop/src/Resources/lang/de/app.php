@@ -146,7 +146,6 @@ return [
                     'state' => 'Bundesland',
                     'street-address' => 'Straße und Hausnummer',
                     'title' => 'Adresse',
-                    'vat-id' => 'USt-IdNr.',
                 ],
 
                 'edit' => [
@@ -164,7 +163,6 @@ return [
                     'street-address' => 'Straße und Hausnummer',
                     'title' => 'Adresse',
                     'update-btn' => 'Aktualisieren',
-                    'vat-id' => 'USt-IdNr.',
                 ],
             ],
 
@@ -976,6 +974,7 @@ return [
             'minimum-order-message' => 'Mindestbestellmenge beträgt',
             'missing-fields' => 'Einige erforderliche Felder fehlen für dieses Produkt.',
             'missing-options' => 'Optionen fehlen für dieses Produkt.',
+            'payment-method-unavailable' => 'This payment method is not available for this order.',
             'paypal-payment-cancelled' => 'Die Paypal-Zahlung wurde abgebrochen.',
             'qty-missing' => 'Mindestens ein Produkt sollte eine Menge von mehr als 1 haben.',
             'return-to-shop' => 'Zurück zum Shop',
@@ -1078,11 +1077,7 @@ return [
                 'street-address' => 'Straßenadresse',
                 'telephone' => 'Telefon',
                 'pin-code' => 'Postleitzahl (PIN)',
-                'gstin' => 'GSTIN',
-                'gstin-placeholder' => 'z. B. 27AAPFU0939F1ZV',
-                'gst-invoice-toggle' => 'GST-Rechnung benötigt? Firma und GSTIN hinzufügen',
                 'title' => 'Adresse',
-                'vat-id' => 'USt-IdNr.',
             ],
 
             'index' => [

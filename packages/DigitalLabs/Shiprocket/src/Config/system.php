@@ -1,0 +1,82 @@
+<?php
+
+return [
+    [
+        'key' => 'sales.shipping.shiprocket',
+        'name' => 'shiprocket::app.system.title',
+        'info' => 'shiprocket::app.system.info',
+        'sort' => 3,
+        'fields' => [
+            [
+                'name' => 'active',
+                'title' => 'shiprocket::app.system.active',
+                'type' => 'boolean',
+                'channel_based' => false,
+                'locale_based' => false,
+            ],
+            [
+                'name' => 'pickup_location',
+                'title' => 'shiprocket::app.system.pickup-location',
+                'type' => 'text',
+                'validation' => 'required_if:active,1',
+                'channel_based' => false,
+                'locale_based' => false,
+            ],
+            [
+                'name' => 'pickup_pin',
+                'title' => 'shiprocket::app.system.pickup-pin',
+                'type' => 'text',
+                'validation' => 'required_if:active,1|digits:6',
+                'channel_based' => false,
+                'locale_based' => false,
+            ],
+            [
+                'name' => 'length',
+                'title' => 'shiprocket::app.system.length',
+                'type' => 'text',
+                'validation' => 'required_if:active,1|numeric|min:0.51',
+                'channel_based' => false,
+                'locale_based' => false,
+            ],
+            [
+                'name' => 'breadth',
+                'title' => 'shiprocket::app.system.breadth',
+                'type' => 'text',
+                'validation' => 'required_if:active,1|numeric|min:0.51',
+                'channel_based' => false,
+                'locale_based' => false,
+            ],
+            [
+                'name' => 'height',
+                'title' => 'shiprocket::app.system.height',
+                'type' => 'text',
+                'validation' => 'required_if:active,1|numeric|min:0.51',
+                'channel_based' => false,
+                'locale_based' => false,
+            ],
+            [
+                'name' => 'auto_send',
+                'title' => 'shiprocket::app.system.auto-send',
+                'type' => 'boolean',
+                'channel_based' => false,
+                'locale_based' => false,
+            ],
+            [
+                'name' => 'pin_check',
+                'title' => 'shiprocket::app.system.pin-check',
+                'type' => 'boolean',
+                'channel_based' => false,
+                'locale_based' => false,
+            ],
+            [
+                'name' => 'max_weight',
+                'title' => 'shiprocket::app.system.max-weight',
+                'type' => 'text',
+                'validation' => 'numeric|min:0.1',
+                'default' => '10',
+                'channel_based' => false,
+                'locale_based' => false,
+            ],
+        ],
+    ],
+];

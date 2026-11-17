@@ -13,7 +13,7 @@
         </p>
 
         <p style="font-size: 16px;color: #5E5E5E;line-height: 24px;">
-            @lang('razorpay::app.emails.alert.'.$problem)
+            @lang('razorpay::app.emails.alert.'.$problem, $details)
         </p>
     </div>
 @endcomponent

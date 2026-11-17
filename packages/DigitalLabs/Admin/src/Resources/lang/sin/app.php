@@ -276,6 +276,8 @@ return [
                         'telephone' => 'දුරකථන',
                         'title' => 'ලිපිනය',
                         'vat-id' => 'වැට් අංකය',
+                        'gstin' => 'GSTIN',
+                        'gstin-placeholder' => 'e.g. 27AAPFU0939F1ZV',
                     ],
 
                     'payment' => [
@@ -567,6 +569,7 @@ return [
                 'qty-to-refund' => 'ආදාන කිරීමට :qty',
                 'refund-btn' => 'ආදානය',
                 'refund-limit-error' => 'ආදාන මුදල :amount වලින් හෝඳින්න නොහැක.',
+                'in-progress' => 'Another refund for this order is still being processed. Wait a moment, then check the order before trying again.',
                 'refund-shipping' => 'භාරය කිරීම',
                 'sku' => 'SKU - :sku',
                 'subtotal' => 'උප මුදල',
@@ -1779,6 +1782,8 @@ return [
                         'street-address' => 'වීදුරු ලිපිනය',
                         'title' => 'ලිපිනය සාදන්න',
                         'vat-id' => 'VAT හැඳුනුම්',
+                        'gstin' => 'GSTIN',
+                        'gstin-placeholder' => 'e.g. 27AAPFU0939F1ZV',
                     ],
 
                     'edit' => [
@@ -1798,6 +1803,8 @@ return [
                         'street-address' => 'වීදුරු ලිපිනය',
                         'title' => 'ලිපිනය සංස්කරණය කිරීම',
                         'vat-id' => 'VAT හැඳුනුම්',
+                        'gstin' => 'GSTIN',
+                        'gstin-placeholder' => 'e.g. 27AAPFU0939F1ZV',
                     ],
 
                     'address-delete-success' => 'ලිපිනය සාර්ථකව මකා දමා ඇත',
@@ -4386,6 +4393,7 @@ return [
                         'title' => 'මුල් ආරම්භය',
                         'title-info' => 'ආනයන ආරම්භය යනු භාණ්ඩ හෝ නිෂ්පාදන ගමනාන්තයට යවන පෙර ආරම්භ කරන ස්ථානයයි.',
                         'vat-number' => 'VAT අංකය',
+                        'vat-number-info' => 'India: your 15-character GSTIN, e.g. 27AAPFU0939F1ZV. Other countries: your VAT registration number.',
                         'zip' => 'පිස්සු කේතය',
                     ],
                 ],

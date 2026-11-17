@@ -146,7 +146,6 @@ return [
                     'state' => 'استان',
                     'street-address' => 'آدرس خیابان',
                     'title' => 'آدرس',
-                    'vat-id' => 'شناسه مالیاتی',
                 ],
 
                 'edit' => [
@@ -164,7 +163,6 @@ return [
                     'street-address' => 'آدرس خیابان',
                     'title' => 'آدرس',
                     'update-btn' => 'به روز رسانی',
-                    'vat-id' => 'شناسه مالیاتی',
                 ],
             ],
 
@@ -976,6 +974,7 @@ return [
             'minimum-order-message' => 'حداقل مبلغ سفارش است',
             'missing-fields' => 'برخی از فیلدهای مورد نیاز برای این محصول وجود ندارد.',
             'missing-options' => 'گزینه‌ها برای این محصول وجود ندارند.',
+            'payment-method-unavailable' => 'This payment method is not available for this order.',
             'paypal-payment-cancelled' => 'پرداخت پی پال لغو شده است.',
             'qty-missing' => 'حداقل یک محصول باید بیشتر از ۱ تعداد داشته باشد.',
             'return-to-shop' => 'بازگشت به فروشگاه',
@@ -1078,11 +1077,7 @@ return [
                 'street-address' => 'آدرس خیابان',
                 'telephone' => 'تلفن',
                 'pin-code' => 'کد پستی (PIN)',
-                'gstin' => 'GSTIN',
-                'gstin-placeholder' => 'مثال: 27AAPFU0939F1ZV',
-                'gst-invoice-toggle' => 'فاکتور GST لازم دارید؟ شرکت و GSTIN را اضافه کنید',
                 'title' => 'آدرس',
-                'vat-id' => 'شناسه مالیاتی',
             ],
 
             'index' => [

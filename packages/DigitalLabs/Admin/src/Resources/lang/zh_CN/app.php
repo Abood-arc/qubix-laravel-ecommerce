@@ -276,6 +276,8 @@ return [
                         'telephone' => '电话',
                         'title' => '地址',
                         'vat-id' => '增值税号码',
+                        'gstin' => 'GSTIN',
+                        'gstin-placeholder' => 'e.g. 27AAPFU0939F1ZV',
                     ],
 
                     'payment' => [
@@ -567,6 +569,7 @@ return [
                 'qty-to-refund' => '待退款数量',
                 'refund-btn' => '退款',
                 'refund-limit-error' => '退款金额 :amount 无法进行。',
+                'in-progress' => 'Another refund for this order is still being processed. Wait a moment, then check the order before trying again.',
                 'refund-shipping' => '退款运费',
                 'sku' => 'SKU - :sku',
                 'subtotal' => '小计',
@@ -1779,6 +1782,8 @@ return [
                         'street-address' => '街道地址',
                         'title' => '创建地址',
                         'vat-id' => 'VAT 号码',
+                        'gstin' => 'GSTIN',
+                        'gstin-placeholder' => 'e.g. 27AAPFU0939F1ZV',
                     ],
 
                     'edit' => [
@@ -1798,6 +1803,8 @@ return [
                         'street-address' => '街道地址',
                         'title' => '编辑地址',
                         'vat-id' => 'VAT 号码',
+                        'gstin' => 'GSTIN',
+                        'gstin-placeholder' => 'e.g. 27AAPFU0939F1ZV',
                     ],
 
                     'address-delete-success' => '成功删除地址',
@@ -4386,6 +4393,7 @@ return [
                         'title' => '发货来源',
                         'title-info' => '发货来源指的是商品在运输到目的地之前的起始地点。',
                         'vat-number' => '增值税号',
+                        'vat-number-info' => 'India: your 15-character GSTIN, e.g. 27AAPFU0939F1ZV. Other countries: your VAT registration number.',
                         'zip' => '邮政编码',
                     ],
                 ],

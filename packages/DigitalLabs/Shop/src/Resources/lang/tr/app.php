@@ -146,7 +146,6 @@ return [
                     'state' => 'Şehir / Bölge',
                     'street-address' => 'Adres Detayı',
                     'title' => 'Adres',
-                    'vat-id' => 'Vergi/KDV No',
                 ],
 
                 'edit' => [
@@ -164,7 +163,6 @@ return [
                     'street-address' => 'Adres Detayı',
                     'title' => 'Adresi Düzenle',
                     'update-btn' => 'Güncelle',
-                    'vat-id' => 'Vergi/KDV No',
                 ],
             ],
 
@@ -976,6 +974,7 @@ return [
             'minimum-order-message' => 'Minimum sipariş tutarı karşılanmadı.',
             'missing-fields' => 'Gerekli alanları doldurun.',
             'missing-options' => 'Seçenekleri belirleyin.',
+            'payment-method-unavailable' => 'This payment method is not available for this order.',
             'paypal-payment-cancelled' => 'Ödeme iptal edildi.',
             'qty-missing' => 'Miktar en az 1 olmalıdır.',
             'return-to-shop' => 'Alışverişe Dön',
@@ -1078,11 +1077,7 @@ return [
                 'street-address' => 'Adres Detayı',
                 'telephone' => 'Telefon',
                 'pin-code' => 'Posta kodu (PIN)',
-                'gstin' => 'GSTIN',
-                'gstin-placeholder' => 'ör. 27AAPFU0939F1ZV',
-                'gst-invoice-toggle' => 'GST faturası mı gerekiyor? Şirket ve GSTIN ekleyin',
                 'title' => 'Adres Bilgileri',
-                'vat-id' => 'Vergi/KDV No',
             ],
 
             'index' => [

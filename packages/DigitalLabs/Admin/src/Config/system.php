@@ -30,6 +30,9 @@ return [
                 'default' => 'kgs',
                 'options' => [
                     [
+                        'title' => 'g',
+                        'value' => 'g',
+                    ], [
                         'title' => 'lbs',
                         'value' => 'lbs',
                     ], [
@@ -1830,6 +1833,7 @@ return [
             ], [
                 'name' => 'vat_number',
                 'title' => 'admin::app.configuration.index.sales.shipping-setting.origin.vat-number',
+                'info' => 'admin::app.configuration.index.sales.shipping-setting.origin.vat-number-info',
                 'type' => 'text',
                 'channel_based' => true,
             ], [

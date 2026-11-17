@@ -146,7 +146,6 @@ return [
                     'state' => '都道府県',
                     'street-address' => '住所',
                     'title' => '住所',
-                    'vat-id' => 'VAT番号',
                 ],
 
                 'edit' => [
@@ -164,7 +163,6 @@ return [
                     'street-address' => '住所',
                     'title' => '住所',
                     'update-btn' => '更新する',
-                    'vat-id' => 'VAT番号',
                 ],
             ],
 
@@ -976,6 +974,7 @@ return [
             'minimum-order-message' => '最小注文金額は です',
             'missing-fields' => 'この製品にはいくつかの必須フィールドがありません。',
             'missing-options' => 'この製品にはオプションがありません。',
+            'payment-method-unavailable' => 'This payment method is not available for this order.',
             'paypal-payment-cancelled' => 'PayPalの支払いがキャンセルされました。',
             'qty-missing' => '少なくとも1つの製品は1以上の数量を持つ必要があります。',
             'return-to-shop' => 'ショップに戻る',
@@ -1078,11 +1077,7 @@ return [
                 'street-address' => '住所',
                 'telephone' => '電話番号',
                 'pin-code' => '郵便番号 (PIN)',
-                'gstin' => 'GSTIN',
-                'gstin-placeholder' => '例: 27AAPFU0939F1ZV',
-                'gst-invoice-toggle' => 'GST請求書が必要ですか？会社名とGSTINを追加',
                 'title' => '住所',
-                'vat-id' => 'VAT番号',
             ],
 
             'index' => [

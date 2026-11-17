@@ -57,6 +57,75 @@ it('rolls the refund back when razorpay fails', function () {
     expect($order->refunds()->count())->toBe(0);
 });
 
+it('tells the admin when the razorpay balance is too low for a refund', function () {
+    [$order] = paidRazorpayOrder($this, 400);
+
+    // Always ₹1 short of the refund: product prices in tests are random.
+    $balance = max(0, (int) round($order->items->first()->total * 100) - 100);
+
+    Http::fake(['api.razorpay.com/v1/balance' => Http::response(['balance' => $balance, 'refund_credits' => 0])]);
+
+    try {
+        app(RefundRepository::class)->create(razorpayRefundData($order));
+
+        $this->fail('The refund should have been refused.');
+    } catch (RazorpayRefundFailedException $exception) {
+        $exception->render();
+    }
+
+    expect(session('error'))->toBe(trans('razorpay::app.errors.admin-refund-low-balance', [
+        'balance' => core()->formatPrice($balance / 100, 'INR'),
+        'amount' => core()->formatPrice($order->items->first()->total, 'INR'),
+    ]))
+        ->and($order->refunds()->count())->toBe(0);
+});
+
+it('tells the admin to check the dashboard when razorpay does not confirm a refund', function () {
+    [$order] = paidRazorpayOrder($this, 500);
+
+    try {
+        app(RefundRepository::class)->create(razorpayRefundData($order));
+
+        $this->fail('The refund should not have been recorded.');
+    } catch (RazorpayRefundFailedException $exception) {
+        $exception->render();
+    }
+
+    expect(session('error'))->toBe(trans('razorpay::app.errors.admin-refund-unknown'))
+        ->and($order->refunds()->count())->toBe(0);
+
+    // An unknown outcome is not a refusal, so the balance is not asked about.
+    Http::assertNotSent(fn (Request $request) => str_ends_with($request->url(), '/balance'));
+});
+
+it('keeps the general message when the balance covers the refund', function () {
+    [$order] = paidRazorpayOrder($this, 400);
+
+    Http::fake(['api.razorpay.com/v1/balance' => Http::response(['balance' => 100000000])]);
+
+    try {
+        app(RefundRepository::class)->create(razorpayRefundData($order));
+    } catch (RazorpayRefundFailedException $exception) {
+        $exception->render();
+    }
+
+    expect(session('error'))->toBe(trans('razorpay::app.errors.admin-refund-failed'));
+});
+
+it('keeps the general message when the balance cannot be read', function () {
+    [$order] = paidRazorpayOrder($this, 400);
+
+    Http::fake(['api.razorpay.com/v1/balance' => Http::response(['error' => ['code' => 'BAD_REQUEST_ERROR']], 400)]);
+
+    try {
+        app(RefundRepository::class)->create(razorpayRefundData($order));
+    } catch (RazorpayRefundFailedException $exception) {
+        $exception->render();
+    }
+
+    expect(session('error'))->toBe(trans('razorpay::app.errors.admin-refund-failed'));
+});
+
 it('does not call razorpay for other payment methods', function () {
     [$order] = paidRazorpayOrder($this);
 

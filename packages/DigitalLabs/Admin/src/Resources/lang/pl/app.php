@@ -276,6 +276,8 @@ return [
                         'telephone' => 'Telefon',
                         'title' => 'Adres',
                         'vat-id' => 'NIP',
+                        'gstin' => 'GSTIN',
+                        'gstin-placeholder' => 'e.g. 27AAPFU0939F1ZV',
                     ],
 
                     'payment' => [
@@ -567,6 +569,7 @@ return [
                 'qty-to-refund' => 'Ilość do zwrotu',
                 'refund-btn' => 'Zwrot',
                 'refund-limit-error' => 'Nie można przetworzyć zwrotu w kwocie :amount.',
+                'in-progress' => 'Another refund for this order is still being processed. Wait a moment, then check the order before trying again.',
                 'refund-shipping' => 'Zwrot kosztów dostawy',
                 'sku' => 'SKU - :sku',
                 'subtotal' => 'Suma częściowa',
@@ -1779,6 +1782,8 @@ return [
                         'street-address' => 'Adres ulicy',
                         'title' => 'Utwórz adres',
                         'vat-id' => 'VAT ID',
+                        'gstin' => 'GSTIN',
+                        'gstin-placeholder' => 'e.g. 27AAPFU0939F1ZV',
                     ],
 
                     'edit' => [
@@ -1798,6 +1803,8 @@ return [
                         'street-address' => 'Adres ulicy',
                         'title' => 'Edytuj adres',
                         'vat-id' => 'VAT ID',
+                        'gstin' => 'GSTIN',
+                        'gstin-placeholder' => 'e.g. 27AAPFU0939F1ZV',
                     ],
 
                     'address-delete-success' => 'Adres pomyślnie usunięty',
@@ -4386,6 +4393,7 @@ return [
                         'title' => 'Pochodzenie',
                         'title-info' => 'Pochodzenie wysyłki odnosi się do miejsca, z którego towary lub produkty pochodzą przed ich transportem do miejsca docelowego.',
                         'vat-number' => 'Numer VAT',
+                        'vat-number-info' => 'India: your 15-character GSTIN, e.g. 27AAPFU0939F1ZV. Other countries: your VAT registration number.',
                         'zip' => 'Kod pocztowy',
                     ],
                 ],

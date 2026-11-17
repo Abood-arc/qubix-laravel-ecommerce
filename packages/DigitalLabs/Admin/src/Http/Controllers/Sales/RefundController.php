@@ -8,6 +8,8 @@ use DigitalLabs\Sales\Exceptions\InvalidRefundQuantityException;
 use DigitalLabs\Sales\Repositories\OrderItemRepository;
 use DigitalLabs\Sales\Repositories\OrderRepository;
 use DigitalLabs\Sales\Repositories\RefundRepository;
+use Illuminate\Contracts\Cache\LockTimeoutException;
+use Illuminate\Support\Facades\Cache;
 
 class RefundController extends Controller
 {
@@ -51,9 +53,30 @@ class RefundController extends Controller
     /**
      * Store a newly created resource in storage.
      *
+     * A double-clicked Refund button sends two requests that would both pass the checks
+     * before either is saved, refunding twice. Refunds for one order therefore run one at a
+     * time: the second waits, then re-checks against what the first refunded.
+     *
      * @return \Illuminate\Http\Response
      */
     public function store(int $orderId)
+    {
+        try {
+            return Cache::lock('admin-refund:order:'.$orderId, 60)
+                ->block(20, fn () => $this->storeRefund($orderId));
+        } catch (LockTimeoutException) {
+            session()->flash('error', trans('admin::app.sales.refunds.create.in-progress'));
+
+            return redirect()->back();
+        }
+    }
+
+    /**
+     * Check and create one refund; runs while holding the order's refund lock.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    protected function storeRefund(int $orderId)
     {
         $order = $this->orderRepository->findOrFail($orderId);
 

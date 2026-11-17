@@ -102,8 +102,13 @@ it('creates no order and no second refund for a late webhook after a refund', fu
     Http::assertNotSent(fn (Request $request) => str_ends_with($request->url(), '/refund'));
 });
 
-it('rejects a bad signature', function () {
+it('rejects a bad signature and logs it, so a wrong webhook secret is noticed', function () {
+    Log::spy();
+
     sendWebhook(webhookBody('order_any'), 'bad')->assertStatus(400);
+
+    Log::shouldHaveReceived('error')->withArgs(fn ($message, $context = []) => str_contains($message, 'RAZORPAY_WEBHOOK_SECRET')
+        && ($context['secret_set'] ?? null) === true)->once();
 });
 
 it('rejects everything while the secret is blank, even a matching empty-key signature', function () {

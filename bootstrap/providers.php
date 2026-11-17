@@ -36,6 +36,9 @@ return [
     ...(class_exists(DigitalLabs\Razorpay\Providers\RazorpayServiceProvider::class)
         ? [DigitalLabs\Razorpay\Providers\RazorpayServiceProvider::class]
         : []),
+    ...(class_exists(DigitalLabs\Shiprocket\Providers\ShiprocketServiceProvider::class)
+        ? [DigitalLabs\Shiprocket\Providers\ShiprocketServiceProvider::class]
+        : []),
     DigitalLabs\Rule\Providers\RuleServiceProvider::class,
     DigitalLabs\Sales\Providers\SalesServiceProvider::class,
     DigitalLabs\Shipping\Providers\ShippingServiceProvider::class,

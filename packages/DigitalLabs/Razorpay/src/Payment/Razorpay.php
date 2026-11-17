@@ -35,9 +35,9 @@ class Razorpay extends Payment
 
         return $cart
             && $this->getConfigData('active')
-            && $this->getConfigData('key_id')
-            && $this->getConfigData('key_secret')
-            && $this->getConfigData('webhook_secret')
+            && filled(config('razorpay.key_id'))
+            && filled(config('razorpay.key_secret'))
+            && filled(config('razorpay.webhook_secret'))
             && $cart->cart_currency_code === 'INR'
             && (float) $cart->grand_total >= 1
             && $this->isAllowedCustomer();

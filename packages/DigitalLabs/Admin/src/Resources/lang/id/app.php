@@ -276,6 +276,8 @@ return [
                         'telephone' => 'Telepon',
                         'title' => 'Alamat',
                         'vat-id' => 'ID Pajak',
+                        'gstin' => 'GSTIN',
+                        'gstin-placeholder' => 'e.g. 27AAPFU0939F1ZV',
                     ],
 
                     'payment' => [
@@ -567,6 +569,7 @@ return [
                 'qty-to-refund' => 'Jumlah yang Dikembalikan',
                 'refund-btn' => 'Kembalikan Dana',
                 'refund-limit-error' => 'Jumlah pengembalian dana :amount tidak dapat diproses.',
+                'in-progress' => 'Another refund for this order is still being processed. Wait a moment, then check the order before trying again.',
                 'refund-shipping' => 'Pengembalian Biaya Pengiriman',
                 'sku' => 'SKU - :sku',
                 'subtotal' => 'Subtotal',
@@ -1779,6 +1782,8 @@ return [
                         'street-address' => 'Alamat Jalan',
                         'title' => 'Tambah Alamat',
                         'vat-id' => 'ID Pajak',
+                        'gstin' => 'GSTIN',
+                        'gstin-placeholder' => 'e.g. 27AAPFU0939F1ZV',
                     ],
 
                     'edit' => [
@@ -1798,6 +1803,8 @@ return [
                         'street-address' => 'Alamat Jalan',
                         'title' => 'Edit Alamat',
                         'vat-id' => 'ID Pajak',
+                        'gstin' => 'GSTIN',
+                        'gstin-placeholder' => 'e.g. 27AAPFU0939F1ZV',
                     ],
 
                     'address-delete-success' => 'Alamat berhasil dihapus',
@@ -4386,6 +4393,7 @@ return [
                         'title' => 'Asal Pengiriman',
                         'title-info' => 'Asal pengiriman merujuk pada lokasi tempat barang atau produk berasal sebelum dikirim ke tujuan.',
                         'vat-number' => 'Nomor PPN',
+                        'vat-number-info' => 'India: your 15-character GSTIN, e.g. 27AAPFU0939F1ZV. Other countries: your VAT registration number.',
                         'zip' => 'Kode Pos',
                     ],
                 ],

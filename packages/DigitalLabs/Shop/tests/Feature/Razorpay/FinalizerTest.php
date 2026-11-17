@@ -94,7 +94,7 @@ it('follows the frozen copy when the cart changes during payment', function () {
         ->and(refundRequests())->toBe(0);
 });
 
-it('rejects a payment that does not match the row', function (array $remote) {
+it('rejects a payment that does not match the row', function (array $remote, bool $moneyTaken) {
     Http::fake(['api.razorpay.com/v1/payments/*' => Http::response(array_merge([
         'id' => 'pay_test',
         'order_id' => $this->payment->razorpay_order_id,
@@ -107,12 +107,37 @@ it('rejects a payment that does not match the row', function (array $remote) {
 
     expect($result->status)->toBe(FinalizeResult::REJECTED)
         ->and(Order::where('cart_id', $this->cart->id)->exists())->toBeFalse();
+
+    // Money that Razorpay really took must never go unnoticed.
+    $moneyTaken
+        ? Mail::assertQueued(PaymentAlertNotification::class, fn (PaymentAlertNotification $mail) => $mail->problem === 'payment_mismatch')
+        : Mail::assertNotQueued(PaymentAlertNotification::class);
 })->with([
-    'other order' => [['order_id' => 'order_other']],
-    'other amount' => [['amount' => 1]],
-    'other currency' => [['currency' => 'USD']],
-    'not paid' => [['status' => 'failed']],
+    'other order' => [['order_id' => 'order_other'], true],
+    'other amount' => [['amount' => 1], true],
+    'other currency' => [['currency' => 'USD'], true],
+    'other amount, only authorized' => [['amount' => 1, 'status' => 'authorized'], true],
+    'not paid' => [['status' => 'failed'], false],
 ]);
+
+it('alerts only once when the same mismatched payment is reported again', function () {
+    Http::fake(['api.razorpay.com/v1/payments/*' => Http::response([
+        'id' => 'pay_test',
+        'order_id' => $this->payment->razorpay_order_id,
+        'amount' => $this->payment->amount + 2000,
+        'currency' => 'INR',
+        'status' => 'captured',
+    ])]);
+
+    ($this->finalizer)()->finalize($this->payment, 'pay_test');
+
+    ($this->finalizer)()->finalize($this->payment->fresh(), 'pay_test');
+
+    Mail::assertQueued(PaymentAlertNotification::class, 1);
+
+    Mail::assertQueued(PaymentAlertNotification::class, fn (PaymentAlertNotification $mail) => $mail->details['received'] === core()->formatPrice(($this->payment->amount + 2000) / 100, 'INR')
+        && $mail->details['expected'] === core()->formatPrice($this->payment->amount / 100, 'INR'));
+});
 
 it('returns pending when razorpay cannot be reached', function () {
     Http::fake(['api.razorpay.com/*' => Http::response([], 500)]);

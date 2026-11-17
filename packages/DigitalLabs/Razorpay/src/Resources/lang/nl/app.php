@@ -3,10 +3,7 @@
 return [
     'system' => [
         'title' => 'Razorpay',
-        'info' => 'Accept UPI, cards and netbanking through Razorpay.',
-        'key-id' => 'Key ID',
-        'key-secret' => 'Key Secret',
-        'webhook-secret' => 'Webhook Secret',
+        'info' => 'Accept UPI, cards and netbanking through Razorpay. The API keys and webhook secret are set on the server, in .env: RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET and RAZORPAY_WEBHOOK_SECRET.',
         'test-customer-email' => 'Test Customer Email',
         'test-customer-email-info' => 'While set, only this logged-in customer can use Razorpay. Clear it to open Razorpay to everyone.',
     ],
@@ -27,6 +24,8 @@ return [
         'cancelled' => 'Payment cancelled. Your cart is still here.',
         'payment-invalid' => 'We could not verify this payment. If money was deducted, your order will be confirmed or the money returned shortly.',
         'admin-refund-failed' => 'Razorpay could not process this refund, so nothing was changed. Check the Razorpay dashboard and balance, then try again.',
+        'admin-refund-low-balance' => 'Not enough money in your Razorpay balance (:balance) to refund :amount, so nothing was changed. Add funds in the Razorpay dashboard, then try again.',
+        'admin-refund-unknown' => "Razorpay didn't confirm this refund in time, so it was not recorded here, but Razorpay may still have sent the money. Check the payment in the Razorpay dashboard before trying again. If you retry, use exactly the same amount.",
     ],
 
     'refund' => [
@@ -50,6 +49,7 @@ return [
             'amount' => 'Amount: :amount',
             'refund_failed' => 'The automatic refund failed. Refund this payment by hand in the Razorpay dashboard, and check the account balance.',
             'invoice_failed' => 'The order was created and paid, but its invoice or payment record could not be completed. Check this order in the admin panel.',
+            'payment_mismatch' => 'Razorpay collected :received for this payment, but the order expected :expected (Razorpay order :order). No order was created. Check the payment in the Razorpay dashboard, then create the order by hand or refund the customer.',
         ],
     ],
 ];

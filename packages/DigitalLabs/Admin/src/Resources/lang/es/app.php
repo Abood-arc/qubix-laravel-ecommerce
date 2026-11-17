@@ -276,6 +276,8 @@ return [
                         'telephone' => 'Teléfono',
                         'title' => 'Dirección',
                         'vat-id' => 'NIF',
+                        'gstin' => 'GSTIN',
+                        'gstin-placeholder' => 'e.g. 27AAPFU0939F1ZV',
                     ],
 
                     'payment' => [
@@ -567,6 +569,7 @@ return [
                 'qty-to-refund' => 'Cantidad a Reembolsar',
                 'refund-btn' => 'Reembolsar',
                 'refund-limit-error' => 'No se puede procesar un monto de reembolso de :amount.',
+                'in-progress' => 'Another refund for this order is still being processed. Wait a moment, then check the order before trying again.',
                 'refund-shipping' => 'Reembolso de Envío',
                 'sku' => 'SKU - :sku',
                 'subtotal' => 'Subtotal',
@@ -1779,6 +1782,8 @@ return [
                         'street-address' => 'Dirección',
                         'title' => 'Crear dirección',
                         'vat-id' => 'ID de IVA',
+                        'gstin' => 'GSTIN',
+                        'gstin-placeholder' => 'e.g. 27AAPFU0939F1ZV',
                     ],
 
                     'edit' => [
@@ -1798,6 +1803,8 @@ return [
                         'street-address' => 'Dirección',
                         'title' => 'Editar dirección',
                         'vat-id' => 'ID de IVA',
+                        'gstin' => 'GSTIN',
+                        'gstin-placeholder' => 'e.g. 27AAPFU0939F1ZV',
                     ],
 
                     'address-delete-success' => 'Dirección eliminada exitosamente',
@@ -4386,6 +4393,7 @@ return [
                         'title' => 'Origen',
                         'title-info' => 'El origen del envío se refiere al lugar donde los bienes o productos se originan antes de ser transportados a su destino.',
                         'vat-number' => 'Número de IVA',
+                        'vat-number-info' => 'India: your 15-character GSTIN, e.g. 27AAPFU0939F1ZV. Other countries: your VAT registration number.',
                         'zip' => 'Código postal',
                     ],
                 ],

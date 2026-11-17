@@ -276,6 +276,8 @@ return [
                         'telephone' => 'Téléphone',
                         'title' => 'Adresse',
                         'vat-id' => 'TVA',
+                        'gstin' => 'GSTIN',
+                        'gstin-placeholder' => 'e.g. 27AAPFU0939F1ZV',
                     ],
 
                     'payment' => [
@@ -567,6 +569,7 @@ return [
                 'qty-to-refund' => 'Quantité à rembourser',
                 'refund-btn' => 'Rembourser',
                 'refund-limit-error' => 'Le montant du remboursement :amount ne peut pas être traité.',
+                'in-progress' => 'Another refund for this order is still being processed. Wait a moment, then check the order before trying again.',
                 'refund-shipping' => 'Remboursement de l’expédition',
                 'sku' => 'SKU - :sku',
                 'subtotal' => 'Sous-total',
@@ -1779,6 +1782,8 @@ return [
                         'street-address' => 'Adresse',
                         'title' => 'Créer une adresse',
                         'vat-id' => 'Numéro de TVA',
+                        'gstin' => 'GSTIN',
+                        'gstin-placeholder' => 'e.g. 27AAPFU0939F1ZV',
                     ],
 
                     'edit' => [
@@ -1798,6 +1803,8 @@ return [
                         'street-address' => 'Adresse',
                         'title' => 'Éditer l\'adresse',
                         'vat-id' => 'Numéro de TVA',
+                        'gstin' => 'GSTIN',
+                        'gstin-placeholder' => 'e.g. 27AAPFU0939F1ZV',
                     ],
 
                     'address-delete-success' => 'Adresse supprimée avec succès',
@@ -4386,6 +4393,7 @@ return [
                         'title' => 'Origine',
                         'title-info' => 'L\'origine de l\'expédition fait référence à l\'endroit où les marchandises ou les produits sont originaires avant d\'être transportés vers leur destination.',
                         'vat-number' => 'Numéro de TVA',
+                        'vat-number-info' => 'India: your 15-character GSTIN, e.g. 27AAPFU0939F1ZV. Other countries: your VAT registration number.',
                         'zip' => 'Code postal',
                     ],
                 ],

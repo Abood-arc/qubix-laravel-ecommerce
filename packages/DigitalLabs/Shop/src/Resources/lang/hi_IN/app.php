@@ -146,7 +146,6 @@ return [
                     'state' => 'राज्य',
                     'street-address' => 'सड़क का पता',
                     'title' => 'पता',
-                    'vat-id' => 'वैट आईडी',
                 ],
 
                 'edit' => [
@@ -164,7 +163,6 @@ return [
                     'street-address' => 'सड़क का पता',
                     'title' => 'पता',
                     'update-btn' => 'अपडेट करें',
-                    'vat-id' => 'वैट आईडी',
                 ],
             ],
 
@@ -976,6 +974,7 @@ return [
             'minimum-order-message' => 'न्यूनतम आदेश रकम है',
             'missing-fields' => 'इस उत्पाद के लिए कुछ आवश्यक फ़ील्ड गायब हैं।',
             'missing-options' => 'इस उत्पाद के लिए विकल्प गायब हैं।',
+            'payment-method-unavailable' => 'This payment method is not available for this order.',
             'paypal-payment-cancelled' => 'पेपैल भुगतान रद्द कर दिया गया है.',
             'qty-missing' => 'कम से कम एक उत्पाद का क्वांटिटी 1 से अधिक होना चाहिए।',
             'return-to-shop' => 'वापस खरीदारी करें',
@@ -1078,11 +1077,7 @@ return [
                 'street-address' => 'स्ट्रीट पता',
                 'telephone' => 'टेलीफोन',
                 'pin-code' => 'पिन कोड',
-                'gstin' => 'GSTIN',
-                'gstin-placeholder' => 'उदा. 27AAPFU0939F1ZV',
-                'gst-invoice-toggle' => 'GST बिल चाहिए? कंपनी और GSTIN जोड़ें',
                 'title' => 'पता',
-                'vat-id' => 'वैट आईडी',
             ],
 
             'index' => [

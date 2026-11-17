@@ -89,6 +89,7 @@
             "DigitalLabs\\Payment\\": "packages/DigitalLabs/Payment/src",
             "DigitalLabs\\Product\\": "packages/DigitalLabs/Product/src",
             "DigitalLabs\\Razorpay\\": "packages/DigitalLabs/Razorpay/src",
+            "DigitalLabs\\Shiprocket\\": "packages/DigitalLabs/Shiprocket/src",
             "DigitalLabs\\Rule\\": "packages/DigitalLabs/Rule/src",
             "DigitalLabs\\Sales\\": "packages/DigitalLabs/Sales/src",
             "DigitalLabs\\Shipping\\": "packages/DigitalLabs/Shipping/src",

@@ -146,7 +146,6 @@ return [
                     'state' => 'Область',
                     'street-address' => 'Улица и номер дома',
                     'title' => 'Адрес',
-                    'vat-id' => 'Идентификационный номер НДС',
                 ],
 
                 'edit' => [
@@ -164,7 +163,6 @@ return [
                     'street-address' => 'Улица и номер дома',
                     'title' => 'Адрес',
                     'update-btn' => 'Обновить',
-                    'vat-id' => 'Идентификационный номер НДС',
                 ],
             ],
 
@@ -976,6 +974,7 @@ return [
             'minimum-order-message' => 'Минимальная сумма заказа составляет',
             'missing-fields' => 'Отсутствуют некоторые обязательные поля для этого товара.',
             'missing-options' => 'Отсутствуют варианты для этого товара.',
+            'payment-method-unavailable' => 'This payment method is not available for this order.',
             'paypal-payment-cancelled' => 'Платеж через PayPal был отменен.',
             'qty-missing' => 'Как минимум один товар должен иметь количество больше 1.',
             'return-to-shop' => 'Вернуться в магазин',
@@ -1078,11 +1077,7 @@ return [
                 'street-address' => 'Улица, дом',
                 'telephone' => 'Телефон',
                 'pin-code' => 'Почтовый индекс (PIN)',
-                'gstin' => 'GSTIN',
-                'gstin-placeholder' => 'напр. 27AAPFU0939F1ZV',
-                'gst-invoice-toggle' => 'Нужен счёт с GST? Добавьте компанию и GSTIN',
                 'title' => 'Адрес',
-                'vat-id' => 'Идентификационный номер НДС',
             ],
 
             'index' => [

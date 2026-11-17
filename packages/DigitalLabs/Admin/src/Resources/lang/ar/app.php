@@ -276,6 +276,8 @@ return [
                         'telephone' => 'رقم الهاتف',
                         'title' => 'العنوان',
                         'vat-id' => 'الرقم الضريبي',
+                        'gstin' => 'GSTIN',
+                        'gstin-placeholder' => 'e.g. 27AAPFU0939F1ZV',
                     ],
 
                     'payment' => [
@@ -567,6 +569,7 @@ return [
                 'qty-to-refund' => 'الكمية المراد استردادها',
                 'refund-btn' => 'استرداد',
                 'refund-limit-error' => 'لا يمكن معالجة مبلغ الاسترداد :amount.',
+                'in-progress' => 'Another refund for this order is still being processed. Wait a moment, then check the order before trying again.',
                 'refund-shipping' => 'استرداد تكلفة الشحن',
                 'sku' => 'رمز المنتج - :sku',
                 'subtotal' => 'المجموع الفرعي',
@@ -1779,6 +1782,8 @@ return [
                         'street-address' => 'عنوان الشارع',
                         'title' => 'إنشاء عنوان',
                         'vat-id' => 'رقم الضريبة القيمة المضافة',
+                        'gstin' => 'GSTIN',
+                        'gstin-placeholder' => 'e.g. 27AAPFU0939F1ZV',
                     ],
 
                     'edit' => [
@@ -1798,6 +1803,8 @@ return [
                         'street-address' => 'عنوان الشارع',
                         'title' => 'تحرير العنوان',
                         'vat-id' => 'رقم الضريبة القيمة المضافة',
+                        'gstin' => 'GSTIN',
+                        'gstin-placeholder' => 'e.g. 27AAPFU0939F1ZV',
                     ],
 
                     'address-delete-success' => 'تم حذف العنوان بنجاح',
@@ -4386,6 +4393,7 @@ return [
                         'title' => 'المصدر',
                         'title-info' => 'مصدر الشحن يشير إلى الموقع الذي تنطلق منه البضائع أو المنتجات قبل أن تنقل إلى وجهتها.',
                         'vat-number' => 'رقم ضريبة القيمة المضافة',
+                        'vat-number-info' => 'India: your 15-character GSTIN, e.g. 27AAPFU0939F1ZV. Other countries: your VAT registration number.',
                         'zip' => 'الرمز البريدي',
                     ],
                 ],

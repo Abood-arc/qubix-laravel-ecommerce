@@ -146,7 +146,6 @@ return [
                     'state' => 'State',
                     'street-address' => 'Street Address',
                     'title' => 'Address',
-                    'vat-id' => 'Vat ID',
                 ],
 
                 'edit' => [
@@ -164,7 +163,6 @@ return [
                     'street-address' => 'Street Address',
                     'title' => 'Address',
                     'update-btn' => 'Update',
-                    'vat-id' => 'Vat ID',
                 ],
             ],
 
@@ -976,6 +974,7 @@ return [
             'minimum-order-message' => 'Minimum order amount is',
             'missing-fields' => 'Some required fields missing for this product.',
             'missing-options' => 'Options are missing for this product.',
+            'payment-method-unavailable' => 'This payment method is not available for this order.',
             'paypal-payment-cancelled' => 'Paypal payment has been cancelled.',
             'qty-missing' => 'At least one product should have more than 1 quantity.',
             'return-to-shop' => 'Return To Shop',
@@ -1078,11 +1077,7 @@ return [
                 'street-address' => 'Street Address',
                 'telephone' => 'Telephone',
                 'pin-code' => 'PIN code',
-                'gstin' => 'GSTIN',
-                'gstin-placeholder' => 'e.g. 27AAPFU0939F1ZV',
-                'gst-invoice-toggle' => 'Need a GST invoice? Add company and GSTIN',
                 'title' => 'Address',
-                'vat-id' => 'Vat ID',
             ],
 
             'index' => [

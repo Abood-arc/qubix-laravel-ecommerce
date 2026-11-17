@@ -3,6 +3,7 @@
 namespace DigitalLabs\Razorpay\Services;
 
 use DigitalLabs\Razorpay\Exceptions\RazorpayException;
+use DigitalLabs\Razorpay\Exceptions\RazorpayUnknownOutcomeException;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Support\Facades\Http;
 
@@ -68,6 +69,14 @@ class RazorpayClient
     }
 
     /**
+     * The account balance refunds are paid from (amounts in paise).
+     */
+    public function fetchBalance(): array
+    {
+        return $this->send('GET', 'balance');
+    }
+
+    /**
      * Check the signature the checkout popup returned.
      */
     public function isPaymentSignatureValid(string $orderId, string $paymentId, string $signature): bool
@@ -88,7 +97,7 @@ class RazorpayClient
      */
     protected function isSignatureValid(string $payload, string $signature, string $secretField): bool
     {
-        $secret = (string) $this->setting($secretField);
+        $secret = $this->credential($secretField);
 
         if ($secret === '' || $signature === '') {
             return false;
@@ -104,28 +113,32 @@ class RazorpayClient
     {
         try {
             $response = Http::baseUrl(self::BASE_URL)
-                ->withBasicAuth((string) $this->setting('key_id'), (string) $this->setting('key_secret'))
+                ->withBasicAuth($this->credential('key_id'), $this->credential('key_secret'))
                 ->withHeaders($headers)
                 ->acceptJson()
                 ->connectTimeout(5)
                 ->timeout(15)
                 ->send($method, $path, $data ? ['json' => $data] : []);
         } catch (ConnectionException $exception) {
-            throw new RazorpayException('Razorpay could not be reached.', 0, $exception);
+            throw new RazorpayUnknownOutcomeException('Razorpay could not be reached.', 0, $exception);
+        }
+
+        if ($response->serverError()) {
+            throw new RazorpayUnknownOutcomeException('Razorpay API error '.$response->status().' (outcome unknown)');
         }
 
         if ($response->failed()) {
-            throw new RazorpayException('Razorpay API error '.$response->status().': '.$response->json('error.code'));
+            throw new RazorpayException(trim('Razorpay API error '.$response->status().': '.$response->json('error.code').' '.$response->json('error.description')));
         }
 
         return $response->json();
     }
 
     /**
-     * Read a Razorpay setting.
+     * Read an API key from the server's .env (config/razorpay.php).
      */
-    protected function setting(string $field): mixed
+    protected function credential(string $field): string
     {
-        return core()->getConfigData('sales.payment_methods.razorpay.'.$field);
+        return (string) config('razorpay.'.$field);
     }
 }

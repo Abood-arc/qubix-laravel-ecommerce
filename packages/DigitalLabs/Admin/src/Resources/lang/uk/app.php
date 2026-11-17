@@ -276,6 +276,8 @@ return [
                         'telephone' => 'Телефон',
                         'title' => 'Адреса',
                         'vat-id' => 'ІПН',
+                        'gstin' => 'GSTIN',
+                        'gstin-placeholder' => 'e.g. 27AAPFU0939F1ZV',
                     ],
 
                     'payment' => [
@@ -567,6 +569,7 @@ return [
                 'qty-to-refund' => 'Кількість для повернення',
                 'refund-btn' => 'Повернути',
                 'refund-limit-error' => 'Суму повернення :amount не можна обробити.',
+                'in-progress' => 'Another refund for this order is still being processed. Wait a moment, then check the order before trying again.',
                 'refund-shipping' => 'Повернення доставки',
                 'sku' => 'Артикул - :sku',
                 'subtotal' => 'Підсумок',
@@ -1779,6 +1782,8 @@ return [
                         'street-address' => 'Вулиця',
                         'title' => 'Створити адресу',
                         'vat-id' => 'Ідентифікаційний номер ПДВ',
+                        'gstin' => 'GSTIN',
+                        'gstin-placeholder' => 'e.g. 27AAPFU0939F1ZV',
                     ],
 
                     'edit' => [
@@ -1798,6 +1803,8 @@ return [
                         'street-address' => 'Вулиця',
                         'title' => 'Редагувати адресу',
                         'vat-id' => 'Ідентифікаційний номер ПДВ',
+                        'gstin' => 'GSTIN',
+                        'gstin-placeholder' => 'e.g. 27AAPFU0939F1ZV',
                     ],
 
                     'address-delete-success' => 'Адресу успішно видалено',
@@ -4386,6 +4393,7 @@ return [
                         'title' => 'Походження',
                         'title-info' => 'Місце походження доставки відноситься до місця, де товари або продукти походять перед транспортуванням до місця призначення.',
                         'vat-number' => 'Номер ПДВ',
+                        'vat-number-info' => 'India: your 15-character GSTIN, e.g. 27AAPFU0939F1ZV. Other countries: your VAT registration number.',
                         'zip' => 'Поштовий індекс',
                     ],
                 ],

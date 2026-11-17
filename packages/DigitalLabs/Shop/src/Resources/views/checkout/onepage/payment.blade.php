@@ -39,8 +39,10 @@
                     <!-- Accordion Blade Component Content -->
                     <x-slot:content class="mt-8 !p-0 max-md:mt-0 max-md:rounded-t-none max-md:border max-md:border-t-0 max-md:!p-4">
                         <div class="flex flex-wrap gap-7 max-md:gap-4 max-sm:gap-2.5">
+                            {{-- A disabled method is shown greyed out with its reason and cannot be picked. --}}
                             <div 
-                                class="relative cursor-pointer max-md:max-w-full max-md:flex-auto"
+                                class="relative max-md:max-w-full max-md:flex-auto"
+                                :class="payment.disabled ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'"
                                 v-for="(payment, index) in methods"
                             >
                                 {!! view_render_event('qubix.shop.checkout.payment-method.before') !!}
@@ -51,18 +53,22 @@
                                     :value="payment.payment"
                                     :id="payment.method"
                                     class="peer hidden"
+                                    :disabled="payment.disabled"
                                     @change="store(payment)"
                                 >
     
                                 <label 
                                     :for="payment.method" 
-                                    class="icon-radio-unselect peer-checked:icon-radio-select absolute top-5 cursor-pointer text-2xl text-navyBlue ltr:right-5 rtl:left-5"
+                                    class="icon-radio-unselect peer-checked:icon-radio-select absolute top-5 text-2xl text-navyBlue ltr:right-5 rtl:left-5"
+                                    :class="payment.disabled ? 'cursor-not-allowed' : 'cursor-pointer'"
                                 >
                                 </label>
 
                                 <label 
                                     :for="payment.method" 
-                                    class="block w-[190px] cursor-pointer rounded-xl border border-zinc-200 p-5 max-md:flex max-md:w-full max-md:gap-5 max-md:rounded-lg max-sm:gap-4 max-sm:px-4 max-sm:py-2.5"
+                                    class="block w-[190px] rounded-xl border border-zinc-200 p-5 max-md:flex max-md:w-full max-md:gap-5 max-md:rounded-lg max-sm:gap-4 max-sm:px-4 max-sm:py-2.5"
+                                    :class="payment.disabled ? 'cursor-not-allowed' : 'cursor-pointer'"
+                                    :aria-disabled="payment.disabled ? 'true' : null"
                                 >
                                     {!! view_render_event('qubix.shop.checkout.onepage.payment-method.image.before') !!}
 
@@ -82,6 +88,13 @@
 
                                         <p class="mt-1.5 text-sm font-semibold max-md:mt-1 max-sm:mt-0">
                                             @{{ payment.method_title }}
+                                        </p>
+
+                                        <p
+                                            class="mt-1.5 text-xs font-medium text-red-600 max-md:mt-1 max-sm:mt-0"
+                                            v-if="payment.disabled"
+                                        >
+                                            @{{ payment.reason }}
                                         </p>
                                         
                                         {!! view_render_event('qubix.shop.checkout.onepage.payment-method.title.after') !!}
@@ -127,6 +140,10 @@
 
             methods: {
                 store(selectedMethod) {
+                    if (selectedMethod.disabled) {
+                        return;
+                    }
+
                     this.$emit('processing', 'review');
 
                     this.$axios.post("{{ route('shop.checkout.onepage.payment_methods.store') }}", {

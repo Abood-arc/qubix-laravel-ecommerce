@@ -146,7 +146,6 @@ return [
                     'state' => 'Estat',
                     'street-address' => 'Adreça',
                     'title' => 'Adreça',
-                    'vat-id' => 'ID de l\'IVA',
                 ],
 
                 'edit' => [
@@ -164,7 +163,6 @@ return [
                     'street-address' => 'Adreça',
                     'title' => 'Adreça',
                     'update-btn' => 'Actualitzar',
-                    'vat-id' => 'ID de l\'IVA',
                 ],
             ],
 
@@ -976,6 +974,7 @@ return [
             'minimum-order-message' => 'L\'import mínim de la comanda és',
             'missing-fields' => 'Falten alguns camps obligatoris per aquest producte.',
             'missing-options' => 'Falten opcions per aquest producte.',
+            'payment-method-unavailable' => 'This payment method is not available for this order.',
             'paypal-payment-cancelled' => 'El pagament de Paypal ha estat cancel·lat.',
             'qty-missing' => 'Almenys un producte ha de tenir una quantitat superior a 1.',
             'return-to-shop' => 'Tornar a la Botiga',
@@ -1078,11 +1077,7 @@ return [
                 'street-address' => 'Adreça',
                 'telephone' => 'Telèfon',
                 'pin-code' => 'Codi postal (PIN)',
-                'gstin' => 'GSTIN',
-                'gstin-placeholder' => 'p. ex. 27AAPFU0939F1ZV',
-                'gst-invoice-toggle' => 'Necessites una factura amb GST? Afegeix l\'empresa i el GSTIN',
                 'title' => 'Adreça',
-                'vat-id' => 'Número d\'Identificació Fiscal',
             ],
 
             'index' => [

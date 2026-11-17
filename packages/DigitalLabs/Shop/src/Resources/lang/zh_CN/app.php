@@ -146,7 +146,6 @@ return [
                     'state' => '州/省',
                     'street-address' => '街道地址',
                     'title' => '地址',
-                    'vat-id' => 'VAT号码',
                 ],
 
                 'edit' => [
@@ -164,7 +163,6 @@ return [
                     'street-address' => '街道地址',
                     'title' => '地址',
                     'update-btn' => '更新',
-                    'vat-id' => 'VAT号码',
                 ],
             ],
 
@@ -976,6 +974,7 @@ return [
             'minimum-order-message' => '最低订单金额为',
             'missing-fields' => '此产品缺少一些必填字段。',
             'missing-options' => '此产品缺少选项。',
+            'payment-method-unavailable' => 'This payment method is not available for this order.',
             'paypal-payment-cancelled' => 'Paypal付款已被取消。',
             'qty-missing' => '至少有一个产品应该有超过 1 个数量。',
             'return-to-shop' => '返回商店',
@@ -1078,11 +1077,7 @@ return [
                 'street-address' => '街道地址',
                 'telephone' => '电话',
                 'pin-code' => '邮政编码 (PIN)',
-                'gstin' => 'GSTIN',
-                'gstin-placeholder' => '例如 27AAPFU0939F1ZV',
-                'gst-invoice-toggle' => '需要 GST 发票？添加公司和 GSTIN',
                 'title' => '地址',
-                'vat-id' => 'VAT号码',
             ],
 
             'index' => [
