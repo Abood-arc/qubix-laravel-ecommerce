@@ -25,3 +25,26 @@ it('renders the Classic card exactly as before when no card style is saved', fun
 
     expect($template)->toBe($this->classicCardFixture());
 });
+
+it('renders the Classic card exactly as before when Classic is chosen or an unknown style is saved', function (string $style) {
+    $this->pinStoreConfig(\DigitalLabs\Shop\Enums\ProductCardStyleEnum::CONFIG_KEY, $style);
+
+    $html = $this->searchPageHtml();
+
+    expect($this->productCardTemplate($html))->toBe($this->classicCardFixture())
+        ->and($html)->not->toContain('v-card-swipe-gallery')
+        ->and($html)->not->toContain('v-card-deck-gallery');
+})->with(['classic', 'no-such-style']);
+
+it('keeps the Classic card on the cart and compare pages whatever the setting', function (string $route) {
+    $this->pinStoreConfig(\DigitalLabs\Shop\Enums\ProductCardStyleEnum::CONFIG_KEY, 'swipe');
+    $this->pinStoreConfig('sales.checkout.shopping_cart.cross_sell', '1');
+
+    $html = $this->get(route($route))->assertOk()->getContent();
+
+    expect($this->productCardTemplate($html))->toBe($this->classicCardFixture())
+        ->and($html)->not->toContain('v-card-swipe-gallery');
+})->with([
+    'cart page (cross-sell row)' => 'shop.checkout.cart.index',
+    'compare page' => 'shop.compare.index',
+]);

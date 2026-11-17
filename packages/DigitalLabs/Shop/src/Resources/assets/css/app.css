@@ -1,3 +1,5 @@
+@import "./product-cards.css";
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
