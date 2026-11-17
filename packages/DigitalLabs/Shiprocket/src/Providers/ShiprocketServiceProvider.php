@@ -9,6 +9,7 @@ use DigitalLabs\Shiprocket\Services\DeliveryCheck;
 use DigitalLabs\Shiprocket\Services\FakeShiprocketClient;
 use DigitalLabs\Shiprocket\Services\ShiprocketClient;
 use DigitalLabs\Shiprocket\Support\Settings;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
 
 class ShiprocketServiceProvider extends ServiceProvider
@@ -42,6 +43,24 @@ class ShiprocketServiceProvider extends ServiceProvider
 
         $this->loadViewsFrom(dirname(__DIR__).'/Resources/views', 'shiprocket');
 
-        // Task 7 registers the admin order panel on 'qubix.admin.sales.order.right_component.before' here.
+        $this->registerViewHooks();
+    }
+
+    /**
+     * The admin order panel and the customer's "Track your parcel" links.
+     */
+    protected function registerViewHooks(): void
+    {
+        Event::listen('qubix.admin.sales.order.right_component.before', function ($viewRenderEventManager) {
+            $viewRenderEventManager->addTemplate('shiprocket::admin.order-panel');
+        });
+
+        Event::listen('qubix.shop.emails.orders.shipped.track_number.after', function ($viewRenderEventManager) {
+            $viewRenderEventManager->addTemplate('shiprocket::shop.tracking-link-email');
+        });
+
+        Event::listen('qubix.shop.customers.account.orders.view.shipments.track_number.after', function ($viewRenderEventManager) {
+            $viewRenderEventManager->addTemplate('shiprocket::shop.tracking-link');
+        });
     }
 }

@@ -73,12 +73,17 @@ return [
     ], [
         'key' => 'sales.shipments.view',
         'name' => 'admin::app.acl.view',
-        'route' => 'admin.sales.shipments.view',
+        'route' => ['admin.sales.shipments.view', 'admin.shiprocket.label'],
         'sort' => 1,
     ], [
         'key' => 'sales.shipments.create',
         'name' => 'admin::app.acl.create',
-        'route' => 'admin.sales.shipments.store',
+        'route' => [
+            'admin.sales.shipments.store',
+            'admin.shiprocket.ship',
+            'admin.shiprocket.retry',
+            'admin.shiprocket.cancel',
+        ],
         'sort' => 2,
     ], [
         'key' => 'sales.refunds',
