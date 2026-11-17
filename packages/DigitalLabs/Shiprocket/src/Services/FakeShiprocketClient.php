@@ -22,6 +22,8 @@ class FakeShiprocketClient implements ShiprocketApi
 
     protected const SHIPMENT_ID_BASE = 200000;
 
+    public function checkLogin(): void {}
+
     public function checkServiceability(string $pickupPin, string $deliveryPin, float $weightKg, bool $cod): array
     {
         $pin = trim($deliveryPin);

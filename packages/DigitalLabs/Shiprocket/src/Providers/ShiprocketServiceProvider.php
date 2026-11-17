@@ -3,6 +3,7 @@
 namespace DigitalLabs\Shiprocket\Providers;
 
 use DigitalLabs\Shipping\Contracts\DeliveryCheck as DeliveryCheckContract;
+use DigitalLabs\Shiprocket\Console\Commands\CheckCommand;
 use DigitalLabs\Shiprocket\Contracts\ShiprocketApi;
 use DigitalLabs\Shiprocket\Payment\CashOnDelivery;
 use DigitalLabs\Shiprocket\Services\DeliveryCheck;
@@ -49,6 +50,10 @@ class ShiprocketServiceProvider extends ServiceProvider
         $this->loadViewsFrom(dirname(__DIR__).'/Resources/views', 'shiprocket');
 
         $this->registerViewHooks();
+
+        if ($this->app->runningInConsole()) {
+            $this->commands([CheckCommand::class]);
+        }
     }
 
     /**

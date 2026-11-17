@@ -9,6 +9,11 @@ namespace DigitalLabs\Shiprocket\Contracts;
 interface ShiprocketApi
 {
     /**
+     * Log in afresh with the API user, ignoring a cached token, so a wrong user shows now.
+     */
+    public function checkLogin(): void;
+
+    /**
      * @return array{deliverable: bool, cod: bool}
      */
     public function checkServiceability(string $pickupPin, string $deliveryPin, float $weightKg, bool $cod): array;

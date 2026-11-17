@@ -95,6 +95,13 @@ class ShiprocketClient implements ShiprocketApi
 
     protected const ORDER_CANCELLED = '/^\s*cancel+ed\s*$/i';
 
+    public function checkLogin(): void
+    {
+        Cache::forget($this->tokenCacheKey());
+
+        $this->token();
+    }
+
     public function checkServiceability(string $pickupPin, string $deliveryPin, float $weightKg, bool $cod): array
     {
         $response = $this->call('GET', self::PATH_SERVICEABILITY, [
