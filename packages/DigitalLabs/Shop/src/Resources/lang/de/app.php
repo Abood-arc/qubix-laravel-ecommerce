@@ -473,6 +473,10 @@ return [
             'default-toggle' => 'Standardumschaltung',
         ],
 
+        'flash-group' => [
+            'close' => 'Close message',
+        ],
+
         'media' => [
             'index' => [
                 'add-attachments' => 'Anhänge hinzufügen',

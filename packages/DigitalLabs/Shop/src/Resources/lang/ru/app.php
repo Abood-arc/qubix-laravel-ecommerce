@@ -473,6 +473,10 @@ return [
             'default-toggle' => 'Переключатель по умолчанию',
         ],
 
+        'flash-group' => [
+            'close' => 'Close message',
+        ],
+
         'media' => [
             'index' => [
                 'add-attachments' => 'Добавить вложения',

@@ -473,6 +473,10 @@ return [
             'default-toggle' => 'Перемикач за замовчуванням',
         ],
 
+        'flash-group' => [
+            'close' => 'Close message',
+        ],
+
         'media' => [
             'index' => [
                 'add-attachments' => 'Додати вкладення',

@@ -473,6 +473,10 @@ return [
             'default-toggle' => 'Alternar Padrão',
         ],
 
+        'flash-group' => [
+            'close' => 'Close message',
+        ],
+
         'media' => [
             'index' => [
                 'add-attachments' => 'Adicionar Anexos',

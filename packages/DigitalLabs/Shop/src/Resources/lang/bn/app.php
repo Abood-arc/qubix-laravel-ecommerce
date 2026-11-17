@@ -473,6 +473,10 @@ return [
             'default-toggle' => 'ডিফল্ট টগল',
         ],
 
+        'flash-group' => [
+            'close' => 'Close message',
+        ],
+
         'media' => [
             'index' => [
                 'add-attachments' => 'সংযুক্তি যোগ করুন',

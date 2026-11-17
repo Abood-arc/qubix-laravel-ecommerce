@@ -473,6 +473,10 @@ return [
             'default-toggle' => 'Alternar per defecte',
         ],
 
+        'flash-group' => [
+            'close' => 'Close message',
+        ],
+
         'media' => [
             'index' => [
                 'add-attachments' => 'Afegir adjunts',

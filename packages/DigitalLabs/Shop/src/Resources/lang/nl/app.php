@@ -473,6 +473,10 @@ return [
             'default-toggle' => 'Standaard Schakelen',
         ],
 
+        'flash-group' => [
+            'close' => 'Close message',
+        ],
+
         'media' => [
             'index' => [
                 'add-attachments' => 'Bijlagen toevoegen',

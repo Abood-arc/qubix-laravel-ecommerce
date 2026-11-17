@@ -473,6 +473,10 @@ return [
             'default-toggle' => 'מתג ברירת מחדל',
         ],
 
+        'flash-group' => [
+            'close' => 'Close message',
+        ],
+
         'media' => [
             'index' => [
                 'add-attachments' => 'הוסף קבצים מצורפים',

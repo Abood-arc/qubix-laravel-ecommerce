@@ -473,6 +473,10 @@ return [
             'default-toggle' => 'Default Toggle',
         ],
 
+        'flash-group' => [
+            'close' => 'Close message',
+        ],
+
         'media' => [
             'index' => [
                 'add-attachments' => 'Add attachments',

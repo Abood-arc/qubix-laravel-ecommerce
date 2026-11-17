@@ -473,6 +473,10 @@ return [
             'default-toggle' => 'Toggel Default',
         ],
 
+        'flash-group' => [
+            'close' => 'Close message',
+        ],
+
         'media' => [
             'index' => [
                 'add-attachments' => 'Tambahkan Lampiran',

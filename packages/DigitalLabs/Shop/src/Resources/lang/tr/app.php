@@ -473,6 +473,10 @@ return [
             'default-toggle' => 'Aç/Kapat',
         ],
 
+        'flash-group' => [
+            'close' => 'Close message',
+        ],
+
         'media' => [
             'index' => [
                 'add-attachments' => 'Dosya Ekle',

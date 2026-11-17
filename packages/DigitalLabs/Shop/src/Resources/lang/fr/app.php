@@ -473,6 +473,10 @@ return [
             'default-toggle' => 'Basculer par défaut',
         ],
 
+        'flash-group' => [
+            'close' => 'Close message',
+        ],
+
         'media' => [
             'index' => [
                 'add-attachments' => 'Ajouter des pièces jointes',

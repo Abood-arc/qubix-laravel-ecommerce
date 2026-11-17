@@ -473,6 +473,10 @@ return [
             'default-toggle' => 'デフォルトトグル',
         ],
 
+        'flash-group' => [
+            'close' => 'Close message',
+        ],
+
         'media' => [
             'index' => [
                 'add-attachments' => '添付ファイルを追加',

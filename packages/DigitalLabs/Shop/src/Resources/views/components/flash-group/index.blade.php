@@ -70,9 +70,24 @@
             },
 
             created() {
+                /*
+                 * One auto-close timer per flash, by uid. The group owns them because every flash is
+                 * shown twice (the desktop and the phone list), so a timer per shown copy would close
+                 * it twice.
+                 */
+                this.timers = new Map();
+
                 this.loadInitialFlashes();
 
                 this.registerGlobalEvents();
+            },
+
+            beforeUnmount() {
+                this.$emitter.off('add-flash', this.add);
+
+                this.timers.forEach(timer => clearTimeout(timer));
+
+                this.timers.clear();
             },
 
             methods: {
@@ -90,23 +105,40 @@
                         return;
                     }
                     
-                    flashes.forEach(flash => {
-                        flash.uid = this.uid++;
-
-                        this.flashes.push(flash);
-                    });
+                    flashes.forEach(flash => this.add(flash));
                 },
 
                 add(flash) {
                     flash.uid = this.uid++;
 
                     this.flashes.push(flash);
+
+                    this.scheduleClose(flash);
+                },
+
+                /**
+                 * A message closes itself after a second. A message with a link (flash.link) waits for
+                 * the shopper to close it: following the link needs time (WCAG 2.2.1).
+                 */
+                scheduleClose(flash) {
+                    if (flash.link) {
+                        return;
+                    }
+
+                    this.timers.set(flash.uid, setTimeout(() => this.remove(flash), 1000));
                 },
 
                 remove(flash) {
-                    let index = this.flashes.indexOf(flash);
+                    clearTimeout(this.timers.get(flash.uid));
 
-                    this.flashes.splice(index, 1);
+                    this.timers.delete(flash.uid);
+
+                    const index = this.flashes.findIndex(item => item.uid === flash.uid);
+
+                    // Already gone (closed by hand, or from the other copy): never remove another message.
+                    if (index !== -1) {
+                        this.flashes.splice(index, 1);
+                    }
                 },
 
                 registerGlobalEvents() {

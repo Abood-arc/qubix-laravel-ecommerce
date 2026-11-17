@@ -473,6 +473,10 @@ return [
             'default-toggle' => 'පෙරනි එකක් සැකසෙමින්',
         ],
 
+        'flash-group' => [
+            'close' => 'Close message',
+        ],
+
         'media' => [
             'index' => [
                 'add-attachments' => 'ඇඩෙක්මෙන්ට් එකක් එක්කරන්න',

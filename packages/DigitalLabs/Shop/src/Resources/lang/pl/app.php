@@ -473,6 +473,10 @@ return [
             'default-toggle' => 'Domyślna zmiana',
         ],
 
+        'flash-group' => [
+            'close' => 'Close message',
+        ],
+
         'media' => [
             'index' => [
                 'add-attachments' => 'Dodaj załączniki',

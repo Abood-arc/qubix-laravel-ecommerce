@@ -473,6 +473,10 @@ return [
             'default-toggle' => 'Attivazione predefinita',
         ],
 
+        'flash-group' => [
+            'close' => 'Close message',
+        ],
+
         'media' => [
             'index' => [
                 'add-attachments' => 'Aggiungi allegati',

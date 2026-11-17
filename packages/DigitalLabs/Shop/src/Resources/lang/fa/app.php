@@ -473,6 +473,10 @@ return [
             'default-toggle' => 'کلیک کردن پیش‌فرض',
         ],
 
+        'flash-group' => [
+            'close' => 'Close message',
+        ],
+
         'media' => [
             'index' => [
                 'add-attachments' => 'افزودن پیوست',

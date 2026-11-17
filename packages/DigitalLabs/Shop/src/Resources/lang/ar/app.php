@@ -473,6 +473,10 @@ return [
             'default-toggle' => 'التبديل الافتراضي',
         ],
 
+        'flash-group' => [
+            'close' => 'إغلاق الرسالة',
+        ],
+
         'media' => [
             'index' => [
                 'add-attachments' => 'إضافة المرفقات',

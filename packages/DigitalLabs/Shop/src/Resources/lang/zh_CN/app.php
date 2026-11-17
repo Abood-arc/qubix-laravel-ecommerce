@@ -473,6 +473,10 @@ return [
             'default-toggle' => '默认切换',
         ],
 
+        'flash-group' => [
+            'close' => 'Close message',
+        ],
+
         'media' => [
             'index' => [
                 'add-attachments' => '添加附件',

@@ -473,6 +473,10 @@ return [
             'default-toggle' => 'डिफ़ॉल्ट टॉगल',
         ],
 
+        'flash-group' => [
+            'close' => 'Close message',
+        ],
+
         'media' => [
             'index' => [
                 'add-attachments' => 'अटैचमेंट जोड़ें',
