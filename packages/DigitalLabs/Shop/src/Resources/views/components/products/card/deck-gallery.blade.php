@@ -1,8 +1,9 @@
 {{--
     Photo area of the "Photo deck" card (design concept E). The photos sit in a small stack, so the
     card says "there's more" without dots. Throw the top photo sideways (drag or swipe), tap the
-    "1 / 4" counter, or use the arrow keys on the photo, and it goes to the back of the pile. With a
-    mouse the stack fans out a little on hover. Reduced motion: no throw and no fan; photos fade.
+    "1 / 4" counter, or use the arrow keys on the photo, and it goes to the back of the pile. Input
+    never waits for a throw: a photo still in the air goes straight to its place. With a mouse the
+    stack fans out a little on hover. Reduced motion: no throw and no fan; photos fade.
     The default slot holds the overlays (badge, round Add to cart). Shared photo logic: the
     $cardGallery mixin (assets/js/plugins/card-gallery.js).
 --}}
@@ -96,11 +97,6 @@
                      */
                     order: [],
 
-                    /*
-                     * A throw is running; input waits until it lands.
-                     */
-                    busy: false,
-
                     fanned: false,
                 };
             },
@@ -131,10 +127,13 @@
 
             created() {
                 /*
-                 * Not reactive: the layer elements, the drag in progress, and the moment a drag's
-                 * trailing click stops counting as a click on the product link.
+                 * Not reactive: the layer elements, the throw or landing in progress (see run()), the drag
+                 * in progress, and the moment a drag's trailing click stops counting as a click on the
+                 * product link.
                  */
                 this.layers = [];
+
+                this.motion = null;
 
                 this.drag = null;
 
@@ -145,7 +144,21 @@
                 onReset() {
                     this.order = this.photos.map((photo, index) => index);
 
-                    this.busy = false;
+                    // A throw still in the air belongs to the product shown before: stop it where it is, so
+                    // its end never acts on this one. (The first reset comes before created(): nothing runs.)
+                    if (this.motion) {
+                        this.motion.animation.cancel();
+
+                        this.motion = null;
+                    }
+
+                    this.layers?.forEach(layer => {
+                        if (layer) {
+                            layer.style.transform = '';
+
+                            layer.style.transition = '';
+                        }
+                    });
                 },
 
                 setLayer(index, element) {
@@ -180,75 +193,134 @@
                 },
 
                 /**
-                 * Throw the top photo off towards `side` (-1 left, 1 right); it slides back in at the bottom.
+                 * Make `animation` the pile's one motion in progress (`this.motion`). `done(playedOut)` runs
+                 * exactly once: when the animation plays out (true), or straight away when new input
+                 * fast-forwards it (false, see fastForward()). A motion stopped by onReset() runs nothing.
+                 */
+                run(animation, done) {
+                    const motion = {
+                        animation,
+
+                        finish: (playedOut = false) => {
+                            if (this.motion !== motion) {
+                                return;
+                            }
+
+                            this.motion = null;
+
+                            animation.cancel();
+
+                            done(playedOut);
+                        },
+                    };
+
+                    this.motion = motion;
+
+                    // `finished` rejects when the animation is cancelled: fast-forwarded or stopped, already handled.
+                    animation.finished.then(() => motion.finish(true), () => {});
+                },
+
+                /**
+                 * New input does not wait for a throw to land: the photo in the air goes straight to its
+                 * place in the pile, and the new input acts at once.
+                 */
+                fastForward() {
+                    this.motion?.finish();
+                },
+
+                /**
+                 * Bring `layer` from off the `side` it was thrown towards (-1 left, 1 right) to its place in
+                 * the pile. The layer's own transition stays off until it has landed, so it does not
+                 * also slide there.
+                 */
+                land(layer, side) {
+                    layer.style.transition = 'none';
+
+                    const to = getComputedStyle(layer).transform;
+
+                    this.run(
+                        layer.animate(
+                            [{ transform: thrownPose(side), opacity: 0 }, { transform: to, opacity: 1 }],
+                            { duration: 420, easing: 'cubic-bezier(0.16, 1, 0.3, 1)' }
+                        ),
+                        () => (layer.style.transition = '')
+                    );
+                },
+
+                /**
+                 * Reduced motion: the new top photo fades in where it is.
+                 */
+                fadeIn(layer) {
+                    layer.style.transition = '';
+
+                    layer.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 180, easing: 'ease-out' });
+                },
+
+                /**
+                 * Throw the top photo off towards `side` (-1 left, 1 right); it lands back in at the bottom.
                  */
                 throwFront(side) {
-                    if (this.busy || this.photos.length < 2) {
+                    if (this.photos.length < 2) {
                         return;
                     }
+
+                    this.fastForward();
 
                     this.wake();
 
                     const front = this.layers[this.front];
 
                     const sendToBack = () => {
+                        front.style.transform = '';
+
                         this.order = [...this.order.slice(1), this.order[0]];
 
                         this.announce(this.front);
                     };
 
                     if (this.prefersReducedMotion()) {
-                        front.style.transform = '';
-
                         sendToBack();
 
-                        this.$nextTick(() => {
-                            this.layers[this.front].animate([{ opacity: 0 }, { opacity: 1 }], { duration: 180, easing: 'ease-out' });
-                        });
+                        this.$nextTick(() => this.fadeIn(this.layers[this.front]));
 
                         return;
                     }
-
-                    this.busy = true;
 
                     const start = front.style.transform || getComputedStyle(front).transform;
 
                     front.style.transition = 'none';
 
-                    const out = front.animate(
-                        [{ transform: start }, { transform: thrownPose(side), opacity: 0.2 }],
-                        { duration: 230, easing: 'cubic-bezier(0.4, 0, 1, 1)', fill: 'forwards' }
-                    );
+                    this.run(
+                        front.animate(
+                            [{ transform: start }, { transform: thrownPose(side), opacity: 0.2 }],
+                            { duration: 230, easing: 'cubic-bezier(0.4, 0, 1, 1)', fill: 'forwards' }
+                        ),
+                        playedOut => {
+                            const product = this.product.id;
 
-                    out.onfinish = () => {
-                        front.style.transform = '';
+                            sendToBack();
 
-                        sendToBack();
-
-                        this.$nextTick(() => {
-                            out.cancel();
-
-                            const to = getComputedStyle(front).transform;
-
-                            front.animate(
-                                [{ transform: thrownPose(side), opacity: 0 }, { transform: to, opacity: 1 }],
-                                { duration: 420, easing: 'cubic-bezier(0.16, 1, 0.3, 1)' }
-                            ).onfinish = () => {
+                            if (! playedOut) {
+                                // Fast-forwarded: no landing, the photo simply takes its place at the back.
                                 front.style.transition = '';
 
-                                this.busy = false;
-                            };
-                        });
-                    };
+                                return;
+                            }
+
+                            this.$nextTick(() => product === this.product.id && this.land(front, side));
+                        }
+                    );
                 },
 
                 /**
                  * The previous photo comes back from `side` onto the top of the pile.
                  */
                 bringBack(side) {
-                    if (this.busy || this.photos.length < 2) {
+                    if (this.photos.length < 2) {
                         return;
                     }
+
+                    this.fastForward();
 
                     this.wake();
 
@@ -262,34 +334,15 @@
 
                     this.announce(this.front);
 
-                    this.$nextTick(() => {
-                        if (this.prefersReducedMotion()) {
-                            back.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 180 });
-
-                            back.style.transition = '';
-
-                            return;
-                        }
-
-                        this.busy = true;
-
-                        const to = getComputedStyle(back).transform;
-
-                        back.animate(
-                            [{ transform: thrownPose(side), opacity: 0 }, { transform: to, opacity: 1 }],
-                            { duration: 420, easing: 'cubic-bezier(0.16, 1, 0.3, 1)' }
-                        ).onfinish = () => {
-                            back.style.transition = '';
-
-                            this.busy = false;
-                        };
-                    });
+                    this.$nextTick(() => (this.prefersReducedMotion() ? this.fadeIn(back) : this.land(back, side)));
                 },
 
                 onPointerDown(event) {
-                    if (this.busy || this.photos.length < 2 || (event.pointerType === 'mouse' && event.button !== 0)) {
+                    if (this.photos.length < 2 || (event.pointerType === 'mouse' && event.button !== 0)) {
                         return;
                     }
+
+                    this.fastForward();
 
                     this.drag = { id: event.pointerId, x: event.clientX, y: event.clientY, moved: false };
 

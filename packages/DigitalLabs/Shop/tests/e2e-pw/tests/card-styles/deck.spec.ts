@@ -75,15 +75,36 @@ test("arrow keys on the photo move through the pile and announce the photo", asy
 
     await expect(card.getByRole("status")).toHaveText(`Photo 2 of ${product.photoCount}`);
 
-    // Keys are ignored while a throw is still in the air (about 650ms). The counter turns to 2 when the
-    // photo reaches the back, partway through, so wait for the counter and then for the photo to land.
     await expect(card.getByText(`2 / ${product.photoCount}`)).toBeVisible();
-    await expect.poll(() => runningPhotoAnimations(page)).toBe(0);
 
     await page.keyboard.press("ArrowLeft");
 
     await expect(card.getByText(`1 / ${product.photoCount}`)).toBeVisible();
     await expect(card.getByRole("status")).toHaveText(`Photo 1 of ${product.photoCount}`);
+});
+
+test("keys pressed while a photo is still in the air all count", async ({ page }) => {
+    await openSearchFor(page, product);
+
+    const card = styledCard(page, product);
+
+    await photoLink(page, product).focus();
+
+    // A throw and its landing take about 650ms; these presses land well inside it.
+    await page.keyboard.press("ArrowRight");
+    await page.keyboard.press("ArrowRight");
+
+    const shown = (2 % product.photoCount) + 1;
+
+    await expect(card.getByText(`${shown} / ${product.photoCount}`)).toBeVisible();
+    await expect(card.getByRole("status")).toHaveText(`Photo ${shown} of ${product.photoCount}`);
+
+    await page.keyboard.press("ArrowLeft");
+
+    await expect(card.getByText(`${shown === 1 ? product.photoCount : shown - 1} / ${product.photoCount}`)).toBeVisible();
+
+    // Every photo settles back into the pile.
+    await expect.poll(() => runningPhotoAnimations(page)).toBe(0);
 });
 
 test("the round bag button adds the product to the cart", async ({ page }) => {
