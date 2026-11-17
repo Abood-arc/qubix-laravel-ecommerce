@@ -68,9 +68,7 @@
                 <x-shop::products.card.icon name="next" />
             </button>
 
-            <template v-if="photos.length > 1">
-                @include('shop::components.products.card.gallery-hint')
-            </template>
+            @include('shop::components.products.card.gallery-hint')
 
             <slot></slot>
         </div>

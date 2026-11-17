@@ -442,6 +442,9 @@
                         .then(response => {
                             if (response.data.message) {
                                 this.cart = response.data.data;
+
+                                // Tell the rest of the page too (product cards with a − 1 + control follow the cart).
+                                this.$emitter.emit('update-mini-cart', response.data.data);
                             } else {
                                 this.$emitter.emit('add-flash', { type: 'warning', message: response.data.data.message });
                             }
@@ -461,6 +464,9 @@
                             })
                             .then(response => {
                                 this.cart = response.data.data;
+
+                                // Tell the rest of the page too (product cards with a − 1 + control follow the cart).
+                                this.$emitter.emit('update-mini-cart', response.data.data);
 
                                 this.$emitter.emit('add-flash', { type: 'success', message: response.data.message });
 

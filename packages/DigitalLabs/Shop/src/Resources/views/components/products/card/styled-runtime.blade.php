@@ -194,37 +194,235 @@
 
         /* ---- cart: start ---- */
         /*
-         * The cart, as the new cards see it. Add to cart is the Classic card's call with the same messages;
-         * the cart that comes back is broadcast on update-mini-cart, as everywhere else in the shop.
+         * The cart, as the new cards see it: for each product a card can step, its one cart line
+         * ({ itemId, quantity }). Read once per page from the cart API, then rebuilt from every cart that
+         * is broadcast on update-mini-cart (these cards, the Classic card, the product page, the mini
+         * cart). Quantity changes use the cart page's own calls, so the same stock rules apply
+         * (Cart::updateItems); a line is removed at 0. Every change is announced as card-cart-changed.
+         *
+         * Writes go out one at a time, in order, so carts come back in the order they were asked for.
+         * Quick clicks on − or + only move the wanted quantity (`wanted`), which the cards show at once;
+         * the next write sends the latest one, so five quick clicks cost one or two requests. A refused
+         * change shows the cart's message and goes back to what the cart really holds.
          */
         const cardCart = {
-            // Same cart call as the Classic card's addToCart (products/card.blade.php), which stays untouched.
-            async add(product) {
+            lines: {},
+
+            wanted: {},
+
+            queue: Promise.resolve(),
+
+            loading: null,
+
+            /**
+             * Run `task` after every write asked for before it.
+             */
+            enqueue(task) {
+                const run = this.queue.then(task);
+
+                this.queue = run.catch(() => {});
+
+                return run;
+            },
+
+            load() {
+                this.loading ??= this.enqueue(() => this.fetch());
+
+                return this.loading;
+            },
+
+            fetch() {
+                return axios.get(routes.cart)
+                    .then(response => this.apply(response.data.data))
+                    .catch(() => {});
+            },
+
+            /**
+             * A card steps a product only when the cart has exactly one plain line for it: no options,
+             * quantity changeable. Configurable, bundle and grouped lines are left to the cart page.
+             */
+            apply(cart) {
+                const items = cart?.items ?? [];
+
+                const linesPerProduct = {};
+
+                items.forEach(item => {
+                    linesPerProduct[item.product_id] = (linesPerProduct[item.product_id] ?? 0) + 1;
+                });
+
+                this.lines = {};
+
+                items.forEach(item => {
+                    if (linesPerProduct[item.product_id] === 1 && item.can_change_qty && ! (item.options ?? []).length) {
+                        this.lines[item.product_id] = { itemId: item.id, quantity: Number(item.quantity) };
+                    }
+                });
+
+                this.changed();
+            },
+
+            /**
+             * What the card shows: the quantity on its way to the cart, else the cart's.
+             */
+            quantity(productId) {
+                return this.wanted[productId] ?? this.lines[productId]?.quantity ?? 0;
+            },
+
+            /**
+             * Add to cart: the Classic card's call with the same messages.
+             */
+            add(product) {
+                // Same cart call as the Classic card's addToCart (products/card.blade.php), which stays untouched.
+                return this.enqueue(async () => {
+                    try {
+                        const response = await axios.post(routes.cartStore, { quantity: 1, product_id: product.id });
+
+                        if (response.data.message) {
+                            emitter.emit('update-mini-cart', response.data.data);
+
+                            flash('success', response.data.message);
+
+                            return true;
+                        }
+
+                        flash('warning', response.data.data.message);
+
+                        return false;
+                    } catch (error) {
+                        flash('error', error.response?.data?.message);
+
+                        if (error.response?.data?.redirect_uri) {
+                            window.location.href = error.response.data.redirect_uri;
+                        }
+
+                        return false;
+                    }
+                });
+            },
+
+            /**
+             * Ask for `quantity` of a product that has a line (0 removes the line). Resolves true once
+             * the cart holds what this call asked for and nothing newer is waiting; false when the cart
+             * refused it, or when a later call took it over.
+             */
+            setQuantity(productId, quantity) {
+                if (! this.lines[productId]) {
+                    return Promise.resolve(false);
+                }
+
+                this.wanted[productId] = Math.max(0, quantity);
+
+                this.changed();
+
+                return this.enqueue(() => this.write(productId));
+            },
+
+            remove(productId) {
+                return this.setQuantity(productId, 0);
+            },
+
+            /**
+             * Send the product's wanted quantity, if it still differs from the cart's.
+             */
+            async write(productId) {
+                const quantity = this.wanted[productId];
+
+                const line = this.lines[productId];
+
+                if (quantity === undefined) {
+                    return false;
+                }
+
+                if (! line || quantity === line.quantity) {
+                    delete this.wanted[productId];
+
+                    this.changed();
+
+                    return Boolean(line);
+                }
+
+                const done = quantity > 0
+                    ? await this.update(line.itemId, quantity)
+                    : await this.destroy(line.itemId);
+
+                if (! done) {
+                    // Back to what the cart really holds, then make sure of it.
+                    delete this.wanted[productId];
+
+                    this.changed();
+
+                    await this.refresh();
+
+                    return false;
+                }
+
+                if (this.wanted[productId] !== quantity) {
+                    return false;
+                }
+
+                delete this.wanted[productId];
+
+                this.changed();
+
+                return true;
+            },
+
+            /**
+             * The cart page's quantity call (and the mini cart's): a message next to the cart means it
+             * worked; otherwise data.message says why not (for example the inventory warning).
+             */
+            async update(itemId, quantity) {
                 try {
-                    const response = await axios.post(routes.cartStore, { quantity: 1, product_id: product.id });
+                    const response = await axios.put(routes.cartUpdate, { qty: { [itemId]: quantity } });
 
                     if (response.data.message) {
                         emitter.emit('update-mini-cart', response.data.data);
-
-                        flash('success', response.data.message);
 
                         return true;
                     }
 
                     flash('warning', response.data.data.message);
-
-                    return false;
                 } catch (error) {
                     flash('error', error.response?.data?.message);
+                }
 
-                    if (error.response?.data?.redirect_uri) {
-                        window.location.href = error.response.data.redirect_uri;
-                    }
+                return false;
+            },
+
+            /**
+             * The mini cart's remove call, without its confirm dialog at 0 (the design's behaviour).
+             */
+            async destroy(itemId) {
+                try {
+                    const response = await axios.post(routes.cartDestroy, { _method: 'DELETE', cart_item_id: itemId });
+
+                    emitter.emit('update-mini-cart', response.data.data);
+
+                    flash('success', response.data.message);
+
+                    return true;
+                } catch (error) {
+                    flash('error', error.response?.data?.message);
 
                     return false;
                 }
             },
+
+            /**
+             * After a refused change: read the cart again and tell everyone (the header count too).
+             */
+            refresh() {
+                return axios.get(routes.cart)
+                    .then(response => emitter.emit('update-mini-cart', response.data.data))
+                    .catch(() => {});
+            },
+
+            changed() {
+                emitter.emit('card-cart-changed');
+            },
         };
+
+        emitter.on('update-mini-cart', cart => cardCart.apply(cart));
         /* ---- cart: end ---- */
 
         app.config.globalProperties.$cardCompare = cardCompare;

@@ -207,3 +207,20 @@ export async function expectCompareLimitMessage(page: Page): Promise<void> {
     await expect(page.getByText("You can compare up to 4").first()).toBeVisible();
     await expect(page.getByRole("link", { name: "Open compare" }).first()).toBeVisible();
 }
+
+/**
+ * The card's Add to cart button: the full button on the Swipe card, the round bag button on the Photo deck card.
+ */
+export const addToCartButton = (page: Page, product: CardProduct, style: CardStyle) =>
+    styledCard(page, product).getByRole("button", {
+        name: style === "Photo deck" ? `Add ${product.name} to cart` : "Add To Cart",
+    });
+
+/**
+ * How many of the product the real cart holds (the page's session, through the cart API).
+ */
+export async function cartQuantityOf(page: Page, product: CardProduct): Promise<number> {
+    const { data } = await (await page.request.get("api/checkout/cart")).json();
+
+    return Number(data?.items?.find((item: any) => item.product_id === product.id)?.quantity ?? 0);
+}

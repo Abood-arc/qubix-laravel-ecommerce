@@ -1,5 +1,20 @@
 import { fillPlaceholders } from "./fill-placeholders";
 
+/*
+ * The DOM event that carries a message to the card's live region. It bubbles from the sender to the
+ * card's root (.pc-card), where the photo component listens, so each card hears only its own parts.
+ */
+const ANNOUNCE_EVENT = "pc-announce";
+
+/**
+ * Have screen readers read `message` through the live region of the card that holds `element`
+ * (card/gallery-hint). For parts of a card outside its photo component, such as Add to cart and the
+ * − 1 + control. Components use it as this.$cardAnnounce(this.$el, message).
+ */
+export function announceInCard(element, message) {
+    element.dispatchEvent(new CustomEvent(ANNOUNCE_EVENT, { bubbles: true, detail: message }));
+}
+
 /**
  * The logic every product card photo component shares (the Swipe card's v-card-swipe-gallery, the
  * Photo deck card's v-card-deck-gallery), as a Vue mixin. Components defined in Blade use it as
@@ -10,7 +25,8 @@ import { fillPlaceholders } from "./fill-placeholders";
  *   - lazy loading: photo 1 loads like today's card, the others once `wake()` is called (pointing,
  *     focus, touch) or, on touch screens, photo 2 once the card scrolls into view;
  *   - `reset()` when a grid reuses the component for another product (filters, paging);
- *   - the keyboard hint id, the "Photo 2 of 4" label and the live-region announcement;
+ *   - the keyboard hint id, the "Photo 2 of 4" label and the live-region announcement, which also
+ *     reads out what the card's other parts send with $cardAnnounce (announceInCard above);
  *   - `arrowStep()` for the left and right arrow keys, mirrored right-to-left.
  *
  * The markup that goes with it is the Blade partials card/gallery-photo (one photo) and
@@ -85,10 +101,20 @@ export const cardGallery = {
 
     mounted() {
         this.watchView();
+
+        this.card = this.$el.closest(".pc-card") ?? this.$el;
+
+        this.onCardAnnounce = (event) => this.say(event.detail);
+
+        this.card.addEventListener(ANNOUNCE_EVENT, this.onCardAnnounce);
     },
 
     beforeUnmount() {
         this.observer?.disconnect();
+
+        this.card.removeEventListener(ANNOUNCE_EVENT, this.onCardAnnounce);
+
+        clearTimeout(this.sayTimer);
     },
 
     methods: {
@@ -96,6 +122,8 @@ export const cardGallery = {
             this.requested = this.photos.map((photo, index) => index === 0);
 
             this.loaded = [];
+
+            clearTimeout(this.sayTimer);
 
             this.announcement = "";
 
@@ -172,6 +200,18 @@ export const cardGallery = {
         },
 
         /**
+         * Tell screen readers `message` (sent with announceInCard). The region is emptied first, so
+         * the same words twice in a row ("2 in cart" after a refused change) are read again.
+         */
+        say(message) {
+            clearTimeout(this.sayTimer);
+
+            this.announcement = "";
+
+            this.sayTimer = setTimeout(() => (this.announcement = message), 30);
+        },
+
+        /**
          * 1 for the arrow key that means "next photo", -1 for "previous", 0 for any other key or a
          * single photo. Right is next in English, left is next in Arabic. The arrows' page scroll is
          * stopped when they change the photo.
@@ -195,5 +235,7 @@ export const cardGallery = {
 export default {
     install(app) {
         app.config.globalProperties.$cardGallery = cardGallery;
+
+        app.config.globalProperties.$cardAnnounce = announceInCard;
     },
 };

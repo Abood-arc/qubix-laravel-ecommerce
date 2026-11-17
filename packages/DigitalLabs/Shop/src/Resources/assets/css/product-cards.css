@@ -1052,3 +1052,154 @@
         transition: none;
     }
 }
+
+/* ========== Add to cart, step 2: the − 1 + control while the product is in the cart ========== */
+
+/*
+ * The button and the control share one cell as wide as the button's spot. The hidden control must not
+ * widen it (its two 44px buttons would stretch the 44px round button), so it clips its own content.
+ */
+.pc-buy {
+    grid-template-columns: minmax(0, 1fr);
+}
+
+.pc-stepper {
+    min-width: 0;
+    overflow: hidden;
+    display: grid;
+    grid-template-columns: 44px minmax(0, 1fr) 44px;
+    align-items: center;
+    border-radius: var(--radius-ui);
+    background: rgb(var(--c-brand));
+    color: #fff;
+    opacity: 0;
+    visibility: hidden;
+    transform: scale(0.94);
+    transition: opacity 200ms, transform 260ms var(--pc-ease-out), visibility 0s 260ms;
+}
+
+.pc-buy[data-state="qty"] .pc-stepper {
+    opacity: 1;
+    visibility: visible;
+    transform: none;
+    transition: opacity 200ms, transform 300ms var(--pc-ease-out), visibility 0s;
+}
+
+.pc-buy[data-state="qty"] .pc-add {
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 150ms, visibility 0s 150ms;
+}
+
+.pc-stepper button {
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 100%;
+    padding: 0;
+    border: 0;
+    border-radius: var(--radius-ui);
+    background: transparent;
+    color: inherit;
+    cursor: pointer;
+    transition: background-color 150ms;
+}
+
+.pc-stepper button:hover {
+    background: rgb(255 255 255 / 0.14);
+}
+
+.pc-stepper button:focus-visible {
+    outline-color: #fff;
+    outline-offset: -4px;
+}
+
+.pc-stepper .pc-ico {
+    width: 18px;
+    height: 18px;
+    stroke-width: 2.2;
+    transition: transform 120ms;
+}
+
+.pc-stepper button:active .pc-ico {
+    transform: scale(0.85);
+}
+
+.pc-qty {
+    overflow: hidden;
+    font-size: 14px;
+    font-weight: 700;
+    text-align: center;
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+}
+
+.pc-qty b {
+    display: inline-block;
+    font-weight: 800;
+    animation: pc-qty-in 240ms var(--pc-ease-out);
+}
+
+@keyframes pc-qty-in {
+    from { opacity: 0; transform: translateY(9px); }
+    to { opacity: 1; transform: none; }
+}
+
+/* The round bag button grows into the control across the photo. */
+.pc-buy--round {
+    transition: width 320ms var(--pc-ease-out);
+}
+
+.pc-buy--round[data-state="qty"] {
+    width: calc(100% - 36px);
+}
+
+.pc-buy--round .pc-stepper {
+    border-radius: 999px;
+    box-shadow: 0 2px 6px rgb(0 0 0 / 0.18), 0 8px 18px rgb(0 0 0 / 0.14);
+}
+
+.pc-buy--round .pc-stepper button {
+    border-radius: 999px;
+}
+
+.pc-buy--round .pc-qty {
+    font-size: 13px;
+}
+
+.pc-card--deck {
+    container-type: inline-size;
+}
+
+@container (max-width: 190px) {
+    .pc-buy--round .pc-qty-word {
+        display: none;
+    }
+}
+
+/* The control covers the "1 / 4" counter; the arrow keys on the photo still change photos. */
+.pc-card--deck:has(.pc-buy--round[data-state="qty"]) .pc-deck-next {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+}
+
+@media (max-width: 767px) {
+    .pc-buy--round[data-state="qty"] {
+        width: calc(100% - 26px);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .pc-stepper {
+        transform: none !important;
+    }
+
+    .pc-qty b {
+        animation: none;
+    }
+
+    .pc-buy--round {
+        transition: none;
+    }
+}
