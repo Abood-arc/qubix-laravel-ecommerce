@@ -110,6 +110,9 @@ test.describe("Classic-only pages with a new style chosen", () => {
         await expect(page.getByText(products[0].name, { exact: true }).first()).toBeVisible();
         await expect(page.locator("[data-card-style]")).toHaveCount(0);
 
+        // A card is on screen here, so this proves the tray stays away while cards are shown on the cart page.
+        await expect(page.getByRole("region", { name: "Compare tray" })).toHaveCount(0);
+
         // Today's card: a hover reveals Add To Cart and Add To Compare buttons.
         await page.getByText(products[0].name, { exact: true }).first().hover();
         await expect(page.getByRole("button", { name: "Add To Cart" }).first()).toBeVisible();
