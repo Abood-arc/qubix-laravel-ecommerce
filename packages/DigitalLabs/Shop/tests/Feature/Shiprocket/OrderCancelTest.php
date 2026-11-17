@@ -16,7 +16,9 @@ use DigitalLabs\Shiprocket\Models\ShiprocketShipment;
 use DigitalLabs\Shiprocket\Services\FakeShiprocketClient;
 use DigitalLabs\Shiprocket\Services\ShipmentBooker;
 use DigitalLabs\User\Models\Admin;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Sleep;
 use Webkul\Faker\Helpers\Customer as CustomerFaker;
 use Webkul\Faker\Helpers\Product as ProductFaker;
 
@@ -230,13 +232,55 @@ it('also cancels a shiprocket order whose booking stopped part way', function (s
         ->and(ShiprocketShipment::where('order_id', $order->id)->value('status'))->toBe(ShiprocketShipment::STATUS_CANCELLED);
 })->with([ShiprocketShipment::STATUS_BOOKING, ShiprocketShipment::STATUS_FAILED]);
 
+it('waits for a running booking before cancelling, and keeps the order when it cannot', function () {
+    Sleep::fake(syncWithCarbon: true);
+
+    $api = cancelApi();
+    $order = cancellableOrder();
+
+    // A booking has started but Shiprocket has not answered yet: no Shiprocket order id is
+    // known, and the booking holds the order's lock.
+    $row = ShiprocketShipment::create([
+        'order_id' => $order->id,
+        'status' => ShiprocketShipment::STATUS_BOOKING,
+        'channel_order_id' => (string) $order->increment_id,
+    ]);
+
+    $lock = Cache::lock('shiprocket:book:'.$order->id, 180);
+    $lock->get();
+
+    try {
+        expect(fn () => app(OrderRepository::class)->cancel($order))
+            ->toThrow(ShiprocketCancelBlockedException::class, trans('shiprocket::app.cancel.failed', [
+                'reason' => trans('shiprocket::app.admin.status.booking'),
+            ]));
+    } finally {
+        $lock->release();
+    }
+
+    expect($order->fresh()->status)->not->toBe(Order::STATUS_CANCELED)
+        ->and($row->fresh()->status)->toBe(ShiprocketShipment::STATUS_BOOKING)
+        ->and($api->cancelled)->toBe([]);
+
+    // Once the booking is no longer running, the cancel goes through and stops any retry.
+    expect(app(OrderRepository::class)->cancel($order->fresh()))->toBeTrue()
+        ->and($row->fresh())
+        ->status->toBe(ShiprocketShipment::STATUS_CANCELLED)
+        ->generation->toBe(1);
+});
+
 it('does not book a cancelled order again', function () {
     $api = cancelApi();
     [$order] = bookedCancelOrder();
 
     app(OrderRepository::class)->cancel($order);
 
-    $row = app(ShipmentBooker::class)->book($order->fresh(), manual: true);
+    // A request from before the cancel (no generation, or the old one) leaves it cancelled.
+    expect(app(ShipmentBooker::class)->book($order->fresh(), manual: true)->status)->toBe(ShiprocketShipment::STATUS_CANCELLED)
+        ->and(app(ShipmentBooker::class)->book($order->fresh(), manual: true, generation: 0)->status)->toBe(ShiprocketShipment::STATUS_CANCELLED);
+
+    // Even a request for the new booking finds nothing left to ship.
+    $row = app(ShipmentBooker::class)->book($order->fresh(), manual: true, generation: 1);
 
     expect($row->status)->toBe(ShiprocketShipment::STATUS_FAILED)
         ->and($row->failure_reason)->toBe(trans('shiprocket::app.admin.cannot-ship'))

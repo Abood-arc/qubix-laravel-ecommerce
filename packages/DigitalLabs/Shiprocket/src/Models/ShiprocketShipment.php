@@ -54,6 +54,7 @@ class ShiprocketShipment extends Model
     protected $fillable = [
         'order_id',
         'status',
+        'generation',
         'shiprocket_order_id',
         'shipment_id',
         'channel_order_id',
@@ -68,10 +69,12 @@ class ShiprocketShipment extends Model
 
     protected $casts = [
         'pickup_scheduled_at' => 'datetime',
+        'generation' => 'integer',
     ];
 
     protected $attributes = [
         'status' => self::STATUS_PENDING,
+        'generation' => 0,
     ];
 
     public static function rank(string $status): int
@@ -94,17 +97,38 @@ class ShiprocketShipment extends Model
 
     /**
      * Move the parcel forward. Webhooks can arrive late or out of order, so a status never
-     * goes backwards and a cancelled or failed booking is left alone.
+     * goes backwards and a cancelled booking is left alone.
+     *
+     * A failed booking is left alone too, unless the courier was booked before it failed
+     * (it has an AWB): that parcel is real and is followed from `booked` on. A cancel
+     * starts a new booking generation, like an admin cancel does.
      */
     public function advanceTo(string $status): bool
     {
-        if ($this->isTerminal() || self::rank($status) <= self::rank($this->status)) {
+        if ($this->status === self::STATUS_CANCELLED || self::rank($status) <= $this->progressRank()) {
             return false;
         }
 
         $this->status = $status;
 
+        if ($status === self::STATUS_CANCELLED) {
+            $this->generation++;
+        }
+
         return $this->save();
+    }
+
+    /**
+     * How far the parcel has got, for advanceTo(): a failed booking that holds an AWB
+     * counts as booked, one without as finished.
+     */
+    protected function progressRank(): int
+    {
+        if ($this->status === self::STATUS_FAILED) {
+            return filled($this->awb_code) ? self::RANKS[self::STATUS_BOOKED] : self::RANKS[self::STATUS_FAILED];
+        }
+
+        return self::rank($this->status);
     }
 
     public function order(): BelongsTo

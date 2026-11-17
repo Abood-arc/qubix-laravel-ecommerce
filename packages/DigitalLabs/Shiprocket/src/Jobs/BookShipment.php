@@ -2,6 +2,7 @@
 
 namespace DigitalLabs\Shiprocket\Jobs;
 
+use DateTimeInterface;
 use DigitalLabs\Sales\Models\OrderProxy;
 use DigitalLabs\Shiprocket\Services\ShipmentBooker;
 use DigitalLabs\Shiprocket\Support\Settings;
@@ -17,6 +18,15 @@ use Throwable;
  *
  * Only an unknown outcome (timeout, Shiprocket down) is retried; the booker resumes from
  * the last confirmed step. Refusals are handled by the booker (row failed, admin emailed).
+ * The job carries the booking generation it was sent for, so a retry left over from
+ * before a cancel does nothing.
+ *
+ * Time budget: production runs `queue:work redis --tries=3` with retry_after 90 s. The job
+ * is stopped after 85 s ($timeout), before the queue would hand it to a second worker.
+ * Each Shiprocket call is capped at 12 s (ShiprocketClient), so a first booking (login,
+ * order, courier, pickup, label: 5 × 12 s) plus the 3 s lock wait takes at most 63 s, and a
+ * resumed one (one more lookup) 75 s. Only a rare worst case (a token renewal on top)
+ * can run past 85 s; it is then stopped and resumed by the next try, since every step is saved.
  */
 class BookShipment implements ShouldQueue
 {
@@ -27,12 +37,31 @@ class BookShipment implements ShouldQueue
      */
     public const BUSY_RETRY_SECONDS = 30;
 
-    public int $tries = 3;
+    /**
+     * How long the job keeps being tried, counted from when it was queued.
+     */
+    public const RETRY_MINUTES = 30;
+
+    public int $timeout = 85;
+
+    /**
+     * Failed tries (an unknown outcome) before the job gives up.
+     *
+     * Not $tries: with retryUntil() the queue ignores $tries (and --tries), and a try that
+     * only found the order busy (released, no exception) must not use one up.
+     */
+    public int $maxExceptions = 3;
 
     public function __construct(
         public int $orderId,
         public bool $manual = false,
+        public ?int $generation = null,
     ) {}
+
+    public function retryUntil(): DateTimeInterface
+    {
+        return now()->addMinutes(self::RETRY_MINUTES);
+    }
 
     /**
      * @return int[] seconds before the second and third try
@@ -50,7 +79,7 @@ class BookShipment implements ShouldQueue
             return;
         }
 
-        if ($booker->attempt($order, $this->manual) === null) {
+        if ($booker->attempt($order, $this->manual, $this->generation) === null) {
             $this->release(self::BUSY_RETRY_SECONDS);
         }
     }
@@ -63,6 +92,7 @@ class BookShipment implements ShouldQueue
         app(ShipmentBooker::class)->markFailed(
             $this->orderId,
             $exception?->getMessage() ?: trans('shiprocket::app.admin.status.failed'),
+            $this->generation,
         );
     }
 }

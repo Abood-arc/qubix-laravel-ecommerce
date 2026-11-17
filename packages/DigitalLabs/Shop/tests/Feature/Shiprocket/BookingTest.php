@@ -19,12 +19,18 @@ use DigitalLabs\Shiprocket\Models\ShiprocketShipment;
 use DigitalLabs\Shiprocket\Services\FakeShiprocketClient;
 use DigitalLabs\Shiprocket\Services\ShipmentBooker;
 use DigitalLabs\Shop\Mail\Order\ShippedNotification;
+use DigitalLabs\User\Models\Admin;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Sleep;
 use Webkul\Faker\Helpers\Customer as CustomerFaker;
 use Webkul\Faker\Helpers\Product as ProductFaker;
+
+use function Pest\Laravel\actingAs;
+use function Pest\Laravel\post;
 
 /**
  * The deterministic fake, recording every call. A hook replaces one call: it gets the real
@@ -325,7 +331,7 @@ it('resumes after a lost courier answer without creating the order again', funct
 });
 
 it('resumes a booking that has its courier but no store shipment yet', function () {
-    $api = bookingApi()->on('generateLabel', fn () => throw new ShiprocketUnknownOutcomeException('Shiprocket error (HTTP 502)'));
+    $api = bookingApi()->on('requestPickup', fn () => throw new ShiprocketUnknownOutcomeException('Shiprocket error (HTTP 502)'));
     $order = bookingOrder();
 
     expect(fn () => booker()->book($order))->toThrow(ShiprocketUnknownOutcomeException::class);
@@ -339,6 +345,38 @@ it('resumes a booking that has its courier but no store shipment yet', function 
         ->and($api->count('assignAwb'))->toBe(1)
         ->and(Shipment::where('order_id', $order->id)->count())->toBe(1);
 });
+
+it('ships the order even when shiprocket has no label yet', function (Throwable $failure) {
+    Log::spy();
+
+    $api = bookingApi()->on('generateLabel', fn () => throw $failure);
+    $order = bookingOrder();
+
+    $row = booker()->book($order);
+
+    // The courier and pickup are booked and the customer is told; the label is fetched
+    // when the admin asks for it.
+    expect($row->fresh())
+        ->status->toBe(ShiprocketShipment::STATUS_PICKUP_SCHEDULED)
+        ->label_url->toBeNull()
+        ->failure_reason->toBeNull()
+        ->and(Shipment::where('order_id', $order->id)->count())->toBe(1)
+        ->and($order->fresh()->status)->toBe(Order::STATUS_COMPLETED);
+
+    Log::shouldHaveReceived('warning')->once();
+
+    Mail::assertQueued(ShippedNotification::class, 1);
+    Mail::assertNotQueued(AdminAlert::class);
+
+    // Asked again, nothing is booked twice.
+    booker()->book($order->fresh());
+
+    expect($api->count('assignAwb'))->toBe(1)
+        ->and($api->count('generateLabel'))->toBe(1);
+})->with([
+    'refused' => [fn () => new ShiprocketException('Label not ready')],
+    'no answer' => [fn () => new ShiprocketUnknownOutcomeException('Shiprocket error (HTTP 502)')],
+]);
 
 it('marks a refusal failed with shiprocket\'s reason and emails the admin', function () {
     bookingApi()->on('createOrder', fn () => throw new ShiprocketException('Wrong Pickup location entered.'));
@@ -469,11 +507,13 @@ it('books again after a cancel with a new order number and updates the same stor
 
     booker()->cancel($first);
 
-    expect($first->fresh()->status)->toBe(ShiprocketShipment::STATUS_CANCELLED)
+    expect($first->fresh())
+        ->status->toBe(ShiprocketShipment::STATUS_CANCELLED)
+        ->generation->toBe(1)
         ->and($api->args('cancelOrder'))->toBe([100001])
         ->and($shipment->fresh()->track_number)->toBe('FAKE200001');
 
-    $second = booker()->book($order->fresh(), manual: true);
+    $second = booker()->book($order->fresh(), manual: true, generation: 1);
 
     expect($second->fresh())
         ->status->toBe(ShiprocketShipment::STATUS_PICKUP_SCHEDULED)
@@ -502,7 +542,82 @@ it('books again after a cancel with a new order number and updates the same stor
 
     booker()->cancel($second->fresh());
 
-    expect(booker()->book($order->fresh(), manual: true)->channel_order_id)->toBe($order->increment_id.'-3')
+    expect(booker()->book($order->fresh(), manual: true, generation: 2)->channel_order_id)->toBe($order->increment_id.'-3')
+        ->and(Shipment::where('order_id', $order->id)->count())->toBe(1);
+});
+
+it('never books again from a retry left over from before a cancel', function () {
+    bookingConfig('sales.shipping.shiprocket.active', 1);
+    config(['shiprocket.email' => 'api@example.com', 'shiprocket.password' => 'secret']);
+
+    $api = bookingApi()->on('requestPickup', fn () => throw new ShiprocketUnknownOutcomeException('Shiprocket error (no response)'));
+    $order = bookingOrder('cashondelivery');
+
+    // The admin's Ship: the courier is booked, then the pickup answer is lost, so the queue
+    // will run this job again later.
+    $job = new BookShipment($order->id, manual: true, generation: 0);
+
+    expect(fn () => app()->call([$job, 'handle']))->toThrow(ShiprocketUnknownOutcomeException::class);
+
+    $row = ShiprocketShipment::where('order_id', $order->id)->sole();
+
+    expect($row->status)->toBe(ShiprocketShipment::STATUS_BOOKED);
+
+    // Before the retry runs, the admin cancels the parcel.
+    booker()->cancel($row);
+
+    expect($row->fresh())
+        ->status->toBe(ShiprocketShipment::STATUS_CANCELLED)
+        ->generation->toBe(1);
+
+    app()->call([$job, 'handle']);
+
+    // A call that does not say which booking it is for never starts a new one either.
+    booker()->book($order->fresh(), manual: true);
+
+    expect($row->fresh()->status)->toBe(ShiprocketShipment::STATUS_CANCELLED)
+        ->and($api->count('createOrder'))->toBe(1)
+        ->and($api->count('assignAwb'))->toBe(1)
+        ->and(Shipment::where('order_id', $order->id)->count())->toBe(0);
+
+    // A new Ship after the cancel is for the new booking.
+    Queue::fake();
+
+    actingAs(Admin::factory()->create(), 'admin');
+
+    post(route('admin.shiprocket.ship', $order->id))
+        ->assertSessionHas('success', trans('shiprocket::app.admin.queued'));
+
+    $fresh = null;
+
+    Queue::assertPushed(BookShipment::class, function (BookShipment $pushed) use (&$fresh) {
+        $fresh = $pushed;
+
+        return $pushed->manual && $pushed->generation === 1;
+    });
+
+    // Its first try loses Shiprocket's answer, so it is still running when the old job's
+    // last try gives up: that must not touch the new booking.
+    $api->on('createOrder', function (Closure $call) {
+        $call();
+
+        throw new ShiprocketUnknownOutcomeException('Shiprocket error (no response)');
+    });
+
+    expect(fn () => app()->call([$fresh, 'handle']))->toThrow(ShiprocketUnknownOutcomeException::class);
+
+    $job->failed(new ShiprocketUnknownOutcomeException('Shiprocket error (no response)'));
+
+    expect($row->fresh())
+        ->status->toBe(ShiprocketShipment::STATUS_BOOKING)
+        ->generation->toBe(1);
+
+    app()->call([$fresh, 'handle']);
+
+    expect($row->fresh())
+        ->status->toBe(ShiprocketShipment::STATUS_PICKUP_SCHEDULED)
+        ->channel_order_id->toBe($order->increment_id.'-2')
+        ->and($api->count('createOrder'))->toBe(2)
         ->and(Shipment::where('order_id', $order->id)->count())->toBe(1);
 });
 
@@ -557,7 +672,7 @@ it('books in the background and gives up after the last unanswered try', functio
 
     $job = new BookShipment($order->id);
 
-    expect($job->tries)->toBe(3)
+    expect($job->maxExceptions)->toBe(3)
         ->and($job->backoff())->toBe([60, 300])
         ->and(fn () => app()->call([$job, 'handle']))->toThrow(ShiprocketUnknownOutcomeException::class);
 
@@ -572,6 +687,26 @@ it('books in the background and gives up after the last unanswered try', functio
     app()->call([new BookShipment($order->id, manual: true), 'handle']);
 
     expect(ShiprocketShipment::where('order_id', $order->id)->value('status'))->toBe(ShiprocketShipment::STATUS_PICKUP_SCHEDULED);
+});
+
+it('stops a try before the queue hands the job out again, and keeps trying for half an hour', function () {
+    $this->freezeTime();
+
+    $job = new BookShipment(1);
+
+    // The production worker hands a job out again after 90 s (retry_after).
+    expect($job->timeout)->toBe(85)
+        ->and($job->retryUntil()->getTimestamp())->toBe(now()->addMinutes(30)->getTimestamp())
+        // The queue ignores $tries once retryUntil() is set; failed tries are counted instead.
+        ->and(property_exists($job, 'tries'))->toBeFalse()
+        ->and($job->maxExceptions)->toBe(3);
+
+    // Queued with its deadline, so a busy order's releases never exhaust it.
+    $payload = json_decode((fn () => $this->createPayload($job, 'default'))->call(app('queue')->connection('sync')), true);
+
+    expect($payload['retryUntil'])->toBe(now()->addMinutes(30)->getTimestamp())
+        ->and($payload['maxExceptions'])->toBe(3)
+        ->and($payload['timeout'])->toBe(85);
 });
 
 it('puts the job back while another booking of the order runs', function () {
