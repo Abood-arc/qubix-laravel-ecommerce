@@ -1256,3 +1256,241 @@
         animation: none;
     }
 }
+
+/* ========== Compare tray: the picks, sliding up from the bottom of the screen ========== */
+
+.pc-tray {
+    --pc-ink: #1d221f;
+    --pc-muted: #5a625d;
+    --pc-ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+
+    position: fixed;
+    z-index: 50;
+    inset-inline: 0;
+    inset-block-end: 16px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    width: min(640px, calc(100% - 32px));
+    margin-inline: auto;
+    padding-block: 12px;
+    padding-inline: 18px 12px;
+    border-radius: 18px;
+    background: #fff;
+    color: var(--pc-ink);
+    box-shadow: 0 2px 6px rgb(0 0 0 / 0.08), 0 18px 48px rgb(0 0 0 / 0.18);
+    transform: translateY(calc(100% + 32px));
+    visibility: hidden;
+    transition: transform 260ms var(--pc-ease-out), visibility 0s 260ms;
+}
+
+.pc-tray.is-open {
+    transform: none;
+    visibility: visible;
+    transition: transform 380ms var(--pc-ease-out), visibility 0s;
+}
+
+.pc-tray :focus-visible {
+    outline: 2px solid rgb(var(--c-brand));
+    outline-offset: 2px;
+}
+
+.pc-tray-head {
+    margin: 0;
+    font-size: 15px;
+    font-weight: 800;
+    line-height: 1.2;
+}
+
+.pc-tray-head small {
+    display: block;
+    color: var(--pc-muted);
+    font-size: 12.5px;
+    font-weight: 500;
+}
+
+.pc-tray-slots {
+    display: flex;
+    flex: 0 1 auto;
+    gap: 8px;
+    min-width: 0;
+}
+
+.pc-tray-slot {
+    position: relative;
+    flex: 0 1 52px;
+    min-width: 34px;
+    aspect-ratio: 1;
+    padding: 0;
+    overflow: hidden;
+    border: 1.5px dashed #c9cbc5;
+    border-radius: min(var(--radius-ui), 10px);
+    background: #fff;
+}
+
+.pc-tray-slot.is-full {
+    border: 0;
+    background: rgb(var(--c-sand));
+    cursor: pointer;
+    animation: pc-slot-in 360ms var(--pc-ease-out);
+}
+
+.pc-tray-slot img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    mix-blend-mode: multiply;
+}
+
+.pc-tray-x {
+    position: absolute;
+    inset-block-start: 3px;
+    inset-inline-end: 3px;
+    display: grid;
+    place-items: center;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: rgb(0 0 0 / 0.62);
+    color: #fff;
+}
+
+.pc-tray-x .pc-ico {
+    width: 12px;
+    height: 12px;
+    stroke-width: 2.6;
+}
+
+@keyframes pc-slot-in {
+    from { opacity: 0; transform: scale(0.6); }
+    to { opacity: 1; transform: none; }
+}
+
+.pc-tray-actions {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-inline-start: auto;
+}
+
+.pc-tray-clear {
+    min-height: 44px;
+    padding: 0 12px;
+    border: 0;
+    border-radius: var(--radius-ui);
+    background: transparent;
+    color: var(--pc-muted);
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.pc-tray-clear:hover {
+    background: #f2f2ef;
+    color: var(--pc-ink);
+}
+
+.pc-tray-go {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    padding: 0 18px;
+    border-radius: var(--radius-ui);
+    background: rgb(var(--c-brand));
+    color: #fff;
+    font-size: 14.5px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.pc-tray-go:hover {
+    background: rgb(var(--c-brand-deep));
+}
+
+.pc-tray-go.is-disabled {
+    background: #e6e7e3;
+    color: var(--pc-muted);
+    cursor: not-allowed;
+}
+
+/* Room at the end of the page for the open tray (its height is set by the tray's script). */
+body.pc-has-tray {
+    padding-bottom: var(--pc-tray-space, 0px);
+}
+
+@media (max-width: 767px) {
+    .pc-tray {
+        inset-block-end: 0;
+        gap: 10px;
+        width: 100%;
+        padding: 10px 12px calc(10px + env(safe-area-inset-bottom));
+        border-radius: 18px 18px 0 0;
+    }
+
+    .pc-tray-head {
+        display: none;
+    }
+
+    .pc-tray-slots {
+        gap: 6px;
+    }
+
+    .pc-tray-slot {
+        flex-basis: 46px;
+    }
+
+    .pc-tray-actions {
+        flex: none;
+        gap: 2px;
+    }
+
+    .pc-tray-clear {
+        padding: 0 8px;
+    }
+
+    .pc-tray-go {
+        padding: 0 14px;
+    }
+
+    /* Above the fixed bars of the category page (Filter/Sort) and the product page (buy bar). */
+    body:has(.category-mobile-bar) .pc-tray {
+        inset-block-end: calc(3.25rem + env(safe-area-inset-bottom));
+        padding-bottom: 10px;
+    }
+
+    body:has(.pdp-buy-bar) .pc-tray {
+        inset-block-end: calc(4.75rem + env(safe-area-inset-bottom));
+        padding-bottom: 10px;
+    }
+
+    body.pc-has-tray:has(.category-mobile-bar) {
+        padding-bottom: calc(3.25rem + env(safe-area-inset-bottom) + var(--pc-tray-space, 0px));
+    }
+
+    body.pc-has-tray:has(.pdp-buy-bar) {
+        padding-bottom: calc(4.75rem + env(safe-area-inset-bottom) + var(--pc-tray-space, 0px));
+    }
+
+    /* The chat button (layouts/index) floats over the tray's Compare button on a phone: hide it while
+       the tray is open, the way it hides while a drawer is open. */
+    body.pc-has-tray #zanderio-widget-host {
+        content-visibility: hidden;
+    }
+}
+
+/* Reduced motion: the tray fades in and out instead of sliding. */
+@media (prefers-reduced-motion: reduce) {
+    .pc-tray {
+        opacity: 0;
+        transform: none;
+        transition: opacity 160ms, visibility 0s 160ms;
+    }
+
+    .pc-tray.is-open {
+        opacity: 1;
+        transition: opacity 160ms, visibility 0s;
+    }
+
+    .pc-tray-slot.is-full {
+        animation: none;
+    }
+}

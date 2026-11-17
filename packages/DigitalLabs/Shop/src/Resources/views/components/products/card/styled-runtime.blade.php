@@ -57,10 +57,12 @@
             loading: null,
 
             /**
-             * Read the list once per page, on the first card's mount.
+             * Read the list once per page, on the first card's mount. add(), remove() and clear() wait
+             * for it, so a change made while it is on its way is not overwritten by the list it reads.
+             * A failed read leaves the list empty; the cards still work.
              */
             load() {
-                this.loading ??= this.fetch();
+                this.loading ??= this.fetch().catch(() => {});
 
                 return this.loading;
             },
@@ -97,6 +99,8 @@
 
             // Same compare calls as the Classic card's addToCompare (products/card.blade.php), which stays untouched.
             async add(product) {
+                await this.load();
+
                 if (this.has(product.id)) {
                     return;
                 }
@@ -131,6 +135,8 @@
             },
 
             async remove(productId) {
+                await this.load();
+
                 if (isCustomer) {
                     try {
                         await axios.post(routes.compareDestroy, { _method: 'DELETE', product_id: productId });
@@ -151,6 +157,8 @@
             },
 
             async clear() {
+                await this.load();
+
                 if (isCustomer) {
                     try {
                         await axios.post(routes.compareDestroyAll, { _method: 'DELETE' });

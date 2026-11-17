@@ -5,6 +5,7 @@ namespace DigitalLabs\Shop\Providers;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Routing\Router;
 use Illuminate\Support\Facades\Blade;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
 use DigitalLabs\Core\Http\Middleware\PreventRequestsDuringMaintenance;
@@ -56,6 +57,11 @@ class ShopServiceProvider extends ServiceProvider
         Blade::anonymousComponentPath(__DIR__.'/../Resources/views/components', 'shop');
 
         $this->app->register(EventServiceProvider::class);
+
+        // The compare tray of the Swipe and Photo deck product cards; the view decides whether it shows.
+        Event::listen('qubix.shop.layout.content.after', static function ($viewRenderEventManager) {
+            $viewRenderEventManager->addTemplate('shop::components.products.card.compare-tray');
+        });
     }
 
     /**
