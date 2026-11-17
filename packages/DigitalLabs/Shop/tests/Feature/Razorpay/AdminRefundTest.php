@@ -60,7 +60,10 @@ it('rolls the refund back when razorpay fails', function () {
 it('tells the admin when the razorpay balance is too low for a refund', function () {
     [$order] = paidRazorpayOrder($this, 400);
 
-    Http::fake(['api.razorpay.com/v1/balance' => Http::response(['balance' => 7200, 'refund_credits' => 0])]);
+    // Always ₹1 short of the refund: product prices in tests are random.
+    $balance = max(0, (int) round($order->items->first()->total * 100) - 100);
+
+    Http::fake(['api.razorpay.com/v1/balance' => Http::response(['balance' => $balance, 'refund_credits' => 0])]);
 
     try {
         app(RefundRepository::class)->create(razorpayRefundData($order));
@@ -71,7 +74,7 @@ it('tells the admin when the razorpay balance is too low for a refund', function
     }
 
     expect(session('error'))->toBe(trans('razorpay::app.errors.admin-refund-low-balance', [
-        'balance' => core()->formatPrice(72, 'INR'),
+        'balance' => core()->formatPrice($balance / 100, 'INR'),
         'amount' => core()->formatPrice($order->items->first()->total, 'INR'),
     ]))
         ->and($order->refunds()->count())->toBe(0);
