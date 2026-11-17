@@ -109,6 +109,15 @@
                 },
 
                 add(flash) {
+                    /*
+                     * A message with a link stays until closed, so the same one added again (the compare
+                     * limit refused on every click) would only pile up. It is already showing: skip it.
+                     * Messages without a link close themselves and are added as before.
+                     */
+                    if (flash.link && this.flashes.some(item => item.link && item.message === flash.message)) {
+                        return;
+                    }
+
                     flash.uid = this.uid++;
 
                     this.flashes.push(flash);
