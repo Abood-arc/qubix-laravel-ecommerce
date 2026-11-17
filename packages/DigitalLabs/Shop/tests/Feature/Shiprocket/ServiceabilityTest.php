@@ -176,7 +176,9 @@ it('does not ask about cash on delivery where nothing delivers', function () {
         ->and($this->api->calls)->toBe([['pickup' => '411001', 'pin' => '999999', 'weight' => 1.0, 'cod' => false]]);
 });
 
-it('fails open, logs, and asks again next time when Shiprocket fails', function (Throwable $failure) {
+it('fails open, logs, and asks again two minutes later when Shiprocket fails', function (Throwable $failure) {
+    $this->freezeTime();
+
     $this->api->failure = $failure;
 
     Log::spy();
@@ -188,6 +190,14 @@ it('fails open, logs, and asks again next time when Shiprocket fails', function 
 
     $this->api->failure = null;
 
+    // The next checkout steps do not wait for Shiprocket again.
+    $this->travel(119)->seconds();
+
+    expect(shiprocketServiceabilityChecker()->check('999999', 1.0))->toBe(['deliverable' => true, 'cod' => true])
+        ->and($this->api->calls)->toHaveCount(1);
+
+    $this->travel(2)->seconds();
+
     expect(shiprocketServiceabilityChecker()->check('999999', 1.0))->toBe(['deliverable' => false, 'cod' => false])
         ->and($this->api->calls)->toHaveCount(2);
 })->with([
@@ -195,7 +205,9 @@ it('fails open, logs, and asks again next time when Shiprocket fails', function 
     'refused' => [fn () => new ShiprocketException('Oops! Invalid Data.')],
 ]);
 
-it('keeps the delivery answer but not a failed cash on delivery answer', function () {
+it('keeps the delivery answer, and the failed cash on delivery answer only briefly', function () {
+    $this->freezeTime();
+
     $this->api->failure = new ShiprocketUnknownOutcomeException('Shiprocket did not answer');
     $this->api->failOnCod = true;
 
@@ -206,6 +218,11 @@ it('keeps the delivery answer but not a failed cash on delivery answer', functio
     Log::shouldHaveReceived('error')->once();
 
     $this->api->failure = null;
+
+    expect(shiprocketServiceabilityChecker()->check('560010', 1.0))->toBe(['deliverable' => true, 'cod' => true])
+        ->and(collect($this->api->calls)->pluck('cod')->all())->toBe([false, true]);
+
+    $this->travel(121)->seconds();
 
     expect(shiprocketServiceabilityChecker()->check('560010', 1.0))->toBe(['deliverable' => true, 'cod' => false])
         ->and(collect($this->api->calls)->pluck('cod')->all())->toBe([false, true, true]);

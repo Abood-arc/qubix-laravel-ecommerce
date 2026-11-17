@@ -236,6 +236,52 @@ it('is not deliverable when shiprocket has no courier for the pin', function (Cl
     '422 message' => [fn () => fn () => Http::response(['message' => 'No courier serviceable'], 422)],
 ]);
 
+it('does not take an unclear serviceability answer for "no courier"', function (Closure $reply) {
+    fakeShiprocketHttp([SHIPROCKET_TEST_API.'courier/serviceability/*' => $reply]);
+
+    // Thrown, so checkout fails open instead of caching the PIN as undeliverable.
+    expect(catchShiprocketException(fn () => app(ShiprocketClient::class)->checkServiceability('400001', '560001', 0.5, false)))
+        ->toBeInstanceOf(ShiprocketException::class);
+})->with([
+    '422 without a message' => [fn () => fn () => Http::response([], 422)],
+    '422 about something else' => [fn () => fn () => Http::response(['message' => 'Pickup postcode is invalid'], 422)],
+    '404 without a message' => [fn () => fn () => Http::response('', 404)],
+    '200 without a courier list' => [fn () => fn () => Http::response(['message' => 'Something changed'])],
+    '200 about serviceability, without a list' => [fn () => fn () => Http::response(['message' => 'Serviceability details'])],
+]);
+
+it('gives checkout calls 3 seconds and booking calls 12', function () {
+    $timeouts = [];
+
+    Http::preventStrayRequests();
+
+    Http::fake(function (Request $request, array $options) use (&$timeouts) {
+        $path = str_replace(SHIPROCKET_TEST_API, '', strtok($request->url(), '?'));
+
+        $timeouts[] = [$path, $options['timeout'], $options['connect_timeout']];
+
+        return match ($path) {
+            'auth/login' => Http::response(['token' => 'tok-1']),
+            'courier/serviceability/' => Http::response(['data' => ['available_courier_companies' => [['cod' => 1]]]]),
+            default => Http::response(['order_id' => 11, 'shipment_id' => 22]),
+        };
+    });
+
+    app(ShiprocketClient::class)->checkServiceability('400001', '560001', 0.5, true);
+
+    Cache::forget(shiprocketTokenKey());
+
+    app(ShiprocketClient::class)->createOrder(['order_id' => '1001']);
+
+    expect($timeouts)->toBe([
+        // The login a checkout step needs is held to the checkout's limit too.
+        ['auth/login', 3, 3],
+        ['courier/serviceability/', 3, 3],
+        ['auth/login', 12, 5],
+        ['orders/create/adhoc', 12, 5],
+    ]);
+});
+
 it('refuses a serviceability request shiprocket finds invalid', function () {
     fakeShiprocketHttp([
         SHIPROCKET_TEST_API.'courier/serviceability/*' => Http::response([

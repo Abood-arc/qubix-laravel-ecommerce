@@ -16,12 +16,21 @@ use Illuminate\Support\Facades\Log;
  *
  * Two questions, each answered from a 6-hour cache keyed by pickup PIN, delivery PIN,
  * 0.5 kg weight slab and the COD flag. Asked with COD, Shiprocket may list only couriers
- * that collect cash, so "deliverable" is always asked without it. When Shiprocket fails,
- * checkout goes ahead (deliverable, COD allowed); that answer is logged and not cached.
+ * that collect cash, so "deliverable" is always asked without it. When Shiprocket fails
+ * (no answer within ShiprocketClient's 3 s, or an unclear one), checkout goes ahead
+ * (deliverable, COD allowed); that answer is logged and cached for only 2 minutes, so the
+ * customer's next checkout steps do not wait for a Shiprocket that is down.
  */
 class ServiceabilityChecker
 {
     protected const CACHE_SECONDS = 6 * 60 * 60;
+
+    protected const FAIL_OPEN_CACHE_SECONDS = 2 * 60;
+
+    /**
+     * Cached in place of an answer while Shiprocket recently failed.
+     */
+    protected const FAILED = 'failed';
 
     protected const WEIGHT_SLAB_KG = 0.5;
 
@@ -80,7 +89,8 @@ class ServiceabilityChecker
     }
 
     /**
-     * One cached question: is there a courier (that collects cash, when $cod)? Null when Shiprocket failed.
+     * One cached question: is there a courier (that collects cash, when $cod)? Null when
+     * Shiprocket failed, now or in the last 2 minutes.
      */
     protected function ask(string $pickupPin, string $deliveryPin, int $slab, bool $cod): ?bool
     {
@@ -92,6 +102,10 @@ class ServiceabilityChecker
             return $cached;
         }
 
+        if ($cached === self::FAILED) {
+            return null;
+        }
+
         try {
             $answer = $this->api->checkServiceability($pickupPin, $deliveryPin, $slab * self::WEIGHT_SLAB_KG, $cod);
         } catch (ShiprocketException $e) {
@@ -101,6 +115,8 @@ class ServiceabilityChecker
                 'cod' => $cod,
                 'error' => $e->getMessage(),
             ]);
+
+            Cache::put($key, self::FAILED, self::FAIL_OPEN_CACHE_SECONDS);
 
             return null;
         }
