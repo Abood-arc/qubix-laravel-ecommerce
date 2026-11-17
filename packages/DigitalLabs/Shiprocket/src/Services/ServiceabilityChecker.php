@@ -7,6 +7,7 @@ use DigitalLabs\Checkout\Contracts\CartAddress;
 use DigitalLabs\Shiprocket\Contracts\ShiprocketApi;
 use DigitalLabs\Shiprocket\Exceptions\ShiprocketException;
 use DigitalLabs\Shiprocket\Support\Settings;
+use DigitalLabs\Shiprocket\Support\WeightUnit;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 
@@ -23,15 +24,6 @@ class ServiceabilityChecker
     protected const CACHE_SECONDS = 6 * 60 * 60;
 
     protected const WEIGHT_SLAB_KG = 0.5;
-
-    /**
-     * Kilograms per store weight unit; a missing or unknown unit counts as kg.
-     */
-    protected const KG_PER_UNIT = [
-        'g' => 0.001,
-        'kgs' => 1.0,
-        'lbs' => 0.45359237,
-    ];
 
     protected const FAIL_OPEN = ['deliverable' => true, 'cod' => true];
 
@@ -84,7 +76,7 @@ class ServiceabilityChecker
     {
         $weight = $cart->items->sum(fn ($item) => (float) $item->weight * (float) $item->quantity);
 
-        return round($weight * $this->kgPerUnit(), 3);
+        return round($weight * WeightUnit::kgPerUnit(), 3);
     }
 
     /**
@@ -118,12 +110,5 @@ class ServiceabilityChecker
         Cache::put($key, $result, self::CACHE_SECONDS);
 
         return $result;
-    }
-
-    protected function kgPerUnit(): float
-    {
-        $unit = strtolower(trim((string) core()->getConfigData('general.general.locale_options.weight_unit')));
-
-        return self::KG_PER_UNIT[$unit] ?? self::KG_PER_UNIT['kgs'];
     }
 }

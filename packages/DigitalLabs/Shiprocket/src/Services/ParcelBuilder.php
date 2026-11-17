@@ -4,6 +4,7 @@ namespace DigitalLabs\Shiprocket\Services;
 
 use DigitalLabs\Sales\Contracts\Order;
 use DigitalLabs\Shiprocket\Support\Settings;
+use DigitalLabs\Shiprocket\Support\WeightUnit;
 use Illuminate\Support\Collection;
 
 /**
@@ -14,15 +15,6 @@ use Illuminate\Support\Collection;
  */
 class ParcelBuilder
 {
-    /**
-     * Kilograms per store weight unit; a missing or unknown unit counts as kg.
-     */
-    protected const KG_PER_UNIT = [
-        'g' => 0.001,
-        'kgs' => 1.0,
-        'lbs' => 0.45359237,
-    ];
-
     protected const COD_METHOD = 'cashondelivery';
 
     public function __construct(protected AddressNormalizer $addresses) {}
@@ -32,7 +24,7 @@ class ParcelBuilder
         $weight = $this->itemsToShip($order)
             ->sum(fn ($item) => (float) $item->weight * $item->qty_to_ship);
 
-        return round($weight * $this->kgPerUnit(), 3);
+        return round($weight * WeightUnit::kgPerUnit(), 3);
     }
 
     /**
@@ -66,13 +58,6 @@ class ParcelBuilder
         return $order->items
             ->filter(fn ($item) => $item->qty_to_ship > 0)
             ->values();
-    }
-
-    protected function kgPerUnit(): float
-    {
-        $unit = strtolower(trim((string) core()->getConfigData('general.general.locale_options.weight_unit')));
-
-        return self::KG_PER_UNIT[$unit] ?? self::KG_PER_UNIT['kgs'];
     }
 
     /**
