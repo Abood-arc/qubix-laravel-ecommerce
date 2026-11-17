@@ -23,6 +23,7 @@
             <button
                 type="button"
                 class="pc-compare pc-compare--checkbox"
+                :data-compare-product="product.id"
                 :aria-pressed="isInCompare ? 'true' : 'false'"
                 @click="toggle"
                 v-if="variant === 'checkbox'"
@@ -45,6 +46,7 @@
             <button
                 type="button"
                 class="pc-compare pc-icon-button"
+                :data-compare-product="product.id"
                 :aria-pressed="isInCompare ? 'true' : 'false'"
                 :aria-label="label"
                 @click="toggle"

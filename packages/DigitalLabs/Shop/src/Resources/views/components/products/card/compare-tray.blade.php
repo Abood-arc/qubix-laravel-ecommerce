@@ -2,19 +2,20 @@
     Compare tray (design concepts, renderTray): the products picked with Compare on the Swipe and Photo
     deck cards, in a bar that slides up from the bottom of the screen. Works with the real compare list
     through $cardCompare (guest localStorage or the customer's account). Rendered through the
-    qubix.shop.layout.content.after hook (ShopServiceProvider) and shown only while the page has new-style
-    cards and something is picked.
+    qubix.shop.layout.content.after hook (ShopServiceProvider), after the page content, and only when that
+    content has new-style cards: their runtime (card/styled-runtime, which only the Swipe and Photo deck
+    templates include) has been pushed. So never with the Classic card or on the Classic-only pages.
+    Shown while the page's cards are mounted and something is picked.
 
     Not a dialog: no focus trap, and the page gets room at its end while the tray is open (pc-has-tray).
-    Closed, it is inert. Its one live region sits outside the inert part, so what the tray's own buttons
-    did is read out even when Clear closes it.
+    Closed, it is inert; when its own Remove or Clear closes it, focus goes to a card's Compare control
+    (the removed product's, else one on screen), else to the page content. Its one live region sits outside the inert part, so what the
+    tray's own buttons did is read out even when Clear closes it.
 --}}
 @if (
-    ! \DigitalLabs\Shop\Enums\ProductCardStyleEnum::forPage()->isClassic()
+    $__env->hasRenderedOnce('shop-card-styled-runtime')
     && core()->getConfigData('catalog.products.settings.compare_option')
 )
-    @include('shop::components.products.card.styled-runtime')
-
     <v-card-compare-tray></v-card-compare-tray>
 
     @pushOnce('scripts')
@@ -130,6 +131,11 @@
                          * What the tray's live region reads out: lines, after its own Remove and Clear.
                          */
                         announcement: [],
+
+                        /*
+                         * A Remove or Clear is on its way: a second press waits for it instead of repeating it.
+                         */
+                        busy: false,
                     };
                 },
 
@@ -179,10 +185,21 @@
                     this.$emitter.on('card-compare-changed', this.onCompareChanged);
 
                     this.onCompareChanged({ ids: [...this.$cardCompare.ids], cards: this.$cardCompare.cards });
+
+                    // The open tray's height changes with the screen width (desktop pill, phone sheet).
+                    this.resizeObserver = new ResizeObserver(() => {
+                        if (this.isOpen) {
+                            this.reserveSpace();
+                        }
+                    });
+
+                    this.resizeObserver.observe(this.$refs.panel);
                 },
 
                 beforeUnmount() {
                     this.$emitter.off('card-compare-changed', this.onCompareChanged);
+
+                    this.resizeObserver.disconnect();
 
                     document.body.classList.remove('pc-has-tray');
                 },
@@ -193,13 +210,21 @@
                     },
 
                     async remove(productId, slotIndex) {
-                        await this.$cardCompare.remove(productId);
-
-                        if (this.ids.includes(productId)) {
+                        if (! await this.whileBusy(() => this.$cardCompare.remove(productId)) || this.ids.includes(productId)) {
                             return;
                         }
 
-                        this.announce(this.isOpen ? [trayText.removed, this.countLabel] : [trayText.removed]);
+                        if (! this.isOpen) {
+                            this.announce([trayText.removed]);
+
+                            const controls = this.compareControls();
+
+                            this.focusOutside(controls.find(control => control.dataset.compareProduct == productId) ?? controls.find(this.isOnScreen));
+
+                            return;
+                        }
+
+                        this.announce([trayText.removed, this.countLabel]);
 
                         await this.$nextTick();
 
@@ -207,11 +232,74 @@
                     },
 
                     async clear() {
-                        await this.$cardCompare.clear();
-
-                        if (! this.ids.length) {
-                            this.announce([trayText.removed]);
+                        if (! await this.whileBusy(() => this.$cardCompare.clear()) || this.ids.length) {
+                            return;
                         }
+
+                        this.announce([trayText.removed]);
+
+                        const controls = this.compareControls();
+
+                        this.focusOutside(controls.find(this.isOnScreen) ?? controls[0]);
+                    },
+
+                    /**
+                     * Run one Remove or Clear at a time: false when one was already on its way.
+                     */
+                    async whileBusy(action) {
+                        if (this.busy) {
+                            return false;
+                        }
+
+                        this.busy = true;
+
+                        try {
+                            await action();
+                        } finally {
+                            this.busy = false;
+                        }
+
+                        return true;
+                    },
+
+                    /**
+                     * The new cards' Compare controls (card/compare) that are shown, in page order.
+                     */
+                    compareControls() {
+                        return [...document.querySelectorAll('[data-compare-product]')]
+                            .filter(control => control.getBoundingClientRect().width > 0);
+                    },
+
+                    isOnScreen(control) {
+                        const box = control.getBoundingClientRect();
+
+                        return box.bottom > 0 && box.top < window.innerHeight;
+                    },
+
+                    /**
+                     * The tray has closed under the pressed button: focus a card's Compare control (scrolled
+                     * only as far as needed to show it), else the page content (focusable from script only).
+                     */
+                    focusOutside(control) {
+                        if (control) {
+                            control.focus({ preventScroll: true });
+
+                            control.scrollIntoView({ block: 'nearest' });
+
+                            return;
+                        }
+
+                        const main = document.getElementById('main');
+
+                        if (! main) {
+                            return;
+                        }
+
+                        if (! main.hasAttribute('tabindex')) {
+                            main.setAttribute('tabindex', '-1');
+                        }
+
+                        main.focus({ preventScroll: true });
                     },
 
                     /**

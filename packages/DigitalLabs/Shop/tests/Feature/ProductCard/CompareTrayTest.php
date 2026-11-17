@@ -39,3 +39,11 @@ it('leaves the tray out when compare is switched off', function () {
 
     expect($this->searchPageHtml())->not->toContain('v-card-compare-tray');
 });
+
+it('leaves the tray and the card runtime out of pages without product cards', function () {
+    $this->pinStoreConfig(ProductCardStyleEnum::CONFIG_KEY, 'swipe');
+
+    expect($this->get(route('shop.customer.session.index'))->assertOk()->getContent())
+        ->not->toContain('v-card-compare-tray')
+        ->not->toContain('$cardCompare');
+});

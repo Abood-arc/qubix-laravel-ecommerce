@@ -6,7 +6,8 @@
 --}}
 @include('shop::components.compare.list')
 
-@pushOnce('scripts')
+{{-- Named, so the compare tray can tell that the page has new-style cards (card/compare-tray). --}}
+@pushOnce('scripts', 'shop-card-styled-runtime')
     <script type="module">
         const { $axios: axios, $emitter: emitter, $fillPlaceholders: fill } = app.config.globalProperties;
 
@@ -56,10 +57,20 @@
 
             loading: null,
 
+            /*
+             * Which read of the list is the latest: an older answer that arrives late is dropped.
+             */
+            reads: 0,
+
+            /*
+             * True while this object writes the guest list itself, so it does not read back its own change.
+             */
+            writing: false,
+
             /**
              * Read the list once per page, on the first card's mount. add(), remove() and clear() wait
              * for it, so a change made while it is on its way is not overwritten by the list it reads.
-             * A failed read leaves the list empty; the cards still work.
+             * A failed read leaves the list as it was; the cards still work.
              */
             load() {
                 this.loading ??= this.fetch().catch(() => {});
@@ -67,22 +78,69 @@
                 return this.loading;
             },
 
+            /**
+             * Read the list again after a change made elsewhere: the product page's or the Classic card's
+             * add (compare-list-changed), another tab (storage), or Back to a page kept by the browser
+             * (pageshow). Only once the page has read it at all.
+             */
+            refresh() {
+                if (this.writing || ! this.loading) {
+                    return;
+                }
+
+                this.loading = null;
+
+                this.load();
+            },
+
             async fetch() {
+                const read = ++this.reads;
+
                 const guestIds = isCustomer ? [] : compareList().guestIds();
 
-                if (isCustomer || guestIds.length) {
-                    const response = await axios.get(routes.compare, {
-                        params: isCustomer ? {} : { product_ids: guestIds },
-                    });
+                if (! isCustomer && ! guestIds.length) {
+                    this.ids = [];
 
-                    response.data.data.forEach(product => this.remember(product));
+                    this.changed();
 
-                    this.ids = isCustomer
-                        ? response.data.data.map(product => product.id)
-                        : guestIds.filter(id => this.products[id]);
+                    return;
+                }
+
+                const response = await axios.get(routes.compare, {
+                    params: isCustomer ? {} : { product_ids: guestIds },
+                });
+
+                if (read !== this.reads) {
+                    return;
+                }
+
+                response.data.data.forEach(product => this.remember(product));
+
+                if (isCustomer) {
+                    this.ids = response.data.data.map(product => product.id);
+                } else {
+                    // A saved product the shop no longer shows leaves the list, so the count and the limit agree.
+                    guestIds
+                        .filter(id => ! response.data.data.some(product => product.id == id))
+                        .forEach(id => this.quietly(() => compareList().removeForGuest(id)));
+
+                    this.ids = compareList().guestIds().filter(id => this.products[id]);
                 }
 
                 this.changed();
+            },
+
+            /**
+             * Run a guest list write of this object's own, without reading the list back for it.
+             */
+            quietly(write) {
+                this.writing = true;
+
+                try {
+                    return write();
+                } finally {
+                    this.writing = false;
+                }
             },
 
             remember(product) {
@@ -121,7 +179,7 @@
                             return;
                         }
                     }
-                } else if (compareList().addForGuest(product.id) === 'full') {
+                } else if (this.quietly(() => compareList().addForGuest(product.id)) === 'full') {
                     return;
                 }
 
@@ -146,7 +204,7 @@
                         return;
                     }
                 } else {
-                    compareList().removeForGuest(productId);
+                    this.quietly(() => compareList().removeForGuest(productId));
                 }
 
                 this.ids = this.ids.filter(id => id !== productId);
@@ -168,7 +226,7 @@
                         return;
                     }
                 } else {
-                    compareList().clearForGuest();
+                    this.quietly(() => compareList().clearForGuest());
                 }
 
                 this.ids = [];
@@ -199,6 +257,20 @@
                 emitter.emit('card-compare-changed', { ids: [...this.ids], cards: this.cards });
             },
         };
+
+        emitter.on('compare-list-changed', () => cardCompare.refresh());
+
+        window.addEventListener('storage', event => {
+            if (event.key === 'compare_items' || event.key === null) {
+                cardCompare.refresh();
+            }
+        });
+
+        window.addEventListener('pageshow', event => {
+            if (event.persisted) {
+                cardCompare.refresh();
+            }
+        });
 
         /* ---- cart: start ---- */
         /*

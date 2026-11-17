@@ -12,6 +12,7 @@ import {
     styledCard,
     transformAnimationCount,
     withAdmin,
+    type CardProduct,
 } from "../../utils/card-styles";
 
 const { defaultBrowserType, ...pixel7 } = devices["Pixel 7"];
@@ -48,6 +49,43 @@ const trayMotion = (page: Page): Promise<string[]> => page.evaluate(() => (windo
 /**
  * How many points of a 5 × 3 grid over the element (clear of its rounded corners) have something else on top.
  */
+/**
+ * The focused element, if it is a new card's Compare control: whether it sits in a card, and its state.
+ * (The control carries data-compare-product; checked in the page, as focus has no locator.)
+ */
+const focusedCompareControl = (page: Page) =>
+    page.evaluate(() => {
+        const control = document.activeElement?.closest("[data-compare-product]");
+
+        return control ? { inCard: Boolean(control.closest("article")), pressed: control.getAttribute("aria-pressed") } : null;
+    });
+
+/**
+ * No local product has related products, so the product page's related call answers with these
+ * products from the listing API. Call before page.goto().
+ */
+async function answerRelatedWith(page: Page, products: CardProduct[]): Promise<void> {
+    const { data } = await (await page.request.get("api/products?limit=48")).json();
+
+    const items = data.filter((item: any) => products.some((product) => product.id === item.id));
+
+    await page.route(/\/api\/products\/\d+\/related/, (route) => route.fulfill({ json: { data: items } }));
+}
+
+/**
+ * The related products load once their row scrolls into view.
+ */
+async function showRelatedProducts(page: Page, product: CardProduct): Promise<void> {
+    await page.keyboard.press("End");
+    await expect(styledCard(page, product)).toBeVisible();
+}
+
+/**
+ * The product page's own "Compare". Its accessible name starts with the icon font's glyph, so it is
+ * matched as "Compare" after any non-letters (as in compare-limit.spec).
+ */
+const productPageCompare = (page: Page) => page.getByRole("button", { name: /^[^A-Za-z]*Compare$/ });
+
 const coveredPoints = (target: Locator): Promise<number> =>
     target.evaluate((element) => {
         const box = element.getBoundingClientRect();
@@ -164,12 +202,129 @@ test("the tray works from the keyboard and says what its buttons did", async ({ 
     await page.keyboard.press("Tab");
     expect(await page.evaluate(() => Boolean(document.activeElement?.closest('[aria-label="Compare tray"]')))).toBe(false);
 
+    // Removing the last photo closes the tray: focus goes to that product's Compare control on its card.
+    await tray(page).getByRole("button", { name: `Remove ${first.name} from compare` }).focus();
+    await page.keyboard.press("Enter");
+
+    await expect(tray(page)).toBeHidden();
+    await expect(styledCard(page, first).getByRole("button", { name: `Compare ${first.name}` })).toBeFocused();
+    await expect(page.getByRole("status").filter({ hasText: "Removed from compare" })).toHaveCount(1);
+
+    await page.keyboard.press("Enter");
+    await expect(tray(page).getByText("1 of 4 chosen")).toBeVisible();
+
     await tray(page).getByRole("button", { name: "Clear" }).focus();
     await page.keyboard.press("Enter");
 
-    // Clear closes the tray; its live region sits outside the closed part and still reads out the change.
+    // Clear closes the tray too: its live region sits outside the closed part and still reads out the
+    // change, and focus goes to a card's Compare control (the first on screen).
     await expect(tray(page)).toBeHidden();
     await expect(page.getByRole("status").filter({ hasText: "Removed from compare" })).toHaveCount(1);
+    expect(await focusedCompareControl(page)).toEqual({ inCard: true, pressed: "false" });
+});
+
+test("a double press on a tray photo removes one product, with one request", async ({ page }) => {
+    // The suite's marked e2e customer (seeded by the global setup, removed by the teardown).
+    await signInSeededCustomer(page);
+
+    const [first, second] = await findSaleableProducts(page.request, 2);
+
+    await setCustomerCompare(page, [first.id, second.id]);
+    await openSearchFor(page, first);
+
+    await expect(tray(page).getByText("2 of 4 chosen")).toBeVisible();
+
+    let deletes = 0;
+
+    page.on("request", (request) => {
+        if (request.url().includes("/api/compare-items") && request.method() === "POST" && request.postDataJSON()?._method === "DELETE") {
+            deletes++;
+        }
+    });
+
+    await tray(page).getByRole("button", { name: `Remove ${first.name} from compare` }).dblclick();
+
+    await expect(tray(page).getByText("1 of 4 chosen")).toBeVisible();
+    expect(deletes).toBe(1);
+
+    await setCustomerCompare(page, []);
+});
+
+test("the tray follows the product page's own Add to compare", async ({ page }) => {
+    const [main, related] = await findSaleableProducts(page.request, 2);
+
+    await answerRelatedWith(page, [related]);
+    await page.goto(main.urlKey);
+    await setGuestCompare(page, [related.id]);
+    await page.reload();
+
+    await showRelatedProducts(page, related);
+    await expect(tray(page).getByText("1 of 4 chosen")).toBeVisible();
+
+    await productPageCompare(page).click();
+
+    await expect(tray(page).getByText("2 of 4 chosen")).toBeVisible();
+});
+
+test("the tray follows a signed-in customer's Add to compare on the product page", async ({ page }) => {
+    // The suite's marked e2e customer (seeded by the global setup, removed by the teardown).
+    await signInSeededCustomer(page);
+
+    const [main, related] = await findSaleableProducts(page.request, 2);
+
+    await setCustomerCompare(page, [related.id]);
+    await answerRelatedWith(page, [related]);
+    await page.goto(main.urlKey);
+
+    await showRelatedProducts(page, related);
+    await expect(tray(page).getByText("1 of 4 chosen")).toBeVisible();
+
+    await productPageCompare(page).click();
+
+    await expect(tray(page).getByText("2 of 4 chosen")).toBeVisible();
+
+    await setCustomerCompare(page, []);
+});
+
+test("the tray follows the compare list changed in another tab, and on Back", async ({ page }) => {
+    const [first, second] = await findSaleableProducts(page.request, 2);
+
+    await openSearchFor(page, first);
+    await setGuestCompare(page, [first.id]);
+    await page.reload();
+
+    await expect(tray(page).getByText("1 of 4 chosen")).toBeVisible();
+
+    const otherTab = await page.context().newPage();
+
+    await otherTab.goto("");
+    await setGuestCompare(otherTab, [first.id, second.id]);
+
+    await expect(tray(page).getByText("2 of 4 chosen")).toBeVisible();
+
+    await otherTab.evaluate(() => localStorage.removeItem("compare_items"));
+
+    await expect(tray(page)).toBeHidden();
+
+    await otherTab.close();
+
+    // A page the browser kept for Back shows again with pageshow (persisted): the list is read again.
+    // Same-page storage writes fire no storage event, so only that pageshow can update the tray here.
+    await setGuestCompare(page, [second.id]);
+    await page.evaluate(() => window.dispatchEvent(new PageTransitionEvent("pageshow", { persisted: true })));
+
+    await expect(tray(page).getByText("1 of 4 chosen")).toBeVisible();
+});
+
+test("saved picks the shop no longer shows leave the list, so the count and the limit agree", async ({ page }) => {
+    const [first] = await findSaleableProducts(page.request, 1);
+
+    await openSearchFor(page, first);
+    await setGuestCompare(page, [first.id, 987654321]);
+    await page.reload();
+
+    await expect(tray(page).getByText("1 of 4 chosen")).toBeVisible();
+    await expect.poll(() => page.evaluate(() => JSON.parse(localStorage.getItem("compare_items") ?? "[]"))).toEqual([first.id]);
 });
 
 test("the tray holds four, and a fifth pick is refused", async ({ page }) => {
@@ -226,6 +381,28 @@ test("the open tray leaves room at the end of the page", async ({ page }) => {
     const trayHeight = (await tray(page).boundingBox())!.height;
 
     await expect.poll(() => page.evaluate(() => parseFloat(getComputedStyle(document.body).paddingBottom))).toBeGreaterThanOrEqual(trayHeight);
+});
+
+test("the room at the end of the page follows the tray's height when the window is resized", async ({ page }) => {
+    const product = await findMultiPhotoProduct(page.request);
+
+    await openSearchFor(page, product);
+    await setGuestCompare(page, [product.id]);
+    await page.reload();
+
+    await expect(tray(page)).toBeVisible();
+
+    const reserved = () => page.evaluate(() => parseFloat(document.body.style.getPropertyValue("--pc-tray-space")));
+    const trayHeight = async () => (await tray(page).boundingBox())!.height;
+
+    await expect.poll(async () => (await reserved()) - (await trayHeight())).toBeCloseTo(16, 0);
+
+    const wide = await reserved();
+
+    await page.setViewportSize({ width: 390, height: 844 });
+
+    await expect.poll(async () => (await reserved()) - (await trayHeight())).toBeCloseTo(16, 0);
+    expect(await reserved()).not.toBe(wide);
 });
 
 test.describe("on a phone", () => {

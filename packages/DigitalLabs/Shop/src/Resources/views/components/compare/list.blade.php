@@ -9,6 +9,9 @@
       into the same message.
     The message links to the compare page. Used by the Classic card, the product page and the
     Swipe/Photo deck cards. Pushed once per page.
+    - Every change to the list is announced on the event bus as `compare-list-changed`: the guest
+      methods below announce their own; after a signed-in customer's add, the caller calls changed().
+      The Swipe/Photo deck cards and the compare tray read the list again when they hear it.
 --}}
 @pushOnce('scripts')
     {{-- Built here because @json() splits its argument on commas, so it can't take an array literal. --}}
@@ -54,6 +57,8 @@
 
                 localStorage.setItem('compare_items', JSON.stringify([...ids, productId]));
 
+                this.changed();
+
                 return 'added';
             },
 
@@ -62,6 +67,8 @@
              */
             removeForGuest(productId) {
                 localStorage.setItem('compare_items', JSON.stringify(this.guestIds().filter(id => id != productId)));
+
+                this.changed();
             },
 
             /**
@@ -69,6 +76,8 @@
              */
             clearForGuest() {
                 localStorage.removeItem('compare_items');
+
+                this.changed();
             },
 
             /**
@@ -82,6 +91,13 @@
                 this.showLimit();
 
                 return true;
+            },
+
+            /**
+             * Tell the page the compare list changed.
+             */
+            changed() {
+                emitter.emit('compare-list-changed');
             },
 
             showLimit() {
