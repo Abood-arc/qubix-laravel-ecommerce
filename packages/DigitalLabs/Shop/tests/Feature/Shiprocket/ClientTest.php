@@ -23,6 +23,11 @@ function fakeShiprocketHttp(array $routes, mixed $login = null): void
     ]);
 }
 
+function shiprocketTokenKey(string $email = 'api@example.com'): string
+{
+    return 'shiprocket:token:'.sha1($email);
+}
+
 function shiprocketLoginCount(): int
 {
     return Http::recorded(fn (Request $request) => $request->url() === SHIPROCKET_TEST_API.'auth/login')->count();
@@ -42,7 +47,7 @@ function catchShiprocketException(Closure $call): ?ShiprocketException
 beforeEach(function () {
     config(['shiprocket.email' => 'api@example.com', 'shiprocket.password' => 'secret']);
 
-    Cache::forget('shiprocket:token');
+    Cache::forget(shiprocketTokenKey());
 });
 
 it('logs in with the api user and sends the token as a bearer header', function () {
@@ -53,7 +58,7 @@ it('logs in with the api user and sends the token as a bearer header', function 
     $ids = app(ShiprocketClient::class)->createOrder(['order_id' => '1001', 'pickup_location' => 'Home']);
 
     expect($ids)->toBe(['order_id' => 11, 'shipment_id' => 22])
-        ->and(Cache::get('shiprocket:token'))->toBe('tok-1');
+        ->and(Cache::get(shiprocketTokenKey()))->toBe('tok-1');
 
     Http::assertSent(fn (Request $request) => $request->url() === SHIPROCKET_TEST_API.'auth/login'
         && $request->method() === 'POST'
@@ -79,8 +84,26 @@ it('logs in once and reuses the cached token', function () {
     expect(shiprocketLoginCount())->toBe(1);
 });
 
+it('keeps one token per api user', function () {
+    fakeShiprocketHttp([
+        SHIPROCKET_TEST_API.'orders/cancel' => Http::response([]),
+    ]);
+
+    app(ShiprocketClient::class)->cancelOrder(1);
+
+    config(['shiprocket.email' => 'other@example.com']);
+
+    app(ShiprocketClient::class)->cancelOrder(2);
+
+    expect(shiprocketLoginCount())->toBe(2)
+        ->and(Cache::has(shiprocketTokenKey()))->toBeTrue()
+        ->and(Cache::has(shiprocketTokenKey('other@example.com')))->toBeTrue();
+
+    Http::assertSent(fn (Request $request) => str_ends_with($request->url(), 'auth/login') && $request['email'] === 'other@example.com');
+});
+
 it('logs in again once and retries when the token is rejected', function () {
-    Cache::put('shiprocket:token', 'stale', now()->addDay());
+    Cache::put(shiprocketTokenKey(), 'stale', now()->addDay());
 
     fakeShiprocketHttp([
         SHIPROCKET_TEST_API.'courier/generate/label' => Http::sequence()
@@ -92,7 +115,7 @@ it('logs in again once and retries when the token is rejected', function () {
 
     expect($url)->toBe('https://labels.example/1.pdf')
         ->and(shiprocketLoginCount())->toBe(1)
-        ->and(Cache::get('shiprocket:token'))->toBe('tok-2');
+        ->and(Cache::get(shiprocketTokenKey()))->toBe('tok-2');
 
     $labelCalls = Http::recorded(fn (Request $request) => str_ends_with($request->url(), 'courier/generate/label'))->values();
 
@@ -133,6 +156,7 @@ it('reports an unknown outcome when shiprocket cannot be reached or fails on its
 })->with([
     'timeout' => [fn () => fn () => throw new ConnectionException('Operation timed out')],
     'server error' => [fn () => fn () => Http::response(['message' => 'Bad gateway'], 502)],
+    'rate limited' => [fn () => fn () => Http::response(['message' => 'Too Many Attempts.'], 429)],
 ]);
 
 it('reports an unknown outcome when the login cannot be reached', function () {
@@ -240,6 +264,29 @@ it('finds an order by its store order number', function () {
     Http::assertSent(fn (Request $request) => $request->method() === 'GET' && $request->url() === SHIPROCKET_TEST_API.'orders?search=1001');
 });
 
+it('skips cancelled orders with the same store order number', function () {
+    fakeShiprocketHttp([
+        SHIPROCKET_TEST_API.'orders?search=1001' => Http::response(['data' => [
+            ['id' => 70, 'channel_order_id' => '1001', 'status' => 'CANCELED', 'shipments' => [['id' => 80]]],
+            ['id' => 71, 'channel_order_id' => '1001', 'status' => 'Cancelled', 'shipments' => [['id' => 81]]],
+            ['id' => 72, 'channel_order_id' => '1001', 'status' => 'NEW', 'shipments' => [['id' => 82]]],
+        ]]),
+    ]);
+
+    expect(app(ShiprocketClient::class)->findOrderByChannelOrderId('1001'))
+        ->toBe(['order_id' => 72, 'shipment_id' => 82]);
+});
+
+it('finds nothing when the only order with that number is cancelled', function () {
+    fakeShiprocketHttp([
+        SHIPROCKET_TEST_API.'orders?search=1001' => Http::response(['data' => [
+            ['id' => 70, 'channel_order_id' => '1001', 'status' => 'canceled', 'shipments' => [['id' => 80]]],
+        ]]),
+    ]);
+
+    expect(app(ShiprocketClient::class)->findOrderByChannelOrderId('1001'))->toBeNull();
+});
+
 it('finds nothing when no order has that store order number', function () {
     fakeShiprocketHttp([
         SHIPROCKET_TEST_API.'orders?search=1001' => Http::response(['data' => [
@@ -332,7 +379,15 @@ it('refuses when no label url comes back', function () {
     ]);
 
     app(ShiprocketClient::class)->generateLabel(22);
-})->throws(ShiprocketException::class);
+})->throws(ShiprocketException::class, 'Shiprocket error (HTTP 200)');
+
+it('names the http status when a refusal has no message', function () {
+    fakeShiprocketHttp([
+        SHIPROCKET_TEST_API.'orders/cancel' => Http::response('', 400),
+    ]);
+
+    app(ShiprocketClient::class)->cancelOrder(71);
+})->throws(ShiprocketException::class, 'Shiprocket error (HTTP 400)');
 
 it('cancels an order', function () {
     fakeShiprocketHttp([

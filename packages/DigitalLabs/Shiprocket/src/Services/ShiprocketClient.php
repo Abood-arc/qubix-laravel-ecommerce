@@ -40,7 +40,10 @@ class ShiprocketClient implements ShiprocketApi
 
     protected const PATH_CANCEL = 'orders/cancel';
 
-    protected const TOKEN_CACHE_KEY = 'shiprocket:token';
+    /**
+     * Followed by a hash of the API user's email, so a new user never reuses an old token.
+     */
+    protected const TOKEN_CACHE_KEY = 'shiprocket:token:';
 
     /**
      * Shiprocket tokens last 10 days; renew a day early.
@@ -60,6 +63,13 @@ class ShiprocketClient implements ShiprocketApi
     protected const AWB_ALREADY_ASSIGNED = '/already\s+(been\s+)?(assigned|generated)/i';
 
     protected const PICKUP_ALREADY_SCHEDULED = '/already/i';
+
+    /**
+     * The order search row's status field, and the values that mean the order was cancelled.
+     */
+    protected const ORDER_STATUS_FIELD = 'status';
+
+    protected const ORDER_CANCELLED = '/^\s*cancel+ed\s*$/i';
 
     public function checkServiceability(string $pickupPin, string $deliveryPin, float $weightKg, bool $cod): array
     {
@@ -92,7 +102,7 @@ class ShiprocketClient implements ShiprocketApi
         $body = $this->data($response);
 
         if (empty($body['order_id']) || empty($body['shipment_id'])) {
-            throw new ShiprocketException($this->message($response) ?? 'Shiprocket did not return an order and shipment id.');
+            throw $this->refusal($response);
         }
 
         return ['order_id' => (int) $body['order_id'], 'shipment_id' => (int) $body['shipment_id']];
@@ -100,17 +110,22 @@ class ShiprocketClient implements ShiprocketApi
 
     public function findOrderByChannelOrderId(string $channelOrderId): ?array
     {
-        $rows = $this->data($this->call('GET', self::PATH_ORDERS, ['search' => $channelOrderId]))['data'] ?? [];
+        $response = $this->call('GET', self::PATH_ORDERS, ['search' => $channelOrderId]);
+
+        $rows = $this->data($response)['data'] ?? [];
 
         foreach (is_array($rows) ? $rows : [] as $row) {
-            if ((string) ($row['channel_order_id'] ?? '') !== $channelOrderId) {
+            if (
+                (string) ($row['channel_order_id'] ?? '') !== $channelOrderId
+                || preg_match(self::ORDER_CANCELLED, (string) ($row[self::ORDER_STATUS_FIELD] ?? ''))
+            ) {
                 continue;
             }
 
             $shipmentId = $row['shipments'][0]['id'] ?? null;
 
             if (empty($row['id']) || empty($shipmentId)) {
-                throw new ShiprocketException("Shiprocket order {$channelOrderId} has no shipment.");
+                throw $this->refusal($response);
             }
 
             return ['order_id' => (int) $row['id'], 'shipment_id' => (int) $shipmentId];
@@ -135,7 +150,7 @@ class ShiprocketClient implements ShiprocketApi
         $data = $this->data($response)['response']['data'] ?? [];
 
         if (empty($data['awb_code'])) {
-            throw new ShiprocketException($reason ?? 'Shiprocket did not assign an AWB.');
+            throw new ShiprocketException($reason ?? $this->fallbackMessage($response));
         }
 
         return ['awb_code' => (string) $data['awb_code'], 'courier_name' => (string) ($data['courier_name'] ?? '')];
@@ -159,7 +174,7 @@ class ShiprocketClient implements ShiprocketApi
         $url = $this->data($response)['label_url'] ?? null;
 
         if (! is_string($url) || $url === '') {
-            throw new ShiprocketException($this->message($response) ?? 'Shiprocket did not create the label.');
+            throw $this->refusal($response);
         }
 
         return $url;
@@ -182,7 +197,7 @@ class ShiprocketClient implements ShiprocketApi
         $data = $this->data($response)['data'] ?? [];
 
         if (empty($data['awb'])) {
-            throw new ShiprocketException($this->message($response) ?? 'Shiprocket says an AWB is assigned but did not return it.');
+            throw $this->refusal($response);
         }
 
         return ['awb_code' => (string) $data['awb'], 'courier_name' => (string) ($data['courier'] ?? '')];
@@ -196,7 +211,7 @@ class ShiprocketClient implements ShiprocketApi
         $response = $this->send($method, $path, $data, $this->token());
 
         if ($response->status() === 401) {
-            Cache::forget(self::TOKEN_CACHE_KEY);
+            Cache::forget($this->tokenCacheKey());
 
             $response = $this->send($method, $path, $data, $this->token());
         }
@@ -209,7 +224,7 @@ class ShiprocketClient implements ShiprocketApi
      */
     protected function token(): string
     {
-        $token = Cache::get(self::TOKEN_CACHE_KEY);
+        $token = Cache::get($this->tokenCacheKey());
 
         if (is_string($token) && $token !== '') {
             return $token;
@@ -223,16 +238,22 @@ class ShiprocketClient implements ShiprocketApi
         $token = $this->data($response)['token'] ?? null;
 
         if (! is_string($token) || $token === '') {
-            throw new ShiprocketException($this->message($response) ?? 'Shiprocket login returned no token.');
+            throw $this->refusal($response);
         }
 
-        Cache::put(self::TOKEN_CACHE_KEY, $token, now()->addDays(self::TOKEN_DAYS));
+        Cache::put($this->tokenCacheKey(), $token, now()->addDays(self::TOKEN_DAYS));
 
         return $token;
     }
 
+    protected function tokenCacheKey(): string
+    {
+        return self::TOKEN_CACHE_KEY.sha1(Settings::email());
+    }
+
     /**
-     * Send one request. No answer, or a failure on Shiprocket's side, leaves the outcome unknown.
+     * Send one request. No answer, a failure on Shiprocket's side, or a rate limit (the request
+     * was not carried out, so a later retry is right) leaves the outcome unknown.
      */
     protected function send(string $method, string $path, array $data = [], ?string $token = null): Response
     {
@@ -248,11 +269,11 @@ class ShiprocketClient implements ShiprocketApi
         try {
             $response = $request->send($method, $path, $method === 'GET' ? ['query' => $data] : ['json' => $data]);
         } catch (ConnectionException $exception) {
-            throw new ShiprocketUnknownOutcomeException('Shiprocket could not be reached.', 0, $exception);
+            throw new ShiprocketUnknownOutcomeException('Shiprocket error (no response)', 0, $exception);
         }
 
-        if ($response->serverError()) {
-            throw new ShiprocketUnknownOutcomeException('Shiprocket API error '.$response->status().' (outcome unknown).');
+        if ($response->serverError() || $response->status() === 429) {
+            throw new ShiprocketUnknownOutcomeException($this->fallbackMessage($response));
         }
 
         return $response;
@@ -264,10 +285,26 @@ class ShiprocketClient implements ShiprocketApi
     protected function data(Response $response): array
     {
         if ($response->failed()) {
-            throw new ShiprocketException($this->message($response) ?? 'Shiprocket refused the request (HTTP '.$response->status().').');
+            throw $this->refusal($response);
         }
 
         return (array) $response->json();
+    }
+
+    /**
+     * A refusal with Shiprocket's reason, or the HTTP status when it gave none.
+     */
+    protected function refusal(Response $response): ShiprocketException
+    {
+        return new ShiprocketException($this->message($response) ?? $this->fallbackMessage($response));
+    }
+
+    /**
+     * Neutral text for logs and admin emails, no translation needed.
+     */
+    protected function fallbackMessage(Response $response): string
+    {
+        return 'Shiprocket error (HTTP '.$response->status().')';
     }
 
     /**

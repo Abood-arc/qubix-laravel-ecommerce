@@ -53,7 +53,7 @@ it('assigns the same awb, label and pickup for a shipment every time', function 
     $api->requestPickup($shipmentId);
 });
 
-it('marks an order cancelled', function () {
+it('marks an order cancelled and no longer finds it', function () {
     $api = app(FakeShiprocketClient::class);
 
     $ids = $api->createOrder(['order_id' => 'fake-3001']);
@@ -63,5 +63,5 @@ it('marks an order cancelled', function () {
     $api->cancelOrder($ids['order_id']);
 
     expect($api->isCancelled($ids['order_id']))->toBeTrue()
-        ->and($api->findOrderByChannelOrderId('fake-3001'))->toBe($ids);
+        ->and($api->findOrderByChannelOrderId('fake-3001'))->toBeNull();
 });

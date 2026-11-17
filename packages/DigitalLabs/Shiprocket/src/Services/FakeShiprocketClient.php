@@ -36,7 +36,7 @@ class FakeShiprocketClient implements ShiprocketApi
         $channelOrderId = (string) ($payload['order_id'] ?? '');
 
         if ($channelOrderId === '') {
-            throw new ShiprocketException('The order id field is required.');
+            throw new ShiprocketException('Shiprocket error (HTTP 422)');
         }
 
         Cache::add(self::CACHE_PREFIX.'counter', 0);
@@ -54,9 +54,14 @@ class FakeShiprocketClient implements ShiprocketApi
         return $ids;
     }
 
+    /**
+     * Like Shiprocket's lookup, a cancelled order is never returned.
+     */
     public function findOrderByChannelOrderId(string $channelOrderId): ?array
     {
-        return Cache::get(self::CACHE_PREFIX.'channel:'.$channelOrderId);
+        $ids = Cache::get(self::CACHE_PREFIX.'channel:'.$channelOrderId);
+
+        return $ids && ! $this->isCancelled($ids['order_id']) ? $ids : null;
     }
 
     public function assignAwb(int $shipmentId): array
