@@ -303,6 +303,7 @@
                     setTimeout(() => this.wishlistPopping = false, 650);
                 },
 
+                // The Swipe and Photo deck cards compare through $cardCompare (card/styled-runtime); this Classic copy is kept as it is so Classic stays untouched.
                 addToCompare(productId) {
                     /**
                      * This will handle for customers.
@@ -344,6 +345,7 @@
                     }
                 },
 
+                // The Swipe and Photo deck cards add through $cardCart (card/styled-runtime); this Classic copy is kept as it is so Classic stays untouched.
                 addToCart() {
                     this.isAddingToCart = true;
 

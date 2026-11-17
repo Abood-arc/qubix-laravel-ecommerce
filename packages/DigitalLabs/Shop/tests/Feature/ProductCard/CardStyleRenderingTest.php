@@ -22,6 +22,9 @@ it('renders the Swipe card in grids and only ships the Swipe photo component', f
         ->toContain('data-card-style="swipe"')
         ->toContain('<v-card-swipe-gallery')
         ->and($html)->toContain('id="v-card-swipe-gallery-template"')
+        ->and($html)->toContain('id="v-card-buy-template"')
+        ->and($html)->toContain('id="v-card-compare-template"')
+        ->and($html)->toContain('globalProperties.$cardCompare =')
         ->and($html)->not->toContain('id="v-card-deck-gallery-template"');
 });
 

@@ -8,14 +8,15 @@ import { fillPlaceholders } from "./fill-placeholders";
  * the component is defined. It gives the component:
  *   - props `product` and `url`, and `photos` (the product's images, or its base image);
  *   - lazy loading: photo 1 loads like today's card, the others once `wake()` is called (pointing,
- *     focus, touch) or, on touch screens, once the card scrolls into view;
+ *     focus, touch) or, on touch screens, photo 2 once the card scrolls into view;
  *   - `reset()` when a grid reuses the component for another product (filters, paging);
  *   - the keyboard hint id, the "Photo 2 of 4" label and the live-region announcement;
  *   - `arrowStep()` for the left and right arrow keys, mirrored right-to-left.
  *
  * The markup that goes with it is the Blade partials card/gallery-photo (one photo) and
  * card/gallery-hint (the hint and the live region); card/gallery-text provides its copy. A component
- * adds its own state through two hooks: onReset() and, on touch screens only, onCardInView(entry).
+ * adds its own state through two hooks: onReset() and, on touch screens only, onCardInView(entry)
+ * (return true to keep hearing about the card's visibility).
  */
 export const cardGallery = {
     inject: {
@@ -73,6 +74,8 @@ export const cardGallery = {
          */
         "product.id"() {
             this.reset();
+
+            this.watchView();
         },
     },
 
@@ -81,24 +84,7 @@ export const cardGallery = {
     },
 
     mounted() {
-        if (this.hasMouse || this.photos.length < 2) {
-            return;
-        }
-
-        // Touch screens: get photo 2 ready as the card scrolls into view.
-        this.observer = new IntersectionObserver((entries) => {
-            const entry = entries[0];
-
-            if (! entry.isIntersecting) {
-                return;
-            }
-
-            this.wake(1);
-
-            this.onCardInView(entry);
-        }, { threshold: [0, 0.65] });
-
-        this.observer.observe(this.$el);
+        this.watchView();
     },
 
     beforeUnmount() {
@@ -122,14 +108,52 @@ export const cardGallery = {
         onReset() {},
 
         /**
-         * Hook, touch screens only: the card is (more) in view; entry.intersectionRatio says how much.
+         * Hook, touch screens only: the card is in view; entry.intersectionRatio says how much.
+         * Return true to hear about it again (for example until the card is mostly in view); the
+         * default stops watching once photo 2 is on its way.
          */
-        onCardInView(entry) {},
+        onCardInView(entry) {
+            return false;
+        },
+
+        /**
+         * Touch screens: get photo 2 ready as the card scrolls into view. Watching stops as soon as
+         * there is nothing left to do, and starts again when a grid reuses the card for another product.
+         */
+        watchView() {
+            if (this.hasMouse || this.photos.length < 2) {
+                return;
+            }
+
+            this.observer ??= new IntersectionObserver((entries) => this.onViewChange(entries[0]), {
+                threshold: [0, 0.65],
+            });
+
+            this.observer.observe(this.$el);
+        },
+
+        onViewChange(entry) {
+            if (! entry.isIntersecting) {
+                return;
+            }
+
+            this.wake(1);
+
+            if (! this.onCardInView(entry)) {
+                this.observer.unobserve(this.$el);
+            }
+        },
 
         /**
          * Start loading photos up to index `upto` (all of them by default).
          */
         wake(upto = Infinity) {
+            const last = Math.min(upto, this.photos.length - 1);
+
+            if (this.requested.slice(0, last + 1).every(Boolean) && this.requested.length > last) {
+                return;
+            }
+
             this.requested = this.photos.map((photo, index) => this.requested[index] || index <= upto);
         },
 

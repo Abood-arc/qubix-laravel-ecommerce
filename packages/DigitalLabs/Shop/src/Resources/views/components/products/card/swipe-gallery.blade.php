@@ -100,6 +100,10 @@
                 };
             },
 
+            beforeUnmount() {
+                clearTimeout(this.nudgeTimer);
+            },
+
             methods: {
                 onReset() {
                     this.current = 0;
@@ -193,36 +197,55 @@
                 },
 
                 /**
-                 * Touch screens: once the card is mostly in view, the grid's first card hints that it swipes.
+                 * Touch screens: the grid's first card keeps watching until it is mostly in view, then
+                 * hints once that it swipes. Every other card is done once photo 2 is on its way.
                  */
                 onCardInView(entry) {
-                    if (entry.intersectionRatio > 0.6) {
-                        this.nudgeOnce();
+                    const grid = this.nudgeGrid();
+
+                    if (! grid) {
+                        return false;
                     }
+
+                    if (entry.intersectionRatio <= 0.6) {
+                        return true;
+                    }
+
+                    this.nudge(grid);
+
+                    return false;
                 },
 
                 /**
-                 * The first card of a grid slides a little and back, once, to hint that it swipes.
+                 * The grid this card should nudge in: only the first card of a grid that has not
+                 * nudged yet, and never with reduced motion. Null otherwise.
                  */
-                nudgeOnce() {
+                nudgeGrid() {
                     const card = this.$el.closest('.pc-card');
 
                     const grid = card?.parentElement;
 
                     if (! grid || this.prefersReducedMotion() || nudgedGrids.has(grid) || grid.firstElementChild !== card) {
-                        return;
+                        return null;
                     }
 
+                    return grid;
+                },
+
+                /**
+                 * The first card of a grid slides a little and back, once, to hint that it swipes.
+                 */
+                nudge(grid) {
                     nudgedGrids.add(grid);
 
                     const distance = (this.isRtl ? 1 : -1) * this.$refs.track.clientWidth * 0.24;
 
-                    setTimeout(() => {
+                    this.nudgeTimer = setTimeout(() => {
                         if (this.current !== 0) {
                             return;
                         }
 
-                        this.$refs.rail.animate([
+                        this.$refs.rail?.animate([
                             { transform: 'translateX(0)', easing: 'cubic-bezier(0.33, 0, 0.2, 1)' },
                             { transform: `translateX(${distance}px)`, offset: 0.4, easing: 'cubic-bezier(0.16, 1, 0.3, 1)' },
                             { transform: 'translateX(0)' },

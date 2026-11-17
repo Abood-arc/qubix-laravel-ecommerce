@@ -369,10 +369,12 @@
     stroke-width: 1.7;
 }
 
-/* price_html prints the old price first; show the current price first, the old one struck after it. */
+/*
+ * price_html prints the old price before the current one. Only the struck-out old price moves to the
+ * end, so the current price comes first and a label ("As low as", "Starting at") still leads.
+ */
 .pc-price {
     display: flex;
-    flex-direction: row-reverse;
     flex-wrap: wrap;
     justify-content: center;
     align-items: baseline;
@@ -389,6 +391,15 @@
     color: rgb(var(--c-brand));
     font-size: 17px;
     font-weight: 800;
+}
+
+/* The configurable price prints an empty old-price slot for the product page to fill. */
+.pc-price > .line-through {
+    order: 1;
+}
+
+.pc-price > .line-through:empty {
+    display: none;
 }
 
 .pc-price .line-through {

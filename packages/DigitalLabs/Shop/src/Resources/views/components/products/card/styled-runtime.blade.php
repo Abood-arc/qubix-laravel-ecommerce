@@ -95,6 +95,7 @@
                 return this.ids.includes(productId);
             },
 
+            // Same compare calls as the Classic card's addToCompare (products/card.blade.php), which stays untouched.
             async add(product) {
                 if (this.has(product.id)) {
                     return;
@@ -139,7 +140,7 @@
                         return;
                     }
                 } else {
-                    localStorage.setItem('compare_items', JSON.stringify(compareList().guestIds().filter(id => id != productId)));
+                    compareList().removeForGuest(productId);
                 }
 
                 this.ids = this.ids.filter(id => id !== productId);
@@ -159,7 +160,7 @@
                         return;
                     }
                 } else {
-                    localStorage.removeItem('compare_items');
+                    compareList().clearForGuest();
                 }
 
                 this.ids = [];
@@ -197,6 +198,7 @@
          * the cart that comes back is broadcast on update-mini-cart, as everywhere else in the shop.
          */
         const cardCart = {
+            // Same cart call as the Classic card's addToCart (products/card.blade.php), which stays untouched.
             async add(product) {
                 try {
                     const response = await axios.post(routes.cartStore, { quantity: 1, product_id: product.id });

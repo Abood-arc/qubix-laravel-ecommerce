@@ -1,4 +1,5 @@
 import { test, expect } from "../../setup";
+import type { Locator } from "@playwright/test";
 import {
     findMultiPhotoProduct,
     openSearchFor,
@@ -96,6 +97,52 @@ test("hides the size and stock lines when the shop has no such facts", async ({ 
     await expect(card.getByText("Compare", { exact: true })).toBeVisible();
     await expect(card.getByText(/×/)).toHaveCount(0);
     await expect(card.getByText(/^Only \d+ left$/)).toHaveCount(0);
+});
+
+/**
+ * Where `first` sits before `second` in reading order: earlier in the DOM, and on screen either on an
+ * earlier line or further left on the same line (English).
+ */
+async function expectReadsBefore(first: Locator, second: Locator): Promise<void> {
+    expect(await first.evaluate((element, other) => !!(element.compareDocumentPosition(other!) & Node.DOCUMENT_POSITION_FOLLOWING), await second.elementHandle())).toBe(true);
+
+    const a = (await first.boundingBox())!;
+    const b = (await second.boundingBox())!;
+
+    expect(a.y + a.height <= b.y + 1 || (Math.abs(a.y - b.y) < a.height && a.x + a.width <= b.x + 1)).toBe(true);
+}
+
+test("a price label such as \"As low as\" stays ahead of the price", async ({ page }) => {
+    // The listing has no configurable product, so the card gets the price_html a configurable product
+    // prints (products/prices/configurable.blade.php): a label, an empty old-price slot, the price.
+    await withCardData(page, product.id, {
+        price_html: '<p class="price-label text-sm text-zinc-500 max-sm:text-xs">As low as</p>'
+            + '<p class="regular-price text-lg font-semibold text-gray-500 line-through"></p>'
+            + '<p class="final-price font-semibold">₹999.00</p>',
+    });
+    await openSearchFor(page, product);
+
+    const card = styledCard(page, product);
+
+    await expectReadsBefore(card.getByText("As low as", { exact: true }), card.getByText("₹999.00", { exact: true }));
+});
+
+test("the current price shows before the struck-out old price", async ({ page }) => {
+    // A discounted simple product's price_html (products/prices/index.blade.php): the old price first.
+    await withCardData(page, product.id, {
+        price_html: '<p class="final-price font-medium text-zinc-500 line-through max-sm:leading-4">₹300.00</p>'
+            + '<p class="font-semibold max-sm:leading-4">₹250.00</p>',
+    });
+    await openSearchFor(page, product);
+
+    const card = styledCard(page, product);
+
+    await expect(card.getByText("₹250.00", { exact: true })).toBeVisible();
+
+    const now = (await card.getByText("₹250.00", { exact: true }).boundingBox())!;
+    const was = (await card.getByText("₹300.00", { exact: true }).boundingBox())!;
+
+    expect(now.x + now.width).toBeLessThanOrEqual(was.x + 1);
 });
 
 test("the Compare tick box adds and removes the product (guest)", async ({ page }) => {

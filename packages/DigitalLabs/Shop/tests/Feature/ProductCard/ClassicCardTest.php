@@ -33,7 +33,10 @@ it('renders the Classic card exactly as before when Classic is chosen or an unkn
 
     expect($this->productCardTemplate($html))->toBe($this->classicCardFixture())
         ->and($html)->not->toContain('v-card-swipe-gallery')
-        ->and($html)->not->toContain('v-card-deck-gallery');
+        ->and($html)->not->toContain('v-card-deck-gallery')
+        ->and($html)->not->toContain('v-card-buy')
+        ->and($html)->not->toContain('v-card-compare')
+        ->and($html)->not->toContain('globalProperties.$cardCompare =');
 })->with(['classic', 'no-such-style']);
 
 it('keeps the Classic card on the cart and compare pages whatever the setting', function (string $route) {
@@ -43,7 +46,10 @@ it('keeps the Classic card on the cart and compare pages whatever the setting', 
     $html = $this->get(route($route))->assertOk()->getContent();
 
     expect($this->productCardTemplate($html))->toBe($this->classicCardFixture())
-        ->and($html)->not->toContain('v-card-swipe-gallery');
+        ->and($html)->not->toContain('v-card-swipe-gallery')
+        ->and($html)->not->toContain('v-card-buy')
+        ->and($html)->not->toContain('v-card-compare')
+        ->and($html)->not->toContain('globalProperties.$cardCompare =');
 })->with([
     'cart page (cross-sell row)' => 'shop.checkout.cart.index',
     'compare page' => 'shop.compare.index',
