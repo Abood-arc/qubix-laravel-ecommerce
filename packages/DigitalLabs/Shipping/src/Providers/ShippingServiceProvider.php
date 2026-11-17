@@ -2,6 +2,8 @@
 
 namespace DigitalLabs\Shipping\Providers;
 
+use DigitalLabs\Shipping\Contracts\DeliveryCheck;
+use DigitalLabs\Shipping\DeliveryCheck\AlwaysDeliverable;
 use Illuminate\Support\ServiceProvider;
 
 class ShippingServiceProvider extends ServiceProvider
@@ -16,6 +18,9 @@ class ShippingServiceProvider extends ServiceProvider
         include __DIR__.'/../Http/helpers.php';
 
         $this->registerConfig();
+
+        // Every address is deliverable unless a shipping integration rebinds this.
+        $this->app->bindIf(DeliveryCheck::class, AlwaysDeliverable::class);
     }
 
     /**
