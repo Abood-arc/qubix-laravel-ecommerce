@@ -26,6 +26,14 @@
     --c-foot: 35 69 55;
     --c-foot-ink: 255 255 255;
     --c-foot-muted: 199 214 203;
+    --c-ink: 29 34 31;            /* #1d221f card text */
+    --c-muted: 90 98 93;          /* #5a625d secondary text (4.5:1 on white) */
+    --c-line: 226 227 222;        /* #e2e3de hairlines */
+    --c-line-strong: 196 198 192; /* #c4c6c0 hover and dashed borders */
+    --c-control: 155 158 152;     /* #9b9e98 tick box outline */
+    --c-surface: 255 255 255;     /* buttons and chips on the photo */
+    --c-surface-soft: 242 242 239; /* #f2f2ef hover fill */
+    --c-on-brand: 255 255 255;    /* text and icons on brand, accent */
     --font-text: "Karla";
     --font-display: "Karla";
     --radius-ui: 999px;
@@ -50,6 +58,14 @@
     --c-foot: 28 42 107;
     --c-foot-ink: 255 255 255;
     --c-foot-muted: 196 201 230;
+    --c-ink: 27 31 56;            /* #1b1f38 card text */
+    --c-muted: 86 90 117;         /* #565a75 secondary text (4.5:1 on white) */
+    --c-line: 230 226 212;        /* #e6e2d4 hairlines */
+    --c-line-strong: 200 196 180; /* #c8c4b4 hover and dashed borders */
+    --c-control: 152 150 168;     /* #9896a8 tick box outline */
+    --c-surface: 255 255 255;     /* buttons and chips on the photo */
+    --c-surface-soft: 247 243 232; /* #f7f3e8 hover fill */
+    --c-on-brand: 255 255 255;    /* text and icons on brand, accent */
     --font-text: "Mukta";
     --font-display: "Baloo 2";
     --radius-ui: 999px;
@@ -74,6 +90,14 @@
     --c-foot: 29 26 21;
     --c-foot-ink: 246 234 208;
     --c-foot-muted: 191 174 140;
+    --c-ink: 29 26 21;            /* #1d1a15 card text */
+    --c-muted: 99 92 79;          /* #635c4f secondary text (4.5:1 on white) */
+    --c-line: 226 216 196;        /* #e2d8c4 hairlines */
+    --c-line-strong: 196 184 160; /* #c4b8a0 hover and dashed borders */
+    --c-control: 160 148 126;     /* #a0947e tick box outline */
+    --c-surface: 255 255 255;     /* buttons and chips on the photo */
+    --c-surface-soft: 246 241 230; /* #f6f1e6 hover fill */
+    --c-on-brand: 255 255 255;    /* text and icons on brand, accent */
     --font-text: "Archivo";
     --font-display: "Archivo";
     --radius-ui: 4px;
@@ -98,6 +122,14 @@
     --c-foot: 244 244 242;
     --c-foot-ink: 17 17 17;
     --c-foot-muted: 92 92 88;
+    --c-ink: 17 17 17;            /* #111111 card text */
+    --c-muted: 92 92 88;          /* #5c5c58 secondary text (4.5:1 on white) */
+    --c-line: 231 231 228;        /* #e7e7e4 hairlines */
+    --c-line-strong: 196 196 192; /* #c4c4c0 hover and dashed borders */
+    --c-control: 158 158 154;     /* #9e9e9a tick box outline */
+    --c-surface: 255 255 255;     /* buttons and chips on the photo */
+    --c-surface-soft: 243 243 241; /* #f3f3f1 hover fill */
+    --c-on-brand: 255 255 255;    /* text and icons on brand, accent */
     --font-text: "Manrope";
     --font-display: "Manrope";
     --radius-ui: 10px;
