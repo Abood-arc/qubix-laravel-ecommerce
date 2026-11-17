@@ -425,6 +425,98 @@
         emitter.on('update-mini-cart', cart => cardCart.apply(cart));
         /* ---- cart: end ---- */
 
+        /* ---- fly to cart: start ---- */
+        const prefersReducedMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+        /**
+         * Restart a one-shot CSS animation class (it stays on until the next restart).
+         */
+        const replayClass = (element, className) => {
+            element.classList.remove(className);
+
+            void element.offsetWidth;
+
+            element.classList.add(className);
+        };
+
+        /**
+         * The header cart icon to fly to. The header has one per layout (desktop, phone); only the one
+         * that is shown has a size.
+         */
+        const visibleCartTarget = () => [...document.querySelectorAll('[data-cart-target]')]
+            .find(element => element.getBoundingClientRect().width > 0 && (element.checkVisibility?.() ?? true));
+
+        /**
+         * After Add to cart: a small photo of the product arcs from the button to the header cart (x runs
+         * linearly, y eases in; design concepts, fly()), and the cart icon bumps. With reduced motion, or
+         * when the cart icon is scrolled off screen, nothing flies: the icon's count fades in instead.
+         * The photo is decoration only: hidden from assistive technology, never in the way of a click,
+         * and removed again whether the flight finishes or is cancelled. The add itself is announced by
+         * the card (pc-announce), not here.
+         */
+        const flyToCart = (from, imageUrl) => {
+            const target = visibleCartTarget();
+
+            if (! target || ! from?.isConnected) {
+                return;
+            }
+
+            const end = target.getBoundingClientRect();
+
+            const start = from.getBoundingClientRect();
+
+            if (prefersReducedMotion() || end.bottom < 0 || ! start.width) {
+                replayClass(target, 'pc-cart-flash');
+
+                return;
+            }
+
+            const x0 = start.left + start.width / 2;
+            const y0 = start.top + start.height / 2;
+            const x1 = end.left + end.width / 2;
+            const y1 = end.top + end.height / 2;
+
+            const flight = document.createElement('div');
+
+            flight.className = 'pc-fly';
+            flight.setAttribute('aria-hidden', 'true');
+            flight.innerHTML = '<div class="pc-fly-y"><div class="pc-fly-dot"><img alt=""></div></div>';
+
+            if (imageUrl) {
+                flight.querySelector('img').src = imageUrl;
+            }
+
+            document.body.append(flight);
+
+            const vertical = flight.firstElementChild;
+
+            const duration = 720;
+
+            const animations = [
+                flight.animate(
+                    [{ transform: `translateX(${x0}px)` }, { transform: `translateX(${x1}px)` }],
+                    { duration, easing: 'cubic-bezier(0.3, 0, 0.6, 1)', fill: 'forwards' }
+                ),
+                vertical.animate(
+                    [{ transform: `translateY(${y0}px)` }, { transform: `translateY(${y0 - 40}px)`, offset: 0.3 }, { transform: `translateY(${y1}px)` }],
+                    { duration, easing: 'cubic-bezier(0.5, 0, 0.75, 0)', fill: 'forwards' }
+                ),
+                vertical.firstElementChild.animate(
+                    [{ transform: 'scale(0.6)', opacity: 0 }, { transform: 'scale(1.05)', opacity: 1, offset: 0.2 }, { transform: 'scale(0.35)', opacity: 0.9 }],
+                    { duration, easing: 'ease-in', fill: 'forwards' }
+                ),
+            ];
+
+            // `finished` rejects when an animation is cancelled: no bump then, but the photo still goes.
+            Promise.all(animations.map(animation => animation.finished))
+                .then(() => replayClass(target, 'pc-cart-bump'))
+                .catch(() => {})
+                .finally(() => flight.remove());
+        };
+
+        app.config.globalProperties.$cardFlyToCart = flyToCart;
+        /* ---- fly to cart: end ---- */
+
         app.config.globalProperties.$cardCompare = cardCompare;
 
         app.config.globalProperties.$cardCart = cardCart;
