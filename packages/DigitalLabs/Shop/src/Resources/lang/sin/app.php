@@ -936,6 +936,7 @@ return [
             'minimum-order-message' => 'මිනිත්තු ඇණවුමේ මුදල වේ',
             'missing-fields' => 'මෙම නිෂ්පාදනය සඳහා අවශ්‍ය ක්ෂේත්රයන් අවසන්.',
             'missing-options' => 'මෙම නිෂ්පාදනය සඳහා අවශ්‍ය තෝරාගත්තා නොමැත.',
+            'payment-method-unavailable' => 'This payment method is not available for this order.',
             'paypal-payment-cancelled' => 'Paypal ගෙවීම අවලංගු කර ඇත.',
             'qty-missing' => 'අයිතමයක් එකක් අටකතා කරනු ලදුවක් එකක් අටකතා කළ යුතුය.',
             'return-to-shop' => 'සාප්පු නමට ආපසු',

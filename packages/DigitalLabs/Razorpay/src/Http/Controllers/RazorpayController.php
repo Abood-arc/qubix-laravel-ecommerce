@@ -10,6 +10,7 @@ use DigitalLabs\Razorpay\Services\FinalizeResult;
 use DigitalLabs\Razorpay\Services\PaymentFinalizer;
 use DigitalLabs\Razorpay\Services\RazorpayClient;
 use DigitalLabs\Sales\Transformers\OrderResource;
+use DigitalLabs\Shipping\Contracts\DeliveryCheck;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -40,10 +41,17 @@ class RazorpayController extends Controller
             return redirect()->route('shop.checkout.cart.index');
         }
 
+        if (
+            $cart->haveStockableItems()
+            && $reason = app(DeliveryCheck::class)->check($cart->shipping_address ?? $cart->billing_address, $cart)
+        ) {
+            return $this->backToCheckout($reason);
+        }
+
         $method = app(Razorpay::class);
 
         if (! $method->isAvailable()) {
-            return $this->backToCheckout('razorpay::app.errors.unavailable');
+            return $this->backToCheckout(trans('razorpay::app.errors.unavailable'));
         }
 
         $amount = (int) round($cart->grand_total * 100);
@@ -55,7 +63,7 @@ class RazorpayController extends Controller
         } catch (RazorpayException $exception) {
             report($exception);
 
-            return $this->backToCheckout('razorpay::app.errors.gateway');
+            return $this->backToCheckout(trans('razorpay::app.errors.gateway'));
         }
 
         $snapshot = (new OrderResource($cart))->jsonSerialize();
@@ -250,7 +258,7 @@ class RazorpayController extends Controller
      */
     protected function backToCheckout(string $message): RedirectResponse
     {
-        session()->flash('error', trans($message));
+        session()->flash('error', $message);
 
         return redirect()->route('shop.checkout.onepage.index');
     }

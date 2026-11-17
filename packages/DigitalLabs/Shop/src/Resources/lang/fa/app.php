@@ -936,6 +936,7 @@ return [
             'minimum-order-message' => 'حداقل مبلغ سفارش است',
             'missing-fields' => 'برخی از فیلدهای مورد نیاز برای این محصول وجود ندارد.',
             'missing-options' => 'گزینه‌ها برای این محصول وجود ندارند.',
+            'payment-method-unavailable' => 'This payment method is not available for this order.',
             'paypal-payment-cancelled' => 'پرداخت پی پال لغو شده است.',
             'qty-missing' => 'حداقل یک محصول باید بیشتر از ۱ تعداد داشته باشد.',
             'return-to-shop' => 'بازگشت به فروشگاه',

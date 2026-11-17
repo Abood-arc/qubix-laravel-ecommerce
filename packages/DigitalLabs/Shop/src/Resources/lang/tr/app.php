@@ -936,6 +936,7 @@ return [
             'minimum-order-message' => 'Minimum sipariş tutarı karşılanmadı.',
             'missing-fields' => 'Gerekli alanları doldurun.',
             'missing-options' => 'Seçenekleri belirleyin.',
+            'payment-method-unavailable' => 'This payment method is not available for this order.',
             'paypal-payment-cancelled' => 'Ödeme iptal edildi.',
             'qty-missing' => 'Miktar en az 1 olmalıdır.',
             'return-to-shop' => 'Alışverişe Dön',

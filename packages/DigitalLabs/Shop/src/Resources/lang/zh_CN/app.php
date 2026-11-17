@@ -936,6 +936,7 @@ return [
             'minimum-order-message' => '最低订单金额为',
             'missing-fields' => '此产品缺少一些必填字段。',
             'missing-options' => '此产品缺少选项。',
+            'payment-method-unavailable' => 'This payment method is not available for this order.',
             'paypal-payment-cancelled' => 'Paypal付款已被取消。',
             'qty-missing' => '至少有一个产品应该有超过 1 个数量。',
             'return-to-shop' => '返回商店',

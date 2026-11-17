@@ -936,6 +936,7 @@ return [
             'minimum-order-message' => '最小注文金額は です',
             'missing-fields' => 'この製品にはいくつかの必須フィールドがありません。',
             'missing-options' => 'この製品にはオプションがありません。',
+            'payment-method-unavailable' => 'This payment method is not available for this order.',
             'paypal-payment-cancelled' => 'PayPalの支払いがキャンセルされました。',
             'qty-missing' => '少なくとも1つの製品は1以上の数量を持つ必要があります。',
             'return-to-shop' => 'ショップに戻る',

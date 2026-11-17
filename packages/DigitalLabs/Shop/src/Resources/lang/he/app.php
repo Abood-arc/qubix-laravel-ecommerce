@@ -936,6 +936,7 @@ return [
             'minimum-order-message' => 'סכום הזמנה מינימלי הוא ',
             'missing-fields' => 'חלק מהשדות החובה חסרים עבור מוצר זה.',
             'missing-options' => 'אפשרויות חסרות עבור מוצר זה.',
+            'payment-method-unavailable' => 'This payment method is not available for this order.',
             'paypal-payment-cancelled' => 'התשלום בפייפאל בוטל.',
             'qty-missing' => 'לפחות מוצר אחד צריך להיות בו יותר מכמות 1.',
             'return-to-shop' => 'חזרה לחנות',

@@ -4,11 +4,13 @@ namespace DigitalLabs\Shop\Http\Controllers\API;
 
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Http\Response;
+use Illuminate\Validation\ValidationException;
 use DigitalLabs\Checkout\Facades\Cart;
 use DigitalLabs\Customer\Repositories\CustomerRepository;
 use DigitalLabs\Payment\Facades\Payment;
 use DigitalLabs\Sales\Repositories\OrderRepository;
 use DigitalLabs\Sales\Transformers\OrderResource;
+use DigitalLabs\Shipping\Contracts\DeliveryCheck;
 use DigitalLabs\Shipping\Facades\Shipping;
 use DigitalLabs\Shop\Http\Requests\CartAddressRequest;
 use DigitalLabs\Shop\Http\Resources\CartResource;
@@ -66,6 +68,13 @@ class OnepageController extends APIController
         Cart::collectTotals();
 
         if ($cart->haveStockableItems()) {
+            if ($reason = app(DeliveryCheck::class)->check($cart->shipping_address, $cart)) {
+                // Shown on the postcode the customer typed: the billing one when it doubles as shipping.
+                $field = ($params['billing']['use_for_shipping'] ?? false) ? 'billing.postcode' : 'shipping.postcode';
+
+                throw ValidationException::withMessages([$field => $reason]);
+            }
+
             if (! $rates = Shipping::collectRates()) {
                 return new JsonResource([
                     'redirect' => true,
@@ -81,7 +90,7 @@ class OnepageController extends APIController
 
         return new JsonResource([
             'redirect' => false,
-            'data' => Payment::getSupportedPaymentMethods(),
+            'data' => Payment::getSupportedPaymentMethods(includeDisabled: true),
         ]);
     }
 
@@ -108,7 +117,7 @@ class OnepageController extends APIController
 
         Cart::collectTotals();
 
-        return response()->json(Payment::getSupportedPaymentMethods());
+        return response()->json(Payment::getSupportedPaymentMethods(includeDisabled: true));
     }
 
     /**
@@ -230,8 +239,23 @@ class OnepageController extends APIController
             throw new \Exception(trans('shop::app.checkout.cart.specify-shipping-method'));
         }
 
+        if (
+            $cart->haveStockableItems()
+            && $reason = app(DeliveryCheck::class)->check($cart->shipping_address, $cart)
+        ) {
+            throw new \Exception($reason);
+        }
+
         if (! $cart->payment) {
             throw new \Exception(trans('shop::app.checkout.cart.specify-payment-method'));
+        }
+
+        $paymentMethodClass = config('payment_methods.'.$cart->payment->method.'.class');
+
+        $paymentMethod = $paymentMethodClass ? app($paymentMethodClass) : null;
+
+        if (! $paymentMethod?->isAvailable()) {
+            throw new \Exception($paymentMethod?->getUnavailableReason() ?? trans('shop::app.checkout.cart.payment-method-unavailable'));
         }
     }
 }

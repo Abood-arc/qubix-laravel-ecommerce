@@ -9,21 +9,23 @@ class Payment
     /**
      * Returns all supported payment methods
      *
+     * @param  bool  $includeDisabled  Also list active methods that cannot take this order, greyed out with their reason (Shop checkout only).
      * @return array
      */
-    public function getSupportedPaymentMethods()
+    public function getSupportedPaymentMethods(bool $includeDisabled = false)
     {
         return [
-            'payment_methods' => $this->getPaymentMethods(),
+            'payment_methods' => $this->getPaymentMethods($includeDisabled),
         ];
     }
 
     /**
      * Returns all supported payment methods
      *
+     * @param  bool  $includeDisabled  Also list active methods that cannot take this order, greyed out with their reason (Shop checkout only).
      * @return array
      */
-    public function getPaymentMethods()
+    public function getPaymentMethods(bool $includeDisabled = false)
     {
         $paymentMethods = [];
 
@@ -31,13 +33,16 @@ class Payment
             $paymentMethod = app($paymentMethodConfig['class']);
 
             if ($paymentMethod->isAvailable()) {
-                $paymentMethods[] = [
-                    'method' => $paymentMethod->getCode(),
-                    'method_title' => $paymentMethod->getTitle(),
-                    'description' => $paymentMethod->getDescription(),
-                    'sort' => $paymentMethod->getSortOrder(),
-                    'image' => $paymentMethod->getImage(),
-                ];
+                $paymentMethods[] = $this->describe($paymentMethod) + ['disabled' => false];
+
+                continue;
+            }
+
+            if (
+                $includeDisabled
+                && ($reason = $paymentMethod->getUnavailableReason()) !== null
+            ) {
+                $paymentMethods[] = $this->describe($paymentMethod) + ['disabled' => true, 'reason' => $reason];
             }
         }
 
@@ -50,6 +55,22 @@ class Payment
         });
 
         return $paymentMethods;
+    }
+
+    /**
+     * The fields a payment method list shows for one method.
+     *
+     * @param  \DigitalLabs\Payment\Payment\Payment  $paymentMethod
+     */
+    protected function describe($paymentMethod): array
+    {
+        return [
+            'method' => $paymentMethod->getCode(),
+            'method_title' => $paymentMethod->getTitle(),
+            'description' => $paymentMethod->getDescription(),
+            'sort' => $paymentMethod->getSortOrder(),
+            'image' => $paymentMethod->getImage(),
+        ];
     }
 
     /**

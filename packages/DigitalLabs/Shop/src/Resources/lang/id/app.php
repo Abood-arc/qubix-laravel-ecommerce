@@ -936,6 +936,7 @@ return [
             'minimum-order-message' => 'Jumlah pesanan minimum adalah',
             'missing-fields' => 'Beberapa informasi wajib belum diisi untuk produk ini.',
             'missing-options' => 'Beberapa opsi produk belum dipilih.',
+            'payment-method-unavailable' => 'This payment method is not available for this order.',
             'paypal-payment-cancelled' => 'Pembayaran melalui PayPal dibatalkan.',
             'qty-missing' => 'Setidaknya satu produk harus memiliki jumlah lebih dari 1.',
             'return-to-shop' => 'Kembali ke Toko',

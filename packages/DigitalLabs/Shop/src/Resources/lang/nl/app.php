@@ -936,6 +936,7 @@ return [
             'minimum-order-message' => 'Het minimum bestelbedrag is',
             'missing-fields' => 'Sommige vereiste velden ontbreken voor dit product.',
             'missing-options' => 'Opties ontbreken voor dit product.',
+            'payment-method-unavailable' => 'This payment method is not available for this order.',
             'paypal-payment-cancelled' => 'PayPal-betaling is geannuleerd.',
             'qty-missing' => 'Minstens één product moet meer dan 1 hoeveelheid hebben.',
             'return-to-shop' => 'Terug naar de winkel',

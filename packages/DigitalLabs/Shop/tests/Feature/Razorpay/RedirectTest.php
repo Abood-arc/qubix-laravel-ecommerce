@@ -1,8 +1,11 @@
 <?php
 
+use DigitalLabs\Checkout\Contracts\Cart as CartContract;
+use DigitalLabs\Checkout\Contracts\CartAddress as CartAddressContract;
 use DigitalLabs\Checkout\Models\CartAddress;
 use DigitalLabs\Checkout\Models\CartShippingRate;
 use DigitalLabs\Razorpay\Models\RazorpayPayment;
+use DigitalLabs\Shipping\Contracts\DeliveryCheck;
 use Illuminate\Http\Client\Request;
 use Illuminate\Support\Facades\Http;
 use Webkul\Faker\Helpers\Customer as CustomerFaker;
@@ -49,6 +52,26 @@ it('sends an unavailable method back to checkout', function () {
     get(route('razorpay.redirect'))
         ->assertRedirect(route('shop.checkout.onepage.index'))
         ->assertSessionHas('error', trans('razorpay::app.errors.unavailable'));
+
+    expect(RazorpayPayment::where('cart_id', $cart->id)->exists())->toBeFalse();
+
+    Http::assertNothingSent();
+});
+
+it('sends an undeliverable address back to checkout with the reason', function () {
+    app()->instance(DeliveryCheck::class, new class implements DeliveryCheck
+    {
+        public function check(CartAddressContract $shippingAddress, CartContract $cart): ?string
+        {
+            return 'We cannot deliver to '.$shippingAddress->postcode.'.';
+        }
+    });
+
+    $cart = $this->createRazorpayCart();
+
+    get(route('razorpay.redirect'))
+        ->assertRedirect(route('shop.checkout.onepage.index'))
+        ->assertSessionHas('error', 'We cannot deliver to '.$cart->shipping_address->postcode.'.');
 
     expect(RazorpayPayment::where('cart_id', $cart->id)->exists())->toBeFalse();
 
