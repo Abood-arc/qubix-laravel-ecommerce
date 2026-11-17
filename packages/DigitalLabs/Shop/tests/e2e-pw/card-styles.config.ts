@@ -14,6 +14,8 @@ import base from "./playwright.config";
 export default defineConfig({
     ...base,
     testDir: "./tests/card-styles",
+    // The Shop config ignores this folder; this config runs nothing else.
+    testIgnore: [],
     globalSetup: "./card-styles.global-setup.ts",
     globalTeardown: "./card-styles.global-teardown.ts",
 });
