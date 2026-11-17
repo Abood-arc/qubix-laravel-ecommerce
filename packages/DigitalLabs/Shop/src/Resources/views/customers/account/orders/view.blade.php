@@ -1423,6 +1423,8 @@
                                         <span>
                                             {{  $shipment->track_number }}
                                         </span>
+
+                                        {!! view_render_event('qubix.shop.customers.account.orders.view.shipments.track_number.after', ['shipment' => $shipment]) !!}
                                     </div>
 
                                     <div class="text-base font-medium">
@@ -1490,6 +1492,8 @@
                                                     {{  $shipment->track_number }}
                                                 </span>
                                             </div>
+
+                                            {!! view_render_event('qubix.shop.customers.account.orders.view.shipments.track_number.after', ['shipment' => $shipment]) !!}
 
                                             @lang('shop::app.customers.account.orders.view.shipments.individual-shipment', ['shipment_id' => $shipment->id])
                                         </div>
