@@ -396,3 +396,18 @@ it('lets only admins who may view shipments download the label', function () {
 
     get(route('admin.shiprocket.label', $order->id))->assertRedirect('https://labels.example.com/1.pdf');
 });
+
+it('checks the parcel size above 0.5 cm in the browser too', function () {
+    $this->loginAsAdmin();
+
+    // The settings ask for gt:0.5, a Laravel rule the admin's form validator lacks: without
+    // its browser twin the settings form could not be validated at all.
+    get(route('admin.configuration.index', ['sales', 'shipping']))
+        ->assertOk()
+        ->assertSee('gt:0.5', false)
+        ->assertSee("window.defineRule('gt'", false);
+
+    get(route('admin.sales.orders.index'))
+        ->assertOk()
+        ->assertDontSee("window.defineRule('gt'", false);
+});

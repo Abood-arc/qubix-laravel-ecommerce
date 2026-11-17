@@ -76,6 +76,21 @@ function bindShiprocketServiceabilityApi(): object
             throw new LogicException('Not used');
         }
 
+        public function generateManifest(int $shipmentId): ?string
+        {
+            throw new LogicException('Not used');
+        }
+
+        public function listPickupLocations(): array
+        {
+            throw new LogicException('Not used');
+        }
+
+        public function getOrder(int $shiprocketOrderId): array
+        {
+            throw new LogicException('Not used');
+        }
+
         public function generateLabel(int $shipmentId): string
         {
             throw new LogicException('Not used');

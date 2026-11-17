@@ -101,6 +101,9 @@ beforeEach(function () {
     autoSendConfig('general.general.locale_options.weight_unit', 'g');
     autoSendConfig('sales.shipping.shiprocket.active', 1);
     autoSendConfig('sales.shipping.shiprocket.auto_send', 1);
+    autoSendConfig('sales.shipping.shiprocket.length', '30');
+    autoSendConfig('sales.shipping.shiprocket.breadth', '25');
+    autoSendConfig('sales.shipping.shiprocket.height', '10');
     config(['shiprocket.email' => 'api@example.com', 'shiprocket.password' => 'secret']);
 });
 

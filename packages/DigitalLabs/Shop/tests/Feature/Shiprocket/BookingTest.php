@@ -46,7 +46,7 @@ function bookingApi(): object
         /** @var array<string, Closure[]> */
         public array $hooks = [
             'createOrder' => [], 'findOrderByChannelOrderId' => [], 'assignAwb' => [],
-            'requestPickup' => [], 'generateLabel' => [], 'cancelOrder' => [],
+            'requestPickup' => [], 'generateManifest' => [], 'generateLabel' => [], 'cancelOrder' => [],
         ];
 
         public function on(string $method, Closure $hook): static
@@ -84,6 +84,11 @@ function bookingApi(): object
         public function requestPickup(int $shipmentId): void
         {
             $this->record(__FUNCTION__, $shipmentId, fn () => parent::requestPickup($shipmentId));
+        }
+
+        public function generateManifest(int $shipmentId): ?string
+        {
+            return $this->record(__FUNCTION__, $shipmentId, fn () => parent::generateManifest($shipmentId));
         }
 
         public function generateLabel(int $shipmentId): string
@@ -211,6 +216,9 @@ beforeEach(function () {
 
     bookingConfig('general.general.locale_options.weight_unit', 'g');
     bookingConfig('sales.shipping.shiprocket.pickup_location', 'Pune Warehouse');
+    bookingConfig('sales.shipping.shiprocket.length', '30');
+    bookingConfig('sales.shipping.shiprocket.breadth', '25');
+    bookingConfig('sales.shipping.shiprocket.height', '10');
     bookingConfig('emails.general.notifications.emails.general.notifications.new_shipment', 1);
 });
 
@@ -276,7 +284,8 @@ it('books only once however often it is asked', function () {
     booker()->book($order);
     booker()->book($order->fresh(), manual: true);
 
-    expect($api->calls)->toHaveCount(4)
+    expect(collect($api->calls)->pluck(0)->all())
+        ->toBe(['createOrder', 'assignAwb', 'requestPickup', 'generateManifest', 'generateLabel'])
         ->and(Shipment::where('order_id', $order->id)->count())->toBe(1);
 });
 
@@ -377,6 +386,71 @@ it('ships the order even when shiprocket has no label yet', function (Throwable 
     'refused' => [fn () => new ShiprocketException('Label not ready')],
     'no answer' => [fn () => new ShiprocketUnknownOutcomeException('Shiprocket error (HTTP 502)')],
 ]);
+
+it('generates the manifest right after the pickup request', function () {
+    Log::spy();
+
+    $api = bookingApi();
+    $order = bookingOrder();
+
+    $row = booker()->book($order);
+
+    expect($api->args('generateManifest'))->toBe([$row->shipment_id]);
+
+    Log::shouldHaveReceived('info')
+        ->withArgs(fn ($message, $context = []) => str_contains($message, 'manifest')
+            && ($context['manifest_url'] ?? null) === 'https://example.test/manifests/200001.pdf')
+        ->once();
+});
+
+it('ships the order even when shiprocket generates no manifest', function (Throwable $failure) {
+    Log::spy();
+
+    $api = bookingApi()->on('generateManifest', fn () => throw $failure);
+    $order = bookingOrder();
+
+    $row = booker()->book($order);
+
+    // The manifest is paperwork for the courier's pickup: the booking, the store Shipment,
+    // the customer's email and the label all go ahead without it.
+    expect($row->fresh())
+        ->status->toBe(ShiprocketShipment::STATUS_PICKUP_SCHEDULED)
+        ->failure_reason->toBeNull()
+        ->label_url->toBe('https://example.test/labels/200001.pdf')
+        ->and(Shipment::where('order_id', $order->id)->count())->toBe(1)
+        ->and($order->fresh()->status)->toBe(Order::STATUS_COMPLETED);
+
+    Log::shouldHaveReceived('warning')
+        ->withArgs(fn ($message) => str_contains($message, 'manifest'))
+        ->once();
+
+    Mail::assertQueued(ShippedNotification::class, 1);
+    Mail::assertNotQueued(AdminAlert::class);
+
+    booker()->book($order->fresh());
+
+    expect($api->count('generateManifest'))->toBe(1)
+        ->and($api->count('assignAwb'))->toBe(1);
+})->with([
+    'refused' => [fn () => new ShiprocketException('Manifest not generated')],
+    'no answer' => [fn () => new ShiprocketUnknownOutcomeException('Shiprocket error (HTTP 502)')],
+]);
+
+it('fails the booking loudly when the parcel size setting is too small', function () {
+    bookingConfig('sales.shipping.shiprocket.height', '0.5');
+
+    $api = bookingApi();
+    $order = bookingOrder();
+
+    $row = booker()->book($order);
+
+    expect($row->fresh())
+        ->status->toBe(ShiprocketShipment::STATUS_FAILED)
+        ->failure_reason->toContain('must be more than 0.5 cm')
+        ->and($api->calls)->toBe([]);
+
+    Mail::assertQueued(AdminAlert::class, fn (AdminAlert $mail) => $mail->problem === 'booking_failed');
+});
 
 it('marks a refusal failed with shiprocket\'s reason and emails the admin', function () {
     bookingApi()->on('createOrder', fn () => throw new ShiprocketException('Wrong Pickup location entered.'));

@@ -18,6 +18,11 @@ class AddressNormalizer
      */
     protected const LINE_LIMIT = 80;
 
+    /**
+     * Longest city Shiprocket accepts (Create Custom Order: billing_city "Max char: 30").
+     */
+    protected const CITY_LIMIT = 30;
+
     protected const COUNTRY = 'India';
 
     /**
@@ -35,7 +40,7 @@ class AddressNormalizer
             'last_name' => trim((string) $address->last_name),
             'address' => $line1,
             'address_2' => $line2,
-            'city' => trim((string) $address->city),
+            'city' => $this->city((string) $address->city),
             'state' => $this->stateName((string) $address->state),
             'pincode' => $this->pin((string) $address->postcode),
             'country' => self::COUNTRY,
@@ -84,6 +89,23 @@ class AddressNormalizer
         }
 
         return $name;
+    }
+
+    /**
+     * The city within Shiprocket's limit: cut at the last word break that fits (or at the
+     * limit when there is none), without a dangling comma or dash.
+     */
+    protected function city(string $city): string
+    {
+        $city = trim($city);
+
+        if (mb_strlen($city) <= self::CITY_LIMIT) {
+            return $city;
+        }
+
+        $break = mb_strrpos(mb_substr($city, 0, self::CITY_LIMIT + 1), ' ') ?: self::CITY_LIMIT;
+
+        return rtrim(mb_substr($city, 0, $break), " \t,.;:-/");
     }
 
     /**

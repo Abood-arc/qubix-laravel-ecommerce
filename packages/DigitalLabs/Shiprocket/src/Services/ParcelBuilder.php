@@ -3,6 +3,7 @@
 namespace DigitalLabs\Shiprocket\Services;
 
 use DigitalLabs\Sales\Contracts\Order;
+use DigitalLabs\Shiprocket\Exceptions\ShiprocketException;
 use DigitalLabs\Shiprocket\Support\Settings;
 use DigitalLabs\Shiprocket\Support\WeightUnit;
 use Illuminate\Support\Collection;
@@ -17,6 +18,12 @@ class ParcelBuilder
 {
     protected const COD_METHOD = 'cashondelivery';
 
+    /**
+     * Each side of the parcel must be more than this (Create Custom Order: length, breadth
+     * and height "Must be more than 0.5").
+     */
+    protected const MIN_SIDE_CM = 0.5;
+
     public function __construct(protected AddressNormalizer $addresses) {}
 
     public function weightKg(Order $order): float
@@ -28,15 +35,21 @@ class ParcelBuilder
     }
 
     /**
-     * @throws \DigitalLabs\Shiprocket\Exceptions\ShiprocketException when an address cannot be used
+     * The payload for Shiprocket's "Create Custom Order".
+     *
+     * @throws ShiprocketException when an address or the parcel size cannot be used
      */
     public function build(Order $order): array
     {
+        $dimensions = $this->dimensions();
+
         $items = $this->itemsToShip($order);
 
         $billing = $this->addresses->normalize($order->billing_address);
 
         $shipping = $this->addresses->normalize($order->shipping_address ?? $order->billing_address);
+
+        [$subTotal, $shippingCharges] = $this->amounts($order, $items);
 
         return [
             'order_id' => (string) $order->increment_id,
@@ -45,12 +58,39 @@ class ParcelBuilder
             ...$this->addressFields('billing_', $billing, $order),
             'shipping_is_billing' => false,
             ...$this->addressFields('shipping_', $shipping, $order),
-            'order_items' => $items->map(fn ($item) => $this->itemLine($item))->all(),
+            'order_items' => $this->itemLines($items, $subTotal),
             'payment_method' => $order->payment?->method === self::COD_METHOD ? 'COD' : 'Prepaid',
-            ...$this->amounts($order, $items),
-            ...Settings::dimensions(),
+            'sub_total' => $subTotal,
+            'shipping_charges' => $shippingCharges,
+            'total_discount' => 0.0,
+            ...$dimensions,
             'weight' => $this->weightKg($order),
         ];
+    }
+
+    /**
+     * The parcel size from the settings. Shiprocket wants each side "more than 0.5" cm and
+     * otherwise refuses with a bare "Invalid Data", so a wrong setting fails here, by name.
+     *
+     * @return array{length: float, breadth: float, height: float}
+     *
+     * @throws ShiprocketException
+     */
+    protected function dimensions(): array
+    {
+        $dimensions = Settings::dimensions();
+
+        foreach ($dimensions as $size) {
+            if ($size <= self::MIN_SIDE_CM) {
+                throw new ShiprocketException(sprintf(
+                    'The parcel size in the Shiprocket settings must be more than %s cm on every side (length %s, breadth %s, height %s).',
+                    self::MIN_SIDE_CM,
+                    ...array_values($dimensions),
+                ));
+            }
+        }
+
+        return $dimensions;
     }
 
     protected function itemsToShip(Order $order): Collection
@@ -61,7 +101,8 @@ class ParcelBuilder
     }
 
     /**
-     * Shiprocket's name for the first name is `<prefix>customer_name`.
+     * Shiprocket's name for the first name is `<prefix>customer_name`. Its PIN codes and
+     * phone numbers are integers, and the normalizer has made both digits only.
      */
     protected function addressFields(string $prefix, array $address, Order $order): array
     {
@@ -71,60 +112,87 @@ class ParcelBuilder
             $prefix.'address' => $address['address'],
             $prefix.'address_2' => $address['address_2'],
             $prefix.'city' => $address['city'],
-            $prefix.'pincode' => $address['pincode'],
+            $prefix.'pincode' => (int) $address['pincode'],
             $prefix.'state' => $address['state'],
             $prefix.'country' => $address['country'],
             $prefix.'email' => $address['email'] ?: (string) $order->customer_email,
-            $prefix.'phone' => $address['phone'],
+            $prefix.'phone' => (int) $address['phone'],
         ];
     }
 
     /**
-     * Per-unit amounts: the selling price includes the item's tax, and `tax` is its rate (%).
-     * The discount is sent once, as the order's `total_discount` (see amounts()), never per
-     * item as well, so Shiprocket cannot take it off twice.
-     */
-    protected function itemLine($item): array
-    {
-        return [
-            'name' => $item->name,
-            'sku' => $item->sku,
-            'units' => (int) $item->qty_to_ship,
-            'selling_price' => round(($item->total + $item->tax_amount) / $item->qty_ordered, 2),
-            'discount' => 0.0,
-            'tax' => (float) $item->tax_percent,
-        ];
-    }
-
-    /**
-     * Shiprocket collects `sub_total + shipping_charges - total_discount` on a COD parcel.
+     * The amount Shiprocket collects on a COD parcel and shows on its invoice. Shiprocket
+     * adds nothing up itself ("the total is not calculated automatically"), so the payload
+     * says it plainly: `sub_total` is the goods after discount, with tax, and
+     * `shipping_charges` the shipping the customer paid (after a shipping discount, with
+     * tax). No discount is sent anywhere else (`total_discount` and every item's `discount`
+     * are 0), so none can be taken off twice.
      *
-     * A parcel carrying the whole order uses the order's own totals, so that amount is
-     * exactly `grand_total` (sub_total + tax + shipping - discount): item tax goes into
-     * `sub_total`, shipping tax into `shipping_charges`. The rest of a partly shipped,
+     * A parcel carrying the whole order sends `grand_total - shipping_charges` as the sub
+     * total, so the two add up to the grand total exactly. The rest of a partly shipped,
      * refunded or cancelled order declares only the units in this parcel, without shipping.
      *
-     * The item lines carry no discount, so this is the only place it is sent. Not yet
-     * confirmed against Shiprocket itself: on the first live discounted COD booking, check
-     * that the amount Shiprocket shows to collect equals the order's grand_total.
+     * @return array{0: float, 1: float} the sub total and the shipping charges
      */
     protected function amounts(Order $order, Collection $items): array
     {
         if ($this->isWholeOrder($order)) {
-            return [
-                'sub_total' => round($order->sub_total + $order->tax_amount - $order->shipping_tax_amount, 2),
-                'shipping_charges' => round($order->shipping_amount + $order->shipping_tax_amount, 2),
-                'total_discount' => round((float) $order->discount_amount, 2),
-            ];
+            $shipping = round(max(0, $order->shipping_amount + $order->shipping_tax_amount - $order->shipping_discount_amount), 2);
+
+            return [round($order->grand_total - $shipping, 2), $shipping];
         }
 
-        $share = fn ($item, $amount) => $amount * $item->qty_to_ship / $item->qty_ordered;
+        return [round($items->sum(fn ($item) => $this->netAmount($item)), 2), 0.0];
+    }
 
-        return [
-            'sub_total' => round($items->sum(fn ($item) => $share($item, $item->total + $item->tax_amount)), 2),
-            'shipping_charges' => 0.0,
-            'total_discount' => round($items->sum(fn ($item) => $share($item, $item->discount_amount)), 2),
-        ];
+    /**
+     * One line per item, each unit at its net price: its share of the item's discount taken
+     * off, its tax included (`tax` is the rate, %). The paise lost rounding unit prices go on
+     * the last single-unit line (else the last line), so the lines add up to the sub total;
+     * only when every line has several units can a paisa or two per line remain.
+     */
+    protected function itemLines(Collection $items, float $subTotal): array
+    {
+        $lines = $items->map(fn ($item) => [
+            'name' => $item->name,
+            'sku' => $item->sku,
+            'units' => (int) $item->qty_to_ship,
+            'selling_price' => round($this->netAmount($item) / $item->qty_to_ship, 2),
+            'discount' => 0.0,
+            'tax' => (float) $item->tax_percent,
+        ])->values()->all();
+
+        if ($lines === []) {
+            return $lines;
+        }
+
+        $paise = fn (float $amount) => (int) round($amount * 100);
+
+        $remainder = $paise($subTotal) - array_sum(array_map(
+            fn ($line) => $paise($line['selling_price']) * $line['units'],
+            $lines
+        ));
+
+        if ($remainder !== 0) {
+            $singles = array_keys(array_filter($lines, fn ($line) => $line['units'] === 1));
+
+            $last = $singles !== [] ? end($singles) : array_key_last($lines);
+
+            $perUnit = (int) round($remainder / $lines[$last]['units']);
+
+            $lines[$last]['selling_price'] = ($paise($lines[$last]['selling_price']) + $perUnit) / 100;
+        }
+
+        return $lines;
+    }
+
+    /**
+     * What the customer pays for the units of an item in this parcel: their share of the
+     * item's total and tax, less their share of its discount.
+     */
+    protected function netAmount($item): float
+    {
+        return ($item->total + $item->tax_amount - $item->discount_amount) * $item->qty_to_ship / $item->qty_ordered;
     }
 
     protected function isWholeOrder(Order $order): bool

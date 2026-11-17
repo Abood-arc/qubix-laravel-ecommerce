@@ -296,9 +296,9 @@ it('refuses a serviceability request shiprocket finds invalid', function () {
         ->and($exception->getMessage())->toBe('Oops! Invalid Data. The weight field is required.');
 });
 
-it('finds an order by its store order number', function () {
+it('finds an order by its store order number with the channel_order_id filter', function () {
     fakeShiprocketHttp([
-        SHIPROCKET_TEST_API.'orders?search=1001' => Http::response(['data' => [
+        SHIPROCKET_TEST_API.'orders?filter_by=channel_order_id&filter=1001' => Http::response(['data' => [
             ['id' => 70, 'channel_order_id' => '10010', 'shipments' => [['id' => 80]]],
             ['id' => 71, 'channel_order_id' => '1001', 'shipments' => [['id' => 81], ['id' => 82]]],
         ]]),
@@ -307,12 +307,12 @@ it('finds an order by its store order number', function () {
     expect(app(ShiprocketClient::class)->findOrderByChannelOrderId('1001'))
         ->toBe(['order_id' => 71, 'shipment_id' => 81]);
 
-    Http::assertSent(fn (Request $request) => $request->method() === 'GET' && $request->url() === SHIPROCKET_TEST_API.'orders?search=1001');
+    Http::assertSent(fn (Request $request) => $request->method() === 'GET' && $request->url() === SHIPROCKET_TEST_API.'orders?filter_by=channel_order_id&filter=1001');
 });
 
 it('skips cancelled orders with the same store order number', function () {
     fakeShiprocketHttp([
-        SHIPROCKET_TEST_API.'orders?search=1001' => Http::response(['data' => [
+        SHIPROCKET_TEST_API.'orders?filter_by=channel_order_id&filter=1001' => Http::response(['data' => [
             ['id' => 70, 'channel_order_id' => '1001', 'status' => 'CANCELED', 'shipments' => [['id' => 80]]],
             ['id' => 71, 'channel_order_id' => '1001', 'status' => 'Cancelled', 'shipments' => [['id' => 81]]],
             ['id' => 72, 'channel_order_id' => '1001', 'status' => 'NEW', 'shipments' => [['id' => 82]]],
@@ -325,7 +325,7 @@ it('skips cancelled orders with the same store order number', function () {
 
 it('finds nothing when the only order with that number is cancelled', function () {
     fakeShiprocketHttp([
-        SHIPROCKET_TEST_API.'orders?search=1001' => Http::response(['data' => [
+        SHIPROCKET_TEST_API.'orders?filter_by=channel_order_id&filter=1001' => Http::response(['data' => [
             ['id' => 70, 'channel_order_id' => '1001', 'status' => 'canceled', 'shipments' => [['id' => 80]]],
         ]]),
     ]);
@@ -335,7 +335,7 @@ it('finds nothing when the only order with that number is cancelled', function (
 
 it('finds nothing when no order has that store order number', function () {
     fakeShiprocketHttp([
-        SHIPROCKET_TEST_API.'orders?search=1001' => Http::response(['data' => [
+        SHIPROCKET_TEST_API.'orders?filter_by=channel_order_id&filter=1001' => Http::response(['data' => [
             ['id' => 70, 'channel_order_id' => '10010', 'shipments' => [['id' => 80]]],
         ]]),
     ]);
@@ -446,3 +446,78 @@ it('cancels an order', function () {
         && $request->method() === 'POST'
         && $request->data() === ['ids' => [71]]);
 });
+
+it('generates the manifest after the pickup', function () {
+    fakeShiprocketHttp([
+        SHIPROCKET_TEST_API.'manifests/generate' => Http::response([
+            'status' => 1,
+            'manifest_url' => 'https://manifests.example/MANIFEST-22.pdf',
+        ]),
+    ]);
+
+    expect(app(ShiprocketClient::class)->generateManifest(22))->toBe('https://manifests.example/MANIFEST-22.pdf');
+
+    Http::assertSent(fn (Request $request) => $request->url() === SHIPROCKET_TEST_API.'manifests/generate'
+        && $request->method() === 'POST'
+        && $request->data() === ['shipment_id' => [22]]);
+});
+
+it('has no new manifest for a shipment shiprocket manifested already', function () {
+    fakeShiprocketHttp([
+        SHIPROCKET_TEST_API.'manifests/generate' => Http::response([
+            'message' => 'Manifest already generated for some shipment_ids, Please try again after removin them',
+            'status_code' => 400,
+            'already_manifested_shipment_ids' => [22],
+        ], 400),
+    ]);
+
+    expect(app(ShiprocketClient::class)->generateManifest(22))->toBeNull();
+});
+
+it('refuses when no manifest url comes back', function () {
+    // Shiprocket's documented answer to a missing field or invalid data is a 200 without a URL.
+    fakeShiprocketHttp([
+        SHIPROCKET_TEST_API.'manifests/generate' => Http::response(['status' => 1, 'manifest_url' => '']),
+    ]);
+
+    app(ShiprocketClient::class)->generateManifest(22);
+})->throws(ShiprocketException::class, 'Shiprocket error (HTTP 200)');
+
+it('lists the pickup locations of the account', function () {
+    fakeShiprocketHttp([
+        SHIPROCKET_TEST_API.'settings/company/pickup' => Http::response(['data' => [
+            'shipping_address' => [
+                ['id' => 1, 'pickup_location' => 'Pune Warehouse', 'pin_code' => '411001', 'city' => 'Pune'],
+                ['id' => 2, 'pickup_location' => 'Home', 'pin_code' => 110001, 'city' => 'Delhi'],
+            ],
+            'allow_more' => 'true',
+        ]]),
+    ]);
+
+    expect(app(ShiprocketClient::class)->listPickupLocations())->toBe([
+        ['pickup_location' => 'Pune Warehouse', 'pin_code' => '411001'],
+        ['pickup_location' => 'Home', 'pin_code' => '110001'],
+    ]);
+
+    Http::assertSent(fn (Request $request) => $request->method() === 'GET'
+        && $request->url() === SHIPROCKET_TEST_API.'settings/company/pickup');
+});
+
+it('reads one order back', function () {
+    fakeShiprocketHttp([
+        SHIPROCKET_TEST_API.'orders/show/71' => Http::response(['data' => [
+            'id' => 71, 'channel_order_id' => '1001', 'total' => 345, 'payment_method' => 'cod',
+        ]]),
+    ]);
+
+    expect(app(ShiprocketClient::class)->getOrder(71))
+        ->toBe(['id' => 71, 'channel_order_id' => '1001', 'total' => 345, 'payment_method' => 'cod']);
+});
+
+it('refuses to read an order shiprocket does not know', function () {
+    fakeShiprocketHttp([
+        SHIPROCKET_TEST_API.'orders/show/71' => Http::response(['message' => 'Order ID not found', 'status_code' => 400], 400),
+    ]);
+
+    app(ShiprocketClient::class)->getOrder(71);
+})->throws(ShiprocketException::class, 'Order ID not found');

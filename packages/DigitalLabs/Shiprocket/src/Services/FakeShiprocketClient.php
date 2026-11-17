@@ -5,6 +5,7 @@ namespace DigitalLabs\Shiprocket\Services;
 use DigitalLabs\Shiprocket\Contracts\ShiprocketApi;
 use DigitalLabs\Shiprocket\Exceptions\ShiprocketException;
 use DigitalLabs\Shiprocket\Models\ShiprocketShipment;
+use DigitalLabs\Shiprocket\Support\Settings;
 use Illuminate\Support\Facades\Cache;
 
 /**
@@ -55,7 +56,13 @@ class FakeShiprocketClient implements ShiprocketApi
         ];
 
         Cache::forever(self::CACHE_PREFIX.'channel:'.$channelOrderId, $ids);
-        Cache::forever(self::CACHE_PREFIX.'order:'.$ids['order_id'], ['cancelled' => false]);
+        Cache::forever(self::CACHE_PREFIX.'order:'.$ids['order_id'], [
+            'cancelled' => false,
+            'channel_order_id' => $channelOrderId,
+            'payment_method' => strtolower((string) ($payload['payment_method'] ?? '')),
+            'sub_total' => $payload['sub_total'] ?? null,
+            'shipping_charges' => $payload['shipping_charges'] ?? null,
+        ]);
 
         return $ids;
     }
@@ -77,6 +84,11 @@ class FakeShiprocketClient implements ShiprocketApi
 
     public function requestPickup(int $shipmentId): void {}
 
+    public function generateManifest(int $shipmentId): ?string
+    {
+        return 'https://example.test/manifests/'.$shipmentId.'.pdf';
+    }
+
     public function generateLabel(int $shipmentId): string
     {
         return 'https://example.test/labels/'.$shipmentId.'.pdf';
@@ -84,7 +96,36 @@ class FakeShiprocketClient implements ShiprocketApi
 
     public function cancelOrder(int $shiprocketOrderId): void
     {
-        Cache::forever(self::CACHE_PREFIX.'order:'.$shiprocketOrderId, ['cancelled' => true]);
+        $key = self::CACHE_PREFIX.'order:'.$shiprocketOrderId;
+
+        Cache::forever($key, ['cancelled' => true] + (array) Cache::get($key, []));
+    }
+
+    /**
+     * The configured pickup location, as if the account had exactly that one.
+     */
+    public function listPickupLocations(): array
+    {
+        return [['pickup_location' => Settings::pickupLocation(), 'pin_code' => Settings::pickupPin()]];
+    }
+
+    public function getOrder(int $shiprocketOrderId): array
+    {
+        $order = Cache::get(self::CACHE_PREFIX.'order:'.$shiprocketOrderId);
+
+        if (! $order) {
+            throw new ShiprocketException('Order ID not found');
+        }
+
+        $total = isset($order['sub_total']) ? round($order['sub_total'] + ($order['shipping_charges'] ?? 0), 2) : null;
+
+        return [
+            'id' => $shiprocketOrderId,
+            'channel_order_id' => $order['channel_order_id'] ?? null,
+            'status' => $order['cancelled'] ? 'CANCELED' : 'NEW',
+            'payment_method' => $order['payment_method'] ?? null,
+            'total' => $total,
+        ];
     }
 
     /**
