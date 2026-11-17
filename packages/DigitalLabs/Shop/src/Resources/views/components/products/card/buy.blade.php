@@ -270,11 +270,12 @@
 
                         this.phase = 'added';
 
-                        this.$cardFlyToCart(this.$refs.button, this.product.base_image?.small_image_url);
-
                         this.$cardAnnounce(this.$el, buyText.added);
 
                         this.addedTimer = setTimeout(() => (this.phase = 'idle'), 900);
+
+                        // Last, and on its own: the flight is decoration, whatever it does cannot touch the add.
+                        this.$cardFlyToCart(this.$refs.button, this.product.base_image?.small_image_url);
                     },
 
                     /**
