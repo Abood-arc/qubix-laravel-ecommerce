@@ -910,3 +910,145 @@
         transform: none !important;
     }
 }
+
+/* ========== Photo deck: a small stack of photos, a "1 / 4" counter, a round Add to cart ========== */
+
+.pc-card--deck .pc-media {
+    overflow: visible;
+    background: transparent;
+}
+
+.pc-card--deck .pc-media-link {
+    touch-action: pan-y; /* sideways drags throw the photo; vertical ones still scroll the page */
+}
+
+.pc-deck {
+    --spread: 1;
+
+    position: absolute;
+    inset-block: 12px 4px;
+    inset-inline: 4px 14px;
+}
+
+.pc-deck-gallery.is-fanned .pc-deck {
+    --spread: 1.9;
+}
+
+.pc-deck-layer {
+    position: absolute;
+    inset: 0;
+    z-index: calc(10 - var(--d, 0));
+    overflow: hidden;
+    border-radius: var(--pc-radius);
+    background: rgb(var(--c-sand));
+    box-shadow: 0 0 0 1px rgb(0 0 0 / 0.04), 0 2px 4px rgb(0 0 0 / 0.05), 0 8px 18px rgb(0 0 0 / 0.07);
+    transform:
+        translate(calc(var(--d, 0) * 5px * var(--spread) * var(--pc-dir)), calc(var(--d, 0) * -4px * var(--spread)))
+        rotate(calc(var(--d, 0) * 2deg * var(--spread) * var(--pc-dir)))
+        scale(calc(1 - var(--d, 0) * 0.03));
+    transition: transform 420ms var(--pc-ease-out), opacity 200ms;
+    user-select: none;
+    -webkit-user-drag: none;
+}
+
+.pc-deck-layer .pc-photo {
+    position: absolute;
+    inset: 0;
+}
+
+.pc-deck-layer.is-deep {
+    opacity: 0;
+}
+
+.pc-deck-next {
+    position: absolute;
+    z-index: 12;
+    inset-block-end: 14px;
+    inset-inline-start: 14px;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    height: 34px;
+    padding: 0;
+    padding-inline: 12px 8px;
+    border: 0;
+    border-radius: var(--pc-chip);
+    background: rgb(255 255 255 / 0.94);
+    color: var(--pc-ink);
+    font-size: 12.5px;
+    font-weight: 700;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+    cursor: pointer;
+    box-shadow: 0 1px 2px rgb(0 0 0 / 0.08), 0 4px 12px rgb(0 0 0 / 0.1);
+}
+
+.pc-deck-next::after {
+    content: "";
+    position: absolute;
+    inset: -5px;
+}
+
+.pc-deck-next:hover {
+    background: #fff;
+}
+
+.pc-deck-next .pc-ico {
+    width: 16px;
+    height: 16px;
+    stroke-width: 2.2;
+}
+
+[dir="rtl"] .pc-deck-next .pc-ico {
+    transform: scaleX(-1);
+}
+
+.pc-card--deck .pc-badge {
+    z-index: 12;
+    inset-block-start: 20px;
+    inset-inline-start: 12px;
+}
+
+.pc-card--deck .pc-info {
+    gap: 4px;
+    text-align: start;
+}
+
+.pc-price-row {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin-bottom: 2px;
+}
+
+.pc-price-row .pc-price {
+    justify-content: flex-start;
+    margin: 0;
+    margin-inline-end: auto;
+}
+
+.pc-card--deck .pc-ratings,
+.pc-card--deck .pc-stock {
+    align-self: flex-start;
+    justify-content: flex-start;
+}
+
+@media (max-width: 767px) {
+    .pc-deck-next {
+        height: 30px;
+        inset-block-end: 10px;
+        inset-inline-start: 10px;
+        padding-inline: 9px 5px;
+    }
+
+    .pc-price-row {
+        gap: 2px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .pc-deck-layer,
+    .pc-buy--round {
+        transition: none;
+    }
+}

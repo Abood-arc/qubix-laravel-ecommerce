@@ -18,6 +18,11 @@ enum ProductCardStyleEnum: string
      */
     case SWIPE = 'swipe';
 
+    /**
+     * "Photo deck" (design concept E).
+     */
+    case DECK = 'deck';
+
     public const CONFIG_KEY = 'general.design.product_card.style';
 
     /**

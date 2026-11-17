@@ -10,5 +10,6 @@ it('uses the Classic card until the owner picks another style', function (?strin
     'nothing saved' => [null, ProductCardStyleEnum::CLASSIC],
     'classic' => ['classic', ProductCardStyleEnum::CLASSIC],
     'swipe' => ['swipe', ProductCardStyleEnum::SWIPE],
+    'deck' => ['deck', ProductCardStyleEnum::DECK],
     'an unknown value' => ['carousel', ProductCardStyleEnum::CLASSIC],
 ]);

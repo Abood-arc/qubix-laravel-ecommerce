@@ -45,3 +45,22 @@ it('prints the size unit chosen in admin', function (?string $unit, string $labe
     'inches' => ['in', 'in'],
     'centimetres' => ['cm', 'cm'],
 ]);
+
+it('renders the Photo deck card in grids and only ships the deck photo component', function () {
+    $this->pinStoreConfig(ProductCardStyleEnum::CONFIG_KEY, 'deck');
+
+    $html = $this->searchPageHtml();
+
+    expect($this->productCardTemplate($html))
+        ->toContain('data-card-style="deck"')
+        ->toContain('<v-card-deck-gallery')
+        ->and($html)->toContain('id="v-card-deck-gallery-template"')
+        ->and($html)->not->toContain('id="v-card-swipe-gallery-template"');
+});
+
+it('keeps the list card exactly as today with the Photo deck card', function () {
+    $this->pinStoreConfig(ProductCardStyleEnum::CONFIG_KEY, 'deck');
+
+    expect($this->listCardMarkup($this->productCardTemplate($this->searchPageHtml())))
+        ->toBe($this->listCardMarkup($this->classicCardFixture()));
+});
