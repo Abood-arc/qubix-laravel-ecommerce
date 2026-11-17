@@ -1,8 +1,9 @@
-import { devices, type Page } from "@playwright/test";
+import { devices, type Locator, type Page } from "@playwright/test";
 import { test, expect } from "../../setup";
 import {
     STORE_LOOKS,
     brandColour,
+    contrastRatio,
     currentStoreLook,
     findMultiPhotoProduct,
     lookColour,
@@ -159,8 +160,9 @@ test.describe("Reduced motion", () => {
     });
 
     /**
-     * Opacity animations started on the card's photo layers since the page loaded (they are short, so
-     * they are recorded as they start rather than looked up afterwards).
+     * Fades started on the card's photo layers from now on: animations whose keyframes change opacity and
+     * never move anything (a throw also fades, but it has a transform). They are short, so they are
+     * recorded as they start rather than looked up afterwards.
      */
     const recordPhotoFades = (page: Page) =>
         photoLink(page, product).evaluate((link) => {
@@ -170,7 +172,9 @@ test.describe("Reduced motion", () => {
             Element.prototype.animate = function (keyframes, options) {
                 const frames = Array.isArray(keyframes) ? keyframes : [keyframes];
 
-                if (link.contains(this) && frames.some((frame) => frame && "opacity" in frame)) {
+                const fade = frames.some((frame) => frame && "opacity" in frame) && ! frames.some((frame) => frame && "transform" in frame);
+
+                if (link.contains(this) && fade) {
                     fades.push(frames.length);
                 }
 
@@ -243,6 +247,13 @@ test.describe("Every store look", () => {
             await expect(styledCard(page, product)).toHaveCSS("color", await lookColour(page, "--c-ink"));
             await expect(styledCard(page, product).getByRole("button", { name: `Compare ${product.name}` })).toHaveCSS("color", await lookColour(page, "--c-muted"));
 
+            // An unticked box is shown by its outline alone, so the outline needs 3:1 against the box (WCAG 1.4.11).
+            // The box is an aria-hidden part of the Compare button, with no role of its own.
+            const box = styledCard(page, product).getByRole("button", { name: `Compare ${product.name}` }).locator(".pc-compare-box");
+            const [outline, fill] = await box.evaluate((element) => [getComputedStyle(element).borderTopColor, getComputedStyle(element).backgroundColor]);
+
+            expect(contrastRatio(outline, fill), `tick box outline ${outline} on ${fill}`).toBeGreaterThanOrEqual(3);
+
             await withAdmin(browser, (admin) => setCardStyle(admin, "Photo deck"));
 
             await openSearchFor(page, product);
@@ -252,3 +263,144 @@ test.describe("Every store look", () => {
         });
     }
 });
+
+/**
+ * Clicks Add to cart and reads the flying photo's path: the animations are paused on their first and last
+ * frame to measure the photo's centre there. Also returns the centre of the visible header cart icon. The
+ * photo (.pc-fly) and the icon ([data-cart-target]) have no role, so they are found by CSS.
+ */
+async function flightToCart(page: Page, add: Locator) {
+    await page.evaluate(() => {
+        new MutationObserver((records, observer) =>
+            records.forEach((record) =>
+                record.addedNodes.forEach((node) => {
+                    if (! (node instanceof HTMLElement) || ! node.classList.contains("pc-fly")) {
+                        return;
+                    }
+
+                    observer.disconnect();
+
+                    const animations = node.getAnimations({ subtree: true });
+                    const centre = () => {
+                        const box = node.querySelector(".pc-fly-dot")!.getBoundingClientRect();
+
+                        return { x: box.left + box.width / 2, y: box.top + box.height / 2 };
+                    };
+
+                    animations.forEach((animation) => animation.pause());
+                    animations.forEach((animation) => (animation.currentTime = 0));
+
+                    const start = centre();
+
+                    animations.forEach((animation) => (animation.currentTime = Number(animation.effect!.getComputedTiming().endTime) - 1));
+
+                    const end = centre();
+
+                    animations.forEach((animation) => animation.play());
+
+                    (window as any).cardFlight = { start, end };
+                })
+            )
+        ).observe(document.body, { childList: true });
+    });
+
+    const button = (await add.boundingBox())!;
+
+    await add.click();
+    await page.waitForFunction(() => (window as any).cardFlight);
+
+    const target = await page.evaluate(() => {
+        const icon = [...document.querySelectorAll("[data-cart-target]")].find((element) => element.getBoundingClientRect().width > 0)!;
+        const box = icon.getBoundingClientRect();
+
+        return { x: box.left + box.width / 2, y: box.top + box.height / 2 };
+    });
+
+    return {
+        button: { x: button.x + button.width / 2, y: button.y + button.height / 2 },
+        ...((await page.evaluate(() => (window as any).cardFlight)) as { start: { x: number; y: number }; end: { x: number; y: number } }),
+        target,
+    };
+}
+
+for (const device of ["desktop", "phone"] as const) {
+    test.describe(`Arabic on a ${device}: the photo flies to the cart icon`, () => {
+        test.use(device === "phone" ? pixel7 : { viewport: { width: 1366, height: 900 } });
+
+        test.beforeAll(async ({ browser }) => {
+            await withAdmin(browser, (admin) => setCardStyle(admin, "Swipe, named and sized"));
+        });
+
+        test("from the Add to cart button to the header cart, right to left", async ({ page }) => {
+            await page.goto("?locale=ar");
+
+            const product = await findMultiPhotoProduct(page.request, "ar");
+
+            await openSearchFor(page, product, "&locale=ar");
+
+            await expect(page.locator("html")).toHaveAttribute("dir", "rtl");
+
+            const flight = await flightToCart(page, styledCard(page, product).getByRole("button", { name: /^أضف إلى السلة/ }));
+
+            // It leaves from the button and lands on the icon (the photo shrinks as it lands, so allow a few pixels).
+            expect(Math.hypot(flight.start.x - flight.button.x, flight.start.y - flight.button.y)).toBeLessThan(4);
+            expect(Math.hypot(flight.end.x - flight.target.x, flight.end.y - flight.target.y)).toBeLessThan(12);
+        });
+    });
+}
+
+const DECK_TEXT = {
+    en: {
+        add: (name: string) => `Add ${name} to cart`,
+        next: (name: string, current: number, total: number) => `Next photo of ${name}, showing ${current} of ${total}`,
+        inCart: "1 in cart",
+    },
+    ar: {
+        add: (name: string) => `أضف ${name} إلى السلة`,
+        next: (name: string, current: number, total: number) => `الصورة التالية من ${name}، المعروضة ${current} من ${total}`,
+        inCart: "1 في السلة",
+    },
+};
+
+for (const device of ["desktop", "phone"] as const) {
+    test.describe(`Photo deck on a ${device}: the "1 / 4" counter while the product is in the cart`, () => {
+        test.use(device === "phone" ? pixel7 : { viewport: { width: 1366, height: 900 } });
+
+        test.beforeAll(async ({ browser }) => {
+            await withAdmin(browser, (admin) => setCardStyle(admin, "Photo deck"));
+        });
+
+        for (const locale of ["en", "ar"] as const) {
+            test(`${locale}: it moves above the − 1 + control and still answers a ${device === "phone" ? "tap" : "click"}`, async ({ page }) => {
+                const text = DECK_TEXT[locale];
+
+                await page.goto(`?locale=${locale}`);
+
+                const product = await findMultiPhotoProduct(page.request, locale);
+
+                await openSearchFor(page, product, `&locale=${locale}`);
+
+                const card = styledCard(page, product);
+
+                await card.getByRole("button", { name: text.add(product.name) }).click();
+
+                const control = card.getByRole("group", { name: text.inCart });
+                const counter = card.getByRole("button", { name: text.next(product.name, 1, product.photoCount) });
+
+                await expect(control).toBeVisible();
+                await expect(counter).toBeVisible();
+
+                // Clear of the control once it has moved up.
+                await expect
+                    .poll(async () => (await counter.boundingBox())!.y + (await counter.boundingBox())!.height <= (await control.boundingBox())!.y)
+                    .toBe(true);
+
+                // Both actions check that nothing else would take the pointer.
+                device === "phone" ? await counter.tap() : await counter.click();
+
+                await expect(card.getByText(`2 / ${product.photoCount}`)).toBeVisible();
+                await expect(control).toBeVisible();
+            });
+        }
+    });
+}

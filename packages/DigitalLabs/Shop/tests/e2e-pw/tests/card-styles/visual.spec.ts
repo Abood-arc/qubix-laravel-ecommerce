@@ -4,6 +4,7 @@ import path from "path";
 import { test, expect } from "../../setup";
 import {
     STORE_LOOKS,
+    cardPhotosOnScreenLoaded,
     currentStoreLook,
     findMultiPhotoProduct,
     openSearchFor,
@@ -72,6 +73,8 @@ test("@visual card styles in every look, device and direction", async ({ browser
                         const card = styledCard(page, product);
 
                         await expect(card).toBeVisible();
+                        await card.scrollIntoViewIfNeeded();
+                        await cardPhotosOnScreenLoaded(page);
 
                         await keep(name, await card.screenshot({ animations: "disabled" }));
 
@@ -81,6 +84,7 @@ test("@visual card styles in every look, device and direction", async ({ browser
                         await card.locator(".pc-add").click();
                         await expect(card.locator('.pc-buy[data-state="qty"]')).toBeVisible();
                         await card.scrollIntoViewIfNeeded();
+                        await cardPhotosOnScreenLoaded(page);
 
                         await keep(`${name}-in-cart`, await page.screenshot({ animations: "disabled" }));
 

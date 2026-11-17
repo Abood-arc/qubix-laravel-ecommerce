@@ -231,3 +231,43 @@ export async function lookColour(page: Page, token: string): Promise<string> {
 
     return `rgb(${channels.split(/\s+/).join(", ")})`;
 }
+
+/**
+ * The WCAG contrast ratio of two computed CSS colours ("rgb(138, 142, 136)"), from 1 to 21.
+ */
+export function contrastRatio(first: string, second: string): number {
+    const luminance = (colour: string) => {
+        const [red, green, blue] = (colour.match(/\d+(\.\d+)?/g) ?? []).slice(0, 3).map((value) => {
+            const channel = Number(value) / 255;
+
+            return channel <= 0.03928 ? channel / 12.92 : ((channel + 0.055) / 1.055) ** 2.4;
+        });
+
+        return 0.2126 * red + 0.7152 * green + 0.0722 * blue;
+    };
+
+    const [lighter, darker] = [luminance(first), luminance(second)].sort((a, b) => b - a);
+
+    return (lighter + 0.05) / (darker + 0.05);
+}
+
+/**
+ * Waits until every card photo on screen that has been asked to load (it has a src) has loaded, so a
+ * screenshot never catches a blank photo tile. The photo wrapper (.pc-photo, no role) carries is-loaded
+ * once its image is in.
+ */
+export async function cardPhotosOnScreenLoaded(page: Page): Promise<void> {
+    await expect
+        .poll(() =>
+            page.evaluate(() =>
+                [...document.querySelectorAll(".pc-photo:has(> img[src])")]
+                    .filter((photo) => {
+                        const box = photo.getBoundingClientRect();
+
+                        return box.width > 0 && box.bottom > 0 && box.top < innerHeight && box.right > 0 && box.left < innerWidth;
+                    })
+                    .every((photo) => photo.classList.contains("is-loaded"))
+            )
+        )
+        .toBe(true);
+}
