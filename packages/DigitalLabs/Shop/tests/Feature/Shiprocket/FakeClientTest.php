@@ -90,3 +90,19 @@ it('marks an order cancelled and no longer finds it', function () {
     expect($api->isCancelled($ids['order_id']))->toBeTrue()
         ->and($api->findOrderByChannelOrderId('fake-3001'))->toBeNull();
 });
+
+it('continues after the highest stored shipment when its cache was cleared', function () {
+    $order = DigitalLabs\Sales\Models\Order::factory()->create();
+
+    DigitalLabs\Shiprocket\Models\ShiprocketShipment::create([
+        'order_id' => $order->id,
+        'shipment_id' => 200005,
+        'awb_code' => 'FAKE200005',
+    ]);
+
+    Illuminate\Support\Facades\Cache::flush();
+
+    $ids = app(FakeShiprocketClient::class)->createOrder(['order_id' => 'after-flush']);
+
+    expect($ids['shipment_id'])->toBe(200006);
+});

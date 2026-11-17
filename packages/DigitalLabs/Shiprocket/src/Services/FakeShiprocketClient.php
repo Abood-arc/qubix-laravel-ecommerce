@@ -4,6 +4,7 @@ namespace DigitalLabs\Shiprocket\Services;
 
 use DigitalLabs\Shiprocket\Contracts\ShiprocketApi;
 use DigitalLabs\Shiprocket\Exceptions\ShiprocketException;
+use DigitalLabs\Shiprocket\Models\ShiprocketShipment;
 use Illuminate\Support\Facades\Cache;
 
 /**
@@ -39,7 +40,12 @@ class FakeShiprocketClient implements ShiprocketApi
             throw new ShiprocketException('Shiprocket error (HTTP 422)');
         }
 
-        Cache::add(self::CACHE_PREFIX.'counter', 0);
+        // A cleared cache must not restart the numbering: continue after the highest
+        // shipment already stored, or the next fake AWB would repeat an existing one.
+        Cache::add(
+            self::CACHE_PREFIX.'counter',
+            max(0, (int) ShiprocketShipment::max('shipment_id') - self::SHIPMENT_ID_BASE)
+        );
 
         $number = (int) Cache::increment(self::CACHE_PREFIX.'counter');
 
