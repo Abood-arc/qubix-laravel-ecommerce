@@ -2,6 +2,7 @@
 
 use DigitalLabs\Sales\Models\Invoice;
 use DigitalLabs\Sales\Models\Order;
+use DigitalLabs\Sales\Models\OrderTransaction;
 use DigitalLabs\Shiprocket\Services\DeliveryCompleter;
 use Illuminate\Support\Facades\Mail;
 
@@ -55,4 +56,44 @@ it('leaves refunded invoices alone', function () {
     app(DeliveryCompleter::class)->complete($order);
 
     expect($order->fresh()->invoices->first()->state)->toBe(Invoice::STATUS_REFUNDED);
+});
+
+it('records the cash the courier collected as the order\'s payment, once', function (?string $invoiceState) {
+    $order = shiprocketDeliveryOrder('cashondelivery', invoiceState: $invoiceState);
+
+    app(DeliveryCompleter::class)->complete($order);
+    app(DeliveryCompleter::class)->complete($order->fresh());
+
+    $invoice = $order->fresh()->invoices->sole();
+
+    expect(OrderTransaction::where('order_id', $order->id)->sole())
+        ->payment_method->toBe('cashondelivery')
+        ->type->toBe('cashondelivery')
+        ->status->toBe('paid')
+        ->invoice_id->toBe($invoice->id)
+        ->amount->toEqual(1000);
+})->with([
+    'invoiced on delivery' => [null],
+    'invoice waiting for the payment' => [Invoice::STATUS_PENDING],
+]);
+
+it('records only what is still unpaid on an invoice', function () {
+    $order = shiprocketDeliveryOrder('cashondelivery', invoiceState: Invoice::STATUS_PENDING);
+
+    $invoice = $order->invoices->sole();
+
+    OrderTransaction::create([
+        'transaction_id' => 'manual-1',
+        'type' => 'cashondelivery',
+        'payment_method' => 'cashondelivery',
+        'status' => 'paid',
+        'amount' => 400,
+        'invoice_id' => $invoice->id,
+        'order_id' => $order->id,
+    ]);
+
+    app(DeliveryCompleter::class)->complete($order);
+
+    expect(OrderTransaction::where('order_id', $order->id)->orderBy('id')->pluck('amount')->map(fn ($amount) => (float) $amount)->all())
+        ->toBe([400.0, 600.0]);
 });

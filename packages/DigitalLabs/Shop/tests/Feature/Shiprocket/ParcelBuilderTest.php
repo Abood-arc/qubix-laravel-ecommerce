@@ -206,7 +206,8 @@ it('collects exactly the grand total with a discount and shipping', function () 
     expect($payload['sub_total'])->toBe(2000.0)
         ->and($payload['shipping_charges'])->toBe(100.0)
         ->and($payload['total_discount'])->toBe(150.0)
-        ->and($payload['order_items'][0]['discount'])->toBe(75.0)
+        // The discount is sent once, on the order: on the items too, it could be taken twice.
+        ->and($payload['order_items'][0]['discount'])->toBe(0.0)
         ->and(round($payload['sub_total'] + $payload['shipping_charges'] - $payload['total_discount'], 2))
         ->toBe((float) $order->grand_total);
 });
@@ -226,7 +227,7 @@ it('carries tax in the item price and still collects exactly the grand total', f
 
     $payload = shiprocketParcelBuilder()->build($order);
 
-    expect($payload['order_items'][0])->toMatchArray(['selling_price' => 1180.0, 'tax' => 18.0, 'discount' => 100.0])
+    expect($payload['order_items'][0])->toMatchArray(['selling_price' => 1180.0, 'tax' => 18.0, 'discount' => 0.0])
         ->and($payload['sub_total'])->toBe(2360.0)
         ->and($payload['shipping_charges'])->toBe(118.0)
         ->and($payload['total_discount'])->toBe(200.0)
