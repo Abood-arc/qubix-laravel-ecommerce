@@ -30,6 +30,9 @@ return [
                 'default' => 'kgs',
                 'options' => [
                     [
+                        'title' => 'g',
+                        'value' => 'g',
+                    ], [
                         'title' => 'lbs',
                         'value' => 'lbs',
                     ], [
