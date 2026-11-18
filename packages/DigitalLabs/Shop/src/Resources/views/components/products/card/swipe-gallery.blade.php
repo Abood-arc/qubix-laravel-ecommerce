@@ -37,7 +37,7 @@
                     class="pc-swipe-track"
                     ref="track"
                     @scroll.passive="onScroll"
-                    @touchstart.passive="wake()"
+                    @touchstart.passive="onTouchStart"
                 >
                     <div
                         class="pc-swipe-rail"
@@ -102,11 +102,23 @@
 
             beforeUnmount() {
                 clearTimeout(this.nudgeTimer);
+
+                clearTimeout(this.settleTimer);
             },
 
             methods: {
                 onReset() {
                     this.current = 0;
+
+                    /*
+                     * Not reactive: the photo the card itself is moving the row to (show()), and the
+                     * photo screen readers last heard about.
+                     */
+                    this.target = null;
+
+                    this.spoken = 0;
+
+                    clearTimeout(this.settleTimer);
 
                     this.$refs.track?.scrollTo({ left: 0, behavior: 'instant' });
                 },
@@ -120,8 +132,12 @@
 
                     const track = this.$refs.track;
 
+                    const left = (this.isRtl ? -1 : 1) * index * track.clientWidth;
+
+                    this.target = Math.abs(track.scrollLeft - left) < 2 ? null : index;
+
                     track.scrollTo({
-                        left: (this.isRtl ? -1 : 1) * index * track.clientWidth,
+                        left,
                         behavior: smooth && ! this.prefersReducedMotion() ? 'smooth' : 'instant',
                     });
                 },
@@ -138,6 +154,8 @@
                     this.show((this.current + step + count) % count, true);
 
                     this.announce(this.current);
+
+                    this.spoken = this.current;
                 },
 
                 onPointerEnter(event) {
@@ -178,21 +196,50 @@
                 },
 
                 /**
-                 * Touch screens: follow the native swipe. (With a mouse, show() moves the track itself.)
+                 * A finger takes over the row, even while show() is still moving it.
+                 */
+                onTouchStart() {
+                    this.target = null;
+
+                    this.wake();
+                },
+
+                /**
+                 * The row moved. Whatever moved it, the progress bars and the caption follow the photo
+                 * on show, and screen readers hear which photo it is once a swipe settles. The card's
+                 * own moves (show(): pointing, arrow keys) already set the photo, so their scrolling is
+                 * only watched until it lands, which keeps a smooth arrow-key move from lighting up
+                 * the bars of the photos it passes.
                  */
                 onScroll() {
-                    if (this.hasMouse) {
-                        return;
-                    }
-
                     const track = this.$refs.track;
 
-                    const index = Math.round(Math.abs(track.scrollLeft) / track.clientWidth);
+                    const index = Math.min(this.photos.length - 1, Math.round(Math.abs(track.scrollLeft) / track.clientWidth));
+
+                    if (this.target !== null) {
+                        if (Math.abs(Math.abs(track.scrollLeft) - this.target * track.clientWidth) < 2) {
+                            this.target = null;
+                        }
+
+                        return;
+                    }
 
                     if (index !== this.current) {
                         this.current = index;
 
                         this.wake();
+                    }
+
+                    clearTimeout(this.settleTimer);
+
+                    this.settleTimer = setTimeout(() => this.onSwipeSettled(), 150);
+                },
+
+                onSwipeSettled() {
+                    if (this.current !== this.spoken) {
+                        this.spoken = this.current;
+
+                        this.announce(this.current);
                     }
                 },
 

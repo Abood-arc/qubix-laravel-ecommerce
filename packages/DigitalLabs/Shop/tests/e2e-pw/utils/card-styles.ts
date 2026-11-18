@@ -1,4 +1,4 @@
-import { expect, test, type APIRequestContext, type Browser, type Page } from "@playwright/test";
+import { expect, test, type APIRequestContext, type Browser, type Locator, type Page } from "@playwright/test";
 import { loginAsAdmin } from "./admin";
 
 /**
@@ -270,4 +270,35 @@ export async function cardPhotosOnScreenLoaded(page: Page): Promise<void> {
             )
         )
         .toBe(true);
+}
+
+/**
+ * A real finger swipe across `target` (a touch screen page: hasTouch), sent through Chrome's input
+ * pipeline as touch events, so the browser scrolls natively the way a phone does. `direction` is the
+ * way the finger moves: "left" drags the content towards the start in English (next photo).
+ */
+export async function fingerSwipe(page: Page, target: Locator, direction: "left" | "right"): Promise<void> {
+    const box = (await target.boundingBox())!;
+    const y = box.y + box.height / 2;
+    const [from, to] = direction === "left"
+        ? [box.x + box.width * 0.85, box.x + box.width * 0.1]
+        : [box.x + box.width * 0.15, box.x + box.width * 0.9];
+    const steps = 12;
+
+    const cdp = await page.context().newCDPSession(page);
+
+    try {
+        await cdp.send("Input.dispatchTouchEvent", { type: "touchStart", touchPoints: [{ x: from, y }] });
+
+        for (let step = 1; step <= steps; step++) {
+            await cdp.send("Input.dispatchTouchEvent", {
+                type: "touchMove",
+                touchPoints: [{ x: from + ((to - from) * step) / steps, y }],
+            });
+        }
+
+        await cdp.send("Input.dispatchTouchEvent", { type: "touchEnd", touchPoints: [] });
+    } finally {
+        await cdp.detach();
+    }
 }

@@ -1,5 +1,5 @@
 import { test, expect } from "../../setup";
-import type { Page } from "@playwright/test";
+import { devices, type Locator, type Page } from "@playwright/test";
 import {
     findMultiPhotoProduct,
     openSearchFor,
@@ -145,3 +145,88 @@ test("photos under the top one load only once the shopper shows interest", async
 
     await expect(photos.nth(1)).toHaveAttribute("src", /.+/);
 });
+
+const { defaultBrowserType, ...pixel7 } = devices["Pixel 7"];
+
+/**
+ * Whether two boxes share any area (touching edges do not count).
+ */
+async function overlap(first: Locator, second: Locator): Promise<boolean> {
+    const a = (await first.boundingBox())!;
+    const b = (await second.boundingBox())!;
+
+    return a.x < b.x + b.width - 0.5 && b.x < a.x + a.width - 0.5 && a.y < b.y + b.height - 0.5 && b.y < a.y + a.height - 0.5;
+}
+
+const LAYOUTS = {
+    "a 390px phone": { ...pixel7, viewport: { width: 390, height: 844 } },
+    "a computer": { viewport: { width: 1366, height: 900 } },
+};
+
+const TEXT = {
+    en: { add: (name: string) => `Add ${name} to cart`, inCart: "1 in cart", removeOne: (name: string) => `Remove one ${name} from cart` },
+    ar: { add: (name: string) => `أضف ${name} إلى السلة`, inCart: "1 في السلة", removeOne: (name: string) => `أزل قطعة من ${name}` },
+};
+
+for (const [device, use] of Object.entries(LAYOUTS)) {
+    for (const locale of ["en", "ar"] as const) {
+        test.describe(`The counter, the round Add to cart and the photo on ${device} (${locale})`, () => {
+            test.use(use);
+
+            test("never cover each other, before and while the product is in the cart", async ({ page }) => {
+                if (locale === "ar") {
+                    await page.goto("?locale=ar");
+                }
+
+                const shown = await findMultiPhotoProduct(page.request, locale);
+
+                await openSearchFor(page, shown, locale === "ar" ? "&locale=ar" : "");
+
+                const card = styledCard(page, shown);
+                const photo = card.getByRole("img", { name: shown.name, exact: true });
+                const counter = card.getByRole("button").filter({ hasText: `1 / ${shown.photoCount}` });
+                const add = card.getByRole("button", { name: TEXT[locale].add(shown.name) });
+
+                await card.scrollIntoViewIfNeeded();
+                await expect(photo).toBeVisible();
+                await expect(counter).toBeVisible();
+
+                expect(await overlap(counter, add), "counter and button").toBe(false);
+                expect(await overlap(counter, photo), "counter and photo").toBe(false);
+                expect(await overlap(add, photo), "button and photo").toBe(false);
+
+                // Both sit on one line: their middles line up.
+                const middle = async (target: Locator) => {
+                    const box = (await target.boundingBox())!;
+
+                    return box.y + box.height / 2;
+                };
+
+                expect(Math.abs((await middle(counter)) - (await middle(add)))).toBeLessThan(1);
+
+                // The counter at the start, the button at the end.
+                const counterBox = (await counter.boundingBox())!;
+                const addBox = (await add.boundingBox())!;
+
+                expect(locale === "ar" ? counterBox.x > addBox.x : counterBox.x < addBox.x).toBe(true);
+
+                await add.click();
+
+                const stepper = card.getByRole("group", { name: TEXT[locale].inCart });
+
+                await expect(stepper).toBeVisible();
+                // The control widens over 320ms: measure once it has.
+                await expect.poll(async () => (await stepper.boundingBox())!.width).toBeGreaterThan(3 * 44);
+
+                expect(await overlap(stepper, photo), "− 1 + control and photo").toBe(false);
+                // The counter steps aside while the control fills its line.
+                await expect(counter).toBeHidden();
+
+                await card.getByRole("button", { name: TEXT[locale].removeOne(shown.name) }).click();
+
+                await expect(add).toBeVisible();
+                await expect(counter).toBeVisible();
+            });
+        });
+    }
+}

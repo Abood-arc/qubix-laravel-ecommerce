@@ -6,6 +6,11 @@ import { fillPlaceholders } from "./fill-placeholders";
  */
 const ANNOUNCE_EVENT = "pc-announce";
 
+/*
+ * A computer with a mouse (product-cards.css uses the same media query).
+ */
+const MOUSE_QUERY = () => window.matchMedia("(hover: hover) and (pointer: fine)");
+
 /**
  * Have screen readers read `message` through the live region of the card that holds `element`
  * (card/gallery-hint). For parts of a card outside its photo component, such as Add to cart and the
@@ -66,9 +71,11 @@ export const cardGallery = {
             announcement: "",
 
             /*
-             * Same split as product-cards.css: a computer with a mouse, or a touch screen.
+             * Same split as product-cards.css: a computer with a mouse, or a touch screen. Kept up to
+             * date (mounted), because the answer can change after the page loads, as the CSS does: a
+             * phone view switched on in the browser's developer tools, a tablet's keyboard cover.
              */
-            hasMouse: window.matchMedia("(hover: hover) and (pointer: fine)").matches,
+            hasMouse: MOUSE_QUERY().matches,
 
             isRtl: document.documentElement.dir === "rtl",
         };
@@ -107,12 +114,24 @@ export const cardGallery = {
         this.onCardAnnounce = (event) => this.say(event.detail);
 
         this.card.addEventListener(ANNOUNCE_EVENT, this.onCardAnnounce);
+
+        this.mouseQuery = MOUSE_QUERY();
+
+        this.onMouseQueryChange = (event) => {
+            this.hasMouse = event.matches;
+
+            this.watchView();
+        };
+
+        this.mouseQuery.addEventListener("change", this.onMouseQueryChange);
     },
 
     beforeUnmount() {
         this.observer?.disconnect();
 
         this.card.removeEventListener(ANNOUNCE_EVENT, this.onCardAnnounce);
+
+        this.mouseQuery.removeEventListener("change", this.onMouseQueryChange);
 
         clearTimeout(this.sayTimer);
     },

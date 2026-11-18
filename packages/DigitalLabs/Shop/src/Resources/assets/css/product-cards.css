@@ -560,14 +560,14 @@
     cursor: not-allowed;
 }
 
-/* The round bag button on the photo (Photo deck card). */
+/* The round bag button (Photo deck card): at the end of the line under the photos (see the Photo deck section). */
 .pc-buy--round {
     position: absolute;
     z-index: 13;
-    inset-block-end: 12px;
-    inset-inline-end: 22px;
-    width: 44px;
-    height: 44px;
+    inset-block-start: var(--pc-deck-bar-top);
+    inset-inline-end: var(--pc-deck-inset-end);
+    width: var(--pc-deck-bar);
+    height: var(--pc-deck-bar);
 }
 
 .pc-buy--round .pc-add {
@@ -613,7 +613,7 @@
     color: rgb(var(--c-brand));
 }
 
-.pc-add-plus .pc-ico {
+.pc-buy--round .pc-add-plus .pc-ico { /* beats the bag icon's size (.pc-buy--round .pc-add .pc-ico) */
     width: 11px;
     height: 11px;
     stroke-width: 3;
@@ -755,11 +755,6 @@
 
     .pc-add {
         height: 44px;
-    }
-
-    .pc-buy--round {
-        inset-block-end: 8px;
-        inset-inline-end: 18px;
     }
 
     .pc-compare--checkbox {
@@ -921,8 +916,23 @@
 
 /* ========== Photo deck: a small stack of photos, a "1 / 4" counter, a round Add to cart ========== */
 
+/*
+ * Under the photos, one line: the "1 / 4" counter at the start and the round Add to cart at the end, each
+ * lined up with an edge of the top photo, centred on the same line. The photo area keeps its shape and
+ * the card makes room below it, so neither ever covers the photo or the other. While the product is in
+ * the cart the − 1 + control fills the line (see "Add to cart, step 2").
+ */
+.pc-card--deck {
+    --pc-deck-inset-start: 4px; /* the top photo's edges (.pc-deck) */
+    --pc-deck-inset-end: 14px;
+    --pc-deck-bar: 44px;
+    --pc-deck-bar-top: calc(100% + 4px); /* 8px under the photos, which end 4px above the photo area's edge */
+    --pc-deck-chip: 34px;
+}
+
 .pc-card--deck .pc-media {
     overflow: visible;
+    margin-block-end: calc(4px + var(--pc-deck-bar));
     background: transparent;
 }
 
@@ -935,7 +945,7 @@
 
     position: absolute;
     inset-block: 12px 4px;
-    inset-inline: 4px 14px;
+    inset-inline: var(--pc-deck-inset-start) var(--pc-deck-inset-end);
 }
 
 .pc-deck-gallery.is-fanned .pc-deck {
@@ -971,24 +981,24 @@
 .pc-deck-next {
     position: absolute;
     z-index: 12;
-    inset-block-end: 14px;
-    inset-inline-start: 14px;
+    inset-block-start: calc(var(--pc-deck-bar-top) + (var(--pc-deck-bar) - var(--pc-deck-chip)) / 2);
+    inset-inline-start: var(--pc-deck-inset-start);
     display: inline-flex;
     align-items: center;
     gap: 4px;
-    height: 34px;
+    height: var(--pc-deck-chip);
     padding: 0;
     padding-inline: 12px 8px;
     border: 0;
     border-radius: var(--pc-chip);
-    background: rgb(var(--c-surface) / 0.94);
+    background: rgb(var(--c-surface));
     color: rgb(var(--c-ink));
     font-size: 12.5px;
     font-weight: 700;
     line-height: 1;
     font-variant-numeric: tabular-nums;
     cursor: pointer;
-    box-shadow: 0 1px 2px rgb(0 0 0 / 0.08), 0 4px 12px rgb(0 0 0 / 0.1);
+    box-shadow: 0 0 0 1px rgb(var(--c-line)), 0 1px 2px rgb(0 0 0 / 0.06);
 }
 
 .pc-deck-next::after {
@@ -998,7 +1008,7 @@
 }
 
 .pc-deck-next:hover {
-    background: rgb(var(--c-surface));
+    box-shadow: 0 0 0 1px rgb(var(--c-line-strong)), 0 1px 2px rgb(0 0 0 / 0.06);
 }
 
 .pc-deck-next .pc-ico {
@@ -1019,6 +1029,7 @@
 
 .pc-card--deck .pc-info {
     gap: 4px;
+    padding-top: 10px;
     text-align: start;
 }
 
@@ -1042,10 +1053,11 @@
 }
 
 @media (max-width: 767px) {
+    .pc-card--deck {
+        --pc-deck-chip: 32px;
+    }
+
     .pc-deck-next {
-        height: 30px;
-        inset-block-end: 10px;
-        inset-inline-start: 10px;
         padding-inline: 9px 5px;
     }
 
@@ -1158,7 +1170,7 @@
 }
 
 .pc-buy--round[data-state="qty"] {
-    width: calc(100% - 36px);
+    width: calc(100% - var(--pc-deck-inset-start) - var(--pc-deck-inset-end));
 }
 
 .pc-buy--round .pc-stepper {
@@ -1185,21 +1197,18 @@
 }
 
 /*
- * The control grows across the bottom of the photo, where the "1 / 4" counter sits: the counter moves up
- * above it (12px clear of its 44px), so it stays in reach of a tap, on the same side as before.
+ * The control grows along the line under the photos, over the "1 / 4" counter's spot: the counter steps
+ * aside while the product is in the cart (as in the design concept). Swiping, dragging and the arrow keys
+ * still turn the photos.
  */
 .pc-deck-next {
-    transition: inset-block-end 320ms var(--pc-ease-out);
+    transition: opacity 160ms, visibility 0s;
 }
 
 .pc-card--deck:has(.pc-buy--round[data-state="qty"]) .pc-deck-next {
-    inset-block-end: 68px;
-}
-
-@media (max-width: 767px) {
-    .pc-buy--round[data-state="qty"] {
-        width: calc(100% - 26px);
-    }
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 120ms, visibility 0s 120ms;
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -6,6 +6,7 @@ import {
     contrastRatio,
     currentStoreLook,
     findMultiPhotoProduct,
+    fingerSwipe,
     lookColour,
     openSearchFor,
     photoLink,
@@ -49,6 +50,36 @@ test.describe("Swipe card on a phone", () => {
         await expect(card.getByText(`Photo 2 of ${product.photoCount}`)).toBeVisible();
     });
 
+    test("a finger swipe moves the progress bars, the caption and the announcement with the photo", async ({ page }) => {
+        const product = await findMultiPhotoProduct(page.request);
+
+        await openSearchFor(page, product);
+
+        const card = styledCard(page, product);
+        // The scrolling row and the progress bars have no role of their own (the bars are aria-hidden).
+        const row = card.locator(".pc-swipe-track");
+        const bars = card.locator(".pc-tick");
+        const last = Math.min(product.photoCount, 4);
+        const photoOnShow = () => row.evaluate((element) => Math.round(Math.abs(element.scrollLeft) / element.clientWidth));
+
+        await row.scrollIntoViewIfNeeded();
+
+        for (let photo = 2; photo <= last; photo++) {
+            await fingerSwipe(page, row, "left");
+
+            await expect.poll(photoOnShow).toBe(photo - 1);
+            await expect(bars.nth(photo - 1)).toHaveClass(/\bis-on\b/);
+            await expect(card.locator(".pc-tick.is-on")).toHaveCount(1);
+            await expect(card.getByText(`Photo ${photo} of ${product.photoCount}`, { exact: true }).first()).toBeVisible();
+            await expect(card.getByRole("status")).toHaveText(`Photo ${photo} of ${product.photoCount}`);
+        }
+
+        await fingerSwipe(page, row, "right");
+
+        await expect.poll(photoOnShow).toBe(last - 2);
+        await expect(bars.nth(last - 2)).toHaveClass(/\bis-on\b/);
+    });
+
     test("Add to cart is at least 44px tall", async ({ page }) => {
         const product = await findMultiPhotoProduct(page.request);
 
@@ -57,6 +88,45 @@ test.describe("Swipe card on a phone", () => {
         const box = (await styledCard(page, product).getByRole("button", { name: "Add To Cart" }).boundingBox())!;
 
         expect(box.height).toBeGreaterThanOrEqual(44);
+    });
+});
+
+test.describe("Swipe card on a screen that turns touch after the page loaded", () => {
+    test.use({ viewport: { width: 390, height: 844 } });
+
+    test.beforeAll(async ({ browser }) => {
+        await withAdmin(browser, (admin) => setCardStyle(admin, "Swipe, named and sized"));
+    });
+
+    test("a finger swipe still moves the progress bars", async ({ page }) => {
+        const product = await findMultiPhotoProduct(page.request);
+        const cdp = await page.context().newCDPSession(page);
+        const hasMouse = () => page.evaluate(() => matchMedia("(hover: hover) and (pointer: fine)").matches);
+
+        // The page loads as on a computer with a mouse (an earlier phone test can leave the browser on touch).
+        await cdp.send("Emulation.setTouchEmulationEnabled", { enabled: false });
+        await openSearchFor(page, product);
+
+        expect(await hasMouse()).toBe(true);
+
+        const card = styledCard(page, product);
+        // The scrolling row and the progress bars have no role of their own (the bars are aria-hidden).
+        const row = card.locator(".pc-swipe-track");
+
+        await expect(card.locator(".pc-tick").first()).toHaveClass(/\bis-on\b/);
+
+        // Then the screen turns touch: the browser's phone view in its developer tools, a laptop folded into a tablet.
+        await cdp.send("Emulation.setTouchEmulationEnabled", { enabled: true, maxTouchPoints: 5 });
+
+        expect(await hasMouse()).toBe(false);
+
+        await expect(row).toHaveCSS("overflow-x", "auto");
+
+        await fingerSwipe(page, row, "left");
+
+        await expect.poll(() => row.evaluate((element) => Math.round(element.scrollLeft / element.clientWidth))).toBe(1);
+        await expect(card.locator(".pc-tick").nth(1)).toHaveClass(/\bis-on\b/);
+        await expect(card.getByText(`Photo 2 of ${product.photoCount}`, { exact: true }).first()).toBeVisible();
     });
 });
 
@@ -352,13 +422,13 @@ for (const device of ["desktop", "phone"] as const) {
 const DECK_TEXT = {
     en: {
         add: (name: string) => `Add ${name} to cart`,
-        next: (name: string, current: number, total: number) => `Next photo of ${name}, showing ${current} of ${total}`,
         inCart: "1 in cart",
+        photo: (current: number, total: number) => `Photo ${current} of ${total}`,
     },
     ar: {
         add: (name: string) => `أضف ${name} إلى السلة`,
-        next: (name: string, current: number, total: number) => `الصورة التالية من ${name}، المعروضة ${current} من ${total}`,
         inCart: "1 في السلة",
+        photo: (current: number, total: number) => `الصورة ${current} من ${total}`,
     },
 };
 
@@ -371,7 +441,7 @@ for (const device of ["desktop", "phone"] as const) {
         });
 
         for (const locale of ["en", "ar"] as const) {
-            test(`${locale}: it moves above the − 1 + control and still answers a ${device === "phone" ? "tap" : "click"}`, async ({ page }) => {
+            test(`${locale}: it steps aside for the − 1 + control, and the photos still turn`, async ({ page }) => {
                 const text = DECK_TEXT[locale];
 
                 await page.goto(`?locale=${locale}`);
@@ -381,24 +451,22 @@ for (const device of ["desktop", "phone"] as const) {
                 await openSearchFor(page, product, `&locale=${locale}`);
 
                 const card = styledCard(page, product);
+                const counter = card.getByRole("button").filter({ hasText: `1 / ${product.photoCount}` });
+
+                await expect(counter).toBeVisible();
 
                 await card.getByRole("button", { name: text.add(product.name) }).click();
 
                 const control = card.getByRole("group", { name: text.inCart });
-                const counter = card.getByRole("button", { name: text.next(product.name, 1, product.photoCount) });
 
                 await expect(control).toBeVisible();
-                await expect(counter).toBeVisible();
+                // Hidden, so out of the tab order and away from screen readers too.
+                await expect(counter).toBeHidden();
 
-                // Clear of the control once it has moved up.
-                await expect
-                    .poll(async () => (await counter.boundingBox())!.y + (await counter.boundingBox())!.height <= (await control.boundingBox())!.y)
-                    .toBe(true);
+                await photoLink(page, product).focus();
+                await page.keyboard.press(locale === "ar" ? "ArrowLeft" : "ArrowRight");
 
-                // Both actions check that nothing else would take the pointer.
-                device === "phone" ? await counter.tap() : await counter.click();
-
-                await expect(card.getByText(`2 / ${product.photoCount}`)).toBeVisible();
+                await expect(card.getByRole("status")).toHaveText(text.photo(2, product.photoCount));
                 await expect(control).toBeVisible();
             });
         }
