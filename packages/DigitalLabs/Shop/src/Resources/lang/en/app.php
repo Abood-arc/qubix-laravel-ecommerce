@@ -471,6 +471,10 @@ return [
             'default-toggle' => 'Default Toggle',
         ],
 
+        'flash-group' => [
+            'close' => 'Close message',
+        ],
+
         'media' => [
             'index' => [
                 'add-attachments' => 'Add attachments',
@@ -639,14 +643,46 @@ return [
 
         'products' => [
             'card' => [
+                'add-one' => 'Add one more :name',
                 'add-to-cart' => 'Add To Cart',
                 'add-to-compare' => 'Add To Compare',
                 'add-to-compare-success' => 'Item added successfully to compare list.',
                 'add-to-wishlist' => 'Add To Wishlist',
+                'added' => 'Added',
+                'adding' => 'Adding',
                 'already-in-compare' => 'Item is already added to compare list.',
+                'cart-quantity' => ':count in cart',
+                'compare' => 'Compare',
+                'compare-added' => 'Added to compare (:count of :max)',
+                'compare-product' => 'Compare :name',
+                'compare-removed' => 'Removed from compare',
+                'compare-tray' => 'Compare tray',
+                'compare-tray-clear' => 'Clear',
+                'compare-tray-count' => ':count of :max chosen',
+                'compare-tray-empty-slot' => 'Empty slot',
+                'compare-tray-go' => 'Compare (:count)',
+                'compare-tray-pick-more' => 'Pick 1 more',
+                'compare-tray-remove' => 'Remove :name from compare',
+                'compare-tray-title' => 'Compare',
+                'discount' => ':percent% off',
+                'in-cart' => 'in cart',
                 'new' => 'New',
+                'next-photo' => 'Next photo of :name, showing :current of :total',
+                'only-left' => 'Only :count left',
+                'out-of-stock' => 'Out of stock',
+                'photo-keys-hint' => 'Use the left and right arrow keys for more photos.',
+                'photo-of' => 'Photo :current of :total',
+                'quick-add' => 'Add :name to cart',
+                'remove-one' => 'Remove one :name from cart',
                 'review-description' => 'Be the first to review this product',
                 'sale' => 'Sale',
+                'save-to-wishlist' => 'Save :name to wishlist',
+                'size-spoken' => 'Size: :width by :height :unit',
+                'size-spoken-depth' => 'Size: :width by :height :unit, :depth :unit deep',
+                'unit-cm' => 'cm',
+                'unit-cm-long' => 'centimetres',
+                'unit-in' => 'in',
+                'unit-in-long' => 'inches',
             ],
 
             'carousel' => [
@@ -911,11 +947,18 @@ return [
         'delete-all' => 'Delete All',
         'empty-text' => 'You have no items in your compare list',
         'item-add-success' => 'Item added successfully to compare list',
+        'limit-link' => 'Open compare',
+        'limit-reached' => 'You can compare up to :max',
         'product-compare' => 'Product Compare',
         'remove-all-success' => 'All items removed successfully.',
         'remove-error' => 'Something went wrong, please try again later.',
         'remove-success' => 'Item removed successfully.',
         'title' => 'Product Compare',
+    ],
+
+    'card-preview' => [
+        'title'       => 'Card preview',
+        'no-products' => 'Add a product to your store to see this preview.',
     ],
 
     'checkout' => [

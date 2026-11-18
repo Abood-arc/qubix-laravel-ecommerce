@@ -471,6 +471,10 @@ return [
             'default-toggle' => 'کلیک کردن پیش‌فرض',
         ],
 
+        'flash-group' => [
+            'close' => 'Close message',
+        ],
+
         'media' => [
             'index' => [
                 'add-attachments' => 'افزودن پیوست',
@@ -639,14 +643,46 @@ return [
 
         'products' => [
             'card' => [
+                'add-one' => 'Add one more :name',
                 'add-to-cart' => 'افزودن به سبد خرید',
                 'add-to-compare' => 'افزودن به لیست مقایسه',
                 'add-to-compare-success' => 'مورد با موفقیت به لیست مقایسه اضافه شد.',
                 'add-to-wishlist' => 'افزودن به لیست خرید',
+                'added' => 'Added',
+                'adding' => 'Adding',
                 'already-in-compare' => 'مورد از قبل به لیست مقایسه اضافه شده است.',
+                'cart-quantity' => ':count in cart',
+                'compare' => 'Compare',
+                'compare-added' => 'Added to compare (:count of :max)',
+                'compare-product' => 'Compare :name',
+                'compare-removed' => 'Removed from compare',
+                'compare-tray' => 'Compare tray',
+                'compare-tray-clear' => 'Clear',
+                'compare-tray-count' => ':count of :max chosen',
+                'compare-tray-empty-slot' => 'Empty slot',
+                'compare-tray-go' => 'Compare (:count)',
+                'compare-tray-pick-more' => 'Pick 1 more',
+                'compare-tray-remove' => 'Remove :name from compare',
+                'compare-tray-title' => 'Compare',
+                'discount' => ':percent% off',
+                'in-cart' => 'in cart',
                 'new' => 'جدید',
+                'next-photo' => 'Next photo of :name, showing :current of :total',
+                'only-left' => 'Only :count left',
+                'out-of-stock' => 'Out of stock',
+                'photo-keys-hint' => 'Use the left and right arrow keys for more photos.',
+                'photo-of' => 'Photo :current of :total',
+                'quick-add' => 'Add :name to cart',
+                'remove-one' => 'Remove one :name from cart',
                 'review-description' => 'اولین نفری باشید که این محصول را مورد بررسی قرار دهید',
                 'sale' => 'حراج',
+                'save-to-wishlist' => 'Save :name to wishlist',
+                'size-spoken' => 'Size: :width by :height :unit',
+                'size-spoken-depth' => 'Size: :width by :height :unit, :depth :unit deep',
+                'unit-cm' => 'cm',
+                'unit-cm-long' => 'centimetres',
+                'unit-in' => 'in',
+                'unit-in-long' => 'inches',
             ],
 
             'carousel' => [
@@ -911,11 +947,18 @@ return [
         'delete-all' => 'حذف همه',
         'empty-text' => 'شما موردی در لیست مقایسه ندارید',
         'item-add-success' => 'مورد با موفقیت به لیست مقایسه افزوده شد',
+        'limit-link' => 'Open compare',
+        'limit-reached' => 'You can compare up to :max',
         'product-compare' => 'مقایسه محصولات',
         'remove-all-success' => 'تمام موارد با موفقیت حذف شدند.',
         'remove-error' => 'مشکلی پیش آمده است، لطفاً بعداً دوباره تلاش کنید.',
         'remove-success' => 'مورد با موفقیت حذف شد.',
         'title' => 'مقایسه محصولات',
+    ],
+
+    'card-preview' => [
+        'title'       => 'Card preview',
+        'no-products' => 'Add a product to your store to see this preview.',
     ],
 
     'checkout' => [

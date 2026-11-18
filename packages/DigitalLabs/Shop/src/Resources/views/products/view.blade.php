@@ -486,6 +486,8 @@
             </x-shop::form>
         </script>
 
+        @include('shop::components.compare.list')
+
         <script type="module">
             app.component('v-product', {
                 template: '#v-product-template',
@@ -594,8 +596,14 @@
                                 })
                                 .then(response => {
                                     this.$emitter.emit('add-flash', { type: 'success', message: response.data.data.message });
+
+                                    this.$compareList.changed();
                                 })
                                 .catch(error => {
+                                    if (this.$compareList.handleLimitError(error)) {
+                                        return;
+                                    }
+
                                     if ([400, 422].includes(error.response.status)) {
                                         this.$emitter.emit('add-flash', { type: 'warning', message: error.response.data.data.message });
 
@@ -611,22 +619,12 @@
                         /**
                          * This will handle for guests.
                          */
-                        let existingItems = this.getStorageValue(this.getCompareItemsStorageKey()) ?? [];
+                        const result = this.$compareList.addForGuest(productId);
 
-                        if (existingItems.length) {
-                            if (! existingItems.includes(productId)) {
-                                existingItems.push(productId);
-
-                                this.setStorageValue(this.getCompareItemsStorageKey(), existingItems);
-
-                                this.$emitter.emit('add-flash', { type: 'success', message: "@lang('shop::app.products.view.add-to-compare')" });
-                            } else {
-                                this.$emitter.emit('add-flash', { type: 'warning', message: "@lang('shop::app.products.view.already-in-compare')" });
-                            }
-                        } else {
-                            this.setStorageValue(this.getCompareItemsStorageKey(), [productId]);
-
+                        if (result === 'added') {
                             this.$emitter.emit('add-flash', { type: 'success', message: "@lang('shop::app.products.view.add-to-compare')" });
+                        } else if (result === 'already') {
+                            this.$emitter.emit('add-flash', { type: 'warning', message: "@lang('shop::app.products.view.already-in-compare')" });
                         }
                     },
 
@@ -647,24 +645,6 @@
 
                                 this.isLoading = false;
                             }).catch(error => this.isLoading = false);
-                    },
-
-                    getCompareItemsStorageKey() {
-                        return 'compare_items';
-                    },
-
-                    setStorageValue(key, value) {
-                        localStorage.setItem(key, JSON.stringify(value));
-                    },
-
-                    getStorageValue(key) {
-                        let value = localStorage.getItem(key);
-
-                        if (value) {
-                            value = JSON.parse(value);
-                        }
-
-                        return value;
                     },
 
                     scrollToReview() {

@@ -471,6 +471,10 @@ return [
             'default-toggle' => 'Переключатель по умолчанию',
         ],
 
+        'flash-group' => [
+            'close' => 'Close message',
+        ],
+
         'media' => [
             'index' => [
                 'add-attachments' => 'Добавить вложения',
@@ -639,14 +643,46 @@ return [
 
         'products' => [
             'card' => [
+                'add-one' => 'Add one more :name',
                 'add-to-cart' => 'Добавить в Корзину',
                 'add-to-compare' => 'Добавить в Список Сравнения',
                 'add-to-compare-success' => 'Товар успешно добавлен в список сравнения.',
                 'add-to-wishlist' => 'Добавить в Список Желаемого',
+                'added' => 'Added',
+                'adding' => 'Adding',
                 'already-in-compare' => 'Товар уже добавлен в список сравнения.',
+                'cart-quantity' => ':count in cart',
+                'compare' => 'Compare',
+                'compare-added' => 'Added to compare (:count of :max)',
+                'compare-product' => 'Compare :name',
+                'compare-removed' => 'Removed from compare',
+                'compare-tray' => 'Compare tray',
+                'compare-tray-clear' => 'Clear',
+                'compare-tray-count' => ':count of :max chosen',
+                'compare-tray-empty-slot' => 'Empty slot',
+                'compare-tray-go' => 'Compare (:count)',
+                'compare-tray-pick-more' => 'Pick 1 more',
+                'compare-tray-remove' => 'Remove :name from compare',
+                'compare-tray-title' => 'Compare',
+                'discount' => ':percent% off',
+                'in-cart' => 'in cart',
                 'new' => 'Новинка',
+                'next-photo' => 'Next photo of :name, showing :current of :total',
+                'only-left' => 'Only :count left',
+                'out-of-stock' => 'Out of stock',
+                'photo-keys-hint' => 'Use the left and right arrow keys for more photos.',
+                'photo-of' => 'Photo :current of :total',
+                'quick-add' => 'Add :name to cart',
+                'remove-one' => 'Remove one :name from cart',
                 'review-description' => 'Будьте первым, кто оставит отзыв о продукте',
                 'sale' => 'Распродажа',
+                'save-to-wishlist' => 'Save :name to wishlist',
+                'size-spoken' => 'Size: :width by :height :unit',
+                'size-spoken-depth' => 'Size: :width by :height :unit, :depth :unit deep',
+                'unit-cm' => 'cm',
+                'unit-cm-long' => 'centimetres',
+                'unit-in' => 'in',
+                'unit-in-long' => 'inches',
             ],
 
             'carousel' => [
@@ -911,11 +947,18 @@ return [
         'delete-all' => 'Удалить все',
         'empty-text' => 'У вас нет товаров в списке сравнения',
         'item-add-success' => 'Товар успешно добавлен в список сравнения',
+        'limit-link' => 'Open compare',
+        'limit-reached' => 'You can compare up to :max',
         'product-compare' => 'Сравнение товаров',
         'remove-all-success' => 'Все товары успешно удалены.',
         'remove-error' => 'Что-то пошло не так. Попробуйте еще раз позже.',
         'remove-success' => 'Товар успешно удален.',
         'title' => 'Сравнение товаров',
+    ],
+
+    'card-preview' => [
+        'title'       => 'Card preview',
+        'no-products' => 'Add a product to your store to see this preview.',
     ],
 
     'checkout' => [

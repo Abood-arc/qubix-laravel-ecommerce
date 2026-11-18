@@ -471,6 +471,10 @@ return [
             'default-toggle' => 'Toggel Default',
         ],
 
+        'flash-group' => [
+            'close' => 'Close message',
+        ],
+
         'media' => [
             'index' => [
                 'add-attachments' => 'Tambahkan Lampiran',
@@ -639,14 +643,46 @@ return [
 
         'products' => [
             'card' => [
+                'add-one' => 'Add one more :name',
                 'add-to-cart' => 'Tambah ke Keranjang',
                 'add-to-compare' => 'Tambah ke Perbandingan',
                 'add-to-compare-success' => 'Item berhasil ditambahkan ke daftar perbandingan.',
                 'add-to-wishlist' => 'Tambah ke Wishlist',
+                'added' => 'Added',
+                'adding' => 'Adding',
                 'already-in-compare' => 'Item sudah ada dalam daftar perbandingan.',
+                'cart-quantity' => ':count in cart',
+                'compare' => 'Compare',
+                'compare-added' => 'Added to compare (:count of :max)',
+                'compare-product' => 'Compare :name',
+                'compare-removed' => 'Removed from compare',
+                'compare-tray' => 'Compare tray',
+                'compare-tray-clear' => 'Clear',
+                'compare-tray-count' => ':count of :max chosen',
+                'compare-tray-empty-slot' => 'Empty slot',
+                'compare-tray-go' => 'Compare (:count)',
+                'compare-tray-pick-more' => 'Pick 1 more',
+                'compare-tray-remove' => 'Remove :name from compare',
+                'compare-tray-title' => 'Compare',
+                'discount' => ':percent% off',
+                'in-cart' => 'in cart',
                 'new' => 'Baru',
+                'next-photo' => 'Next photo of :name, showing :current of :total',
+                'only-left' => 'Only :count left',
+                'out-of-stock' => 'Out of stock',
+                'photo-keys-hint' => 'Use the left and right arrow keys for more photos.',
+                'photo-of' => 'Photo :current of :total',
+                'quick-add' => 'Add :name to cart',
+                'remove-one' => 'Remove one :name from cart',
                 'review-description' => 'Jadilah yang pertama mengulas produk ini.',
                 'sale' => 'Diskon',
+                'save-to-wishlist' => 'Save :name to wishlist',
+                'size-spoken' => 'Size: :width by :height :unit',
+                'size-spoken-depth' => 'Size: :width by :height :unit, :depth :unit deep',
+                'unit-cm' => 'cm',
+                'unit-cm-long' => 'centimetres',
+                'unit-in' => 'in',
+                'unit-in-long' => 'inches',
             ],
 
             'carousel' => [
@@ -911,11 +947,18 @@ return [
         'delete-all' => 'Hapus Semua',
         'empty-text' => 'Anda tidak memiliki item dalam daftar perbandingan',
         'item-add-success' => 'Item berhasil ditambahkan ke daftar perbandingan',
+        'limit-link' => 'Open compare',
+        'limit-reached' => 'You can compare up to :max',
         'product-compare' => 'Perbandingan Produk',
         'remove-all-success' => 'Semua item berhasil dihapus.',
         'remove-error' => 'Terjadi kesalahan, silakan coba lagi nanti.',
         'remove-success' => 'Item berhasil dihapus.',
         'title' => 'Perbandingan Produk',
+    ],
+
+    'card-preview' => [
+        'title'       => 'Card preview',
+        'no-products' => 'Add a product to your store to see this preview.',
     ],
 
     'checkout' => [

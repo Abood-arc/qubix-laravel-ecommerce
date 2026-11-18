@@ -471,6 +471,10 @@ return [
             'default-toggle' => 'التبديل الافتراضي',
         ],
 
+        'flash-group' => [
+            'close' => 'إغلاق الرسالة',
+        ],
+
         'media' => [
             'index' => [
                 'add-attachments' => 'إضافة المرفقات',
@@ -639,14 +643,46 @@ return [
 
         'products' => [
             'card' => [
+                'add-one' => 'أضف قطعة أخرى من :name',
                 'add-to-cart' => 'أضف إلى السلة',
                 'add-to-compare' => 'أضف إلى قائمة المقارنة',
                 'add-to-compare-success' => 'تمت إضافة العنصر بنجاح إلى قائمة المقارنة.',
                 'add-to-wishlist' => 'أضف إلى قائمة الرغبات',
+                'added' => 'تمت الإضافة',
+                'adding' => 'جارٍ الإضافة',
                 'already-in-compare' => 'العنصر مضاف بالفعل إلى قائمة المقارنة.',
+                'cart-quantity' => ':count في السلة',
+                'compare' => 'قارن',
+                'compare-added' => 'أُضيف إلى المقارنة (:count من :max)',
+                'compare-product' => 'قارن :name',
+                'compare-removed' => 'أُزيل من المقارنة',
+                'compare-tray' => 'درج المقارنة',
+                'compare-tray-clear' => 'مسح',
+                'compare-tray-count' => 'اخترت :count من :max',
+                'compare-tray-empty-slot' => 'خانة فارغة',
+                'compare-tray-go' => 'قارن (:count)',
+                'compare-tray-pick-more' => 'اختر منتجًا آخر',
+                'compare-tray-remove' => 'أزل :name من المقارنة',
+                'compare-tray-title' => 'المقارنة',
+                'discount' => 'خصم :percent%',
+                'in-cart' => 'في السلة',
                 'new' => 'جديد',
+                'next-photo' => 'الصورة التالية من :name، المعروضة :current من :total',
+                'only-left' => 'بقي :count فقط',
+                'out-of-stock' => 'نفدت الكمية',
+                'photo-keys-hint' => 'استخدم مفاتيح الأسهم لعرض صور أخرى.',
+                'photo-of' => 'الصورة :current من :total',
+                'quick-add' => 'أضف :name إلى السلة',
+                'remove-one' => 'أزل قطعة من :name',
                 'review-description' => 'كن أول من يقيم هذا المنتج',
                 'sale' => 'تخفيض',
+                'save-to-wishlist' => 'احفظ :name في المفضلة',
+                'size-spoken' => 'المقاس: :width في :height :unit',
+                'size-spoken-depth' => 'المقاس: :width في :height :unit، والعمق :depth :unit',
+                'unit-cm' => 'سم',
+                'unit-cm-long' => 'سنتيمتر',
+                'unit-in' => 'إنش',
+                'unit-in-long' => 'إنش',
             ],
 
             'carousel' => [
@@ -911,11 +947,18 @@ return [
         'delete-all' => 'مسح الكل',
         'empty-text' => 'ليس لديك أي عناصر في قائمة المقارنة',
         'item-add-success' => 'تمت إضافة العنصر بنجاح إلى قائمة المقارنة',
+        'limit-link' => 'افتح المقارنة',
+        'limit-reached' => 'يمكنك مقارنة :max منتجات كحد أقصى',
         'product-compare' => 'مقارنة المنتجات',
         'remove-all-success' => 'تمت إزالة جميع العناصر بنجاح.',
         'remove-error' => 'حدث خطأ ما، يرجى المحاولة مرة أخرى لاحقًا.',
         'remove-success' => 'تمت إزالة العنصر بنجاح.',
         'title' => 'مقارنة المنتجات',
+    ],
+
+    'card-preview' => [
+        'title'       => 'معاينة البطاقة',
+        'no-products' => 'أضف منتجًا إلى متجرك لترى هذه المعاينة.',
     ],
 
     'checkout' => [

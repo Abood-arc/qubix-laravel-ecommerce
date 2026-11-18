@@ -15,6 +15,9 @@ dotenv.config({ path: path.resolve(__dirname, "../../../../../.env") });
 export default defineConfig({
     testDir: "./tests",
 
+    // The card styles suite needs its own setup (card-styles.config.ts), which CI's fresh install doesn't run.
+    testIgnore: ["**/card-styles/**"],
+
     timeout: 140 * 1000,
 
     expect: { timeout: 20 * 1000 },

@@ -41,7 +41,13 @@ class SecureHeaders
         $response->headers->set('Referrer-Policy', 'no-referrer-when-downgrade');
         $response->headers->set('X-Content-Type-Options', 'nosniff');
         $response->headers->set('X-XSS-Protection', '1; mode=block');
-        $response->headers->set('X-Frame-Options', 'DENY');
+
+        // DENY, except a response that asks for SAMEORIGIN itself (the admin's live previews,
+        // shop.card-preview). Anything else a response sets is replaced by DENY.
+        if ($response->headers->get('X-Frame-Options') !== 'SAMEORIGIN') {
+            $response->headers->set('X-Frame-Options', 'DENY');
+        }
+
         $response->headers->set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
     }
 

@@ -1,0 +1,1517 @@
+/*
+ * Product card styles: Admin > Configuration > General > Design > Product card.
+ *
+ * "Swipe, named and sized" (.pc-card--swipe) and "Photo deck" (.pc-card--deck). The Classic card
+ * never carries a .pc-* class, so nothing here can change it. Ported from the design concepts
+ * (qubix-design: docs/design/concepts/product-cards-2.html, variants G and E). Colours, fonts and
+ * corners come from the store look's tokens (--c-*, --radius-ui) in app.css, so every look shows the
+ * cards in its own colours: no colour here is written out, except shadows and the dark scrims on photos.
+ *
+ * Touch screens are "(hover: none), (pointer: coarse)"; computers with a mouse are
+ * "(hover: hover) and (pointer: fine)". The photo components' scripts use the same split.
+ */
+
+/* ---------- Card ---------- */
+
+.pc-card {
+    --pc-radius: min(var(--radius-ui), 12px);
+    --pc-chip: var(--radius-ui);
+    --pc-ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+    --pc-ease-swift: cubic-bezier(0.23, 1, 0.32, 1);
+    --pc-dir: 1;
+
+    position: relative;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto 1fr;
+    width: 100%;
+    max-width: 291px;
+    min-width: 0;
+    color: rgb(var(--c-ink));
+}
+
+[dir="rtl"] .pc-card {
+    --pc-dir: -1;
+}
+
+.pc-card :focus-visible {
+    outline: 2px solid rgb(var(--c-brand));
+    outline-offset: 2px;
+}
+
+.pc-ico {
+    flex: none;
+    width: 22px;
+    height: 22px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+/* ---------- Photo area ---------- */
+
+.pc-media {
+    position: relative;
+    aspect-ratio: 291 / 300;
+    border-radius: var(--pc-radius);
+    overflow: hidden;
+    background: rgb(var(--c-sand));
+    isolation: isolate;
+}
+
+.pc-media-link {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    display: block;
+    border-radius: inherit;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.pc-media-link:focus-visible {
+    outline-width: 3px;
+    outline-offset: -3px;
+}
+
+.pc-photo {
+    position: relative;
+    overflow: hidden;
+    background: rgb(var(--c-sand));
+    isolation: isolate;
+}
+
+.pc-photo img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    mix-blend-mode: multiply;
+    opacity: 0;
+    transition: opacity 300ms var(--pc-ease-out);
+}
+
+.pc-photo.is-loaded img {
+    opacity: 1;
+}
+
+/* A soft shimmer only while a requested photo downloads; photos nobody asked for stay plain. */
+.pc-photo:has(> img[src]):not(.is-loaded)::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    background: linear-gradient(100deg, transparent 20%, rgb(var(--c-surface) / 0.55) 50%, transparent 80%);
+    transform: translateX(-100%);
+    animation: pc-shimmer 1.3s linear infinite;
+}
+
+[dir="rtl"] .pc-photo::before {
+    animation-direction: reverse;
+}
+
+@keyframes pc-shimmer {
+    to {
+        transform: translateX(100%);
+    }
+}
+
+/* ---------- Badge ---------- */
+
+.pc-badge {
+    position: absolute;
+    z-index: 3;
+    inset-block-start: 10px;
+    inset-inline-start: 10px;
+    padding: 3px 9px;
+    border-radius: var(--pc-chip);
+    background: rgb(var(--c-accent));
+    color: rgb(var(--c-on-brand));
+    font-size: 13px;
+    font-weight: 700;
+    line-height: 1.35;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.01em;
+    pointer-events: none;
+}
+
+.pc-badge--new {
+    background: rgb(var(--c-brand));
+}
+
+/* ---------- Wishlist and compare buttons ---------- */
+
+.pc-tools {
+    position: absolute;
+    z-index: 3;
+    inset-block-start: 8px;
+    inset-inline-end: 8px;
+    display: grid;
+    gap: 8px;
+}
+
+.pc-tool {
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: rgb(var(--c-surface));
+    color: rgb(var(--c-ink));
+    cursor: pointer;
+    box-shadow: 0 1px 2px rgb(0 0 0 / 0.08), 0 4px 12px rgb(0 0 0 / 0.08);
+    transition: transform 160ms var(--pc-ease-swift), opacity 220ms var(--pc-ease-out), translate 260ms var(--pc-ease-out), background-color 200ms, color 200ms;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.pc-tool:hover {
+    background: rgb(var(--c-surface-soft));
+}
+
+.pc-tool:active {
+    transform: scale(0.9);
+}
+
+.pc-tool .pc-ico {
+    width: 20px;
+    height: 20px;
+}
+
+/* With a mouse the heart appears on hover or keyboard focus, and stays once switched on. */
+@media (hover: hover) and (pointer: fine) {
+    .pc-tool[aria-pressed="false"] {
+        opacity: 0;
+        translate: calc(8px * var(--pc-dir)) 0;
+    }
+
+    .pc-card:hover .pc-tool,
+    .pc-card:focus-within .pc-tool {
+        opacity: 1;
+        translate: 0 0;
+    }
+}
+
+.pc-icon-button {
+    position: relative;
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: 38px;
+    height: 38px;
+    padding: 0;
+    border: 1px solid rgb(var(--c-line));
+    border-radius: 50%;
+    background: rgb(var(--c-surface));
+    color: rgb(var(--c-ink));
+    cursor: pointer;
+    transition: background-color 160ms, color 160ms, border-color 160ms, transform 140ms var(--pc-ease-swift);
+    -webkit-tap-highlight-color: transparent;
+}
+
+.pc-icon-button::after {
+    content: "";
+    position: absolute;
+    inset: -3px;
+    border-radius: 50%;
+}
+
+.pc-icon-button:hover {
+    border-color: rgb(var(--c-line-strong));
+}
+
+.pc-icon-button:active {
+    transform: scale(0.9);
+}
+
+.pc-icon-button .pc-ico {
+    width: 19px;
+    height: 19px;
+}
+
+.pc-compare.pc-icon-button .pc-ico {
+    transition: transform 360ms var(--pc-ease-out);
+}
+
+.pc-compare.pc-icon-button[aria-pressed="true"] {
+    border-color: rgb(var(--c-brand));
+    color: rgb(var(--c-brand));
+}
+
+.pc-compare.pc-icon-button[aria-pressed="true"] .pc-ico {
+    transform: rotate(180deg);
+}
+
+.pc-wish .pc-heart-fill {
+    position: absolute;
+    color: rgb(var(--c-accent));
+    fill: currentColor;
+    stroke: currentColor;
+    transform: scale(0);
+    transition: transform 160ms var(--pc-ease-swift);
+}
+
+.pc-wish[aria-pressed="true"] {
+    color: rgb(var(--c-accent));
+}
+
+.pc-wish[aria-pressed="true"] .pc-heart-fill {
+    transform: scale(1);
+}
+
+.pc-wish.is-popping .pc-heart-fill {
+    animation: pc-heart-pop 520ms var(--pc-ease-out);
+}
+
+.pc-burst {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+}
+
+.pc-burst i {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 5px;
+    height: 5px;
+    margin: -2.5px;
+    border-radius: 50%;
+    background: rgb(var(--c-accent));
+    opacity: 0;
+}
+
+.pc-burst i:nth-child(1) { --a: 0deg; }
+.pc-burst i:nth-child(2) { --a: 60deg; }
+.pc-burst i:nth-child(3) { --a: 120deg; }
+.pc-burst i:nth-child(4) { --a: 180deg; }
+.pc-burst i:nth-child(5) { --a: 240deg; }
+.pc-burst i:nth-child(6) { --a: 300deg; }
+
+.pc-burst i:nth-child(even) {
+    width: 4px;
+    height: 4px;
+    margin: -2px;
+    background: rgb(var(--c-brand));
+}
+
+.pc-wish.is-popping .pc-burst i {
+    animation: pc-burst 560ms var(--pc-ease-out) forwards;
+}
+
+@keyframes pc-heart-pop {
+    0% { transform: scale(0.2); }
+    40% { transform: scale(1.28); }
+    70% { transform: scale(0.92); }
+    100% { transform: scale(1); }
+}
+
+@keyframes pc-burst {
+    0% { opacity: 1; transform: rotate(var(--a)) translateY(-8px) scale(1); }
+    100% { opacity: 0; transform: rotate(var(--a)) translateY(-27px) scale(0.4); }
+}
+
+/* ---------- Name, size, price, ratings, stock ---------- */
+
+.pc-info {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 0;
+    padding: 14px 2px 0;
+    text-align: center;
+}
+
+.pc-name {
+    display: -webkit-box;
+    min-height: 2.8em;
+    margin: 0;
+    overflow: hidden;
+    overflow-wrap: break-word;
+    font-size: 15px;
+    font-weight: 500;
+    line-height: 1.4;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+}
+
+.pc-name a {
+    color: inherit;
+    text-decoration: none;
+}
+
+.pc-name a:hover {
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 3px;
+}
+
+.pc-size {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    gap: 5px;
+    margin: -2px 0 0;
+    color: rgb(var(--c-muted));
+    font-size: 13px;
+    line-height: 1.35;
+    font-variant-numeric: tabular-nums;
+}
+
+.pc-size .pc-ico {
+    width: 15px;
+    height: 15px;
+    stroke-width: 1.7;
+}
+
+/*
+ * price_html prints the old price before the current one. Only the struck-out old price moves to the
+ * end, so the current price comes first and a label ("As low as", "Starting at") still leads.
+ */
+.pc-price {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: baseline;
+    gap: 2px 8px;
+    margin-block-end: 4px;
+    font-variant-numeric: tabular-nums;
+}
+
+.pc-price p {
+    margin: 0;
+}
+
+.pc-price p:last-child {
+    color: rgb(var(--c-brand));
+    font-size: 17px;
+    font-weight: 800;
+}
+
+/* The configurable price prints an empty old-price slot for the product page to fill. */
+.pc-price > .line-through {
+    order: 1;
+}
+
+.pc-price > .line-through:empty {
+    display: none;
+}
+
+.pc-price .line-through {
+    color: rgb(var(--c-muted));
+    font-size: 14px;
+    font-weight: 500;
+    text-decoration-thickness: 1px;
+}
+
+/* The shop's ratings component brings its own utility padding (px-4 py-2); inside the card it is smaller. */
+.pc-info .pc-ratings {
+    align-self: center;
+    padding: 2px 8px;
+}
+
+.pc-stock {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    gap: 6px;
+    margin: -2px 0 0;
+    color: rgb(var(--c-accent));
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.pc-stock::before {
+    content: "";
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+}
+
+/* ---------- Add to cart: idle, loading, added ---------- */
+
+.pc-buy {
+    display: grid;
+}
+
+.pc-buy > * {
+    grid-area: 1 / 1; /* the button and, once in the cart, the − 1 + control (Task 7) share one spot */
+}
+
+.pc-buy--full {
+    margin-top: auto; /* buttons line up across a row even when one card has a stock line */
+    padding-top: 8px;
+}
+
+.pc-add {
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: 100%;
+    height: 42px;
+    overflow: hidden;
+    border: 1.5px solid rgb(var(--c-brand));
+    border-radius: var(--radius-ui);
+    background: rgb(var(--c-surface));
+    color: rgb(var(--c-brand));
+    font-size: 14.5px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background-color 200ms, color 200ms, transform 140ms var(--pc-ease-swift);
+    -webkit-tap-highlight-color: transparent;
+}
+
+.pc-add:hover {
+    background: rgb(var(--c-brand));
+    color: rgb(var(--c-on-brand));
+}
+
+.pc-add:active {
+    transform: scale(0.97);
+}
+
+.pc-add > span {
+    grid-area: 1 / 1;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    transition: opacity 180ms, transform 260ms var(--pc-ease-out);
+}
+
+.pc-add .pc-ico {
+    width: 19px;
+    height: 19px;
+}
+
+.pc-add-wait,
+.pc-add-done {
+    opacity: 0;
+    transform: translateY(10px);
+}
+
+.pc-buy[data-state="loading"] .pc-add,
+.pc-buy[data-state="added"] .pc-add {
+    background: rgb(var(--c-brand));
+    color: rgb(var(--c-on-brand));
+    cursor: default;
+}
+
+.pc-buy[data-state="loading"] .pc-add-idle,
+.pc-buy[data-state="added"] .pc-add-idle {
+    opacity: 0;
+    transform: translateY(-10px);
+}
+
+.pc-buy[data-state="loading"] .pc-add-wait,
+.pc-buy[data-state="added"] .pc-add-done {
+    opacity: 1;
+    transform: none;
+}
+
+.pc-tickmark path {
+    stroke-dasharray: 22;
+    stroke-dashoffset: 22;
+    transition: stroke-dashoffset 320ms 60ms var(--pc-ease-out);
+}
+
+.pc-buy[data-state="added"] .pc-tickmark path {
+    stroke-dashoffset: 0;
+}
+
+.pc-dots {
+    display: inline-flex;
+    gap: 4px;
+}
+
+.pc-dots i {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: currentColor;
+}
+
+/* The dots bounce only while the add is on its way, not hidden in every idle button. */
+.pc-buy[data-state="loading"] .pc-dots i {
+    animation: pc-dot 1s ease-in-out infinite;
+}
+
+.pc-dots i:nth-child(2) { animation-delay: 0.15s; }
+.pc-dots i:nth-child(3) { animation-delay: 0.3s; }
+
+@keyframes pc-dot {
+    0%, 70%, 100% { transform: translateY(0); opacity: 0.45; }
+    35% { transform: translateY(-4px); opacity: 1; }
+}
+
+@keyframes pc-dot-fade {
+    0%, 70%, 100% { opacity: 0.45; }
+    35% { opacity: 1; }
+}
+
+.pc-add:disabled {
+    border-style: dashed;
+    border-color: rgb(var(--c-line-strong));
+    background: rgb(var(--c-surface));
+    color: rgb(var(--c-muted));
+    cursor: not-allowed;
+}
+
+/* The round bag button (Photo deck card): at the end of the line under the photos (see the Photo deck section). */
+.pc-buy--round {
+    position: absolute;
+    z-index: 13;
+    inset-block-start: var(--pc-deck-bar-top);
+    inset-inline-end: var(--pc-deck-inset-end);
+    width: var(--pc-deck-bar);
+    height: var(--pc-deck-bar);
+}
+
+.pc-buy--round .pc-add {
+    height: 100%;
+    border: 0;
+    border-radius: 999px;
+    background: rgb(var(--c-brand));
+    color: rgb(var(--c-on-brand));
+    box-shadow: 0 2px 6px rgb(0 0 0 / 0.18), 0 8px 18px rgb(0 0 0 / 0.14);
+}
+
+.pc-buy--round .pc-add:hover {
+    background: rgb(var(--c-brand-deep));
+}
+
+.pc-buy--round .pc-add .pc-ico {
+    width: 21px;
+    height: 21px;
+}
+
+.pc-buy--round .pc-add:disabled {
+    border: 0;
+    background: rgb(var(--c-brand));
+    color: rgb(var(--c-on-brand));
+    opacity: 0.45;
+}
+
+.pc-buy--round .pc-dots i {
+    width: 4px;
+    height: 4px;
+}
+
+.pc-add-plus {
+    position: absolute;
+    inset-block-start: 9px;
+    inset-inline-end: 8px;
+    display: grid;
+    place-items: center;
+    width: 13px;
+    height: 13px;
+    border-radius: 50%;
+    background: rgb(var(--c-on-brand));
+    color: rgb(var(--c-brand));
+}
+
+.pc-buy--round .pc-add-plus .pc-ico { /* beats the bag icon's size (.pc-buy--round .pc-add .pc-ico) */
+    width: 11px;
+    height: 11px;
+    stroke-width: 3;
+}
+
+/* ---------- Compare tick box ---------- */
+
+.pc-compare--checkbox {
+    position: relative;
+    align-self: center;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    min-height: 32px;
+    margin-top: 2px;
+    padding: 0 6px;
+    border: 0;
+    border-radius: 6px;
+    background: transparent;
+    color: rgb(var(--c-muted));
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 1;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.pc-compare--checkbox::after {
+    content: "";
+    position: absolute;
+    inset: -6px -4px;
+}
+
+.pc-compare--checkbox:hover,
+.pc-compare--checkbox[aria-pressed="true"] {
+    color: rgb(var(--c-ink));
+}
+
+.pc-compare-box {
+    display: grid;
+    place-items: center;
+    width: 18px;
+    height: 18px;
+    border: 1.5px solid rgb(var(--c-control));
+    border-radius: 4px;
+    background: rgb(var(--c-surface));
+    transition: background-color 150ms, border-color 150ms;
+}
+
+.pc-compare-box .pc-ico {
+    width: 13px;
+    height: 13px;
+    stroke-width: 3;
+    color: rgb(var(--c-on-brand));
+    opacity: 0;
+    transform: scale(0.5);
+    transition: opacity 150ms, transform 200ms var(--pc-ease-out);
+}
+
+.pc-compare--checkbox[aria-pressed="true"] .pc-compare-box {
+    border-color: rgb(var(--c-brand));
+    background: rgb(var(--c-brand));
+}
+
+.pc-compare--checkbox[aria-pressed="true"] .pc-compare-box .pc-ico {
+    opacity: 1;
+    transform: none;
+}
+
+/* ---------- Phones: 44px targets (or 44px hit areas), tighter type ---------- */
+
+@media (max-width: 767px) {
+    .pc-card {
+        max-width: none;
+    }
+
+    .pc-tools {
+        inset-block-start: 6px;
+        inset-inline-end: 6px;
+    }
+
+    .pc-tool {
+        width: 36px;
+        height: 36px;
+    }
+
+    .pc-tool::after {
+        content: "";
+        position: absolute;
+        inset: -4px;
+        border-radius: 50%;
+    }
+
+    .pc-tool .pc-ico {
+        width: 19px;
+        height: 19px;
+    }
+
+    .pc-icon-button {
+        width: 34px;
+        height: 34px;
+    }
+
+    .pc-icon-button::after {
+        inset: -5px;
+    }
+
+    .pc-icon-button .pc-ico {
+        width: 17px;
+        height: 17px;
+    }
+
+    .pc-info {
+        gap: 4px;
+        padding-top: 10px;
+    }
+
+    .pc-name {
+        min-height: 2.76em;
+        font-size: 14px;
+        line-height: 1.38;
+    }
+
+    .pc-price p:last-child {
+        font-size: 15.5px;
+    }
+
+    .pc-price .line-through {
+        font-size: 13px;
+    }
+
+    .pc-size {
+        font-size: 12px;
+    }
+
+    .pc-size .pc-ico {
+        display: none;
+    }
+
+    .pc-add {
+        height: 44px;
+    }
+
+    .pc-compare--checkbox {
+        min-height: 30px;
+        font-size: 12.5px;
+    }
+}
+
+/* ---------- Reduced motion: no shimmer, pop, burst or slides; every confirmation still shows ---------- */
+
+@media (prefers-reduced-motion: reduce) {
+    .pc-photo::before {
+        animation: none !important;
+    }
+
+    .pc-photo img {
+        transition-duration: 160ms;
+    }
+
+    .pc-wish.is-popping .pc-heart-fill,
+    .pc-wish.is-popping .pc-burst i {
+        animation: none;
+    }
+
+    .pc-compare .pc-ico {
+        transition: none;
+        transform: none !important;
+    }
+
+    .pc-tool,
+    .pc-add > span,
+    .pc-compare-box .pc-ico {
+        transform: none !important;
+        translate: none !important;
+    }
+
+    .pc-buy[data-state="loading"] .pc-dots i {
+        animation-name: pc-dot-fade;
+        animation-duration: 2s;
+    }
+
+    .pc-tickmark path {
+        transition-duration: 0s;
+    }
+}
+
+/* ========== Swipe, named and sized: one photo row, progress ticks, "Photo 2 of 4" caption ========== */
+
+.pc-swipe-track {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    overscroll-behavior-x: contain;
+    scrollbar-width: none;
+}
+
+.pc-swipe-track::-webkit-scrollbar {
+    display: none;
+}
+
+.pc-swipe-rail {
+    display: flex;
+    height: 100%;
+}
+
+.pc-swipe-rail .pc-photo {
+    flex: 0 0 100%;
+    height: 100%;
+    scroll-snap-align: start;
+    scroll-snap-stop: always;
+}
+
+.pc-ticks {
+    position: absolute;
+    z-index: 2;
+    inset-inline: 10px;
+    inset-block-end: 9px;
+    display: flex;
+    gap: 4px;
+    pointer-events: none;
+}
+
+.pc-tick {
+    flex: 1;
+    height: 3px;
+    overflow: hidden;
+    border-radius: 2px;
+    background: rgb(0 0 0 / 0.14);
+}
+
+.pc-tick::after {
+    content: "";
+    display: block;
+    height: 100%;
+    background: rgb(var(--c-brand));
+    transform: scaleX(0);
+    transition: transform 200ms var(--pc-ease-out);
+}
+
+.pc-tick.is-on::after {
+    transform: scaleX(1);
+}
+
+.pc-cap {
+    position: absolute;
+    z-index: 2;
+    inset-inline-start: 10px;
+    inset-block-end: 20px;
+    padding: 3px 8px;
+    border-radius: var(--pc-chip);
+    background: rgb(var(--c-surface) / 0.94);
+    color: rgb(var(--c-ink));
+    font-size: 11.5px;
+    font-weight: 700;
+    line-height: 1.35;
+    box-shadow: 0 1px 2px rgb(0 0 0 / 0.06);
+    opacity: 0;
+    transform: translateY(4px);
+    transition: opacity 180ms, transform 220ms var(--pc-ease-out);
+    pointer-events: none;
+}
+
+.pc-cap.is-on {
+    opacity: 1;
+    transform: none;
+}
+
+/* Touch screens swipe the row natively. */
+@media (hover: none), (pointer: coarse) {
+    .pc-swipe-track {
+        overflow-x: auto;
+        scroll-snap-type: x mandatory;
+        touch-action: pan-x pan-y;
+    }
+
+    .pc-ticks {
+        inset-inline: 30%;
+        gap: 5px;
+    }
+
+    .pc-tick {
+        height: 4px;
+    }
+}
+
+@media (max-width: 767px) {
+    .pc-cap {
+        inset-block-end: 22px;
+        inset-inline-start: 8px;
+        font-size: 11px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .pc-cap {
+        transform: none !important;
+    }
+}
+
+/* ========== Photo deck: a small stack of photos, a "1 / 4" counter, a round Add to cart ========== */
+
+/*
+ * Under the photos, one line: the "1 / 4" counter at the start and the round Add to cart at the end, each
+ * lined up with an edge of the top photo, centred on the same line. The photo area keeps its shape and
+ * the card makes room below it, so neither ever covers the photo or the other. While the product is in
+ * the cart the − 1 + control fills the line (see "Add to cart, step 2").
+ */
+.pc-card--deck {
+    --pc-deck-inset-start: 4px; /* the top photo's edges (.pc-deck) */
+    --pc-deck-inset-end: 14px;
+    --pc-deck-bar: 44px;
+    --pc-deck-bar-top: calc(100% + 4px); /* 8px under the photos, which end 4px above the photo area's edge */
+    --pc-deck-chip: 34px;
+}
+
+.pc-card--deck .pc-media {
+    overflow: visible;
+    margin-block-end: calc(4px + var(--pc-deck-bar));
+    background: transparent;
+}
+
+.pc-card--deck .pc-media-link {
+    touch-action: pan-y; /* sideways drags throw the photo; vertical ones still scroll the page */
+}
+
+.pc-deck {
+    --spread: 1;
+
+    position: absolute;
+    inset-block: 12px 4px;
+    inset-inline: var(--pc-deck-inset-start) var(--pc-deck-inset-end);
+}
+
+.pc-deck-gallery.is-fanned .pc-deck {
+    --spread: 1.9;
+}
+
+.pc-deck-layer {
+    position: absolute;
+    inset: 0;
+    z-index: calc(10 - var(--d, 0));
+    overflow: hidden;
+    border-radius: var(--pc-radius);
+    background: rgb(var(--c-sand));
+    box-shadow: 0 0 0 1px rgb(0 0 0 / 0.04), 0 2px 4px rgb(0 0 0 / 0.05), 0 8px 18px rgb(0 0 0 / 0.07);
+    transform:
+        translate(calc(var(--d, 0) * 5px * var(--spread) * var(--pc-dir)), calc(var(--d, 0) * -4px * var(--spread)))
+        rotate(calc(var(--d, 0) * 2deg * var(--spread) * var(--pc-dir)))
+        scale(calc(1 - var(--d, 0) * 0.03));
+    transition: transform 420ms var(--pc-ease-out), opacity 200ms;
+    user-select: none;
+    -webkit-user-drag: none;
+}
+
+.pc-deck-layer .pc-photo {
+    position: absolute;
+    inset: 0;
+}
+
+.pc-deck-layer.is-deep {
+    opacity: 0;
+}
+
+.pc-deck-next {
+    position: absolute;
+    z-index: 12;
+    inset-block-start: calc(var(--pc-deck-bar-top) + (var(--pc-deck-bar) - var(--pc-deck-chip)) / 2);
+    inset-inline-start: var(--pc-deck-inset-start);
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    height: var(--pc-deck-chip);
+    padding: 0;
+    padding-inline: 12px 8px;
+    border: 0;
+    border-radius: var(--pc-chip);
+    background: rgb(var(--c-surface));
+    color: rgb(var(--c-ink));
+    font-size: 12.5px;
+    font-weight: 700;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+    cursor: pointer;
+    box-shadow: 0 0 0 1px rgb(var(--c-line)), 0 1px 2px rgb(0 0 0 / 0.06);
+}
+
+.pc-deck-next::after {
+    content: "";
+    position: absolute;
+    inset: -5px;
+}
+
+.pc-deck-next:hover {
+    box-shadow: 0 0 0 1px rgb(var(--c-line-strong)), 0 1px 2px rgb(0 0 0 / 0.06);
+}
+
+.pc-deck-next .pc-ico {
+    width: 16px;
+    height: 16px;
+    stroke-width: 2.2;
+}
+
+[dir="rtl"] .pc-deck-next .pc-ico {
+    transform: scaleX(-1);
+}
+
+.pc-card--deck .pc-badge {
+    z-index: 12;
+    inset-block-start: 20px;
+    inset-inline-start: 12px;
+}
+
+.pc-card--deck .pc-info {
+    gap: 4px;
+    padding-top: 10px;
+    text-align: start;
+}
+
+.pc-price-row {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin-block-end: 2px;
+}
+
+.pc-price-row .pc-price {
+    justify-content: flex-start;
+    margin: 0;
+    margin-inline-end: auto;
+}
+
+.pc-card--deck .pc-ratings,
+.pc-card--deck .pc-stock {
+    align-self: flex-start;
+    justify-content: flex-start;
+}
+
+@media (max-width: 767px) {
+    .pc-card--deck {
+        --pc-deck-chip: 32px;
+    }
+
+    .pc-deck-next {
+        padding-inline: 9px 5px;
+    }
+
+    .pc-price-row {
+        gap: 2px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .pc-deck-layer {
+        transition: none;
+    }
+}
+
+/* ========== Add to cart, step 2: the − 1 + control while the product is in the cart ========== */
+
+/*
+ * The button and the control share one cell as wide as the button's spot. The hidden control must not
+ * widen it (its two 44px buttons would stretch the 44px round button), so it clips its own content.
+ */
+.pc-buy {
+    grid-template-columns: minmax(0, 1fr);
+}
+
+.pc-stepper {
+    min-width: 0;
+    overflow: hidden;
+    display: grid;
+    grid-template-columns: 44px minmax(0, 1fr) 44px;
+    align-items: center;
+    border-radius: var(--radius-ui);
+    background: rgb(var(--c-brand));
+    color: rgb(var(--c-on-brand));
+    opacity: 0;
+    visibility: hidden;
+    transform: scale(0.94);
+    transition: opacity 200ms, transform 260ms var(--pc-ease-out), visibility 0s 260ms;
+}
+
+.pc-buy[data-state="qty"] .pc-stepper {
+    opacity: 1;
+    visibility: visible;
+    transform: none;
+    transition: opacity 200ms, transform 300ms var(--pc-ease-out), visibility 0s;
+}
+
+.pc-buy[data-state="qty"] .pc-add {
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 150ms, visibility 0s 150ms;
+}
+
+.pc-stepper button {
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 100%;
+    padding: 0;
+    border: 0;
+    border-radius: var(--radius-ui);
+    background: transparent;
+    color: inherit;
+    cursor: pointer;
+    transition: background-color 150ms;
+}
+
+.pc-stepper button:hover {
+    background: rgb(var(--c-on-brand) / 0.14);
+}
+
+.pc-stepper button:focus-visible {
+    outline-color: rgb(var(--c-on-brand));
+    outline-offset: -4px;
+}
+
+.pc-stepper .pc-ico {
+    width: 18px;
+    height: 18px;
+    stroke-width: 2.2;
+    transition: transform 120ms;
+}
+
+.pc-stepper button:active .pc-ico {
+    transform: scale(0.85);
+}
+
+.pc-qty {
+    overflow: hidden;
+    font-size: 14px;
+    font-weight: 700;
+    text-align: center;
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+}
+
+.pc-qty b {
+    display: inline-block;
+    font-weight: 800;
+    animation: pc-qty-in 240ms var(--pc-ease-out);
+}
+
+@keyframes pc-qty-in {
+    from { opacity: 0; transform: translateY(9px); }
+    to { opacity: 1; transform: none; }
+}
+
+/* The round bag button grows into the control across the photo. */
+.pc-buy--round {
+    transition: width 320ms var(--pc-ease-out);
+}
+
+.pc-buy--round[data-state="qty"] {
+    width: calc(100% - var(--pc-deck-inset-start) - var(--pc-deck-inset-end));
+}
+
+.pc-buy--round .pc-stepper {
+    border-radius: 999px;
+    box-shadow: 0 2px 6px rgb(0 0 0 / 0.18), 0 8px 18px rgb(0 0 0 / 0.14);
+}
+
+.pc-buy--round .pc-stepper button {
+    border-radius: 999px;
+}
+
+.pc-buy--round .pc-qty {
+    font-size: 13px;
+}
+
+.pc-card--deck {
+    container-type: inline-size;
+}
+
+@container (max-width: 190px) {
+    .pc-buy--round .pc-qty-word {
+        display: none;
+    }
+}
+
+/*
+ * The control grows along the line under the photos, over the "1 / 4" counter's spot: the counter steps
+ * aside while the product is in the cart (as in the design concept). Swiping, dragging and the arrow keys
+ * still turn the photos.
+ */
+.pc-deck-next {
+    transition: opacity 160ms, visibility 0s;
+}
+
+.pc-card--deck:has(.pc-buy--round[data-state="qty"]) .pc-deck-next {
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 120ms, visibility 0s 120ms;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .pc-stepper {
+        transform: none !important;
+    }
+
+    .pc-qty b {
+        animation: none;
+    }
+
+    .pc-buy--round,
+    .pc-deck-next {
+        transition: none;
+    }
+}
+
+/* ========== Add to cart: the photo that flies to the header cart ========== */
+
+.pc-fly {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 70;
+    pointer-events: none;
+}
+
+.pc-fly-dot {
+    width: 46px;
+    height: 46px;
+    margin: -23px 0 0 -23px;
+    overflow: hidden;
+    border-radius: 50%;
+    background: rgb(var(--c-sand));
+    box-shadow: 0 0 0 3px rgb(var(--c-surface)), 0 8px 20px rgb(0 0 0 / 0.25);
+}
+
+.pc-fly-dot img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    mix-blend-mode: multiply;
+}
+
+.pc-cart-bump {
+    animation: pc-cart-bump 420ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Reduced motion's calm alternative: the count fades in, nothing moves. */
+.pc-cart-flash .header-badge {
+    animation: pc-cart-flash 700ms ease-out;
+}
+
+@keyframes pc-cart-bump {
+    0% { transform: scale(1); }
+    35% { transform: scale(1.22); }
+    100% { transform: scale(1); }
+}
+
+@keyframes pc-cart-flash {
+    0% { opacity: 0.2; }
+    100% { opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .pc-cart-bump {
+        animation: none;
+    }
+}
+
+/* ========== Compare tray: the picks, sliding up from the bottom of the screen ========== */
+
+.pc-tray {
+    --pc-ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+
+    position: fixed;
+    z-index: 50;
+    inset-inline: 0;
+    inset-block-end: 16px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    width: min(640px, calc(100% - 32px));
+    margin-inline: auto;
+    padding-block: 12px;
+    padding-inline: 18px 12px;
+    border-radius: min(var(--radius-ui), 18px);
+    background: rgb(var(--c-surface));
+    color: rgb(var(--c-ink));
+    box-shadow: 0 2px 6px rgb(0 0 0 / 0.08), 0 18px 48px rgb(0 0 0 / 0.18);
+    transform: translateY(calc(100% + 32px));
+    visibility: hidden;
+    transition: transform 260ms var(--pc-ease-out), visibility 0s 260ms;
+}
+
+.pc-tray.is-open {
+    transform: none;
+    visibility: visible;
+    transition: transform 380ms var(--pc-ease-out), visibility 0s;
+}
+
+.pc-tray :focus-visible {
+    outline: 2px solid rgb(var(--c-brand));
+    outline-offset: 2px;
+}
+
+.pc-tray-head {
+    margin: 0;
+    font-size: 15px;
+    font-weight: 800;
+    line-height: 1.2;
+}
+
+.pc-tray-head small {
+    display: block;
+    color: rgb(var(--c-muted));
+    font-size: 12.5px;
+    font-weight: 500;
+}
+
+.pc-tray-slots {
+    display: flex;
+    flex: 0 1 auto;
+    gap: 8px;
+    min-width: 0;
+}
+
+.pc-tray-slot {
+    position: relative;
+    flex: 0 1 52px;
+    min-width: 34px;
+    aspect-ratio: 1;
+    padding: 0;
+    overflow: hidden;
+    border: 1.5px dashed rgb(var(--c-line-strong));
+    border-radius: min(var(--radius-ui), 10px);
+    background: rgb(var(--c-surface));
+}
+
+.pc-tray-slot.is-full {
+    border: 0;
+    background: rgb(var(--c-sand));
+    cursor: pointer;
+    animation: pc-slot-in 360ms var(--pc-ease-out);
+}
+
+.pc-tray-slot img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    mix-blend-mode: multiply;
+}
+
+.pc-tray-x {
+    position: absolute;
+    inset-block-start: 3px;
+    inset-inline-end: 3px;
+    display: grid;
+    place-items: center;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: rgb(0 0 0 / 0.62);
+    color: rgb(255 255 255);
+}
+
+.pc-tray-x .pc-ico {
+    width: 12px;
+    height: 12px;
+    stroke-width: 2.6;
+}
+
+@keyframes pc-slot-in {
+    from { opacity: 0; transform: scale(0.6); }
+    to { opacity: 1; transform: none; }
+}
+
+.pc-tray-actions {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-inline-start: auto;
+}
+
+.pc-tray-clear {
+    min-height: 44px;
+    padding: 0 12px;
+    border: 0;
+    border-radius: var(--radius-ui);
+    background: transparent;
+    color: rgb(var(--c-muted));
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.pc-tray-clear:hover {
+    background: rgb(var(--c-surface-soft));
+    color: rgb(var(--c-ink));
+}
+
+.pc-tray-go {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    padding: 0 18px;
+    border-radius: var(--radius-ui);
+    background: rgb(var(--c-brand));
+    color: rgb(var(--c-on-brand));
+    font-size: 14.5px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.pc-tray-go:hover {
+    background: rgb(var(--c-brand-deep));
+}
+
+.pc-tray-go.is-disabled {
+    background: rgb(var(--c-line));
+    color: rgb(var(--c-muted));
+    cursor: not-allowed;
+}
+
+/* Room at the end of the page for the open tray (its height is set by the tray's script). */
+body.pc-has-tray {
+    padding-bottom: var(--pc-tray-space, 0px);
+}
+
+@media (max-width: 767px) {
+    .pc-tray {
+        inset-block-end: 0;
+        gap: 10px;
+        width: 100%;
+        padding: 10px 12px calc(10px + env(safe-area-inset-bottom));
+        border-end-start-radius: 0;
+        border-end-end-radius: 0;
+    }
+
+    .pc-tray-head {
+        display: none;
+    }
+
+    .pc-tray-slots {
+        gap: 6px;
+    }
+
+    .pc-tray-slot {
+        flex-basis: 46px;
+    }
+
+    .pc-tray-actions {
+        flex: none;
+        gap: 2px;
+    }
+
+    .pc-tray-clear {
+        padding: 0 8px;
+    }
+
+    .pc-tray-go {
+        padding: 0 14px;
+    }
+
+    /* Above the fixed bars of the category page (Filter/Sort) and the product page (buy bar). */
+    body:has(.category-mobile-bar) .pc-tray {
+        inset-block-end: calc(3.25rem + env(safe-area-inset-bottom));
+        padding-bottom: 10px;
+    }
+
+    body:has(.pdp-buy-bar) .pc-tray {
+        inset-block-end: calc(4.75rem + env(safe-area-inset-bottom));
+        padding-bottom: 10px;
+    }
+
+    body.pc-has-tray:has(.category-mobile-bar) {
+        padding-bottom: calc(3.25rem + env(safe-area-inset-bottom) + var(--pc-tray-space, 0px));
+    }
+
+    body.pc-has-tray:has(.pdp-buy-bar) {
+        padding-bottom: calc(4.75rem + env(safe-area-inset-bottom) + var(--pc-tray-space, 0px));
+    }
+
+    /* The chat button (layouts/index) floats over the tray's Compare button on a phone: hide it while
+       the tray is open, the way it hides while a drawer is open. */
+    body.pc-has-tray #zanderio-widget-host {
+        content-visibility: hidden;
+    }
+}
+
+/* Reduced motion: the tray fades in and out instead of sliding. */
+@media (prefers-reduced-motion: reduce) {
+    .pc-tray {
+        opacity: 0;
+        transform: none;
+        transition: opacity 160ms, visibility 0s 160ms;
+    }
+
+    .pc-tray.is-open {
+        opacity: 1;
+        transition: opacity 160ms, visibility 0s;
+    }
+
+    .pc-tray-slot.is-full {
+        animation: none;
+    }
+}

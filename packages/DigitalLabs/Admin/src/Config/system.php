@@ -311,7 +311,8 @@ return [
                 'name' => 'look',
                 'title' => 'admin::app.configuration.index.general.design.store-look.look',
                 'info' => 'admin::app.configuration.index.general.design.store-look.look-info',
-                'type' => 'select',
+                'type' => 'blade',
+                'path' => 'admin::configuration.custom-views.design-picker',
                 'default' => 'forest-green',
                 'channel_based' => true,
                 'options' => [
@@ -329,11 +330,50 @@ return [
                         'value' => 'minimal-white',
                     ],
                 ],
-            ], [
-                'name' => 'look_preview',
-                'title' => 'admin::app.configuration.index.general.design.store-look.look',
+            ],
+        ],
+    ], [
+        'key' => 'general.design.product_card',
+        'name' => 'admin::app.configuration.index.general.design.product-card.title',
+        'info' => 'admin::app.configuration.index.general.design.product-card.info',
+        'sort' => 4,
+        'fields' => [
+            [
+                'name' => 'style',
+                'title' => 'admin::app.configuration.index.general.design.product-card.style',
+                'info' => 'admin::app.configuration.index.general.design.product-card.style-info',
                 'type' => 'blade',
-                'path' => 'admin::configuration.custom-views.store-look',
+                'path' => 'admin::configuration.custom-views.design-picker',
+                'default' => 'classic',
+                'channel_based' => true,
+                'options' => [
+                    [
+                        'title' => 'admin::app.configuration.index.general.design.product-card.classic',
+                        'value' => 'classic',
+                    ], [
+                        'title' => 'admin::app.configuration.index.general.design.product-card.swipe',
+                        'value' => 'swipe',
+                    ], [
+                        'title' => 'admin::app.configuration.index.general.design.product-card.deck',
+                        'value' => 'deck',
+                    ],
+                ],
+            ], [
+                'name' => 'size_unit',
+                'title' => 'admin::app.configuration.index.general.design.product-card.size-unit',
+                'info' => 'admin::app.configuration.index.general.design.product-card.size-unit-info',
+                'type' => 'select',
+                'default' => 'in',
+                'channel_based' => true,
+                'options' => [
+                    [
+                        'title' => 'admin::app.configuration.index.general.design.product-card.inches',
+                        'value' => 'in',
+                    ], [
+                        'title' => 'admin::app.configuration.index.general.design.product-card.centimetres',
+                        'value' => 'cm',
+                    ],
+                ],
             ],
         ],
     ], [

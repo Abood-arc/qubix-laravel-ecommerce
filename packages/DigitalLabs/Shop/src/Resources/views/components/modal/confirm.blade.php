@@ -17,7 +17,7 @@
                 leave-to-class="opacity-0"
             >
                 <div
-                    class="fixed inset-0 z-20 bg-gray-500 bg-opacity-50 transition-opacity"
+                    class="fixed inset-0 z-[1001] bg-gray-500 bg-opacity-50 transition-opacity"
                     v-show="isOpen"
                 ></div>
             </transition>
@@ -33,10 +33,10 @@
                 leave-to-class="translate-y-4 opacity-0 md:translate-y-0 md:scale-95"
             >
                 <div
-                    class="fixed inset-0 z-20 transform overflow-y-auto transition" v-show="isOpen"
+                    class="fixed inset-0 z-[1001] transform overflow-y-auto transition" v-show="isOpen"
                 >
                     <div class="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
-                        <div class="absolute left-1/2 top-1/2 z-[999] w-full max-w-[475px] -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-xl bg-white p-5 max-md:w-[90%] max-sm:p-4">
+                        <div class="absolute left-1/2 top-1/2 w-full max-w-[475px] -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-xl bg-white p-5 max-md:w-[90%] max-sm:p-4">
                             <div class="flex gap-2.5">
                                 <div>
                                     <span class="flex rounded-full border border-gray-300 p-2.5">
@@ -99,6 +99,9 @@
                     agreeCallback: null,
 
                     disagreeCallback: null,
+
+                    // How the page's scrolling was set before the question opened (an open drawer locks it), to put back after.
+                    bodyStyleBeforeOpen: null,
                 };
             },
 
@@ -119,6 +122,11 @@
                 }) {
                     this.isOpen = true;
 
+                    this.bodyStyleBeforeOpen = {
+                        overflow: document.body.style.overflow,
+                        paddingRight: document.body.style.paddingRight,
+                    };
+
                     const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
 
                     document.body.style.overflow = 'hidden';
@@ -137,23 +145,23 @@
                 },
 
                 disagree() {
-                    this.isOpen = false;
-
-                    document.body.style.overflow = 'auto';
-
-                    document.body.style.paddingRight = '';
+                    this.close();
 
                     this.disagreeCallback();
                 },
 
                 agree() {
-                    this.isOpen = false;
-
-                    document.body.style.overflow = 'auto';
-
-                    document.body.style.paddingRight = '';
+                    this.close();
 
                     this.agreeCallback();
+                },
+
+                close() {
+                    this.isOpen = false;
+
+                    document.body.style.overflow = this.bodyStyleBeforeOpen.overflow;
+
+                    document.body.style.paddingRight = this.bodyStyleBeforeOpen.paddingRight;
                 },
 
                 registerGlobalEvents() {

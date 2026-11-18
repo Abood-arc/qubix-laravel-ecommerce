@@ -148,6 +148,8 @@ import Emitter from "./plugins/emitter";
 import Shop from "./plugins/shop";
 import VeeValidate from "./plugins/vee-validate";
 import Flatpickr from "./plugins/flatpickr";
+import FillPlaceholders from "./plugins/fill-placeholders";
+import CardGallery from "./plugins/card-gallery";
 
 [
     Axios,
@@ -155,6 +157,8 @@ import Flatpickr from "./plugins/flatpickr";
     Shop,
     VeeValidate,
     Flatpickr,
+    FillPlaceholders,
+    CardGallery,
 ].forEach((plugin) => app.use(plugin));
 
 /**

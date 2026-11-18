@@ -25,13 +25,22 @@
                 ></span>
 
                 @{{ flash.message }}
+
+                <a
+                    class="font-semibold underline ltr:ml-1.5 rtl:mr-1.5"
+                    :href="flash.link.url"
+                    v-text="flash.link.label"
+                    v-if="flash.link"
+                ></a>
             </p>
 
-			<span
+            <button
+                type="button"
                 class="icon-cancel max-h-4 max-w-4 cursor-pointer"
                 :style="typeStyles[flash.type]['icon']"
+                aria-label="@lang('shop::app.components.flash-group.close')"
                 @click="remove"
-            ></span>
+            ></button>
         </div>
     </script>
 
@@ -87,14 +96,6 @@
                         },
                     },
                 };
-            },
-
-            created() {
-                var self = this;
-
-                setTimeout(function() {
-                    self.remove()
-                }, 1000)
             },
 
             methods: {

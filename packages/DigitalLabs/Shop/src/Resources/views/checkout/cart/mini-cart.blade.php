@@ -26,6 +26,7 @@
                     {{-- Labelled on desktop; a 44px icon on phones. The count sits on the icon's corner. --}}
                     <span
                         class="header-action max-lg:h-11 max-lg:w-11 max-lg:min-w-0 max-lg:p-0"
+                        data-cart-target
                         role="button"
                         aria-label="@lang('shop::app.checkout.cart.mini-cart.shopping-cart')"
                         tabindex="0"
@@ -365,6 +366,7 @@
             <a
                 href="{{ route('shop.checkout.onepage.index') }}"
                 class="header-action max-lg:h-11 max-lg:w-11 max-lg:min-w-0 max-lg:p-0"
+                data-cart-target
                 aria-label="@lang('shop::app.checkout.cart.mini-cart.shopping-cart')"
             >
                 {!! view_render_event('qubix.shop.checkout.mini-cart.drawer.toggle.before') !!}
@@ -442,6 +444,9 @@
                         .then(response => {
                             if (response.data.message) {
                                 this.cart = response.data.data;
+
+                                // Tell the rest of the page too (product cards with a − 1 + control follow the cart).
+                                this.$emitter.emit('update-mini-cart', response.data.data);
                             } else {
                                 this.$emitter.emit('add-flash', { type: 'warning', message: response.data.data.message });
                             }
@@ -461,6 +466,9 @@
                             })
                             .then(response => {
                                 this.cart = response.data.data;
+
+                                // Tell the rest of the page too (product cards with a − 1 + control follow the cart).
+                                this.$emitter.emit('update-mini-cart', response.data.data);
 
                                 this.$emitter.emit('add-flash', { type: 'success', message: response.data.message });
 
