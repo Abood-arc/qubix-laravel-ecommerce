@@ -73,8 +73,12 @@ async function answerRelatedWith(page: Page, products: CardProduct[]): Promise<v
  * The related products load once their row scrolls into view.
  */
 async function showRelatedProducts(page: Page, product: CardProduct): Promise<void> {
-    await page.keyboard.press("End");
-    await expect(styledCard(page, product)).toBeVisible();
+    // The row loads only once it scrolls into view, and the page can still grow (photos, up-sells) after one
+    // press of End, leaving the row off screen. Keep going to the bottom until the card is there.
+    await expect(async () => {
+        await page.keyboard.press("End");
+        await expect(styledCard(page, product)).toBeVisible({ timeout: 2000 });
+    }).toPass({ timeout: 20000 });
 }
 
 /**
