@@ -38,18 +38,53 @@ export async function withAdmin(browser: Browser, action: (admin: Page) => Promi
     }
 }
 
-async function saveDesignSelect(admin: Page, label: string, option: string): Promise<void> {
+async function saveDesign(admin: Page, choose: () => Promise<void>, kept: () => Promise<void>): Promise<void> {
     await admin.goto("admin/configuration/general/design");
-    await admin.getByLabel(label).selectOption({ label: option });
-    await admin.getByRole("button", { name: "Save Configuration" }).click();
-    await expect(admin.getByText("Configuration saved successfully").first()).toBeVisible();
+    await choose();
+
+    // The save answers with a redirect back to the page. (Its flash message can be gone before the page,
+    // which now loads the live previews, has finished loading, so the answer itself is what is checked.)
+    const [saved] = await Promise.all([
+        admin.waitForResponse((response) => response.request().method() === "POST" && response.url().includes("admin/configuration")),
+        admin.getByRole("button", { name: "Save Configuration" }).click(),
+    ]);
+
+    expect(saved.status()).toBe(302);
+    expect(saved.headers().location ?? "").not.toContain("login");
+
+    await admin.waitForLoadState("domcontentloaded");
+
+    await kept();
 }
 
-export const setCardStyle = (admin: Page, style: CardStyle) => saveDesignSelect(admin, "Card style", style);
+/**
+ * Picks one of the design pickers' options (Card style, Look): a radio named after the option.
+ */
+export const designOption = (admin: Page, picker: "Card style" | "Look", option: string) =>
+    admin.getByRole("group", { name: picker }).getByRole("radio", { name: option, exact: true });
 
-export const setSizeUnit = (admin: Page, unit: "Inches" | "Centimetres") => saveDesignSelect(admin, "Size unit", unit);
+export const setCardStyle = (admin: Page, style: CardStyle) =>
+    saveDesign(
+        admin,
+        () => designOption(admin, "Card style", style).check(),
+        () => expect(designOption(admin, "Card style", style)).toBeChecked(),
+    );
 
-export const setStoreLook = (admin: Page, look: StoreLookCode) => saveDesignSelect(admin, "Look", STORE_LOOKS[look]);
+export const setSizeUnit = (admin: Page, unit: "Inches" | "Centimetres") =>
+    saveDesign(
+        admin,
+        async () => {
+            await admin.getByLabel("Size unit").selectOption({ label: unit });
+        },
+        () => expect(admin.getByLabel("Size unit")).toHaveValue(unit === "Inches" ? "in" : "cm"),
+    );
+
+export const setStoreLook = (admin: Page, look: StoreLookCode) =>
+    saveDesign(
+        admin,
+        () => designOption(admin, "Look", STORE_LOOKS[look]).check(),
+        () => expect(designOption(admin, "Look", STORE_LOOKS[look])).toBeChecked(),
+    );
 
 /**
  * The store look the storefront shows now (data-look on <html>), to restore it after a spec.

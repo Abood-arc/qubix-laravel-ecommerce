@@ -32,6 +32,12 @@ enum ProductCardStyleEnum: string
     public const CLASSIC_ONLY_ROUTES = ['shop.checkout.cart.index', 'shop.compare.index'];
 
     /**
+     * The request attribute that carries the style an admin's live preview shows (CardPreviewController),
+     * for that one response only.
+     */
+    public const PREVIEW_ATTRIBUTE = 'product_card_preview_style';
+
+    /**
      * The style saved for the current channel. Classic when nothing (or an unknown value) is saved.
      */
     public static function current(): self
@@ -41,10 +47,17 @@ enum ProductCardStyleEnum: string
 
     /**
      * The style for the page being rendered. The card template is pushed once per page, so this is
-     * a page-level choice: Classic on the Classic-only pages, otherwise the saved style.
+     * a page-level choice: the previewed style on an admin's live preview, Classic on the Classic-only
+     * pages, otherwise the saved style.
      */
     public static function forPage(): self
     {
+        $preview = request()->attributes->get(self::PREVIEW_ATTRIBUTE);
+
+        if ($preview instanceof self) {
+            return $preview;
+        }
+
         return request()->routeIs(...self::CLASSIC_ONLY_ROUTES) ? self::CLASSIC : self::current();
     }
 

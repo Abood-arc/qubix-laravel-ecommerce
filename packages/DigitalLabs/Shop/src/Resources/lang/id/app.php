@@ -956,6 +956,11 @@ return [
         'title' => 'Perbandingan Produk',
     ],
 
+    'card-preview' => [
+        'title'       => 'Card preview',
+        'no-products' => 'Add a product to your store to see this preview.',
+    ],
+
     'checkout' => [
         'success' => [
             'info' => 'Kami akan mengirimkan detail pesanan dan informasi pelacakan ke email Anda',

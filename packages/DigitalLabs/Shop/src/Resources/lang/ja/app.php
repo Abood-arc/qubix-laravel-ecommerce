@@ -956,6 +956,11 @@ return [
         'title' => '製品比較',
     ],
 
+    'card-preview' => [
+        'title'       => 'Card preview',
+        'no-products' => 'Add a product to your store to see this preview.',
+    ],
+
     'checkout' => [
         'success' => [
             'info' => '注文の詳細とトラッキング情報をメールでお送りします',

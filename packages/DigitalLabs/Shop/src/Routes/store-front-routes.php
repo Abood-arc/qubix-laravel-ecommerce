@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Storage;
 use DigitalLabs\Shop\Http\Controllers\BookingProductController;
+use DigitalLabs\Shop\Http\Controllers\CardPreviewController;
 use DigitalLabs\Shop\Http\Controllers\CompareController;
 use DigitalLabs\Shop\Http\Controllers\HomeController;
 use DigitalLabs\Shop\Http\Controllers\PageController;
@@ -68,6 +69,12 @@ Route::get('search', [SearchController::class, 'index'])
     ->middleware('cache.response');
 
 Route::post('search/upload', [SearchController::class, 'upload'])->name('shop.search.upload');
+
+/**
+ * The admin's live previews of the product card styles and store looks (signed-in admins only). Never
+ * cached: no cache.response.
+ */
+Route::get('card-preview', [CardPreviewController::class, 'show'])->name('shop.card-preview');
 
 /**
  * Subscription routes.

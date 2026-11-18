@@ -956,6 +956,11 @@ return [
         'title' => '产品比较',
     ],
 
+    'card-preview' => [
+        'title'       => 'Card preview',
+        'no-products' => 'Add a product to your store to see this preview.',
+    ],
+
     'checkout' => [
         'success' => [
             'info' => '我们将通过电子邮件发送您的订单详细信息和跟踪信息',

@@ -956,6 +956,11 @@ return [
         'title' => 'उत्पाद तुलना',
     ],
 
+    'card-preview' => [
+        'title'       => 'Card preview',
+        'no-products' => 'Add a product to your store to see this preview.',
+    ],
+
     'checkout' => [
         'success' => [
             'info' => 'हम आपको आपकी आदेश विवरण और ट्रैकिंग जानकारी ईमेल करेंगे',

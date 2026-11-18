@@ -956,6 +956,11 @@ return [
         'title' => 'Comparaison de produits',
     ],
 
+    'card-preview' => [
+        'title'       => 'Card preview',
+        'no-products' => 'Add a product to your store to see this preview.',
+    ],
+
     'checkout' => [
         'success' => [
             'info' => 'Nous vous enverrons par e-mail les détails de votre commande ainsi que les informations de suivi.',

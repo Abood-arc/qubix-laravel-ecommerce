@@ -956,6 +956,11 @@ return [
         'title' => 'Ürün Karşılaştırma',
     ],
 
+    'card-preview' => [
+        'title'       => 'Card preview',
+        'no-products' => 'Add a product to your store to see this preview.',
+    ],
+
     'checkout' => [
         'success' => [
             'info' => 'Sipariş detayları e-posta ile gönderilecektir.',

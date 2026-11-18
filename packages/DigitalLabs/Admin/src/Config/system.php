@@ -311,7 +311,8 @@ return [
                 'name' => 'look',
                 'title' => 'admin::app.configuration.index.general.design.store-look.look',
                 'info' => 'admin::app.configuration.index.general.design.store-look.look-info',
-                'type' => 'select',
+                'type' => 'blade',
+                'path' => 'admin::configuration.custom-views.design-picker',
                 'default' => 'forest-green',
                 'channel_based' => true,
                 'options' => [
@@ -329,11 +330,6 @@ return [
                         'value' => 'minimal-white',
                     ],
                 ],
-            ], [
-                'name' => 'look_preview',
-                'title' => 'admin::app.configuration.index.general.design.store-look.look',
-                'type' => 'blade',
-                'path' => 'admin::configuration.custom-views.store-look',
             ],
         ],
     ], [
@@ -346,7 +342,8 @@ return [
                 'name' => 'style',
                 'title' => 'admin::app.configuration.index.general.design.product-card.style',
                 'info' => 'admin::app.configuration.index.general.design.product-card.style-info',
-                'type' => 'select',
+                'type' => 'blade',
+                'path' => 'admin::configuration.custom-views.design-picker',
                 'default' => 'classic',
                 'channel_based' => true,
                 'options' => [
@@ -361,11 +358,6 @@ return [
                         'value' => 'deck',
                     ],
                 ],
-            ], [
-                'name' => 'style_preview',
-                'title' => 'admin::app.configuration.index.general.design.product-card.style',
-                'type' => 'blade',
-                'path' => 'admin::configuration.custom-views.product-card',
             ], [
                 'name' => 'size_unit',
                 'title' => 'admin::app.configuration.index.general.design.product-card.size-unit',

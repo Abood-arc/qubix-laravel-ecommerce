@@ -956,6 +956,11 @@ return [
         'title' => 'නිෂ්පාදන තීරුව',
     ],
 
+    'card-preview' => [
+        'title'       => 'Card preview',
+        'no-products' => 'Add a product to your store to see this preview.',
+    ],
+
     'checkout' => [
         'success' => [
             'info' => 'අපි ඔබට ඔබේ ඇණවුම් වාර්තා සහ පථිපථ තොරතුරු ඊමේල් කරනු ඇත',

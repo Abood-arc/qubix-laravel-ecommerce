@@ -956,6 +956,11 @@ return [
         'title' => 'השוואת מוצרים',
     ],
 
+    'card-preview' => [
+        'title'       => 'Card preview',
+        'no-products' => 'Add a product to your store to see this preview.',
+    ],
+
     'checkout' => [
         'success' => [
             'info' => 'נשלח אליך אימייל עם פרטי ההזמנה ומידע לגבי מעקב.',

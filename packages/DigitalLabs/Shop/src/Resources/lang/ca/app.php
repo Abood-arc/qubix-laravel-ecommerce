@@ -956,6 +956,11 @@ return [
         'title' => 'Comparació de productes',
     ],
 
+    'card-preview' => [
+        'title'       => 'Card preview',
+        'no-products' => 'Add a product to your store to see this preview.',
+    ],
+
     'checkout' => [
         'success' => [
             'info' => 'T\'enviarem els detalls de la teva comanda i la informació de seguiment per correu electrònic',
