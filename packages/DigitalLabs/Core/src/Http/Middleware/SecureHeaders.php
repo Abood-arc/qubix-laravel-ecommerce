@@ -42,9 +42,9 @@ class SecureHeaders
         $response->headers->set('X-Content-Type-Options', 'nosniff');
         $response->headers->set('X-XSS-Protection', '1; mode=block');
 
-        // DENY unless the response allows more itself: the admin's same-origin live previews
-        // (shop.card-preview) say SAMEORIGIN.
-        if (! $response->headers->has('X-Frame-Options')) {
+        // DENY, except a response that asks for SAMEORIGIN itself (the admin's live previews,
+        // shop.card-preview). Anything else a response sets is replaced by DENY.
+        if ($response->headers->get('X-Frame-Options') !== 'SAMEORIGIN') {
             $response->headers->set('X-Frame-Options', 'DENY');
         }
 

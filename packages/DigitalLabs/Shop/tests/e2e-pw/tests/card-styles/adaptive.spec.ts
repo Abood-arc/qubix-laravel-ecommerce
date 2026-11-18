@@ -80,6 +80,38 @@ test.describe("Swipe card on a phone", () => {
         await expect(bars.nth(last - 2)).toHaveClass(/\bis-on\b/);
     });
 
+    test("after an arrow-key move that lands off its mark, the row is still followed", async ({ page }) => {
+        const product = await findMultiPhotoProduct(page.request);
+
+        await openSearchFor(page, product);
+
+        const card = styledCard(page, product);
+        // The scrolling row, its inner rail and the progress bars have no role of their own.
+        const row = card.locator(".pc-swipe-track");
+        const bars = card.locator(".pc-tick");
+        const last = Math.min(product.photoCount, 4);
+
+        // A gap between the photos moves every snap point a few pixels past where the card aims the row,
+        // as fractional photo widths do on real screens.
+        await card.locator(".pc-swipe-rail").evaluate((rail: HTMLElement) => (rail.style.gap = "3px"));
+
+        await photoLink(page, product).focus();
+
+        for (let photo = 2; photo <= last; photo++) {
+            await page.keyboard.press("ArrowRight");
+            await expect(card.getByRole("status")).toHaveText(`Photo ${photo} of ${product.photoCount}`);
+        }
+
+        await expect(bars.nth(last - 1)).toHaveClass(/\bis-on\b/);
+        await expect.poll(() => row.evaluate((element) => element.scrollLeft)).toBeGreaterThan(0);
+
+        // Then something other than a finger or the card moves the row back (a scroll bar, a script).
+        await page.waitForTimeout(400);
+        await row.evaluate((element) => element.scrollTo({ left: 0, behavior: "instant" }));
+
+        await expect(bars.first()).toHaveClass(/\bis-on\b/);
+    });
+
     test("Add to cart is at least 44px tall", async ({ page }) => {
         const product = await findMultiPhotoProduct(page.request);
 

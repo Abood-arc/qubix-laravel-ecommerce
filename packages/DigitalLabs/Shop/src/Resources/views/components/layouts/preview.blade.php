@@ -67,7 +67,7 @@
 
         @stack('styles')
 
-@include('shop::components.layouts.category-nav-script')
+        @include('shop::components.layouts.category-nav-script', ['categoryTreeStamp' => $categoryTreeStamp])
     </head>
 
     <body>

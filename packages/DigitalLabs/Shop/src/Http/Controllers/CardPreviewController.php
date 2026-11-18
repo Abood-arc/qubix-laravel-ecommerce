@@ -23,15 +23,20 @@ class CardPreviewController extends Controller
      */
     public const PRODUCTS = 2;
 
+    /**
+     * Products looked at to find them.
+     */
+    public const POOL = 12;
+
     public function __construct(protected ProductRepository $productRepository) {}
 
     public function show(Request $request): Response
     {
         abort_unless(auth()->guard('admin')->check(), 403);
 
-        $style = ProductCardStyleEnum::tryFrom((string) $request->query('style'));
+        $style = ProductCardStyleEnum::tryFrom((string) $request->query(ProductCardStyleEnum::PREVIEW_PARAMETER));
 
-        $look = StoreLookEnum::tryFrom((string) $request->query('look'));
+        $look = StoreLookEnum::tryFrom((string) $request->query(StoreLookEnum::PREVIEW_PARAMETER));
 
         abort_unless($style && $look, 404);
 
@@ -52,23 +57,27 @@ class CardPreviewController extends Controller
 
     /**
      * The store's own products, as the listing API sends them to the cards: saleable ones with more
-     * than one photo first, so the demo has photos to swipe and something to add to the cart.
+     * than one photo first, so the demo has photos to swipe and something to add to the cart. They are
+     * picked from a small pool of products, and only the ones shown are turned into card data.
      */
     protected function products(): array
     {
-        $products = $this->productRepository
+        $pool = $this->productRepository
             ->setSearchEngine('database')
             ->getAll([
                 'channel_id' => core()->getCurrentChannel()->id,
                 'status' => 1,
                 'visible_individually' => 1,
-                'limit' => 24,
-            ]);
+                'limit' => self::POOL,
+            ])
+            ->getCollection()
+            ->loadMissing('images');
 
-        return collect(ProductResource::collection($products->getCollection())->resolve())
-            ->sortByDesc(fn (array $product) => (int) $product['is_saleable'] * 2 + (int) (count($product['images']) > 1))
+        $shown = $pool
+            ->sortByDesc(fn ($product) => (int) $product->getTypeInstance()->isSaleable() * 2 + (int) ($product->images->count() > 1))
             ->take(self::PRODUCTS)
-            ->values()
-            ->all();
+            ->values();
+
+        return ProductResource::collection($shown)->resolve();
     }
 }

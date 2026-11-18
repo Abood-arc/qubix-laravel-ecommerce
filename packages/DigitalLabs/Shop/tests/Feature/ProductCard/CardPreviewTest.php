@@ -49,8 +49,11 @@ it('shows a signed-in admin the real card in the asked style and look, with the 
 
     signInCardPreviewAdmin();
 
-    $html = get($previewUrl())
-        ->assertOk()
+    $response = get($previewUrl())->assertOk();
+
+    expect($response->headers->get('Cache-Control'))->toContain('no-store');
+
+    $html = $response
         ->assertHeader('X-Robots-Tag', 'noindex, nofollow')
         ->assertHeader('X-Frame-Options', 'SAMEORIGIN')
         ->assertHeader('Content-Security-Policy', "frame-ancestors 'self'")
@@ -113,3 +116,13 @@ it('is never kept in the page cache', function () {
 it('keeps every other page out of frames', function () {
     get(route('shop.home.index'))->assertHeader('X-Frame-Options', 'DENY');
 });
+
+it('lets a response relax framing only to the same origin', function (string $asked, string $sent) {
+    Route::middleware('web')->get('_frame-test', fn () => response('ok')->header('X-Frame-Options', $asked));
+
+    get('_frame-test')->assertHeader('X-Frame-Options', $sent);
+})->with([
+    'same origin' => ['SAMEORIGIN', 'SAMEORIGIN'],
+    'anything else' => ['ALLOW-FROM https://example.com', 'DENY'],
+    'lower case' => ['sameorigin', 'DENY'],
+]);

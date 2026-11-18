@@ -19,11 +19,30 @@ enum StoreLookEnum: string
     public const CONFIG_KEY = 'general.design.store_look.look';
 
     /**
-     * The look saved for the current channel. Forest Green when nothing (or an unknown value) is saved.
+     * The admin's live preview (shop.card-preview): the query parameter that names the look, and the
+     * height of the preview window, the store header above two cards at a phone's width.
      */
+    public const PREVIEW_PARAMETER = 'look';
+
+    public const PREVIEW_HEIGHT = 620;
+
+    /**
+     * Its previews show the store header too, where a look shows most.
+     */
+    public const PREVIEW_HEADER = true;
+
+    /**
+     * The look saved for the current channel (or `$channelCode`). Forest Green when nothing (or an
+     * unknown value) is saved.
+     */
+    public static function saved(?string $channelCode = null): self
+    {
+        return self::tryFrom((string) core()->getConfigData(self::CONFIG_KEY, $channelCode)) ?? self::FOREST_GREEN;
+    }
+
     public static function current(): self
     {
-        return self::tryFrom((string) core()->getConfigData(self::CONFIG_KEY)) ?? self::FOREST_GREEN;
+        return self::saved();
     }
 
     /**

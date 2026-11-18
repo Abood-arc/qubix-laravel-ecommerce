@@ -38,11 +38,30 @@ enum ProductCardStyleEnum: string
     public const PREVIEW_ATTRIBUTE = 'product_card_preview_style';
 
     /**
-     * The style saved for the current channel. Classic when nothing (or an unknown value) is saved.
+     * The admin's live preview (shop.card-preview): the query parameter that names the style, and the
+     * height of the preview window, two cards at a phone's width.
      */
+    public const PREVIEW_PARAMETER = 'style';
+
+    public const PREVIEW_HEIGHT = 400;
+
+    /**
+     * Its previews show the cards only, without the store header.
+     */
+    public const PREVIEW_HEADER = false;
+
+    /**
+     * The style saved for the current channel (or `$channelCode`). Classic when nothing (or an
+     * unknown value) is saved.
+     */
+    public static function saved(?string $channelCode = null): self
+    {
+        return self::tryFrom((string) core()->getConfigData(self::CONFIG_KEY, $channelCode)) ?? self::CLASSIC;
+    }
+
     public static function current(): self
     {
-        return self::tryFrom((string) core()->getConfigData(self::CONFIG_KEY)) ?? self::CLASSIC;
+        return self::saved();
     }
 
     /**

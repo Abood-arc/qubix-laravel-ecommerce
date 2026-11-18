@@ -97,7 +97,7 @@
             </script>
         @endif
 
-        @include('shop::components.layouts.category-nav-script')
+        @include('shop::components.layouts.category-nav-script', ['categoryTreeStamp' => $categoryTreeStamp])
 
         {!! view_render_event('qubix.shop.layout.head.after') !!}
 

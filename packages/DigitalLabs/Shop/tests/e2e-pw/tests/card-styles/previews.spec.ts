@@ -120,6 +120,30 @@ test("each picker is a group of radios with a live preview per option, and no dr
     await expect(cardStyle.getByRole("radio", { name: "Classic", exact: true })).toBeChecked();
 });
 
+test("each preview window loads once, when the admin app has started", async ({ browser }) => {
+    const page = await adminPage(browser);
+    const loads: string[] = [];
+
+    page.on("request", (request) => {
+        if (request.url().includes("/card-preview?")) {
+            loads.push(request.url());
+        }
+    });
+
+    await openDesign(page);
+
+    // The windows load lazily: bring every one of them on screen.
+    for (const name of ["Card style", "Look"]) {
+        await page.getByRole("group", { name }).scrollIntoViewIfNeeded();
+    }
+
+    await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
+    await page.waitForTimeout(3000);
+
+    expect(loads).toHaveLength(7);
+    expect(new Set(loads).size).toBe(7);
+});
+
 test("clicking a preview chooses it, saving keeps it, and arrow keys move between the options", async ({ browser }) => {
     const page = await adminPage(browser);
 
@@ -207,6 +231,38 @@ test("a store look preview shows the card style picked above it, before saving",
     await expect(look.locator("html")).toHaveAttribute("data-look", "sand-charcoal");
 });
 
+test("a store look preview, with the real header and mini cart, sends nothing for the cart, compare or wishlist, and nothing that writes", async ({ browser }) => {
+    const page = await adminPage(browser);
+    const sent: string[] = [];
+
+    page.on("request", (request) => {
+        // Requests from the preview windows only. Laravel Boost's browser logger (local development only)
+        // posts the windows' console to the server; it is not part of the shop.
+        if (request.frame() === page.mainFrame() || request.url().includes("/_boost/")) {
+            return;
+        }
+
+        if (/\/api\/(checkout\/cart|compare-items)|wishlist/.test(request.url()) || request.method() !== "GET") {
+            sent.push(`${request.method()} ${request.url()}`);
+        }
+    });
+
+    await openDesign(page);
+
+    // Unsaved: the look previews play the Swipe card under the store's header.
+    await page.getByText("Swipe, named and sized", { exact: true }).click();
+
+    const look = await preview(page, "Marigold & Indigo");
+
+    // The header's cart button and mini cart are there (the mini cart reads the cart when it starts).
+    await expect(look.locator("[data-cart-target]").first()).toBeAttached();
+    // The buy wrapper has no role.
+    await expect(look.locator('.pc-card').first().locator('.pc-buy[data-state="qty"]')).toBeVisible({ timeout: 25000 });
+    await expect(look.locator('.pc-card').first().getByRole("button", { name: /^Compare / })).toHaveAttribute("aria-pressed", "true", { timeout: 25000 });
+
+    expect(sent).toEqual([]);
+});
+
 test("the demo waits while its preview is off screen", async ({ browser }) => {
     const page = await adminPage(browser);
 
@@ -227,13 +283,28 @@ test.describe("Reduced motion", () => {
 
         await openDesign(page);
 
-        const swipe = await preview(page, "Swipe, named and sized");
+        // The cards' state: which bar is lit, the deck counter, the buy wrapper's state and the compare
+        // tick (the bars and the wrapper have no role).
+        const state = (frame: FrameLocator) =>
+            frame.locator("body").evaluate(() => ({
+                demo: document.documentElement.dataset.demo,
+                bars: [...document.querySelectorAll(".pc-tick")].map((bar) => bar.classList.contains("is-on")),
+                counters: [...document.querySelectorAll(".pc-deck-next")].map((counter) => counter.textContent?.trim()),
+                buy: [...document.querySelectorAll(".pc-buy")].map((buy) => (buy as HTMLElement).dataset.state),
+                compare: [...document.querySelectorAll(".pc-compare")].map((tick) => tick.getAttribute("aria-pressed")),
+            }));
 
-        await expect(swipe.locator("html")).toHaveAttribute("data-demo", "still");
+        for (const name of ["Swipe, named and sized", "Photo deck"]) {
+            const frame = await preview(page, name);
 
-        await page.waitForTimeout(3000);
+            await expect(frame.locator("html")).toHaveAttribute("data-demo", "still");
 
-        // The first photo's bar is still the one lit.
-        await expect(swipe.locator(".pc-card").first().locator(".pc-tick").first()).toHaveClass(/\bis-on\b/);
+            const before = await state(frame);
+
+            await page.waitForTimeout(6000);
+
+            expect(await state(frame)).toEqual(before);
+            expect(before.buy.every((buy) => buy === "idle")).toBe(true);
+        }
     });
 });

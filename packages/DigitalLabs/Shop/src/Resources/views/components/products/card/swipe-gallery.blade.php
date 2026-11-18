@@ -132,12 +132,13 @@
 
                     const track = this.$refs.track;
 
-                    const left = (this.isRtl ? -1 : 1) * index * track.clientWidth;
+                    // The row is the card's own until it settles (onScrollSettled), even if it never moves.
+                    this.target = index;
 
-                    this.target = Math.abs(track.scrollLeft - left) < 2 ? null : index;
+                    this.settleSoon();
 
                     track.scrollTo({
-                        left,
+                        left: (this.isRtl ? -1 : 1) * index * track.clientWidth,
                         behavior: smooth && ! this.prefersReducedMotion() ? 'smooth' : 'instant',
                     });
                 },
@@ -208,34 +209,59 @@
                  * The row moved. Whatever moved it, the progress bars and the caption follow the photo
                  * on show, and screen readers hear which photo it is once a swipe settles. The card's
                  * own moves (show(): pointing, arrow keys) already set the photo, so their scrolling is
-                 * only watched until it lands, which keeps a smooth arrow-key move from lighting up
-                 * the bars of the photos it passes.
+                 * left alone until it settles, which keeps a smooth arrow-key move from lighting up the
+                 * bars of the photos it passes, wherever the row's snap points make it land.
                  */
                 onScroll() {
+                    this.settleSoon();
+
+                    if (this.target === null) {
+                        this.follow();
+                    }
+                },
+
+                /**
+                 * The bars and the caption show the photo the row is at.
+                 */
+                follow() {
                     const track = this.$refs.track;
 
                     const index = Math.min(this.photos.length - 1, Math.round(Math.abs(track.scrollLeft) / track.clientWidth));
-
-                    if (this.target !== null) {
-                        if (Math.abs(Math.abs(track.scrollLeft) - this.target * track.clientWidth) < 2) {
-                            this.target = null;
-                        }
-
-                        return;
-                    }
 
                     if (index !== this.current) {
                         this.current = index;
 
                         this.wake();
                     }
-
-                    clearTimeout(this.settleTimer);
-
-                    this.settleTimer = setTimeout(() => this.onSwipeSettled(), 150);
                 },
 
-                onSwipeSettled() {
+                /**
+                 * The row counts as settled once it has not moved for 150ms.
+                 */
+                settleSoon() {
+                    clearTimeout(this.settleTimer);
+
+                    this.settleTimer = setTimeout(() => this.onScrollSettled(), 150);
+                },
+
+                /**
+                 * The row has stopped: it is the shopper's again, and the bars follow wherever it came to
+                 * rest (also when something else moved it during the card's own move). After a swipe,
+                 * say which photo shows; the card's own moves have spoken already, or are silent.
+                 */
+                onScrollSettled() {
+                    const ownMove = this.target !== null;
+
+                    this.target = null;
+
+                    this.follow();
+
+                    if (ownMove) {
+                        this.spoken = this.current;
+
+                        return;
+                    }
+
                     if (this.current !== this.spoken) {
                         this.spoken = this.current;
 

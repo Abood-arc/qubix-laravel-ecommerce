@@ -8,8 +8,9 @@
     Nothing leaves the page: the cards' cart and compare ($cardCart, $cardCompare) and the shop's compare
     helper ($compareList) are replaced by local stand-ins, and any other request for the shopper's cart,
     compare list or wishlist, or any request that would change something, is answered on the page
-    without reaching the server. Links do not open. With reduced motion the cards stay still, and the
-    loop waits while the preview is off screen or the tab is hidden.
+    without reaching the server. Links do not open. While motion is reduced (also when that is switched
+    on later) the cards stay still; the loop also waits while the preview is off screen or the tab is
+    hidden. Waiting runs no timer: it resumes when one of those changes back.
 
     The state is on <html data-demo>: "playing", "paused" or "still".
 --}}
@@ -161,22 +162,36 @@
 
     let onScreen = true;
 
-    const playing = () => onScreen && ! document.hidden;
+    // The first styled card, once the page has started (Classic cards have no motion of their own).
+    let card = null;
 
-    const showState = () => {
-        root.dataset.demo = reducedMotion.matches ? 'still' : (playing() ? 'playing' : 'paused');
-    };
+    // What wait() is waiting on while the demo is paused or still.
+    let resumers = [];
+
+    const playing = () => !! card && onScreen && ! document.hidden && ! reducedMotion.matches;
 
     /**
-     * Wait `ms`, counting only the time the preview is on screen.
+     * Show the state on <html data-demo>, and wake any wait() once the demo may play again.
+     */
+    const showState = () => {
+        root.dataset.demo = ! card || reducedMotion.matches ? 'still' : (playing() ? 'playing' : 'paused');
+
+        if (playing()) {
+            resumers.splice(0).forEach((resume) => resume());
+        }
+    };
+
+    const whenPlaying = () => (playing() ? Promise.resolve() : new Promise((resume) => resumers.push(resume)));
+
+    /**
+     * Wait `ms`, counting only the time the demo may play: while the preview is off screen, the tab is
+     * hidden or motion is reduced, it simply waits to be woken (no timer runs).
      */
     const wait = async (ms) => {
-        for (let left = ms; left > 0;) {
-            await new Promise((resolve) => setTimeout(resolve, 100));
+        for (let left = ms; left > 0; left -= 250) {
+            await whenPlaying();
 
-            if (playing()) {
-                left -= 100;
-            }
+            await new Promise((resolve) => setTimeout(resolve, Math.min(left, 250)));
         }
     };
 
@@ -255,18 +270,13 @@
     }
 
     window.addEventListener('load', () => setTimeout(() => {
+        card = document.querySelector('.pc-card');
+
+        reducedMotion.addEventListener('change', showState);
+
         showState();
 
-        if (reducedMotion.matches) {
-            return;
-        }
-
-        // The Swipe and Photo deck cards; the Classic card has no motion of its own.
-        const card = document.querySelector('.pc-card');
-
         if (! card) {
-            root.dataset.demo = 'still';
-
             return;
         }
 
