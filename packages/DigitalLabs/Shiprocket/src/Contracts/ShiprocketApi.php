@@ -14,9 +14,12 @@ interface ShiprocketApi
     public function checkLogin(): void;
 
     /**
-     * @return array{deliverable: bool, cod: bool}
+     * The couriers that deliver this parcel; with $cod, only those that collect cash, priced
+     * with their cash on delivery fee. An empty list means no courier delivers there.
+     *
+     * @return list<\DigitalLabs\Shiprocket\Support\Courier>
      */
-    public function checkServiceability(string $pickupPin, string $deliveryPin, float $weightKg, bool $cod): array;
+    public function couriers(string $pickupPin, string $deliveryPin, float $weightKg, bool $cod): array;
 
     /**
      * @return array{order_id: int, shipment_id: int}
@@ -29,11 +32,12 @@ interface ShiprocketApi
     public function findOrderByChannelOrderId(string $channelOrderId): ?array;
 
     /**
-     * Book Shiprocket's recommended courier. An AWB that is already assigned is returned as success.
+     * Book a courier: $courierId when given, otherwise the one Shiprocket picks. An AWB that
+     * is already assigned is returned as success.
      *
      * @return array{awb_code: string, courier_name: string}
      */
-    public function assignAwb(int $shipmentId): array;
+    public function assignAwb(int $shipmentId, ?int $courierId = null): array;
 
     public function requestPickup(int $shipmentId): void;
 

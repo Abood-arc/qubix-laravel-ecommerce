@@ -60,6 +60,7 @@ class ShiprocketShipment extends Model
         'channel_order_id',
         'awb_code',
         'courier_name',
+        'requested_courier_id',
         'label_url',
         'pickup_scheduled_at',
         'last_event',
@@ -70,6 +71,7 @@ class ShiprocketShipment extends Model
     protected $casts = [
         'pickup_scheduled_at' => 'datetime',
         'generation' => 'integer',
+        'requested_courier_id' => 'integer',
     ];
 
     protected $attributes = [

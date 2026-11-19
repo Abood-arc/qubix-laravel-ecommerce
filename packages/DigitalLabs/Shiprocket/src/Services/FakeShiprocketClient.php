@@ -5,6 +5,7 @@ namespace DigitalLabs\Shiprocket\Services;
 use DigitalLabs\Shiprocket\Contracts\ShiprocketApi;
 use DigitalLabs\Shiprocket\Exceptions\ShiprocketException;
 use DigitalLabs\Shiprocket\Models\ShiprocketShipment;
+use DigitalLabs\Shiprocket\Support\Courier;
 use DigitalLabs\Shiprocket\Support\Settings;
 use Illuminate\Support\Facades\Cache;
 
@@ -12,7 +13,9 @@ use Illuminate\Support\Facades\Cache;
  * A deterministic stand-in for local development and browser tests (SHIPROCKET_FAKE=true).
  *
  * Delivery PINs starting with 9 are not deliverable, PINs ending in 0 have no Cash on Delivery,
- * every other PIN has both. Orders live in the cache so a later request can find them.
+ * every other PIN has both. Every deliverable PIN has the same two couriers: "Fake Surface"
+ * (₹90, 5 days) and "Fake Air" (₹150, 2 days), each ₹50 more with Cash on Delivery.
+ * Orders live in the cache so a later request can find them.
  */
 class FakeShiprocketClient implements ShiprocketApi
 {
@@ -24,15 +27,34 @@ class FakeShiprocketClient implements ShiprocketApi
 
     public function checkLogin(): void {}
 
-    public function checkServiceability(string $pickupPin, string $deliveryPin, float $weightKg, bool $cod): array
+    /**
+     * The couriers every deliverable PIN gets, by id: name, prepaid price, days.
+     */
+    public const COURIERS = [
+        1 => ['Fake Surface', 90.0, 5],
+        2 => ['Fake Air', 150.0, 2],
+    ];
+
+    public const COD_FEE = 50.0;
+
+    public function couriers(string $pickupPin, string $deliveryPin, float $weightKg, bool $cod): array
     {
         $pin = trim($deliveryPin);
 
-        if (str_starts_with($pin, '9')) {
-            return ['deliverable' => false, 'cod' => false];
+        if (str_starts_with($pin, '9') || ($cod && str_ends_with($pin, '0'))) {
+            return [];
         }
 
-        return ['deliverable' => true, 'cod' => ! str_ends_with($pin, '0')];
+        return collect(self::COURIERS)
+            ->map(fn (array $courier, int $id) => new Courier(
+                $id,
+                $courier[0],
+                $courier[1] + ($cod ? self::COD_FEE : 0),
+                $courier[2],
+                now()->addDays($courier[2])->format('M j, Y'),
+            ))
+            ->values()
+            ->all();
     }
 
     public function createOrder(array $payload): array
@@ -79,9 +101,9 @@ class FakeShiprocketClient implements ShiprocketApi
         return $ids && ! $this->isCancelled($ids['order_id']) ? $ids : null;
     }
 
-    public function assignAwb(int $shipmentId): array
+    public function assignAwb(int $shipmentId, ?int $courierId = null): array
     {
-        return ['awb_code' => 'FAKE'.$shipmentId, 'courier_name' => 'Fake Express'];
+        return ['awb_code' => 'FAKE'.$shipmentId, 'courier_name' => self::COURIERS[$courierId][0] ?? 'Fake Express'];
     }
 
     public function requestPickup(int $shipmentId): void {}

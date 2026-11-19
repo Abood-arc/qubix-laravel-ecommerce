@@ -3,6 +3,7 @@
 use DigitalLabs\Shiprocket\Exceptions\ShiprocketException;
 use DigitalLabs\Shiprocket\Exceptions\ShiprocketUnknownOutcomeException;
 use DigitalLabs\Shiprocket\Services\ShiprocketClient;
+use DigitalLabs\Shiprocket\Support\Courier;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\Request;
 use Illuminate\Support\Facades\Cache;
@@ -194,32 +195,39 @@ it('flattens shiprocket\'s validation errors into the refusal message', function
         ->toBe('The billing phone must be 10 digits. The sku field is required.');
 });
 
-it('checks serviceability with cod and reads the courier list', function () {
+it('asks with cod and returns only the couriers that collect cash, with their price', function () {
     fakeShiprocketHttp([
         SHIPROCKET_TEST_API.'courier/serviceability/*' => Http::response(['status' => 200, 'data' => [
             'available_courier_companies' => [
-                ['courier_name' => 'Prepaid Only', 'cod' => 0],
-                ['courier_name' => 'Cod Courier', 'cod' => 1],
+                ['courier_company_id' => 7, 'courier_name' => 'Prepaid Only', 'cod' => 0, 'rate' => 80],
+                ['courier_company_id' => 58, 'courier_name' => 'Shadowfax Surface', 'cod' => 1, 'rate' => 143.72,
+                    'estimated_delivery_days' => '6', 'etd' => 'Nov 25, 2026'],
             ],
         ]]),
     ]);
 
-    expect(app(ShiprocketClient::class)->checkServiceability('400001', '560001', 0.5, true))
-        ->toBe(['deliverable' => true, 'cod' => true]);
+    $couriers = app(ShiprocketClient::class)->couriers('400001', '560001', 0.5, true);
+
+    expect($couriers)->toHaveCount(1)
+        ->and($couriers[0])->toBeInstanceOf(Courier::class)
+        ->and($couriers[0]->toArray())->toBe(['id' => 58, 'name' => 'Shadowfax Surface', 'rate' => 143.72, 'days' => 6, 'etd' => 'Nov 25, 2026']);
 
     Http::assertSent(fn (Request $request) => $request->method() === 'GET'
         && $request->url() === SHIPROCKET_TEST_API.'courier/serviceability/?pickup_postcode=400001&delivery_postcode=560001&weight=0.5&cod=1');
 });
 
-it('is deliverable without cod when no courier collects cash', function () {
+it('asks without cod and returns every courier', function () {
     fakeShiprocketHttp([
         SHIPROCKET_TEST_API.'courier/serviceability/*' => Http::response(['data' => [
-            'available_courier_companies' => [['courier_name' => 'Prepaid Only', 'cod' => 0]],
+            'available_courier_companies' => [
+                ['courier_company_id' => 7, 'courier_name' => 'Prepaid Only', 'cod' => 0, 'rate' => 80],
+                ['courier_company_id' => 58, 'courier_name' => 'Cod Courier', 'cod' => 1, 'rate' => 93.72],
+            ],
         ]]),
     ]);
 
-    expect(app(ShiprocketClient::class)->checkServiceability('400001', '560001', 1.0, false))
-        ->toBe(['deliverable' => true, 'cod' => false]);
+    expect(array_map(fn (Courier $courier) => $courier->id, app(ShiprocketClient::class)->couriers('400001', '560001', 1.0, false)))
+        ->toBe([7, 58]);
 
     Http::assertSent(fn (Request $request) => $request->method() === 'GET' && str_ends_with($request->url(), '&cod=0'));
 });
@@ -227,8 +235,7 @@ it('is deliverable without cod when no courier collects cash', function () {
 it('is not deliverable when shiprocket has no courier for the pin', function (Closure $reply) {
     fakeShiprocketHttp([SHIPROCKET_TEST_API.'courier/serviceability/*' => $reply]);
 
-    expect(app(ShiprocketClient::class)->checkServiceability('400001', '799999', 0.5, true))
-        ->toBe(['deliverable' => false, 'cod' => false]);
+    expect(app(ShiprocketClient::class)->couriers('400001', '799999', 0.5, true))->toBe([]);
 })->with([
     'empty list' => [fn () => fn () => Http::response(['data' => ['available_courier_companies' => []]])],
     'no data' => [fn () => fn () => Http::response(['status' => 404, 'message' => 'No courier available'])],
@@ -240,7 +247,7 @@ it('does not take an unclear serviceability answer for "no courier"', function (
     fakeShiprocketHttp([SHIPROCKET_TEST_API.'courier/serviceability/*' => $reply]);
 
     // Thrown, so checkout fails open instead of caching the PIN as undeliverable.
-    expect(catchShiprocketException(fn () => app(ShiprocketClient::class)->checkServiceability('400001', '560001', 0.5, false)))
+    expect(catchShiprocketException(fn () => app(ShiprocketClient::class)->couriers('400001', '560001', 0.5, false)))
         ->toBeInstanceOf(ShiprocketException::class);
 })->with([
     '422 without a message' => [fn () => fn () => Http::response([], 422)],
@@ -267,7 +274,7 @@ it('gives checkout calls 3 seconds and booking calls 12', function () {
         };
     });
 
-    app(ShiprocketClient::class)->checkServiceability('400001', '560001', 0.5, true);
+    app(ShiprocketClient::class)->couriers('400001', '560001', 0.5, true);
 
     Cache::forget(shiprocketTokenKey());
 
@@ -290,7 +297,7 @@ it('refuses a serviceability request shiprocket finds invalid', function () {
         ], 422),
     ]);
 
-    $exception = catchShiprocketException(fn () => app(ShiprocketClient::class)->checkServiceability('400001', '560001', 0, true));
+    $exception = catchShiprocketException(fn () => app(ShiprocketClient::class)->couriers('400001', '560001', 0, true));
 
     expect($exception)->not->toBeNull()
         ->and($exception->getMessage())->toBe('Oops! Invalid Data. The weight field is required.');
@@ -355,6 +362,20 @@ it('assigns the recommended courier', function () {
 
     Http::assertSent(fn (Request $request) => str_ends_with($request->url(), 'courier/assign/awb')
         && $request->data() === ['shipment_id' => 22]);
+});
+
+it('assigns the courier the customer paid for', function () {
+    fakeShiprocketHttp([
+        SHIPROCKET_TEST_API.'courier/assign/awb' => Http::response(['awb_assign_status' => 1, 'response' => ['data' => [
+            'awb_code' => 'AWB124', 'courier_name' => 'Shadowfax Surface', 'shipment_id' => 22,
+        ]]]),
+    ]);
+
+    expect(app(ShiprocketClient::class)->assignAwb(22, 58))
+        ->toBe(['awb_code' => 'AWB124', 'courier_name' => 'Shadowfax Surface']);
+
+    Http::assertSent(fn (Request $request) => str_ends_with($request->url(), 'courier/assign/awb')
+        && $request->data() === ['shipment_id' => 22, 'courier_id' => 58]);
 });
 
 it('reads back an awb that is already assigned', function () {

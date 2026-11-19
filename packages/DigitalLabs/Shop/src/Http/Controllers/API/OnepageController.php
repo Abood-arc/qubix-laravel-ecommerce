@@ -2,9 +2,6 @@
 
 namespace DigitalLabs\Shop\Http\Controllers\API;
 
-use Illuminate\Http\Resources\Json\JsonResource;
-use Illuminate\Http\Response;
-use Illuminate\Validation\ValidationException;
 use DigitalLabs\Checkout\Facades\Cart;
 use DigitalLabs\Customer\Repositories\CustomerRepository;
 use DigitalLabs\Payment\Facades\Payment;
@@ -14,6 +11,10 @@ use DigitalLabs\Shipping\Contracts\DeliveryCheck;
 use DigitalLabs\Shipping\Facades\Shipping;
 use DigitalLabs\Shop\Http\Requests\CartAddressRequest;
 use DigitalLabs\Shop\Http\Resources\CartResource;
+use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Event;
+use Illuminate\Validation\ValidationException;
 
 class OnepageController extends APIController
 {
@@ -105,14 +106,24 @@ class OnepageController extends APIController
             'shipping_method' => 'required',
         ]);
 
+        $forbidden = fn () => response()->json([
+            'redirect_url' => route('shop.checkout.cart.index'),
+        ], Response::HTTP_FORBIDDEN);
+
         if (
             Cart::hasError()
             || ! $validatedData['shipping_method']
-            || ! Cart::saveShippingMethod($validatedData['shipping_method'])
         ) {
-            return response()->json([
-                'redirect_url' => route('shop.checkout.cart.index'),
-            ], Response::HTTP_FORBIDDEN);
+            return $forbidden();
+        }
+
+        // A carrier whose codes change with its prices maps an option shown earlier to its
+        // current code, instead of the customer being sent back to the cart.
+        $shippingMethod = Event::until('checkout.cart.shipping_method.resolve', [$validatedData['shipping_method']])
+            ?? $validatedData['shipping_method'];
+
+        if (! Cart::saveShippingMethod($shippingMethod)) {
+            return $forbidden();
         }
 
         Cart::collectTotals();
@@ -140,6 +151,9 @@ class OnepageController extends APIController
                 'redirect_url' => route('shop.checkout.cart.index'),
             ], Response::HTTP_FORBIDDEN);
         }
+
+        // A shipping price can depend on how the customer pays (a cash on delivery fee).
+        Event::dispatch('checkout.cart.payment.save.after', Cart::getCart());
 
         Cart::collectTotals();
 

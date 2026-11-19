@@ -16,5 +16,11 @@ class EventServiceProvider extends ServiceProvider
         'sales.order.cancel.before' => [
             [\DigitalLabs\Shiprocket\Listeners\OrderCancel::class, 'handle'],
         ],
+        'checkout.cart.payment.save.after' => [
+            [\DigitalLabs\Shiprocket\Listeners\RepriceShipping::class, 'handle'],
+        ],
+        'checkout.cart.shipping_method.resolve' => [
+            [\DigitalLabs\Shiprocket\Listeners\ResolveShippingMethod::class, 'handle'],
+        ],
     ];
 }

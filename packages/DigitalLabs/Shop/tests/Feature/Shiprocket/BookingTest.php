@@ -76,9 +76,14 @@ function bookingApi(): object
             return $this->record(__FUNCTION__, $channelOrderId, fn () => parent::findOrderByChannelOrderId($channelOrderId));
         }
 
-        public function assignAwb(int $shipmentId): array
+        /** The courier asked for by each assignAwb call, in order (null = Shiprocket picks). */
+        public array $courierIds = [];
+
+        public function assignAwb(int $shipmentId, ?int $courierId = null): array
         {
-            return $this->record(__FUNCTION__, $shipmentId, fn () => parent::assignAwb($shipmentId));
+            $this->courierIds[] = $courierId;
+
+            return $this->record(__FUNCTION__, $shipmentId, fn () => parent::assignAwb($shipmentId, $courierId));
         }
 
         public function requestPickup(int $shipmentId): void
@@ -813,4 +818,52 @@ it('does nothing in the background while shiprocket is switched off', function (
 
     expect($api->calls)->toBe([])
         ->and(ShiprocketShipment::where('order_id', $order->id)->exists())->toBeFalse();
+});
+
+it('books the courier the customer paid for', function (string $method, ?int $courierId) {
+    $api = bookingApi();
+    $order = bookingOrder();
+
+    $order->forceFill(['shipping_method' => $method])->save();
+
+    $row = booker()->book($order->fresh());
+
+    expect($api->courierIds)->toBe([$courierId])
+        ->and($row->requested_courier_id)->toBeNull();
+})->with([
+    'standard' => ['shiprocket_standard_c2_p90', 2],
+    'express' => ['shiprocket_express_c1_p150', 1],
+    'backup price: shiprocket picks' => ['shiprocket_backup_p120', null],
+    'flat rate: shiprocket picks' => ['flatrate_flatrate', null],
+]);
+
+it('ships with shiprocket\'s choice when it refuses the paid-for courier, and notes it', function () {
+    Log::spy();
+
+    $api = bookingApi()->on('assignAwb', fn () => throw new ShiprocketException('Selected courier is not serviceable'));
+    $order = bookingOrder();
+
+    $order->forceFill(['shipping_method' => 'shiprocket_standard_c2_p90'])->save();
+
+    $row = booker()->book($order->fresh());
+
+    expect($api->courierIds)->toBe([2, null])
+        ->and($row->status)->toBe(ShiprocketShipment::STATUS_PICKUP_SCHEDULED)
+        ->and($row->courier_name)->toBe('Fake Express')
+        ->and($row->requested_courier_id)->toBe(2);
+
+    Log::shouldHaveReceived('warning')
+        ->withArgs(fn ($message, $context) => str_contains($message, 'paid for') && $context['courier_id'] === 2)
+        ->once();
+});
+
+it('does not swap couriers when the answer was lost', function () {
+    $api = bookingApi()->on('assignAwb', fn () => throw new ShiprocketUnknownOutcomeException('Shiprocket error (HTTP 504)'));
+    $order = bookingOrder();
+
+    $order->forceFill(['shipping_method' => 'shiprocket_standard_c2_p90'])->save();
+
+    // Maybe booked already: the retry asks for the same courier, never another one.
+    expect(fn () => booker()->book($order->fresh()))->toThrow(ShiprocketUnknownOutcomeException::class)
+        ->and($api->courierIds)->toBe([2]);
 });

@@ -17,7 +17,8 @@
  *   php artisan tinker --execute="require 'packages/DigitalLabs/Shop/tests/e2e-pw/utils/shiprocket-seed.php';"
  *
  * The fake client: a delivery PIN starting with 9 is not deliverable, one ending in 0 has no
- * Cash on Delivery, any other PIN has both.
+ * Cash on Delivery, any other PIN has both, with two couriers: Fake Surface (₹90, 5 days) and
+ * Fake Air (₹150, 2 days), each ₹50 more with Cash on Delivery.
  *
  * Run: APP_URL=http://localhost:8282 npx playwright test tests/shiprocket.spec.ts
  */
@@ -120,6 +121,42 @@ test.describe("Shiprocket PIN checks at checkout", () => {
         await expect(shopPage.locator("input#moneytransfer")).toBeEnabled();
         await shopPage.getByAltText("Money Transfer").click();
         await expect(shopPage.getByRole("button", { name: "Place Order" })).toBeVisible();
+    });
+});
+
+test.describe("Shiprocket live delivery prices", () => {
+    test("charges the courier's price and adds the cash on delivery fee when paying cash", async ({ shopPage }) => {
+        await startGuestCheckout(shopPage);
+        await submitIndianAddress(shopPage, "110001");
+
+        const steps = shopPage.locator("#steps-container");
+
+        // Standard (cheapest courier) and Express (fastest), at the fake client's prices.
+        const standard = steps.locator("label", { hasText: "Standard delivery" });
+        const express = steps.locator("label", { hasText: "Express delivery" });
+
+        await expect(standard).toContainText("₹90.00", ROUND_TRIP);
+        await expect(standard).toContainText(/Arrives by \d{1,2} \w{3}/);
+        await expect(express).toContainText("₹150.00");
+
+        await standard.click();
+        await expect(shopPage.getByAltText("Money Transfer")).toBeVisible(ROUND_TRIP);
+
+        // Cash on Delivery says what paying cash adds, before it is chosen.
+        await expect(steps.getByText(/A cash on delivery fee of ₹50\.00 is added to delivery\./)).toBeVisible();
+
+        const deliveryCharges = shopPage
+            .locator("div.flex.justify-between", { has: shopPage.getByText(/^\s*Delivery Charges/) })
+            .first();
+
+        await shopPage.getByAltText("Money Transfer").click();
+        await expect(deliveryCharges).toContainText("₹90.00", ROUND_TRIP);
+
+        await shopPage.getByAltText("Cash On Delivery").click();
+        await expect(deliveryCharges).toContainText("₹140.00", ROUND_TRIP);
+
+        await shopPage.getByRole("button", { name: "Place Order" }).click();
+        await expect(shopPage.getByText("Thank you for your order!")).toBeVisible(ROUND_TRIP);
     });
 });
 

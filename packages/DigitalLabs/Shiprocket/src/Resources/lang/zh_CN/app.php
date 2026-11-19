@@ -13,11 +13,30 @@ return [
         'auto-send' => 'Send prepaid orders automatically',
         'pin-check' => 'Check PIN codes at checkout',
         'max-weight' => 'Maximum weight for automatic booking (kg)',
+        'carrier' => [
+            'title' => 'Shiprocket (live courier prices)',
+            'info' => 'Charges each customer what Shiprocket bills for their parcel: Standard (cheapest courier) and Express (fastest), with the cash on delivery fee when they pay cash. Needs Shiprocket enabled under Sales → Shipping → Shiprocket.',
+            'method-title' => 'Title',
+            'backup-price' => 'Backup price (₹ per order)',
+            'backup-price-info' => 'Charged when Shiprocket cannot give a price at checkout (it is down or slow); Shiprocket then picks the courier.',
+            'add-gst' => 'Add 18% GST to Shiprocket prices',
+            'add-gst-info' => 'Turn on if Shiprocket bills more than its quoted price because GST is added on top.',
+        ],
     ],
 
     'checkout' => [
         'not-deliverable' => 'Sorry, we can\'t deliver to PIN code :pin yet.',
         'cod-unavailable' => 'Cash on Delivery isn\'t available for PIN code :pin. Please pay online.',
+        'standard' => 'Standard delivery',
+        'express' => 'Express delivery',
+        'standard-cod' => 'Standard delivery (incl. cash on delivery fee)',
+        'express-cod' => 'Express delivery (incl. cash on delivery fee)',
+        'backup' => 'Standard delivery',
+        'arrives' => 'Arrives by :date',
+        'tracked' => 'Tracked courier delivery',
+        'cod-fee' => 'A cash on delivery fee of :fee is added to delivery.',
+        'price-changed' => 'The delivery price changed to :price. Please check your order and place it again.',
+        'recheck-delivery' => 'We couldn\'t confirm your delivery price just now. Please choose your delivery option again and place the order.',
     ],
 
     'admin' => [
@@ -49,6 +68,7 @@ return [
         'queued' => 'Sent to Shiprocket. This page updates once booking finishes.',
         'cancelled' => 'Shiprocket shipment cancelled. The store shipment record stays; re-booking will update it.',
         'cannot-ship' => 'This order can\'t be shipped (already shipped, cancelled or nothing left to ship).',
+        'courier-swapped' => 'Booked with :courier instead of the courier the customer paid for: Shiprocket refused that one.',
     ],
 
     'cancel' => [

@@ -50,7 +50,10 @@ function fakeShiprocketCheckApi(array $overrides = [], array $recorded = []): vo
             $cod = $query['delivery_postcode'] === '700001' ? 0 : (int) $query['cod'];
 
             return Http::response(['status' => 200, 'data' => ['available_courier_companies' => [
-                ['courier_name' => 'Delhivery Surface', 'cod' => $cod],
+                ['courier_company_id' => 12, 'courier_name' => 'Delhivery Surface', 'cod' => $cod,
+                    'rate' => (int) $query['cod'] ? 143.2 : 93.2, 'estimated_delivery_days' => 5],
+                ['courier_company_id' => 1, 'courier_name' => 'Blue Dart Air', 'cod' => $cod,
+                    'rate' => (int) $query['cod'] ? 214.1 : 156.1, 'estimated_delivery_days' => 2],
             ]]]);
         },
         SHIPROCKET_CHECK_API.'orders/create/adhoc' => Http::response(['order_id' => 9001, 'shipment_id' => 9101, 'status' => 'NEW']),
@@ -178,8 +181,10 @@ it('checks the api user, the pickup location and serviceability while shiprocket
         ->toContain('Home')
         ->toContain('Pickup location "Pune Warehouse" in the settings: found in Shiprocket.')
         ->toContain('Pickup PIN 411001 in the settings matches that location.')
-        ->toContain('Serviceability from 411001 (0.5 kg)')
-        ->and($output)->toMatch('/110001\s*\|\s*yes\s*\|\s*yes/')
+        // One light item in the 30 × 25 × 10 cm parcel is charged as 1.5 kg.
+        ->toContain('Serviceability and prices from 411001 (1.5 kg)')
+        ->and($output)->toMatch('/110001\s*\|\s*yes\s*\|\s*yes\s*\|\s*Delhivery Surface ₹94 \/ ₹144\s*\|\s*Blue Dart Air ₹157 \/ ₹215/')
+        ->toMatch('/700001\s*\|\s*yes\s*\|\s*no\s*\|\s*Delhivery Surface ₹94 \/ -\s*\|\s*Blue Dart Air ₹157 \/ -/')
         ->toMatch('/400001\s*\|\s*yes\s*\|\s*yes/')
         ->toMatch('/560001\s*\|\s*no\s*\|\s*no/')
         ->toMatch('/700001\s*\|\s*yes\s*\|\s*no/')
@@ -193,7 +198,7 @@ it('checks the api user, the pickup location and serviceability while shiprocket
 
     Http::assertSent(fn (Request $request) => str_contains($request->url(), 'courier/serviceability/')
         && str_contains($request->url(), 'pickup_postcode=411001')
-        && str_contains($request->url(), 'weight=0.5'));
+        && str_contains($request->url(), 'weight=1.5'));
 });
 
 it('checks only the PINs asked for', function () {

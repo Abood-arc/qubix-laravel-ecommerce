@@ -92,6 +92,22 @@ it('shows the failure reason and a retry button', function () {
         ->assertDontSee(route('admin.shiprocket.ship', $order->id), false);
 });
 
+it('says when the parcel went with another courier than the customer paid for', function () {
+    $this->loginAsAdmin();
+
+    $order = shiprocketDeliveryOrder();
+
+    $row = shiprocketDeliveryRow($order);
+
+    $note = trans('shiprocket::app.admin.courier-swapped', ['courier' => $row->courier_name]);
+
+    viewShiprocketPanel($order)->assertDontSeeText($note);
+
+    $row->update(['requested_courier_id' => 58]);
+
+    viewShiprocketPanel($order)->assertSeeText($note);
+});
+
 it('shows the courier, awb, tracking, label and cancel once booked', function () {
     $this->loginAsAdmin();
 
