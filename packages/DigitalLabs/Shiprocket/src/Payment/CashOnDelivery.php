@@ -55,7 +55,12 @@ class CashOnDelivery extends CoreCashOnDelivery
             return $description;
         }
 
-        return trim($description.' '.trans('shiprocket::app.checkout.cod-fee', ['fee' => core()->currency($fee)]));
+        $note = trans('shiprocket::app.checkout.cod-fee', ['fee' => core()->currency($fee)]);
+
+        $description = rtrim(trim((string) $description), '.');
+
+        // The admin's description is often a bare title ("Cash On Delivery"): end it as a sentence.
+        return $description === '' ? $note : $description.'. '.$note;
     }
 
     /**

@@ -221,7 +221,7 @@ it('tells the customer what paying cash adds before they choose it', function ()
     );
 
     expect($methods->firstWhere('method', 'cashondelivery')['description'])
-        ->toContain(trans('shiprocket::app.checkout.cod-fee', ['fee' => core()->currency(50)]));
+        ->toEndWith('. '.trans('shiprocket::app.checkout.cod-fee', ['fee' => core()->currency(50)]));
 });
 
 it('says nothing about a fee for other delivery methods', function () {
