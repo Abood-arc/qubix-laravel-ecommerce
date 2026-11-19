@@ -339,7 +339,8 @@ test("should be able to reorder", async ({ page }) => {
     await page.locator("div").locator("span.icon-eye").first().click();
     await page.getByRole("link", { name: "Reorder" }).click();
 
-    await page.getByRole("button", { name: "Update Cart" }).click();
+    // The cart page saves a quantity change by itself (there is no Update Cart button).
+    await page.getByLabel("Increase Quantity").first().click();
 
     await expect(
         page.getByText("Quantity updated successfully").first(),
