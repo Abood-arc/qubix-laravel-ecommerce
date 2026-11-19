@@ -1,6 +1,7 @@
 import { test, expect } from "../../setup";
 import type { Locator } from "@playwright/test";
 import {
+    cartQuantityOf,
     findMultiPhotoProduct,
     openSearchFor,
     photoLink,
@@ -166,14 +167,13 @@ test("the Compare tick box adds and removes the product (guest)", async ({ page 
     await expect(page.getByText("Removed from compare").first()).toBeVisible();
 });
 
-test("Add to cart shows the tick once the item is in the cart", async ({ page }) => {
+test("Add to cart turns straight into the − 1 + control, with no dots or tick in between", async ({ page }) => {
     await openSearchFor(page, product);
 
     const card = styledCard(page, product);
 
-    // The state wrapper has no role; its data-state drives the tick (and, from Task 7, the − 1 + control).
-    // The tick shows for 900ms only, which polling can miss on a slow machine, so the page records the
-    // states the wrapper passes through, from before the click.
+    // The state wrapper has no role; its data-state drives the dots, the tick and the − 1 + control.
+    // The page records the states the wrapper passes through, from before the click.
     const wrapper = card.locator(".pc-buy");
 
     await wrapper.evaluate((element: HTMLElement & { seenStates?: string[] }) => {
@@ -186,9 +186,8 @@ test("Add to cart shows the tick once the item is in the cart", async ({ page })
     await card.getByRole("button", { name: "Add To Cart" }).click();
 
     await expect(page.getByText("Item Added Successfully").first()).toBeVisible();
-    await expect
-        .poll(() => wrapper.evaluate((element: HTMLElement & { seenStates?: string[] }) => element.seenStates!.slice(0, 2)))
-        .toEqual(["loading", expect.stringMatching(/^(added|qty)$/)]);
+    await expect.poll(() => cartQuantityOf(page, product)).toBe(1);
+    expect(await wrapper.evaluate((element: HTMLElement & { seenStates?: string[] }) => element.seenStates)).toEqual(["qty"]);
 });
 
 test("the wishlist heart sends a guest to sign in", async ({ page }) => {

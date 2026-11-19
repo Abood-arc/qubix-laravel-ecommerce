@@ -970,6 +970,7 @@ return [
         ],
 
         'cart' => [
+            'add-failed' => 'The item could not be added to the cart. Please try again.',
             'continue-to-checkout' => 'जारी रखने के लिए जारी रखें',
             'illegal' => 'मात्रा एक से कम नहीं हो सकती।',
             'inactive' => 'आइटम निष्क्रिय कर दिया गया है और इसके बाद से कार्ट से हटा दिया गया है।',

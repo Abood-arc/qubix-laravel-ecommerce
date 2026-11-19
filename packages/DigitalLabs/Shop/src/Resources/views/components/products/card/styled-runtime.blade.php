@@ -6,6 +6,8 @@
 --}}
 @include('shop::components.compare.list')
 
+@include('shop::components.products.card.cart-writes')
+
 {{-- Named, so the compare tray can tell that the page has new-style cards (card/compare-tray). --}}
 @pushOnce('scripts', 'shop-card-styled-runtime')
     <script type="module">
@@ -14,8 +16,6 @@
         const isCustomer = @json(auth()->guard('customer')->check());
 
         const routes = {{ Js::from([
-            'cart' => route('shop.api.checkout.cart.index'),
-            'cartStore' => route('shop.api.checkout.cart.store'),
             'cartUpdate' => route('shop.api.checkout.cart.update'),
             'cartDestroy' => route('shop.api.checkout.cart.destroy'),
             'compare' => route('shop.api.compare.index'),
@@ -275,49 +275,34 @@
         /* ---- cart: start ---- */
         /*
          * The cart, as the new cards see it: for each product a card can step, its one cart line
-         * ({ itemId, quantity }). Read once per page from the cart API, then rebuilt from every cart that
-         * is broadcast on update-mini-cart (these cards, the Classic card, the product page, the mini
-         * cart). Quantity changes use the cart page's own calls, so the same stock rules apply
-         * (Cart::updateItems); a line is removed at 0. Every change is announced as card-cart-changed.
+         * ({ itemId, quantity }), rebuilt from every cart that is broadcast on update-mini-cart (these
+         * cards, the Classic card, the product page, the mini cart, $cartWrites' reads). Adds and quantity
+         * changes go through $cartWrites (card/cart-writes), which sends them in a safe order, with the
+         * cart page's own calls, so the same stock rules apply (Cart::updateItems); a line is removed at 0.
+         * Every change is announced as card-cart-changed.
          *
-         * Writes go out one at a time, in order, so carts come back in the order they were asked for.
-         * Quick clicks on − or + only move the wanted quantity (`wanted`), which the cards show at once;
-         * the next write sends the latest one, so five quick clicks cost one or two requests. A refused
-         * change shows the cart's message and goes back to what the cart really holds.
+         * The cards show every change at once: Add to cart and quick clicks on − or + only move the
+         * wanted quantity (`wanted`), and the next write for the product sends the latest one, so five
+         * quick clicks cost one or two requests. A refused change shows the cart's message and goes back
+         * to what the cart really holds.
          */
+        const cartWrites = app.config.globalProperties.$cartWrites;
+
         const cardCart = {
             lines: {},
 
             wanted: {},
 
-            queue: Promise.resolve(),
-
             loading: null,
 
             /**
-             * Run `task` after every write asked for before it.
+             * Read the cart once per page, on the first card's mount. It waits for nothing, and nothing
+             * waits for it.
              */
-            enqueue(task) {
-                const run = this.queue.then(task);
-
-                this.queue = run.catch(() => {});
-
-                return run;
-            },
-
             load() {
-                this.loading ??= this.enqueue(() => this.readCart(cart => this.apply(cart)));
+                this.loading ??= cartWrites.read();
 
                 return this.loading;
-            },
-
-            /**
-             * Read the cart and hand it to `use`. A failed read changes nothing; the cards keep what they show.
-             */
-            readCart(use) {
-                return axios.get(routes.cart)
-                    .then(response => use(response.data.data))
-                    .catch(() => {});
             },
 
             /**
@@ -352,46 +337,42 @@
             },
 
             /**
-             * Add to cart: the Classic card's call with the same messages.
+             * Add one to the cart (resolves like $cartWrites.add()). A product with nothing to choose is
+             * counted at once, so its card turns into the − 1 + control straight away; once the cart has
+             * answered, the card shows the cart's own quantity again, unless − or + was clicked meanwhile
+             * (that write follows this one and settles it).
              */
-            add(product) {
-                // Same cart call as the Classic card's addToCart (products/card.blade.php), which stays untouched.
-                return this.enqueue(async () => {
-                    try {
-                        const response = await axios.post(routes.cartStore, { quantity: 1, product_id: product.id });
+            async add(product) {
+                const instant = cartWrites.isInstant(product);
 
-                        if (response.data.message) {
-                            emitter.emit('update-mini-cart', response.data.data);
+                const asked = this.quantity(product.id) + 1;
 
-                            flash('success', response.data.message);
+                if (instant) {
+                    this.wanted[product.id] = asked;
 
-                            return true;
-                        }
+                    this.changed();
+                }
 
-                        flash('warning', response.data.data.message);
+                const result = await cartWrites.add(product);
 
-                        return false;
-                    } catch (error) {
-                        flash('error', error.response?.data?.message);
+                if (instant && (! result.added || this.wanted[product.id] === asked)) {
+                    delete this.wanted[product.id];
 
-                        if (error.response?.data?.redirect_uri) {
-                            window.location.href = error.response.data.redirect_uri;
-                        }
+                    this.changed();
+                }
 
-                        return false;
-                    }
-                });
+                return result;
             },
 
             /**
-             * Ask for `quantity` of a product that has a line (0 removes the line). Resolves with how it
-             * went: { outcome: 'done' } once the cart holds what this call asked for and nothing newer is
-             * waiting; { outcome: 'superseded' } when a later call took it over (that call reports);
-             * { outcome: 'refused', message } when the cart said no (message: the cart's reason, if it
-             * gave one), by which time the card shows what the cart really holds again.
+             * Ask for `quantity` of a product that has a line, or is on its way to the cart (0 removes the
+             * line). Resolves with how it went: { outcome: 'done' } once the cart holds what this call
+             * asked for and nothing newer is waiting; { outcome: 'superseded' } when a later call took it
+             * over (that call reports); { outcome: 'refused', message } when the cart said no (message: the
+             * cart's reason, if it gave one), by which time the card shows what the cart really holds again.
              */
             setQuantity(productId, quantity) {
-                if (! this.lines[productId]) {
+                if (! this.lines[productId] && this.wanted[productId] === undefined) {
                     return Promise.resolve({ outcome: 'refused' });
                 }
 
@@ -399,7 +380,7 @@
 
                 this.changed();
 
-                return this.enqueue(() => this.write(productId));
+                return cartWrites.run(productId, () => this.write(productId));
             },
 
             remove(productId) {
@@ -436,7 +417,7 @@
 
                     this.changed();
 
-                    await this.refresh();
+                    await cartWrites.read();
 
                     return { outcome: 'refused', message: refusal.message };
                 }
@@ -498,13 +479,6 @@
                 } catch (error) {
                     return this.refused('error', error.response?.data?.message);
                 }
-            },
-
-            /**
-             * After a refused change: read the cart again and tell everyone (the header count too).
-             */
-            refresh() {
-                return this.readCart(cart => emitter.emit('update-mini-cart', cart));
             },
 
             changed() {

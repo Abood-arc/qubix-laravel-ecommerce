@@ -4,6 +4,7 @@
     dots, then a tick, then becomes a − 1 + control while the product is in the cart (design concepts:
     buyHTML, miniBuyHTML, setQty). Everything goes through $cardCart (card/styled-runtime): the Classic
     card's add call, then the cart page's update call (same stock rules), and the line is removed at 0.
+    A product with nothing to choose skips the dots and the tick: it shows the control at once.
     What changed is read out through the card's one live region ($cardAnnounce, card/gallery-hint).
 --}}
 @props(['variant'])
@@ -255,14 +256,36 @@
                         this.quantity = this.$cardCart.quantity(this.product.id);
                     },
 
+                    /**
+                     * A product with nothing to choose turns into the − 1 + control at once, and its photo
+                     * flies to the header cart as it is tapped; $cartWrites sends the add, and if the cart
+                     * refuses, the card goes back to Add to cart and reads out why. Any other product shows
+                     * the "Adding" dots until the cart answers, then the tick.
+                     */
                     async add() {
                         if (this.state !== 'idle') {
                             return;
                         }
 
+                        if (this.$cartWrites.isInstant(this.product)) {
+                            const added = this.$cardCart.add(this.product);
+
+                            this.$cardAnnounce(this.$el, buyText.added);
+
+                            this.flyToCart();
+
+                            const { message } = await added;
+
+                            if (message) {
+                                this.$cardAnnounce(this.$el, message);
+                            }
+
+                            return;
+                        }
+
                         this.phase = 'loading';
 
-                        if (! await this.$cardCart.add(this.product)) {
+                        if (! (await this.$cardCart.add(this.product)).added) {
                             this.phase = 'idle';
 
                             return;
@@ -274,7 +297,13 @@
 
                         this.addedTimer = setTimeout(() => (this.phase = 'idle'), 900);
 
-                        // Last, and on its own: the flight is decoration, whatever it does cannot touch the add.
+                        this.flyToCart();
+                    },
+
+                    /**
+                     * Last, and on its own: the flight is decoration, whatever it does cannot touch the add.
+                     */
+                    flyToCart() {
                         this.$cardFlyToCart(this.$refs.button, this.product.base_image?.small_image_url);
                     },
 

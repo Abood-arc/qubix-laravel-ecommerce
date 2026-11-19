@@ -7,9 +7,9 @@ use Webkul\Faker\Helpers\Product as ProductFaker;
 use function Pest\Laravel\getJson;
 
 /*
- * The facts the Swipe and Photo deck cards show, as ProductResource sends them:
- * the size from the width/height/length attributes and "Only N left" from the channel's
- * inventory index.
+ * The facts the product cards use, as ProductResource sends them: the size from the
+ * width/height/length attributes, "Only N left" from the channel's inventory index, and the
+ * product type (which products a card adds at once: card/cart-writes).
  */
 
 beforeEach(function () {
@@ -90,11 +90,16 @@ it('says nothing about stock for a configurable product', function () {
     expect(productCardData($product)['stock_left'])->toBeNull();
 });
 
+it('names the product type, so a card knows which products go straight into the cart', function () {
+    expect(productCardData((new ProductFaker)->getSimpleProductFactory()->create())['type'])->toBe('simple')
+        ->and(productCardData((new ProductFaker)->getConfigurableProductFactory()->create())['type'])->toBe('configurable');
+});
+
 it('sends the card data with the products listing', function () {
     sizedSimpleProduct('16', '14', '5');
 
     getJson(route('shop.api.products.index'))
         ->assertOk()
-        ->assertJsonStructure(['data' => [['images', 'dimensions', 'stock_left']]])
+        ->assertJsonStructure(['data' => [['type', 'images', 'dimensions', 'stock_left']]])
         ->assertJsonFragment(['dimensions' => ['width' => '16', 'height' => '14', 'depth' => '5']]);
 });

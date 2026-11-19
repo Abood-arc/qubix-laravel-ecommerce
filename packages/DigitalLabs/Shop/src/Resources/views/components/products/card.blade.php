@@ -182,6 +182,8 @@
 
     @include('shop::components.compare.list')
 
+    @include('shop::components.products.card.cart-writes')
+
     <script type="module">
         /**
          * Copy used by the Swipe and Photo deck card templates (":name" style placeholders, filled by text()).
@@ -345,34 +347,17 @@
                     }
                 },
 
-                // The Swipe and Photo deck cards add through $cardCart (card/styled-runtime); this Classic copy is kept as it is so Classic stays untouched.
-                addToCart() {
-                    this.isAddingToCart = true;
+                /**
+                 * Through $cartWrites (card/cart-writes), like the Swipe and Photo deck cards: a product
+                 * with nothing to choose shows as added at once (the message and the header count), and
+                 * the button stays ready for another. Any other product shows the dots until the cart answers.
+                 */
+                async addToCart() {
+                    this.isAddingToCart = ! this.$cartWrites.isInstant(this.product);
 
-                    this.$axios.post('{{ route("shop.api.checkout.cart.store") }}', {
-                            'quantity': 1,
-                            'product_id': this.product.id,
-                        })
-                        .then(response => {
-                            if (response.data.message) {
-                                this.$emitter.emit('update-mini-cart', response.data.data );
+                    await this.$cartWrites.add(this.product);
 
-                                this.$emitter.emit('add-flash', { type: 'success', message: response.data.message });
-                            } else {
-                                this.$emitter.emit('add-flash', { type: 'warning', message: response.data.data.message });
-                            }
-
-                            this.isAddingToCart = false;
-                        })
-                        .catch(error => {
-                            this.$emitter.emit('add-flash', { type: 'error', message: error.response.data.message });
-
-                            if (error.response.data.redirect_uri) {
-                                window.location.href = error.response.data.redirect_uri;
-                            }
-
-                            this.isAddingToCart = false;
-                        });
+                    this.isAddingToCart = false;
                 },
             },
         });

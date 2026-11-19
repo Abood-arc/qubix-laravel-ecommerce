@@ -970,6 +970,7 @@ return [
         ],
 
         'cart' => [
+            'add-failed' => 'The item could not be added to the cart. Please try again.',
             'continue-to-checkout' => 'Lanjut ke Pembayaran',
             'illegal' => 'Jumlah tidak boleh kurang dari satu.',
             'inactive' => 'Produk ini telah dinonaktifkan dan dihapus dari keranjang.',

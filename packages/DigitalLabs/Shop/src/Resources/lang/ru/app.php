@@ -970,6 +970,7 @@ return [
         ],
 
         'cart' => [
+            'add-failed' => 'The item could not be added to the cart. Please try again.',
             'continue-to-checkout' => 'Продолжить оформление заказа',
             'illegal' => 'Количество не может быть меньше одного.',
             'inactive' => 'Товар был деактивирован и удален из корзины.',
