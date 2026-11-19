@@ -69,11 +69,12 @@ async function openListing(page: Page, shown: CardProduct[]): Promise<void> {
 }
 
 /**
- * The card's Add to cart. The Classic card has no role of its own, so its phone button is found by place.
+ * The card's Add to cart. The Classic card has no role of its own, so its phone button is found by place
+ * (it says "Added" for a moment after a tap).
  */
 function addButton(page: Page, style: CardStyle, product: CardProduct, shown: CardProduct[]): Locator {
     if (style === "Classic") {
-        return page.getByRole("button", { name: "Add To Cart" }).nth(shown.indexOf(product));
+        return page.getByRole("button", { name: /^(Add To Cart|Added)$/ }).nth(shown.indexOf(product));
     }
 
     return addToCartButton(page, product, style);
@@ -272,7 +273,65 @@ test.describe("Classic: what happens at the tap", () => {
         expect(adds).toHaveLength(1);
         expect(await cartQuantityOf(page, product)).toBe(1);
     });
+
+    test("the button says Added with a tick and the header cart bumps, then it is Add To Cart again", async ({ page }) => {
+        const [product] = products;
+
+        const adds = await holdCartRequests(page, "POST", 1500);
+
+        await openListing(page, [product]);
+
+        await countCartBumps(page);
+
+        const button = addButton(page, "Classic", product, [product]);
+
+        await button.click();
+
+        // At the tap, before the cart has answered.
+        await expect(button).toHaveAccessibleName("Added");
+        await expect(button.locator(".cart-added-tick")).toBeVisible();
+        await expect.poll(() => page.evaluate(() => (window as any).cartBumps)).toBe(1);
+        expect(adds[0].end).toBeUndefined();
+
+        await expect(button).toHaveAccessibleName("Add To Cart", { timeout: 3000 });
+        expect(await cartQuantityOf(page, product)).toBe(1);
+    });
+
+    test("a refused add takes Added back as soon as the cart says no", async ({ page }) => {
+        const [product] = products;
+
+        await holdCartRequests(page, "POST", 600, (route) =>
+            route.fulfill({ status: 400, json: { message: REFUSAL } })
+        );
+
+        await openListing(page, [product]);
+
+        const button = addButton(page, "Classic", product, [product]);
+
+        await button.click();
+
+        await expect(button).toHaveAccessibleName("Added");
+        await expect(page.getByText(REFUSAL).filter({ visible: true }).first()).toBeVisible();
+
+        // Well before "Added" would have ended on its own (1.5 s after the tap).
+        await expect(button).toHaveAccessibleName("Add To Cart", { timeout: 300 });
+    });
 });
+
+/**
+ * Count the header cart icon's bumps (its pc-cart-bump animation starting) into window.cartBumps.
+ */
+async function countCartBumps(page: Page): Promise<void> {
+    await page.evaluate(() => {
+        (window as any).cartBumps = 0;
+
+        document.addEventListener("animationstart", (event) => {
+            if (event.animationName === "pc-cart-bump") {
+                (window as any).cartBumps++;
+            }
+        });
+    });
+}
 
 for (const style of ["Swipe, named and sized", "Photo deck"] as CardStyle[]) {
     test.describe(`${style}: what happens at the tap`, () => {

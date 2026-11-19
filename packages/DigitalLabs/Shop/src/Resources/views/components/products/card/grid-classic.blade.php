@@ -140,7 +140,7 @@
                     <button
                         type="button"
                         class="mt-2 hidden h-10 w-full items-center justify-center gap-1.5 rounded-full border border-navyBlue text-sm font-semibold text-navyBlue transition-[background-color,color,transform] duration-150 active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-50 max-md:flex"
-                        :class="{ 'cart-add-btn--loading': isAddingToCart }"
+                        :class="{ 'cart-add-btn--loading': isAddingToCart, 'cart-add-btn--added': isAddedToCart }"
                         :disabled="! product.is_saleable || isAddingToCart"
                         @click="addToCart()"
                     >
@@ -150,6 +150,15 @@
                                 <span class="cart-dot"></span>
                                 <span class="cart-dot"></span>
                             </span>
+                        </template>
+
+                        <template v-else-if="isAddedToCart">
+                            <x-shop::products.card.icon
+                                name="check"
+                                class="cart-added-tick"
+                            />
+
+                            @lang('shop::app.components.products.card.added')
                         </template>
 
                         <template v-else>
@@ -165,18 +174,28 @@
 
                         <button
                             class="cart-add-btn secondary-button flex w-full max-w-full items-center justify-center gap-1.5 overflow-hidden p-2.5 text-sm font-medium max-sm:rounded-xl max-sm:p-2"
-                            :class="{ 'cart-add-btn--loading': isAddingToCart }"
+                            :class="{ 'cart-add-btn--loading': isAddingToCart, 'cart-add-btn--added': isAddedToCart }"
                             :disabled="! product.is_saleable || isAddingToCart"
                             @click="addToCart()"
                         >
                             <!-- Loading state -->
                             <template v-if="isAddingToCart">
-                                <span class="cart-adding-text">Adding</span>
+                                <span class="cart-adding-text">@lang('shop::app.components.products.card.adding')</span>
                                 <span class="cart-dots" aria-hidden="true">
                                     <span class="cart-dot"></span>
                                     <span class="cart-dot"></span>
                                     <span class="cart-dot"></span>
                                 </span>
+                            </template>
+
+                            <!-- Just added -->
+                            <template v-else-if="isAddedToCart">
+                                <x-shop::products.card.icon
+                                    name="check"
+                                    class="cart-added-tick"
+                                />
+
+                                <span>@lang('shop::app.components.products.card.added')</span>
                             </template>
 
                             <!-- Default state -->

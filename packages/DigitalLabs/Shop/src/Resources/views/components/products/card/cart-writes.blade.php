@@ -267,5 +267,91 @@
         });
 
         app.config.globalProperties.$cartWrites = cartWrites;
+
+        /* ---- header cart icon: start ---- */
+        const prefersReducedMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+        const replays = new WeakMap();
+
+        /**
+         * Play a one-shot CSS animation by adding its class, and take the class off again when the
+         * animation ends (animationend bubbles, so a count badge inside the icon is heard too), so it
+         * cannot replay later, when the icon is shown again or the badge is drawn again. A timer covers
+         * an animation that never runs (an icon that is hidden right then).
+         */
+        const replayClass = (element, className, animationName, duration) => {
+            replays.get(element)?.();
+
+            const done = event => {
+                if (event && event.animationName !== animationName) {
+                    return;
+                }
+
+                element.classList.remove(className);
+
+                element.removeEventListener('animationend', done);
+
+                clearTimeout(timer);
+
+                replays.delete(element);
+            };
+
+            const timer = setTimeout(done, duration + 500);
+
+            replays.set(element, done);
+
+            element.classList.remove(className);
+
+            void element.offsetWidth;
+
+            element.classList.add(className);
+
+            element.addEventListener('animationend', done);
+        };
+
+        /**
+         * The header cart icon, which every card style answers an add with (animations: product-cards.css).
+         */
+        const cartIcon = {
+            prefersReducedMotion,
+
+            /**
+             * The icon that is shown. The header has one per layout (desktop, phone); only the one that
+             * is shown has a size.
+             */
+            target() {
+                return [...document.querySelectorAll('[data-cart-target]')]
+                    .find(element => element.getBoundingClientRect().width > 0 && (element.checkVisibility?.() ?? true));
+            },
+
+            /**
+             * The icon bumps. With reduced motion it flashes instead.
+             */
+            bump(target = this.target()) {
+                if (! target) {
+                    return;
+                }
+
+                if (prefersReducedMotion()) {
+                    this.flash(target);
+
+                    return;
+                }
+
+                replayClass(target, 'pc-cart-bump', 'pc-cart-bump', 420);
+            },
+
+            /**
+             * Reduced motion's calm alternative: the icon's count fades in, nothing moves.
+             */
+            flash(target = this.target()) {
+                if (target) {
+                    replayClass(target, 'pc-cart-flash', 'pc-cart-flash', 700);
+                }
+            },
+        };
+
+        app.config.globalProperties.$cartIcon = cartIcon;
+        /* ---- header cart icon: end ---- */
     </script>
 @endPushOnce

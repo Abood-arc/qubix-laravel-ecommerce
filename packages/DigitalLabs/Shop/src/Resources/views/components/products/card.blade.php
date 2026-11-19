@@ -167,7 +167,8 @@
 
                     <x-shop::button
                         class="primary-button whitespace-nowrap px-8 py-2.5"
-                        :title="trans('shop::app.components.products.card.add-to-cart')"
+                        ::title="addToCartLabel"
+                        ::class="{ 'cart-add-btn--added': isAddedToCart }"
                         ::loading="isAddingToCart"
                         ::disabled="! product.is_saleable || isAddingToCart"
                         @click="addToCart()"
@@ -186,9 +187,11 @@
 
     <script type="module">
         /**
-         * Copy used by the Swipe and Photo deck card templates (":name" style placeholders, filled by text()).
+         * Copy used by the card templates (":name" style placeholders, filled by text()).
          */
         const cardText = {{ Js::from([
+            'added' => trans('shop::app.components.products.card.added'),
+            'addToCart' => trans('shop::app.components.products.card.add-to-cart'),
             'discount' => trans('shop::app.components.products.card.discount'),
             'onlyLeft' => trans('shop::app.components.products.card.only-left'),
             'saveToWishlist' => trans('shop::app.components.products.card.save-to-wishlist'),
@@ -201,6 +204,19 @@
 
             props: ['mode', 'product'],
 
+            watch: {
+                /*
+                 * Grids reuse card components when their product list changes (filters, paging).
+                 */
+                'product.id'() {
+                    this.endAdded();
+                },
+            },
+
+            beforeUnmount() {
+                clearTimeout(this.addedTimer);
+            },
+
             data() {
                 return {
                     isCustomer: '{{ auth()->guard('customer')->check() }}',
@@ -210,6 +226,11 @@
                     isSendingToCart: false,
 
                     /*
+                     * Add to cart shows "Added" with a tick for a moment after an add (Classic).
+                     */
+                    isAddedToCart: false,
+
+                    /*
                      * The Swipe and Photo deck hearts burst when a product is saved; Classic never reads this.
                      */
                     wishlistPopping: false,
@@ -217,10 +238,17 @@
             },
 
             /*
-             * Values for the Swipe and Photo deck templates. Computed values are lazy, so the Classic
-             * template, which reads none of them, never evaluates them.
+             * Values for the card templates, most of them for Swipe and Photo deck. Computed values are
+             * lazy, so a template evaluates only the ones it reads.
              */
             computed: {
+                /**
+                 * The Classic list card's Add to cart, which takes its label as a value.
+                 */
+                addToCartLabel() {
+                    return this.isAddedToCart ? `✓ ${cardText.added}` : cardText.addToCart;
+                },
+
                 productUrl() {
                     return `{{ route('shop.product_or_category.index', '') }}/${this.product.url_key}`;
                 },
@@ -351,9 +379,11 @@
 
                 /**
                  * Through $cartWrites (card/cart-writes), like the Swipe and Photo deck cards: a product
-                 * with nothing to choose shows as added at once (the message and the header count). Any
-                 * other product shows the dots until the cart answers. Another tap while this add is on
-                 * its way is ignored: an accidental double tap would add a second one with no sign of it.
+                 * with nothing to choose shows as added at once (the message, the header count, and the
+                 * button's "Added"). Any other product shows the dots until the cart answers, then
+                 * "Added". If the cart refuses, the button goes back to Add to cart at once. Another tap
+                 * while this add is on its way is ignored: an accidental double tap would add a second
+                 * one with no sign of it.
                  */
                 async addToCart() {
                     if (this.isSendingToCart) {
@@ -362,15 +392,46 @@
 
                     this.isSendingToCart = true;
 
-                    this.isAddingToCart = ! this.$cartWrites.isInstant(this.product);
+                    const instant = this.$cartWrites.isInstant(this.product);
+
+                    this.isAddingToCart = ! instant;
+
+                    if (instant) {
+                        this.showAdded();
+                    }
 
                     try {
-                        await this.$cartWrites.add(this.product);
+                        const { added } = await this.$cartWrites.add(this.product);
+
+                        if (! added) {
+                            this.endAdded();
+                        } else if (! instant) {
+                            this.showAdded();
+                        }
                     } finally {
                         this.isSendingToCart = false;
 
                         this.isAddingToCart = false;
                     }
+                },
+
+                /**
+                 * "Added" with a tick on the button for 1.5 s, and the header cart icon bumps.
+                 */
+                showAdded() {
+                    clearTimeout(this.addedTimer);
+
+                    this.isAddedToCart = true;
+
+                    this.addedTimer = setTimeout(() => (this.isAddedToCart = false), 1500);
+
+                    this.$cartIcon.bump();
+                },
+
+                endAdded() {
+                    clearTimeout(this.addedTimer);
+
+                    this.isAddedToCart = false;
                 },
             },
         });

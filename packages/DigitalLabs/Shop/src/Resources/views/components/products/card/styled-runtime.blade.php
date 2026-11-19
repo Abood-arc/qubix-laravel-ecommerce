@@ -540,52 +540,8 @@
         /* ---- cart: end ---- */
 
         /* ---- fly to cart: start ---- */
-        const prefersReducedMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-        const replays = new WeakMap();
-
-        /**
-         * Play a one-shot CSS animation by adding its class, and take the class off again when the
-         * animation ends (animationend bubbles, so a count badge inside the icon is heard too), so it
-         * cannot replay later, when the icon is shown again or the badge is drawn again. A timer covers
-         * an animation that never runs (an icon that is hidden right then).
-         */
-        const replayClass = (element, className, animationName, duration) => {
-            replays.get(element)?.();
-
-            const done = event => {
-                if (event && event.animationName !== animationName) {
-                    return;
-                }
-
-                element.classList.remove(className);
-
-                element.removeEventListener('animationend', done);
-
-                clearTimeout(timer);
-
-                replays.delete(element);
-            };
-
-            const timer = setTimeout(done, duration + 500);
-
-            replays.set(element, done);
-
-            element.classList.remove(className);
-
-            void element.offsetWidth;
-
-            element.classList.add(className);
-
-            element.addEventListener('animationend', done);
-        };
-
-        /**
-         * The header cart icon to fly to. The header has one per layout (desktop, phone); only the one
-         * that is shown has a size.
-         */
-        const visibleCartTarget = () => [...document.querySelectorAll('[data-cart-target]')]
-            .find(element => element.getBoundingClientRect().width > 0 && (element.checkVisibility?.() ?? true));
+        // Looked up when used: card/cart-writes, which sets it, may be pushed after this script.
+        const cartIcon = () => app.config.globalProperties.$cartIcon;
 
         /**
          * After Add to cart: a small photo of the product arcs from the button to the header cart (x runs
@@ -596,7 +552,7 @@
          * the card (pc-announce), not here.
          */
         const flyToCart = (from, imageUrl) => {
-            const target = visibleCartTarget();
+            const target = cartIcon().target();
 
             if (! target || ! from?.isConnected) {
                 return;
@@ -615,8 +571,8 @@
             const onScreen = x1 >= 0 && x1 <= document.documentElement.clientWidth
                 && y1 >= 0 && y1 <= document.documentElement.clientHeight;
 
-            if (prefersReducedMotion() || ! onScreen || ! start.width) {
-                replayClass(target, 'pc-cart-flash', 'pc-cart-flash', 700);
+            if (cartIcon().prefersReducedMotion() || ! onScreen || ! start.width) {
+                cartIcon().flash(target);
 
                 return;
             }
@@ -656,7 +612,7 @@
 
                 // `finished` rejects when an animation is cancelled: no bump then, but the photo still goes.
                 Promise.all(animations.map(animation => animation.finished))
-                    .then(() => replayClass(target, 'pc-cart-bump', 'pc-cart-bump', 420))
+                    .then(() => cartIcon().bump(target))
                     .catch(() => {})
                     .finally(() => flight.remove());
             } catch {
