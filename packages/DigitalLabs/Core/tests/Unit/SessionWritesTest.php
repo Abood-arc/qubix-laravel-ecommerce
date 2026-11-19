@@ -51,6 +51,23 @@ it('does not save a session the request read and left as it was', function () {
     expect($inner->writes)->toBe(0);
 });
 
+it('pushes back the expiry of a session it did not rewrite', function () {
+    $inner = countingSessionHandler(['abc' => 'cart|i:7;']);
+    $inner->writes = 0;
+
+    $keptAlive = [];
+
+    $handler = new SkipUnchangedWrites($inner, function (string $id) use (&$keptAlive) {
+        $keptAlive[] = $id;
+    });
+
+    $handler->read('abc');
+    $handler->write('abc', 'cart|i:7;');
+
+    expect($inner->writes)->toBe(0)
+        ->and($keptAlive)->toBe(['abc']);
+});
+
 it('saves a session the request changed', function () {
     $inner = countingSessionHandler(['abc' => '']);
     $inner->writes = 0;

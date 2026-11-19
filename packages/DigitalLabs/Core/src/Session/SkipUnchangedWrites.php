@@ -2,6 +2,7 @@
 
 namespace DigitalLabs\Core\Session;
 
+use Closure;
 use SessionHandlerInterface;
 
 /**
@@ -13,8 +14,8 @@ use SessionHandlerInterface;
  * copy over the session that now holds the new cart, and the cart is gone. Requests that only read the
  * session stop writing it, so they can't undo another request's change.
  *
- * Trade-off: an unchanged session isn't saved, so its expiry isn't pushed back by that request. Any change
- * (every page view records the previous URL) saves it as before.
+ * An unchanged session's expiry is still pushed back, through $keepAlive (Redis EXPIRE, or touching the
+ * session file), which can't overwrite anything.
  */
 class SkipUnchangedWrites implements SessionHandlerInterface
 {
@@ -25,7 +26,13 @@ class SkipUnchangedWrites implements SessionHandlerInterface
      */
     protected array $readData = [];
 
-    public function __construct(protected SessionHandlerInterface $handler) {}
+    /**
+     * @param  (Closure(string): void)|null  $keepAlive  pushes back the expiry of the session with the given id
+     */
+    public function __construct(
+        protected SessionHandlerInterface $handler,
+        protected ?Closure $keepAlive = null,
+    ) {}
 
     public function open(string $path, string $name): bool
     {
@@ -49,6 +56,10 @@ class SkipUnchangedWrites implements SessionHandlerInterface
     public function write(string $id, string $data): bool
     {
         if (array_key_exists($id, $this->readData) && $this->readData[$id] === $data) {
+            if ($this->keepAlive) {
+                ($this->keepAlive)($id);
+            }
+
             return true;
         }
 
