@@ -4163,6 +4163,8 @@ return [
                     ],
 
                     'information' => [
+                        'company-name' => 'Show Company Name',
+                        'company-name-info' => 'Shows the optional Company Name field in the checkout and address book forms.',
                         'street-lines' => 'Líneas en una dirección de calle',
                         'title' => 'Información',
                         'title-info' => '"Líneas en una dirección de calle" se refiere a segmentos individuales de una dirección, a menudo separados por comas, que proporcionan información de ubicación como número de casa, calle, ciudad y más.',

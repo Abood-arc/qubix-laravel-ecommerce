@@ -4163,6 +4163,8 @@ return [
                     ],
 
                     'information' => [
+                        'company-name' => 'Show Company Name',
+                        'company-name-info' => 'Shows the optional Company Name field in the checkout and address book forms.',
                         'street-lines' => 'Sokak Adresindeki Satırlar',
                         'title' => 'Bilgi',
                         'title-info' => '"Sokak adresindeki satırlar", genellikle virgüllerle ayrılan, konum bilgisi sağlayan bir adreste yer alan bireysel segmentlerdir, ev numarası, sokak, şehir ve daha fazlası gibi.',

@@ -4163,6 +4163,8 @@ return [
                     ],
 
                     'information' => [
+                        'company-name' => 'Show Company Name',
+                        'company-name-info' => 'Shows the optional Company Name field in the checkout and address book forms.',
                         'street-lines' => '地址行',
                         'title' => '信息',
                         'title-info' => '“地址行”指的是地址的各个部分，通常用逗号分隔，提供如门牌号、街道名称、市区等位置信息。',

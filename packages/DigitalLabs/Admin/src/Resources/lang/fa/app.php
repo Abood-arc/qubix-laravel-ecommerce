@@ -4163,6 +4163,8 @@ return [
                     ],
 
                     'information' => [
+                        'company-name' => 'Show Company Name',
+                        'company-name-info' => 'Shows the optional Company Name field in the checkout and address book forms.',
                         'street-lines' => 'خطوط در آدرس خیابانی',
                         'title' => 'اطلاعات',
                         'title-info' => '«خطوط در آدرس خیابانی» به بخش‌های جداگانه‌ای از یک آدرس اشاره دارد که اغلب با کاما از هم جدا شده‌اند و اطلاعات مکانی مانند شماره خانه، خیابان، شهر و غیره را ارائه می‌دهند.',

@@ -4163,6 +4163,8 @@ return [
                     ],
 
                     'information' => [
+                        'company-name' => 'Show Company Name',
+                        'company-name-info' => 'Shows the optional Company Name field in the checkout and address book forms.',
                         'street-lines' => 'রাস্তার ঠিকানায় লাইনগুলি',
                         'title' => 'তথ্য',
                         'title-info' => 'রাস্তার ঠিকানায় লাইনগুলি একটি ঠিকানার বিভাগগুলি নির্দেশ করে, যা সাধারণত কমা দ্বারা পৃথক করা হয়, যা স্থানের তথ্য সরবরাহ করে যেমন বাড়ির নম্বর, রাস্তা, শহর এবং আরও।',

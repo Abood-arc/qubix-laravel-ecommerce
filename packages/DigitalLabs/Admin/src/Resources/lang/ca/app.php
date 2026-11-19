@@ -4163,6 +4163,8 @@ return [
                     ],
 
                     'information' => [
+                        'company-name' => 'Show Company Name',
+                        'company-name-info' => 'Shows the optional Company Name field in the checkout and address book forms.',
                         'street-lines' => 'Línies en una adreça de carrer',
                         'title' => 'Informació',
                         'title-info' => '"Línies en una adreça de carrer" es refereix als segments individuals d\'una adreça, sovint separats per comes, que proporcionen informació d\'ubicació com número de casa, carrer, ciutat i més.',

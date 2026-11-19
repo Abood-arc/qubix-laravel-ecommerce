@@ -4163,6 +4163,8 @@ return [
                     ],
 
                     'information' => [
+                        'company-name' => 'Show Company Name',
+                        'company-name-info' => 'Shows the optional Company Name field in the checkout and address book forms.',
                         'street-lines' => 'වීථි ලිපින රේඛා',
                         'title' => 'තොරතුරු',
                         'title-info' => '"වීථි ලිපින රේඛා" යනු ලිපිනයේ කාණ්ඩය වන අතර, සාමාන්‍යයෙන් ගෙයි අංකය, වීථිය, නගරය, ආදී තොරතුරු ඇතුළත් වේ.',

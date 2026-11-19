@@ -4163,6 +4163,8 @@ return [
                     ],
 
                     'information' => [
+                        'company-name' => 'Show Company Name',
+                        'company-name-info' => 'Shows the optional Company Name field in the checkout and address book forms.',
                         'street-lines' => 'שורות בכתובת רחוב',
                         'title' => 'מידע',
                         'title-info' => '"שורות בכתובת רחוב" מתייחסות לחלקים יחידים של כתובת, המופרדים לעיתים על ידי פסיקים, ומספקים מידע מקומי כמו מספר בית, רחוב, עיר ועוד.',

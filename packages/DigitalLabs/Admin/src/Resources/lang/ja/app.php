@@ -4163,6 +4163,8 @@ return [
                     ],
 
                     'information' => [
+                        'company-name' => 'Show Company Name',
+                        'company-name-info' => 'Shows the optional Company Name field in the checkout and address book forms.',
                         'street-lines' => '住所の行',
                         'title' => '情報',
                         'title-info' => '「住所の行」とは、住所の個々のセグメントを指し、通常はコンマで区切られており、家番号、通り名、市区町村などの位置情報を提供します。',

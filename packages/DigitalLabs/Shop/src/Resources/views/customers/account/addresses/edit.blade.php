@@ -58,22 +58,24 @@
             >
                 {!! view_render_event('qubix.shop.customers.account.address.edit_form_controls.before', ['address' => $address]) !!}
 
-                <!-- Company Name -->
-                <x-shop::form.control-group>
-                    <x-shop::form.control-group.label>
-                        @lang('shop::app.customers.account.addresses.edit.company-name')
-                    </x-shop::form.control-group.label>
+                @if (core()->getConfigData('customer.address.information.company_name'))
+                    <!-- Company Name -->
+                    <x-shop::form.control-group>
+                        <x-shop::form.control-group.label>
+                            @lang('shop::app.customers.account.addresses.edit.company-name')
+                        </x-shop::form.control-group.label>
 
-                    <x-shop::form.control-group.control
-                        type="text"
-                        name="company_name"
-                        :value="old('company_name') ?? $address->company_name"
-                        :label="trans('shop::app.customers.account.addresses.edit.company-name')"
-                        :placeholder="trans('shop::app.customers.account.addresses.edit.company-name')"
-                    />
+                        <x-shop::form.control-group.control
+                            type="text"
+                            name="company_name"
+                            :value="old('company_name') ?? $address->company_name"
+                            :label="trans('shop::app.customers.account.addresses.edit.company-name')"
+                            :placeholder="trans('shop::app.customers.account.addresses.edit.company-name')"
+                        />
 
-                    <x-shop::form.control-group.error control-name="company_name" />
-                </x-shop::form.control-group>
+                        <x-shop::form.control-group.error control-name="company_name" />
+                    </x-shop::form.control-group>
+                @endif
 
                 {!! view_render_event('qubix.shop.customers.account.addresses.edit_form_controls.company_name.after', ['address' => $address]) !!}
 

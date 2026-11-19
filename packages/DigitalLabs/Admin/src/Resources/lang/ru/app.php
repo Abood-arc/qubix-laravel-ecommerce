@@ -4163,6 +4163,8 @@ return [
                     ],
 
                     'information' => [
+                        'company-name' => 'Show Company Name',
+                        'company-name-info' => 'Shows the optional Company Name field in the checkout and address book forms.',
                         'street-lines' => 'Строки в адресе улицы',
                         'title' => 'Информация',
                         'title-info' => '«Строки в адресе улицы» относятся к отдельным сегментам адреса, часто разделенным запятыми, предоставляющим информацию о местоположении, такую ​​как номер дома, улица, город и т. д.',

@@ -279,20 +279,22 @@
 
             {!! view_render_event('qubix.shop.checkout.onepage.address.form.phone.after') !!}
 
-            <!-- Company Name (optional; the storefront asks for no tax number) -->
-            <x-shop::form.control-group>
-                <x-shop::form.control-group.label>
-                    @lang('shop::app.checkout.onepage.address.company-name')
-                </x-shop::form.control-group.label>
+            @if (core()->getConfigData('customer.address.information.company_name'))
+                <!-- Company Name (optional; the storefront asks for no tax number) -->
+                <x-shop::form.control-group>
+                    <x-shop::form.control-group.label>
+                        @lang('shop::app.checkout.onepage.address.company-name')
+                    </x-shop::form.control-group.label>
 
-                <x-shop::form.control-group.control
-                    type="text"
-                    ::name="controlName + '.company_name'"
-                    ::value="address.company_name"
-                    autocomplete="organization"
-                    :placeholder="trans('shop::app.checkout.onepage.address.company-name')"
-                />
-            </x-shop::form.control-group>
+                    <x-shop::form.control-group.control
+                        type="text"
+                        ::name="controlName + '.company_name'"
+                        ::value="address.company_name"
+                        autocomplete="organization"
+                        :placeholder="trans('shop::app.checkout.onepage.address.company-name')"
+                    />
+                </x-shop::form.control-group>
+            @endif
 
             {!! view_render_event('qubix.shop.checkout.onepage.address.form.company_name.after') !!}
         </div>

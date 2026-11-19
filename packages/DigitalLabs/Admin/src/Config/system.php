@@ -1327,6 +1327,13 @@ return [
                 'validation' => 'between:1,4|integer',
                 'channel_based' => true,
                 'default_value' => 1,
+            ], [
+                'name' => 'company_name',
+                'title' => 'admin::app.configuration.index.customer.address.information.company-name',
+                'info' => 'admin::app.configuration.index.customer.address.information.company-name-info',
+                'type' => 'boolean',
+                'default' => '1',
+                'channel_based' => true,
             ],
         ],
     ], [

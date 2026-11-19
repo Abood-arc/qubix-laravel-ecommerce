@@ -4163,6 +4163,8 @@ return [
                     ],
 
                     'information' => [
+                        'company-name' => 'Show Company Name',
+                        'company-name-info' => 'Shows the optional Company Name field in the checkout and address book forms.',
                         'street-lines' => 'الأسطر في عنوان الشارع',
                         'title' => 'المعلومات',
                         'title-info' => '"الأسطر في عنوان الشارع" تشير إلى الأجزاء الفردية للعنوان، وغالبًا ما تكون مفصولة بفواصل، وتوفر معلومات الموقع مثل رقم المنزل والشارع والمدينة وغيرها.',

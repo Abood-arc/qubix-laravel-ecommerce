@@ -4163,6 +4163,8 @@ return [
                     ],
 
                     'information' => [
+                        'company-name' => 'Show Company Name',
+                        'company-name-info' => 'Shows the optional Company Name field in the checkout and address book forms.',
                         'street-lines' => 'Regels in een straatadres',
                         'title' => 'Informatie',
                         'title-info' => '"Regels in een straatadres" verwijzen naar afzonderlijke segmenten van een adres, vaak gescheiden door komma\'s, die locatie-informatie verstrekken zoals huisnummer, straat, stad en meer.',

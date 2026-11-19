@@ -4163,6 +4163,8 @@ return [
                     ],
 
                     'information' => [
+                        'company-name' => 'Show Company Name',
+                        'company-name-info' => 'Shows the optional Company Name field in the checkout and address book forms.',
                         'street-lines' => 'Рядки в адресі',
                         'title' => 'Інформація',
                         'title-info' => '"Рядки в адресі" вказують на окремі сегменти адреси, часто розділені комами, надаючи інформацію про місцезнаходження, таку як номер будинку, вулиця, місто та інше.',

@@ -4163,6 +4163,8 @@ return [
                     ],
 
                     'information' => [
+                        'company-name' => 'Show Company Name',
+                        'company-name-info' => 'Shows the optional Company Name field in the checkout and address book forms.',
                         'street-lines' => 'Zeilen in einer Straßenadresse',
                         'title' => 'Informationen',
                         'title-info' => '"Zeilen in einer Straßenadresse" beziehen sich auf einzelne Segmente einer Adresse, die oft durch Kommas getrennt sind und Standortinformationen wie Hausnummer, Straße, Stadt und mehr liefern.',

@@ -4163,6 +4163,8 @@ return [
                     ],
 
                     'information' => [
+                        'company-name' => 'Show Company Name',
+                        'company-name-info' => 'Shows the optional Company Name field in the checkout and address book forms.',
                         'street-lines' => 'सड़क पते में पंक्तियाँ',
                         'title' => 'जानकारी',
                         'title-info' => '"सड़क पते में पंक्तियाँ" एक पते के व्यक्तिगत सेगमेंट हैं, जो आमतौर पर कोमों द्वारा अलग होते हैं, जो स्थान सूचना प्रदान करते हैं जैसे कि घर क्रमांक, सड़क, शहर और अधिक।',

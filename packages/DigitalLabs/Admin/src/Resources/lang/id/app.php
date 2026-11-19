@@ -4163,6 +4163,8 @@ return [
                     ],
 
                     'information' => [
+                        'company-name' => 'Show Company Name',
+                        'company-name-info' => 'Shows the optional Company Name field in the checkout and address book forms.',
                         'street-lines' => 'Baris di Alamat Jalan',
                         'title' => 'Informasi',
                         'title-info' => '"Baris di alamat jalan" mengacu pada segmen individual dari alamat, sering dipisahkan dengan koma, memberikan informasi lokasi seperti nomor rumah, jalan, kota, dan lainnya.',
