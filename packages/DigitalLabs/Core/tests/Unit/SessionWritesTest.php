@@ -1,6 +1,8 @@
 <?php
 
 use DigitalLabs\Core\Session\SkipUnchangedWrites;
+use Illuminate\Cache\ArrayStore;
+use Illuminate\Cache\Repository;
 use Illuminate\Session\ArraySessionHandler;
 use Illuminate\Session\CacheBasedSessionHandler;
 use Illuminate\Session\FileSessionHandler;
@@ -74,16 +76,19 @@ it('saves a new session it never read, and a session written again after a chang
     expect($inner->writes)->toBe(2);
 });
 
-it('wraps the file and cache drivers, and leaves the others alone', function () {
-    $handlerOf = fn (string $driver) => app('session')->driver($driver)->getHandler();
+it('wraps the file and cache (Redis) drivers, and leaves the others alone', function () {
+    // The handler a driver's session ends up with: what SessionManager::buildSession() makes of it.
+    $sessionHandler = fn (SessionHandlerInterface $handler) => (fn () => $this->buildSession($handler))
+        ->call(app('session'))
+        ->getHandler();
 
-    expect($handlerOf('file'))->toBeInstanceOf(SkipUnchangedWrites::class)
-        ->and($handlerOf('file')->getHandler())->toBeInstanceOf(FileSessionHandler::class);
+    $file = $sessionHandler(new FileSessionHandler(app('files'), storage_path('framework/sessions'), 120));
+    $cache = $sessionHandler(new CacheBasedSessionHandler(new Repository(new ArrayStore), 120));
+    $array = $sessionHandler(new ArraySessionHandler(120));
 
-    config(['session.store' => 'array']);
-
-    expect($handlerOf('redis'))->toBeInstanceOf(SkipUnchangedWrites::class)
-        ->and($handlerOf('redis')->getHandler())->toBeInstanceOf(CacheBasedSessionHandler::class);
-
-    expect($handlerOf('array'))->toBeInstanceOf(ArraySessionHandler::class);
+    expect($file)->toBeInstanceOf(SkipUnchangedWrites::class)
+        ->and($file->getHandler())->toBeInstanceOf(FileSessionHandler::class)
+        ->and($cache)->toBeInstanceOf(SkipUnchangedWrites::class)
+        ->and($cache->getHandler())->toBeInstanceOf(CacheBasedSessionHandler::class)
+        ->and($array)->toBeInstanceOf(ArraySessionHandler::class);
 });
