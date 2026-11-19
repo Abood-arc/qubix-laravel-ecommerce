@@ -26,6 +26,11 @@ const { defaultBrowserType, ...pixel7 } = devices["Pixel 7"];
 
 test.use(pixel7);
 
+// Cart requests held back on purpose can still be on their way when a test ends: let them go quietly.
+test.afterEach(async ({ page }) => {
+    await page.unrouteAll({ behavior: "ignoreErrors" });
+});
+
 test.describe.configure({ mode: "serial" });
 
 test.afterAll(async ({ browser }) => {
@@ -220,8 +225,54 @@ for (const style of ["Classic", "Swipe, named and sized", "Photo deck"] as CardS
             await expect.poll(() => headerCartCount(page)).toBe("4");
             await expect(page.getByText(ADDED).filter({ visible: true })).toHaveCount(1);
         });
+
+        test("a link tapped while the add is on its way goes there once the add is done", async ({ page }) => {
+            const [product] = products;
+
+            const adds = await holdCartRequests(page, "POST", 1500);
+
+            await openListing(page, [product]);
+
+            const listing = page.url();
+
+            await addButton(page, style, product, [product]).click();
+
+            await page.getByRole("link", { name: product.name }).first().click();
+
+            // Still here while the add is out: leaving now would drop it, or lose the guest's new cart.
+            await page.waitForTimeout(500);
+            expect(page.url()).toBe(listing);
+            expect(adds[0].end).toBeUndefined();
+
+            await page.waitForURL((url) => url.href !== listing);
+
+            expect(adds[0].end).toBeDefined();
+            expect(await cartQuantityOf(page, product)).toBe(1);
+        });
     });
 }
+
+test.describe("Classic: what happens at the tap", () => {
+    test.beforeAll(async ({ browser }) => {
+        await withAdmin(browser, (admin) => setCardStyle(admin, "Classic"));
+    });
+
+    test("a double tap adds one, not two", async ({ page }) => {
+        const [product] = products;
+
+        const adds = await holdCartRequests(page, "POST", 800);
+
+        await openListing(page, [product]);
+
+        await addButton(page, "Classic", product, [product]).dblclick();
+
+        await expect.poll(() => adds[0]?.end).toBeDefined();
+        await page.waitForTimeout(500);
+
+        expect(adds).toHaveLength(1);
+        expect(await cartQuantityOf(page, product)).toBe(1);
+    });
+});
 
 for (const style of ["Swipe, named and sized", "Photo deck"] as CardStyle[]) {
     test.describe(`${style}: what happens at the tap`, () => {
@@ -274,6 +325,28 @@ for (const style of ["Swipe, named and sized", "Photo deck"] as CardStyle[]) {
             // The add went out and came back while the reads were still held.
             expect(reads.length).toBeGreaterThan(0);
             expect(adds[0].end!).toBeLessThan(Math.min(...reads.map((read) => read.end ?? Infinity)));
+        });
+
+        test("Add, − and Add again before the cart answers leaves one in the cart", async ({ page }) => {
+            const [product] = products;
+
+            await holdCartRequests(page, "POST", 800);
+
+            await openListing(page, [product]);
+
+            const card = styledCard(page, product);
+
+            await addButton(page, style, product, [product]).click();
+            await card.getByRole("button", { name: `Remove one ${product.name} from cart` }).click();
+            await addButton(page, style, product, [product]).click();
+
+            await expect(card.getByRole("group", { name: "1 in cart" })).toBeVisible();
+            await expect.poll(() => cartQuantityOf(page, product)).toBe(1);
+
+            // And it stays that way once every write has settled.
+            await page.waitForTimeout(1500);
+            expect(await cartQuantityOf(page, product)).toBe(1);
+            await expect(card.getByRole("group", { name: "1 in cart" })).toBeVisible();
         });
 
         test("− and + work while the add is still on its way", async ({ page }) => {

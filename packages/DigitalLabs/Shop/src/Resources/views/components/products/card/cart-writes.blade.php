@@ -14,6 +14,9 @@
       so once the last of them is back the cart is read again.
     - Every cart it gets is broadcast on update-mini-cart. A read is dropped when a write has started
       since it was asked for: that write's answer is the newer cart.
+    - Leaving the page: a tap on a link while writes are waiting or on their way goes there once they are
+      done (at most 3 s later). The shopper was told the item was added, so it must reach the cart, and a
+      page request read alongside an add could save the session without the new cart.
 --}}
 @pushOnce('scripts', 'shop-card-cart-writes')
     <script type="module">
@@ -57,12 +60,22 @@
             started: 0,
 
             /*
+             * Writes asked for and not yet done (waiting their turn or on their way), and who waits for
+             * there to be none.
+             */
+            outstanding: 0,
+
+            whenDoneWaiters: [],
+
+            /*
              * Units of each product (by id) that an instant add is bringing to the cart.
              */
             pending: {},
 
             /**
              * Whether a product goes into the cart as it is, so a card can show it as added at once.
+             * (A product with required custom options would need its page too. None has any custom option
+             * (checked 2026-11-19); if some come, ProductResource should say so and this should check it.)
              */
             isInstant(product) {
                 return ['simple', 'virtual'].includes(product.type);
@@ -81,6 +94,14 @@
                 const run = Promise.all(before).then(() => this.track(task));
 
                 const settled = run.then(() => {}, () => {});
+
+                this.outstanding++;
+
+                settled.then(() => {
+                    if (--this.outstanding === 0) {
+                        this.whenDoneWaiters.splice(0).forEach(resolve => resolve());
+                    }
+                });
 
                 if (! this.hasCart) {
                     this.firstWrites = settled;
@@ -110,6 +131,21 @@
             },
 
             /**
+             * Resolves once no write is waiting or on its way, or after `limit` ms, whichever is first.
+             */
+            whenDone(limit) {
+                if (! this.outstanding) {
+                    return Promise.resolve();
+                }
+
+                return new Promise(resolve => {
+                    this.whenDoneWaiters.push(resolve);
+
+                    setTimeout(resolve, limit);
+                });
+            },
+
+            /**
              * Read the cart and broadcast it, unless a write has started meanwhile. A failed read changes nothing.
              */
             read() {
@@ -132,12 +168,19 @@
                 const instant = this.isInstant(product);
 
                 if (instant) {
-                    flash('success', cartText.added);
+                    this.flashAdded();
 
                     this.countPending(product.id, 1);
                 }
 
                 return this.run(product.id, () => this.post(product, instant));
+            },
+
+            /**
+             * The "added to cart" message an instant add shows as it is tapped.
+             */
+            flashAdded() {
+                flash('success', cartText.added);
             },
 
             async post(product, instant) {
@@ -195,6 +238,33 @@
         };
 
         emitter.on('update-mini-cart', cart => (cartWrites.hasCart = !! cart?.id));
+
+        /*
+         * A plain left click on a link to another page of the shop, while cart writes are still out: go
+         * there once they are done. Clicks the page already handles, new tabs and downloads are left alone.
+         */
+        document.addEventListener('click', event => {
+            if (! cartWrites.outstanding || event.defaultPrevented || event.button !== 0
+                || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) {
+                return;
+            }
+
+            const link = event.target.closest?.('a[href]');
+
+            if (! link || link.hasAttribute('download') || (link.target && link.target !== '_self')) {
+                return;
+            }
+
+            const url = new URL(link.href, window.location.href);
+
+            if (url.origin !== window.location.origin || (url.hash && url.pathname === window.location.pathname)) {
+                return;
+            }
+
+            event.preventDefault();
+
+            cartWrites.whenDone(3000).then(() => window.location.assign(url.href));
+        });
 
         app.config.globalProperties.$cartWrites = cartWrites;
     </script>

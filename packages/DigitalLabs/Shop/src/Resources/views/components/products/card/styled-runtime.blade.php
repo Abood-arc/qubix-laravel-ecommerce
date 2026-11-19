@@ -16,6 +16,7 @@
         const isCustomer = @json(auth()->guard('customer')->check());
 
         const routes = {{ Js::from([
+            'cartStore' => route('shop.api.checkout.cart.store'),
             'cartUpdate' => route('shop.api.checkout.cart.update'),
             'cartDestroy' => route('shop.api.checkout.cart.destroy'),
             'compare' => route('shop.api.compare.index'),
@@ -295,6 +296,8 @@
 
             wanted: {},
 
+            changes: {},
+
             loading: null,
 
             /**
@@ -343,27 +346,49 @@
              * counted at once, so its card turns into the − 1 + control straight away; once the cart has
              * answered, the card shows the cart's own quantity again, unless − or + was clicked meanwhile
              * (that write follows this one and settles it).
+             *
+             * When the product is already in the cart, or on its way (Add, −, Add), this asks for one more
+             * than the card shows, sent like − and +: in order behind them. Another "add one" would land on
+             * top of a − still waiting its turn, and the cart would end up with one too many.
              */
             async add(product) {
                 const instant = cartWrites().isInstant(product);
 
-                const asked = this.quantity(product.id) + 1;
+                if (instant && (this.lines[product.id] || this.wanted[product.id] !== undefined)) {
+                    cartWrites().flashAdded();
+
+                    const { outcome, message } = await this.setQuantity(product.id, this.quantity(product.id) + 1);
+
+                    return outcome === 'refused' ? { added: false, message } : { added: true };
+                }
+
+                const change = this.bump(product.id);
 
                 if (instant) {
-                    this.wanted[product.id] = asked;
+                    this.wanted[product.id] = this.quantity(product.id) + 1;
 
                     this.changed();
                 }
 
                 const result = await cartWrites().add(product);
 
-                if (instant && (! result.added || this.wanted[product.id] === asked)) {
+                if (instant && (! result.added || this.changes[product.id] === change)) {
                     delete this.wanted[product.id];
 
                     this.changed();
                 }
 
                 return result;
+            },
+
+            /**
+             * Count a change to the product's wanted quantity; an add that answers later only clears what
+             * it set if nothing has changed since.
+             */
+            bump(productId) {
+                this.changes[productId] = (this.changes[productId] ?? 0) + 1;
+
+                return this.changes[productId];
             },
 
             /**
@@ -379,6 +404,8 @@
                 }
 
                 this.wanted[productId] = Math.max(0, quantity);
+
+                this.bump(productId);
 
                 this.changed();
 
@@ -401,17 +428,18 @@
                     return { outcome: 'superseded' };
                 }
 
-                if (! line || quantity === line.quantity) {
+                if (quantity === (line?.quantity ?? 0)) {
                     delete this.wanted[productId];
 
                     this.changed();
 
-                    return { outcome: line ? 'done' : 'refused' };
+                    return { outcome: 'done' };
                 }
 
-                const refusal = quantity > 0
-                    ? await this.update(line.itemId, quantity)
-                    : await this.destroy(line.itemId);
+                // No line (yet, or any more: say a − removed it while Add was tapped again): make one.
+                const refusal = ! line
+                    ? await this.create(productId, quantity)
+                    : (quantity > 0 ? await this.update(line.itemId, quantity) : await this.destroy(line.itemId));
 
                 if (refusal) {
                     // Back to what the cart really holds, then make sure of it.
@@ -460,6 +488,26 @@
                     }
 
                     return this.refused('warning', response.data.data.message);
+                } catch (error) {
+                    return this.refused('error', error.response?.data?.message);
+                }
+            },
+
+            /**
+             * Put `quantity` of a product that has no line into the cart. Resolves null when it worked,
+             * else the refusal.
+             */
+            async create(productId, quantity) {
+                try {
+                    const response = await axios.post(routes.cartStore, { product_id: productId, quantity });
+
+                    if (response.data.message) {
+                        emitter.emit('update-mini-cart', response.data.data);
+
+                        return null;
+                    }
+
+                    return this.refused('warning', response.data.data?.message);
                 } catch (error) {
                     return this.refused('error', error.response?.data?.message);
                 }

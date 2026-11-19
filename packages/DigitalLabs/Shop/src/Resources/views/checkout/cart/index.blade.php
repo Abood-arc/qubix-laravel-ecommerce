@@ -468,12 +468,16 @@
                     this.getCart();
 
                     window.addEventListener('pagehide', this.saveBeforeLeaving);
+
+                    window.addEventListener('pageshow', this.refreshAfterBack);
                 },
 
                 beforeUnmount() {
                     clearTimeout(this.saveTimer);
 
                     window.removeEventListener('pagehide', this.saveBeforeLeaving);
+
+                    window.removeEventListener('pageshow', this.refreshAfterBack);
                 },
 
                 computed: {
@@ -641,6 +645,16 @@
                             },
                             body: JSON.stringify({ qty }),
                         });
+                    },
+
+                    /**
+                     * Back to this page from the browser's back/forward cache: the cart may have changed since
+                     * (including the save sent on leaving), so show it as it is now.
+                     */
+                    refreshAfterBack(event) {
+                        if (event.persisted) {
+                            this.getCart();
+                        }
                     },
 
                     /**

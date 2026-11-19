@@ -12,6 +12,11 @@ const { defaultBrowserType, ...pixel7 } = devices["Pixel 7"];
 
 test.use(pixel7);
 
+// Cart requests held back on purpose can still be on their way when a test ends: let them go quietly.
+test.afterEach(async ({ page }) => {
+    await page.unrouteAll({ behavior: "ignoreErrors" });
+});
+
 const REFUSED = "The requested quantity is not available, please try again later.";
 
 async function openCartWithOneItem(page: Page): Promise<void> {

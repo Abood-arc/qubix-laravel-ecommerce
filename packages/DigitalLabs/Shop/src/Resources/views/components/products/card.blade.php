@@ -207,6 +207,8 @@
 
                     isAddingToCart: false,
 
+                    isSendingToCart: false,
+
                     /*
                      * The Swipe and Photo deck hearts burst when a product is saved; Classic never reads this.
                      */
@@ -349,15 +351,26 @@
 
                 /**
                  * Through $cartWrites (card/cart-writes), like the Swipe and Photo deck cards: a product
-                 * with nothing to choose shows as added at once (the message and the header count), and
-                 * the button stays ready for another. Any other product shows the dots until the cart answers.
+                 * with nothing to choose shows as added at once (the message and the header count). Any
+                 * other product shows the dots until the cart answers. Another tap while this add is on
+                 * its way is ignored: an accidental double tap would add a second one with no sign of it.
                  */
                 async addToCart() {
+                    if (this.isSendingToCart) {
+                        return;
+                    }
+
+                    this.isSendingToCart = true;
+
                     this.isAddingToCart = ! this.$cartWrites.isInstant(this.product);
 
-                    await this.$cartWrites.add(this.product);
+                    try {
+                        await this.$cartWrites.add(this.product);
+                    } finally {
+                        this.isSendingToCart = false;
 
-                    this.isAddingToCart = false;
+                        this.isAddingToCart = false;
+                    }
                 },
             },
         });
