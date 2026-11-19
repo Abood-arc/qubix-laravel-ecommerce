@@ -407,9 +407,12 @@
              * third-party script.) Scripts that act on the mounted app listen for qubix:app-mounted.
              */
             document.addEventListener('DOMContentLoaded', function () {
-                app.mount('#app');
-
-                document.dispatchEvent(new Event('qubix:app-mounted'));
+                try {
+                    app.mount('#app');
+                } finally {
+                    // Even if mounting threw: what waits for the app (the chat widget) still loads.
+                    document.dispatchEvent(new Event('qubix:app-mounted'));
+                }
             });
         </script>
 
