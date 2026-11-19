@@ -831,9 +831,9 @@ it('books the courier the customer paid for', function (string $method, ?int $co
     expect($api->courierIds)->toBe([$courierId])
         ->and($row->requested_courier_id)->toBeNull();
 })->with([
-    'standard' => ['shiprocket_standard_c2', 2],
-    'express' => ['shiprocket_express_c1', 1],
-    'backup price: shiprocket picks' => ['shiprocket_backup', null],
+    'standard' => ['shiprocket_standard_c2_p90', 2],
+    'express' => ['shiprocket_express_c1_p150', 1],
+    'backup price: shiprocket picks' => ['shiprocket_backup_p120', null],
     'flat rate: shiprocket picks' => ['flatrate_flatrate', null],
 ]);
 
@@ -843,7 +843,7 @@ it('ships with shiprocket\'s choice when it refuses the paid-for courier, and no
     $api = bookingApi()->on('assignAwb', fn () => throw new ShiprocketException('Selected courier is not serviceable'));
     $order = bookingOrder();
 
-    $order->forceFill(['shipping_method' => 'shiprocket_standard_c2'])->save();
+    $order->forceFill(['shipping_method' => 'shiprocket_standard_c2_p90'])->save();
 
     $row = booker()->book($order->fresh());
 
@@ -861,7 +861,7 @@ it('does not swap couriers when the answer was lost', function () {
     $api = bookingApi()->on('assignAwb', fn () => throw new ShiprocketUnknownOutcomeException('Shiprocket error (HTTP 504)'));
     $order = bookingOrder();
 
-    $order->forceFill(['shipping_method' => 'shiprocket_standard_c2'])->save();
+    $order->forceFill(['shipping_method' => 'shiprocket_standard_c2_p90'])->save();
 
     // Maybe booked already: the retry asks for the same courier, never another one.
     expect(fn () => booker()->book($order->fresh()))->toThrow(ShiprocketUnknownOutcomeException::class)

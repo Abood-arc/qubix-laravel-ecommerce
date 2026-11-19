@@ -19,5 +19,8 @@ class EventServiceProvider extends ServiceProvider
         'checkout.cart.payment.save.after' => [
             [\DigitalLabs\Shiprocket\Listeners\RepriceShipping::class, 'handle'],
         ],
+        'checkout.cart.shipping_method.resolve' => [
+            [\DigitalLabs\Shiprocket\Listeners\ResolveShippingMethod::class, 'handle'],
+        ],
     ];
 }

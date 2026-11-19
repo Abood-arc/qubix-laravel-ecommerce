@@ -56,17 +56,22 @@ it('offers nothing for an empty list', function () {
         ->and($options->express())->toBeNull();
 });
 
-it('builds and reads back the method codes', function () {
-    expect(RateCode::make(RateCode::STANDARD, 58))->toBe('shiprocket_standard_c58')
-        ->and(RateCode::parse('shiprocket_standard_c58'))->toBe(['tier' => 'standard', 'courier_id' => 58])
-        ->and(RateCode::parse('shiprocket_express_c196'))->toBe(['tier' => 'express', 'courier_id' => 196])
-        ->and(RateCode::make(RateCode::BACKUP))->toBe('shiprocket_backup')
-        ->and(RateCode::parse('shiprocket_backup'))->toBe(['tier' => 'backup', 'courier_id' => null]);
+it('builds and reads back the method codes, quoted price included', function () {
+    expect(RateCode::make(RateCode::STANDARD, 58, 94))->toBe('shiprocket_standard_c58_p94')
+        ->and(RateCode::parse('shiprocket_standard_c58_p94'))->toBe(['tier' => 'standard', 'courier_id' => 58, 'price' => 94.0])
+        ->and(RateCode::parse('shiprocket_express_c196_p126'))->toBe(['tier' => 'express', 'courier_id' => 196, 'price' => 126.0])
+        ->and(RateCode::make(RateCode::BACKUP, null, 120.5))->toBe('shiprocket_backup_p120.5')
+        ->and(RateCode::parse('shiprocket_backup_p120.5'))->toBe(['tier' => 'backup', 'courier_id' => null, 'price' => 120.5])
+        ->and(RateCode::make(RateCode::BACKUP, null, 100))->toBe('shiprocket_backup_p100')
+        ->and(RateCode::make(RateCode::BACKUP, null, 0))->toBe('shiprocket_backup_p0');
 });
 
 it('does not read other methods as ours', function (?string $code) {
     expect(RateCode::parse($code))->toBeNull();
-})->with(['flatrate_flatrate', 'free_free', 'shiprocket_standard', 'shiprocket_cheap_c5', 'shiprocket_standard_c', null]);
+})->with([
+    'flatrate_flatrate', 'free_free', 'shiprocket_standard', 'shiprocket_standard_c58', 'shiprocket_cheap_c5_p9',
+    'shiprocket_standard_c_p9', 'shiprocket_backup', 'shiprocket_backup_c5_p9', null,
+]);
 
 it('rounds the price up to the rupee, with gst when the rates exclude it', function (float $rate, bool $gst, int $price) {
     expect(RateCode::price($rate, $gst))->toBe($price);

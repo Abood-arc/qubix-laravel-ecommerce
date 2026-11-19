@@ -2,8 +2,6 @@
 
 namespace DigitalLabs\Shop\Http\Controllers\API;
 
-use Illuminate\Http\Resources\Json\JsonResource;
-use Illuminate\Http\Response;
 use DigitalLabs\CartRule\Repositories\CartRuleCouponRepository;
 use DigitalLabs\Checkout\Facades\Cart;
 use DigitalLabs\Checkout\Models\CartAddress;
@@ -12,6 +10,8 @@ use DigitalLabs\Product\Repositories\ProductRepository;
 use DigitalLabs\Shipping\Facades\Shipping;
 use DigitalLabs\Shop\Http\Resources\CartResource;
 use DigitalLabs\Shop\Http\Resources\ProductResource;
+use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Http\Response;
 
 class CartController extends APIController
 {
@@ -184,11 +184,17 @@ class CartController extends APIController
             'cart_id' => $cart->id,
         ]);
 
-        $cart->setRelation('billing_address', $address);
+        $estimateAt = function () use ($address) {
+            $cart = Cart::getCart();
 
-        $cart->setRelation('shipping_address', $address);
+            $cart->setRelation('billing_address', $address);
 
-        Cart::setCart($cart);
+            $cart->setRelation('shipping_address', $address);
+
+            Cart::setCart($cart);
+        };
+
+        $estimateAt();
 
         if (request()->has('shipping_method')) {
             Cart::saveShippingMethod(request()->input('shipping_method'));
@@ -197,6 +203,10 @@ class CartController extends APIController
         Cart::collectTotals();
 
         $cartResource = (new CartResource(Cart::getCart()))->jsonSerialize();
+
+        // collectTotals() reloads the cart, dropping the address being estimated, and a carrier
+        // that prices by postcode (Shiprocket) would otherwise quote the saved address, or none.
+        $estimateAt();
 
         return new JsonResource([
             'data' => [

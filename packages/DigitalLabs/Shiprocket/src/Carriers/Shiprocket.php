@@ -95,7 +95,7 @@ class Shiprocket extends AbstractShipping
 
         $rate->carrier = $this->getCode();
         $rate->carrier_title = $this->getConfigData('title') ?: 'Shiprocket';
-        $rate->method = RateCode::make($tier, $courier?->id);
+        $rate->method = RateCode::make($tier, $courier?->id, $basePrice);
         $rate->method_title = trans('shiprocket::app.checkout.'.$tier.($cod && $tier !== RateCode::BACKUP ? '-cod' : ''));
         $rate->method_description = $this->arrives($courier);
         $rate->price = core()->convertPrice($basePrice);

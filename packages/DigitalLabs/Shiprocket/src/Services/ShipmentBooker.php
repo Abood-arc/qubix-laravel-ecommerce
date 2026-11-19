@@ -471,9 +471,10 @@ class ShipmentBooker
                 throw $exception;
             }
 
-            // The courier stopped taking this parcel since checkout: ship it anyway, with the
-            // courier Shiprocket picks, and keep a note for the admin.
-            Log::warning('Shiprocket refused the courier the customer paid for; booking its own choice instead.', [
+            // Usually the courier stopped taking this parcel since checkout: ship it anyway with
+            // the courier Shiprocket picks, and keep a note for the admin. Any other refusal
+            // (wallet, address) fails the same way on this second try.
+            Log::warning('Shiprocket refused booking with the courier the customer paid for; trying its own choice.', [
                 'order_id' => $orderId,
                 'courier_id' => $paidFor,
                 'reason' => $exception->getMessage(),

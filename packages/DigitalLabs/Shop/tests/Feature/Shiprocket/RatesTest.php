@@ -1,5 +1,6 @@
 <?php
 
+use DigitalLabs\CartRule\Models\CartRule;
 use DigitalLabs\Checkout\Models\CartAddress;
 use DigitalLabs\Core\Models\CoreConfig;
 use DigitalLabs\Razorpay\Models\RazorpayPayment;
@@ -8,10 +9,12 @@ use DigitalLabs\Shipping\Facades\Shipping;
 use DigitalLabs\Shiprocket\Contracts\ShiprocketApi;
 use DigitalLabs\Shiprocket\Exceptions\ShiprocketUnknownOutcomeException;
 use DigitalLabs\Shiprocket\Services\FakeShiprocketClient;
+use DigitalLabs\Shiprocket\Services\RateRefresher;
 use DigitalLabs\Shiprocket\Support\Courier;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Sleep;
 
 use function Pest\Laravel\get;
 use function Pest\Laravel\postJson;
@@ -110,8 +113,8 @@ it('offers standard and express at the price shiprocket charges', function () {
     $arrives = fn (int $days) => trans('shiprocket::app.checkout.arrives', ['date' => now()->addDays($days)->format('j M')]);
 
     expect(shiprocketRates())->toBe([
-        'shiprocket_standard_c1' => [90.0, 'Standard delivery', $arrives(5)],
-        'shiprocket_express_c2' => [150.0, 'Express delivery', $arrives(2)],
+        'shiprocket_standard_c1_p90' => [90.0, 'Standard delivery', $arrives(5)],
+        'shiprocket_express_c2_p150' => [150.0, 'Express delivery', $arrives(2)],
     ]);
 });
 
@@ -119,8 +122,8 @@ it('prices cash on delivery with its fee', function () {
     ratesCart($this, 'cashondelivery');
 
     expect(shiprocketRates())->toMatchArray([
-        'shiprocket_standard_c1' => [140.0, 'Standard delivery (incl. cash on delivery fee)', trans('shiprocket::app.checkout.arrives', ['date' => now()->addDays(5)->format('j M')])],
-    ])->and(shiprocketRates()['shiprocket_express_c2'][0])->toBe(200.0);
+        'shiprocket_standard_c1_p140' => [140.0, 'Standard delivery (incl. cash on delivery fee)', trans('shiprocket::app.checkout.arrives', ['date' => now()->addDays(5)->format('j M')])],
+    ])->and(shiprocketRates()['shiprocket_express_c2_p200'][0])->toBe(200.0);
 });
 
 it('adds gst when the rates exclude it, rounding up to the rupee', function () {
@@ -129,8 +132,8 @@ it('adds gst when the rates exclude it, rounding up to the rupee', function () {
     ratesCart($this);
 
     expect(array_map(fn ($rate) => $rate[0], shiprocketRates()))->toBe([
-        'shiprocket_standard_c1' => 107.0,
-        'shiprocket_express_c2' => 177.0,
+        'shiprocket_standard_c1_p107' => 107.0,
+        'shiprocket_express_c2_p177' => 177.0,
     ]);
 });
 
@@ -142,7 +145,7 @@ it('offers the backup price when shiprocket cannot answer', function () {
     ratesCart($this);
 
     expect(shiprocketRates())->toBe([
-        'shiprocket_backup' => [120.0, 'Standard delivery', trans('shiprocket::app.checkout.tracked')],
+        'shiprocket_backup_p120' => [120.0, 'Standard delivery', trans('shiprocket::app.checkout.tracked')],
     ]);
 });
 
@@ -173,13 +176,13 @@ it('offers nothing outside india', function () {
 it('re-prices delivery when the customer switches to cash on delivery and back', function () {
     $cart = ratesCart($this);
 
-    chooseDelivery('shiprocket_standard_c1');
+    chooseDelivery('shiprocket_standard_c1_p90');
 
     expect((float) $cart->refresh()->shipping_amount)->toBe(90.0);
 
     choosePayment('cashondelivery');
 
-    expect($cart->refresh()->shipping_method)->toBe('shiprocket_standard_c1')
+    expect($cart->refresh()->shipping_method)->toBe('shiprocket_standard_c1_p140')
         ->and((float) $cart->shipping_amount)->toBe(140.0);
 
     choosePayment('razorpay');
@@ -190,11 +193,11 @@ it('re-prices delivery when the customer switches to cash on delivery and back',
 it('keeps express with cash on delivery when a fast courier collects cash', function () {
     $cart = ratesCart($this);
 
-    chooseDelivery('shiprocket_express_c2');
+    chooseDelivery('shiprocket_express_c2_p150');
 
     choosePayment('cashondelivery');
 
-    expect($cart->refresh()->shipping_method)->toBe('shiprocket_express_c2')
+    expect($cart->refresh()->shipping_method)->toBe('shiprocket_express_c2_p200')
         ->and((float) $cart->shipping_amount)->toBe(200.0);
 });
 
@@ -203,11 +206,11 @@ it('falls back to standard when no fast courier collects cash', function () {
 
     $cart = ratesCart($this);
 
-    chooseDelivery('shiprocket_express_c2');
+    chooseDelivery('shiprocket_express_c2_p150');
 
     choosePayment('cashondelivery');
 
-    expect($cart->refresh()->shipping_method)->toBe('shiprocket_standard_c1')
+    expect($cart->refresh()->shipping_method)->toBe('shiprocket_standard_c1_p140')
         ->and((float) $cart->shipping_amount)->toBe(140.0);
 });
 
@@ -215,7 +218,7 @@ it('tells the customer what paying cash adds before they choose it', function ()
     ratesCart($this);
 
     $methods = collect(
-        postJson(route('shop.checkout.onepage.shipping_methods.store'), ['shipping_method' => 'shiprocket_standard_c1'])
+        postJson(route('shop.checkout.onepage.shipping_methods.store'), ['shipping_method' => 'shiprocket_standard_c1_p90'])
             ->assertOk()
             ->json('payment_methods')
     );
@@ -240,7 +243,7 @@ it('says nothing about a fee for other delivery methods', function () {
 it('refuses to place an order at a delivery price shiprocket no longer charges', function () {
     $cart = ratesCart($this, 'cashondelivery');
 
-    chooseDelivery('shiprocket_standard_c1');
+    chooseDelivery('shiprocket_standard_c1_p140');
 
     $this->api->raise = 10;
 
@@ -268,7 +271,7 @@ it('does not open the payment popup at a stale delivery price', function () {
 
     $cart = ratesCart($this);
 
-    chooseDelivery('shiprocket_standard_c1');
+    chooseDelivery('shiprocket_standard_c1_p90');
 
     $this->api->raise = 10;
 
@@ -279,4 +282,135 @@ it('does not open the payment popup at a stale delivery price', function () {
         ->assertSessionHas('error', trans('shiprocket::app.checkout.price-changed', ['price' => core()->currency(100)]));
 
     expect(RazorpayPayment::where('cart_id', $cart->id)->exists())->toBeFalse();
+});
+
+it('does not take a free-shipping cart rule for a changed price', function () {
+    CartRule::factory()->afterCreating(function (CartRule $rule) {
+        $rule->cart_rule_customer_groups()->sync([1, 2, 3]);
+        $rule->cart_rule_channels()->sync([core()->getCurrentChannel()->id]);
+    })->create([
+        'name' => 'Free delivery',
+        'action_type' => 'by_percent',
+        'discount_amount' => 0,
+        'condition_type' => 1,
+        'conditions' => [],
+        'status' => 1,
+        'coupon_type' => 0,
+        'use_auto_generation' => 0,
+        'free_shipping' => 1,
+        'apply_to_shipping' => 0,
+        'end_other_rules' => 0,
+        'uses_attribute_conditions' => 0,
+        'discount_quantity' => 0,
+        'discount_step' => 0,
+        'sort_order' => 0,
+        'times_used' => 0,
+        'usage_per_customer' => 0,
+        'uses_per_coupon' => 0,
+        'starts_from' => null,
+        'ends_till' => null,
+    ]);
+
+    ratesCart($this, 'cashondelivery');
+
+    chooseDelivery('shiprocket_standard_c1_p140');
+
+    $orders = Order::count();
+
+    // The rule zeroes the stored delivery price; the quote in the code still stands, so the
+    // order goes through instead of "Delivery price changed" on every try.
+    postJson(route('shop.checkout.onepage.orders.store'))->assertOk();
+
+    $order = Order::latest('id')->first();
+
+    expect(Order::count())->toBe($orders + 1)
+        ->and($order->shipping_method)->toBe('shiprocket_standard_c1_p140')
+        ->and((float) $order->shipping_amount)->toBe(0.0);
+});
+
+it('takes an option shown before the customer chose cash on delivery', function () {
+    $cart = ratesCart($this);
+
+    chooseDelivery('shiprocket_standard_c1_p90');
+
+    choosePayment('cashondelivery');
+
+    // The page still shows the prepaid options; picking one gives its cash on delivery price.
+    postJson(route('shop.checkout.onepage.shipping_methods.store'), ['shipping_method' => 'shiprocket_express_c2_p150'])
+        ->assertOk();
+
+    expect($cart->refresh()->shipping_method)->toBe('shiprocket_express_c2_p200')
+        ->and((float) $cart->shipping_amount)->toBe(200.0);
+});
+
+it('takes the backup option once shiprocket answers again, and the reverse', function () {
+    Log::spy();
+
+    $this->freezeTime();
+
+    $this->api->fail = true;
+
+    $cart = ratesCart($this);
+
+    expect(array_keys(shiprocketRates()))->toBe(['shiprocket_backup_p120']);
+
+    // Shiprocket is back after the 2-minute pause: the backup code is gone.
+    $this->api->fail = false;
+
+    $this->travel(3)->minutes();
+
+    chooseDelivery('shiprocket_backup_p120');
+
+    expect($cart->refresh()->shipping_method)->toBe('shiprocket_standard_c1_p90');
+
+    // And down again: a live option falls back to the backup price.
+    $this->api->fail = true;
+
+    Cache::flush();
+
+    chooseDelivery('shiprocket_express_c2_p150');
+
+    expect($cart->refresh()->shipping_method)->toBe('shiprocket_backup_p120');
+});
+
+it('estimates on the cart page for the PIN code typed there', function () {
+    ratesCart($this, 'razorpay', '110001');
+
+    $methods = postJson(route('shop.api.checkout.cart.estimate_shipping'), [
+        'country' => 'IN',
+        'state' => 'DL',
+        'postcode' => '900001',
+    ])->assertOk()->json('data.shipping_methods');
+
+    // 900001 has no courier: Shiprocket offers nothing there, although the saved address has one.
+    expect(collect($methods)->pluck('carrier_title')->all())->not->toContain('Shiprocket');
+
+    $methods = postJson(route('shop.api.checkout.cart.estimate_shipping'), [
+        'country' => 'IN',
+        'state' => 'DL',
+        'postcode' => '110002',
+    ])->assertOk()->json('data.shipping_methods');
+
+    expect(collect($methods)->firstWhere('carrier_title', 'Shiprocket')['rates'][0]['method'] ?? null)
+        ->toBe('shiprocket_standard_c1_p90');
+});
+
+it('refuses the order when another request holds the re-pricing too long', function () {
+    Sleep::fake(syncWithCarbon: true);
+
+    $cart = ratesCart($this);
+
+    chooseDelivery('shiprocket_standard_c1_p90');
+
+    $held = Cache::lock('shiprocket:reprice:cart:'.$cart->id, 60);
+
+    expect($held->get())->toBeTrue();
+
+    try {
+        expect(app(RateRefresher::class)->refresh($cart->refresh()))->toBe(['changed' => true, 'price' => null]);
+    } finally {
+        $held->release();
+    }
+
+    expect(app(RateRefresher::class)->refresh($cart->refresh()))->toBe(['changed' => false, 'price' => 90.0]);
 });
