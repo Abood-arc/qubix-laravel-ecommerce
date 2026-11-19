@@ -27,6 +27,7 @@ class CategoryResource extends JsonResource
                 'small_image_url' => url('cache/small/'.$this->logo_path),
                 'medium_image_url' => url('cache/medium/'.$this->logo_path),
                 'large_image_url' => url('cache/large/'.$this->logo_path),
+                'tile_image_url' => url('cache/tile/'.$this->logo_path),
                 'original_image_url' => url('cache/original/'.$this->logo_path),
             ]),
             'banner' => $this->when($this->banner_path, [

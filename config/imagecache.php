@@ -54,6 +54,7 @@ return [
         'small' => 'DigitalLabs\Shop\CacheFilters\Small',
         'medium' => 'DigitalLabs\Shop\CacheFilters\Medium',
         'large' => 'DigitalLabs\Shop\CacheFilters\Large',
+        'tile' => 'DigitalLabs\Shop\CacheFilters\Tile',
     ],
 
     /*

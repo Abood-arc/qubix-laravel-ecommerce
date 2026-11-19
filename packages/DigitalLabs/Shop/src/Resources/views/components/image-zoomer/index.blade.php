@@ -1,3 +1,7 @@
+{{--
+    Full-screen zoom of a product's (or a review's) photos, at their original size. Nothing inside is
+    rendered until it first opens, so the originals are fetched only when a shopper asks to zoom.
+--}}
 <v-gallery-zoomer {{ $attributes }}></v-gallery-zoomer>
 
 @pushOnce('scripts')
@@ -19,6 +23,7 @@
             <div
                 ref="parentContainer" 
                 class="fixed inset-0 z-10 flex transform flex-col gap-4 overflow-y-auto transition"
+                v-if="hasOpened"
                 v-show="isOpen"
             >
                 <!-- Close -->
@@ -56,8 +61,8 @@
                     >
                         <div
                             v-for="(attachment, index) in attachments"
-                            class="h-full items-center justify-center"
-                            ref="slides"
+                            class="flex h-full items-center justify-center"
+                            v-show="index === currentIndex - 1"
                         >
                             <video 
                                 class="max-h-full max-w-full transition-transform duration-300 ease-out"
@@ -174,6 +179,8 @@
                 return {
                     isOpen: this.isImageZooming,
 
+                    hasOpened: this.isImageZooming,
+
                     isDragging: false,
 
                     isZooming: false,
@@ -196,15 +203,21 @@
 
             methods: {
                 toggle() {
-                    this.isOpen = ! this.isOpen;
-
-                    document.body.style.overflow = this.isOpen ? 'hidden' : '';
+                    this.isOpen ? this.close() : this.open();
                 },
 
                 open() {
                     this.isOpen = true;
 
+                    this.hasOpened = true;
+
                     document.body.style.overflow = 'hidden';
+                },
+
+                close() {
+                    this.isOpen = false;
+
+                    document.body.style.overflow = '';
                 },
 
                 navigate(index) {
@@ -215,18 +228,6 @@
                     if (index < 1) {
                         this.currentIndex = this.attachments.length;
                     }
-
-                    let slides = this.$refs.slides;
-
-                    for (let i = 0; i < slides.length; i++) {
-                        if (i == this.currentIndex - 1) {
-                            continue;
-                        }
-
-                        slides[i].style.display = 'none';
-                    }
-                    
-                    slides[this.currentIndex - 1].style.display = 'flex';
 
                     this.isZooming = false;
 

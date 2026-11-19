@@ -67,14 +67,17 @@
                     class="group block"
                     :class="useGrid ? '' : 'w-[42%] shrink-0 snap-start md:w-[calc(25%-18px)]'"
                 >
+                    {{-- sizes: the tile's width, two to a row on phones (inside 56px of side padding and a
+                         12px gap) and four from md up (at most 285px). A phone takes the 600px tile copy. --}}
                     <span class="block aspect-square overflow-hidden rounded-md bg-sand">
                         <x-shop::media.images.lazy
                             ::src="category.logo?.large_image_url || fallback"
                             ::srcset="`
                                 ${(category.logo?.large_image_url || fallback)} 165w,
+                                ${(category.logo?.tile_image_url || category.logo?.original_image_url || fallback)} 600w,
                                 ${(category.logo?.original_image_url || category.logo?.large_image_url || fallback)} 1200w
                             `"
-                            sizes="(max-width: 768px) 45vw, 300px"
+                            sizes="(min-width: 1440px) 285px, (min-width: 768px) calc(25vw - 46px), calc(50vw - 34px)"
                             width="300"
                             height="300"
                             class="h-full w-full object-contain mix-blend-multiply transition-transform duration-300 ease-[cubic-bezier(0.23,1,0.32,1)] 1180:group-hover:scale-105"
