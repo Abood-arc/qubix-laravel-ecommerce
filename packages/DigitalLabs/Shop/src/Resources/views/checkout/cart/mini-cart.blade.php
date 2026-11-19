@@ -41,16 +41,16 @@
                             @if (core()->getConfigData('sales.checkout.my_cart.summary') == 'display_item_quantity')
                                 <span
                                     class="header-badge"
-                                    v-if="cart?.items_qty"
+                                    v-if="itemsQuantity"
                                 >
-                                    @{{ cart.items_qty }}
+                                    @{{ itemsQuantity }}
                                 </span>
                             @else
                                 <span
                                     class="header-badge"
-                                    v-if="cart?.items_count"
+                                    v-if="itemsCount"
                                 >
-                                    @{{ cart.items_count }}
+                                    @{{ itemsCount }}
                                 </span>
                             @endif
                         </span>
@@ -227,7 +227,7 @@
                                 <!-- Cart Item Remove Button -->
                                 <button
                                     type="button"
-                                    class="text-navyBlue max-md:text-sm"
+                                    class="tap-target text-navyBlue max-md:text-sm"
                                     @click="removeItem(item.id)"
                                 >
                                     @lang('shop::app.checkout.cart.mini-cart.remove')
@@ -351,7 +351,10 @@
                             {!! view_render_event('qubix.shop.checkout.mini-cart.continue_to_checkout.after') !!}
 
                             <div class="block cursor-pointer text-center text-base font-medium max-md:py-1.5">
-                                <a href="{{ route('shop.checkout.cart.index') }}">
+                                <a
+                                    href="{{ route('shop.checkout.cart.index') }}"
+                                    class="tap-target"
+                                >
                                     @lang('shop::app.checkout.cart.mini-cart.view-cart')
                                 </a>
                             </div>
@@ -379,9 +382,9 @@
 
                         <span
                             class="header-badge"
-                            v-if="cart?.items_qty"
+                            v-if="itemsQuantity"
                         >
-                            @{{ cart.items_qty }}
+                            @{{ itemsQuantity }}
                         </span>
                     </span>
 
@@ -402,6 +405,17 @@
                 return  {
                     cart: null,
 
+                    /*
+                     * Units of each product (by id) that a product card's add is bringing to the cart
+                     * ($cartWrites, card/cart-writes): the count shows them before the cart has answered.
+                     */
+                    pendingAdds: {},
+
+                    /*
+                     * How many carts have been broadcast, so a read that one overtook is not shown.
+                     */
+                    updates: 0,
+
                     isLoading:false,
 
                     displayTax: {
@@ -409,6 +423,27 @@
                         subtotal: "{{ core()->getConfigData('sales.taxes.shopping_cart.display_subtotal') }}",
                     },
                 }
+            },
+
+            computed: {
+                /**
+                 * The count on the cart icon: units in the cart, and on their way to it.
+                 */
+                itemsQuantity() {
+                    return Number(this.cart?.items_qty ?? 0)
+                        + Object.values(this.pendingAdds).reduce((sum, units) => sum + units, 0);
+                },
+
+                /**
+                 * The count on the cart icon when the store counts lines: a product on its way that the
+                 * cart does not hold yet is one more.
+                 */
+                itemsCount() {
+                    const inCart = new Set((this.cart?.items ?? []).map(item => String(item.product_id)));
+
+                    return Number(this.cart?.items_count ?? 0)
+                        + Object.keys(this.pendingAdds).filter(productId => ! inCart.has(productId)).length;
+                },
             },
 
             mounted() {
@@ -420,15 +455,30 @@
                  * Action.
                  */
                 this.$emitter.on('update-mini-cart', (cart) => {
+                    this.updates++;
+
                     this.cart = cart;
+                });
+
+                this.$emitter.on('cart-adds-pending', (pending) => {
+                    this.pendingAdds = pending;
                 });
             },
 
             methods: {
                 getCart() {
+                    const updates = this.updates;
+
                     this.$axios.get('{{ route('shop.api.checkout.cart.index') }}')
                         .then(response => {
-                            this.cart = response.data.data;
+                            // A cart broadcast while this read was on its way is newer: keep it.
+                            if (updates !== this.updates) {
+                                return;
+                            }
+
+                            // Shown here, and told to the rest of the page: the product cards learn
+                            // whether there is a cart yet, and what is in it ($cartWrites, $cardCart).
+                            this.$emitter.emit('update-mini-cart', response.data.data);
                         })
                         .catch(error => {});
                 },

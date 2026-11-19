@@ -91,13 +91,7 @@
                 window.addEventListener('click', this.handleFocusOut);
             },
 
-            mounted() {
-                this.toggleBlockWidth = this.$refs.toggleBlock.clientWidth;
-
-                this.toggleBlockHeight = this.$refs.toggleBlock.clientHeight;
-            },
-
-            beforeDestroy() {
+            beforeUnmount() {
                 window.removeEventListener('click', this.handleFocusOut);
             },
 
@@ -145,16 +139,12 @@
             methods: {
                 toggle() {
                     /**
-                     * If still somehow width is zero then this will check for width one more time.
+                     * The menu sits against the toggle, so the toggle is measured as the menu opens
+                     * (measuring it on mount forced a layout while the page was still starting up).
                      */
-                    if (this.toggleBlockWidth === 0) {
+                    if (! this.isActive) {
                         this.toggleBlockWidth = this.$refs.toggleBlock.clientWidth;
-                    }
 
-                    /**
-                     * If still somehow height is zero then this will check for height one more time.
-                     */
-                    if (this.toggleBlockHeight === 0) {
                         this.toggleBlockHeight = this.$refs.toggleBlock.clientHeight;
                     }
 

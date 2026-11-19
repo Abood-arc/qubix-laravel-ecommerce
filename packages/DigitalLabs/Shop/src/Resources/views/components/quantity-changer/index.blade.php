@@ -19,7 +19,7 @@
     >
         <div>
             <span 
-                class="icon-minus cursor-pointer text-2xl"
+                class="icon-minus tap-target cursor-pointer text-2xl"
                 role="button"
                 tabindex="0"
                 aria-label="@lang('shop::app.components.quantity-changer.decrease-quantity')"
@@ -32,7 +32,7 @@
             </p>
             
             <span 
-                class="icon-plus cursor-pointer text-2xl"
+                class="icon-plus tap-target cursor-pointer text-2xl"
                 role="button"
                 tabindex="0"
                 aria-label="@lang('shop::app.components.quantity-changer.increase-quantity')"

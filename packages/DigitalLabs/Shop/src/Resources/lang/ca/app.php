@@ -970,6 +970,7 @@ return [
         ],
 
         'cart' => [
+            'add-failed' => 'The item could not be added to the cart. Please try again.',
             'continue-to-checkout' => 'Continuar amb el Pagament',
             'illegal' => 'La quantitat no pot ser inferior a un.',
             'inactive' => 'L\'article ha estat desactivat i posteriorment eliminat de la cistella.',

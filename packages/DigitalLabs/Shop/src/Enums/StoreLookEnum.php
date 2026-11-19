@@ -46,24 +46,18 @@ enum StoreLookEnum: string
     }
 
     /**
-     * This look's Google fonts, added to the storefront's one font request. Forest Green uses Karla,
-     * which every page already loads.
+     * This look's font families (keys of config shop.fonts.families): its text font, then its display
+     * font when that is another family. StoreFonts adds them to every storefront page in this look.
+     *
+     * @return list<string>
      */
-    public function fontFamilies(): string
+    public function fontFamilies(): array
     {
         return match ($this) {
-            self::FOREST_GREEN => '',
-            self::MARIGOLD_INDIGO => '&family=Baloo+2:wght@500;600;700;800&family=Mukta:wght@400;500;600;700;800',
-            self::SAND_CHARCOAL => '&family=Archivo:wght@400;500;600;700;800',
-            self::MINIMAL_WHITE => '&family=Manrope:wght@400;500;600;700;800',
+            self::FOREST_GREEN => ['karla'],
+            self::MARIGOLD_INDIGO => ['mukta', 'baloo-2'],
+            self::SAND_CHARCOAL => ['archivo'],
+            self::MINIMAL_WHITE => ['manrope'],
         };
-    }
-
-    /**
-     * The storefront's font stylesheet with this look's fonts.
-     */
-    public function fontsUrl(): string
-    {
-        return 'https://fonts.googleapis.com/css2?family=Karla:wght@400;500;600;700;800&family=Poppins:wght@400;500;600;700;800&family=DM+Serif+Display&family=Noto+Sans+Arabic:wght@400;500;600;700'.$this->fontFamilies().'&display=swap';
     }
 }

@@ -122,6 +122,9 @@
                 <!--
                     Key changes on each activation so Vue re-mounts the img,
                     restarting the CSS animation (Ken Burns / blur-reveal reset).
+                    The banner spans the page, so it is drawn at the full viewport width.
+                    Only the slide on show and the one after it have an image to fetch
+                    (see shouldLoad); the active one is the page's largest paint.
                 -->
                 <img
                     :key="'img-' + index + (index === currentIndex ? '-a' + animGen : '-i')"
@@ -129,12 +132,12 @@
                         ? ((animGen % 2 === 0 ? 'vhero-slide-active-even ' : 'vhero-slide-active-odd ') + 'vhero-image-enhanced')
                         : 'vhero-image-enhanced'"
                     style="height:100%; width:100%; object-fit:cover; object-position:center; user-select:none; display:block;"
-                    :src="image.image"
-                    :srcset="buildSrcset(image)"
-                    sizes="(max-width: 525px) 525px, (max-width: 1024px) 1024px, (max-width: 1600px) 1280px, 1920px"
+                    :src="shouldLoad(index) ? image.image : null"
+                    :srcset="shouldLoad(index) ? buildSrcset(image) : null"
+                    sizes="100vw"
                     :alt="image.title || 'Hero image ' + (index + 1)"
-                    :fetchpriority="index === 0 ? 'high' : 'low'"
-                    :loading="index === 0 ? 'eager' : 'lazy'"
+                    :fetchpriority="index === currentIndex ? 'high' : 'low'"
+                    :loading="index === currentIndex ? 'eager' : 'lazy'"
                     :decoding="index === 0 ? 'sync' : 'async'"
                     draggable="false"
                     @load="onLoad(index)"
@@ -248,6 +251,17 @@
                     if (!this.isLoaded(index)) {
                         this.loadedSlides.push(index);
                     }
+                },
+
+                /*
+                 * The slides fetched so far: the one on show, the next one (so it is ready when
+                 * autoplay or a swipe brings it in) and any already loaded. Every other slide
+                 * waits until it comes up.
+                 */
+                shouldLoad(index) {
+                    const next = (this.currentIndex + 1) % this.images.length;
+
+                    return index === this.currentIndex || index === next || this.isLoaded(index);
                 },
 
                 buildSrcset(image) {

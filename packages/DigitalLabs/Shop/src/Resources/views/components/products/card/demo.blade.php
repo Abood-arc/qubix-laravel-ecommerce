@@ -53,18 +53,15 @@
     globals.$cardCart = {
         load: () => Promise.resolve(),
 
-        refresh() {},
-
         quantity: (productId) => inCart[productId] ?? 0,
 
+        // Like the real add of a product with nothing to choose: in the cart at once.
         async add(product) {
-            await new Promise((resolve) => setTimeout(resolve, 450));
-
             inCart[product.id] = 1;
 
             emitter.emit('card-cart-changed');
 
-            return true;
+            return { added: true };
         },
 
         async setQuantity(productId, quantity) {

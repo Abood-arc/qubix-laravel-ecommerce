@@ -11,10 +11,8 @@
     $categoryTreeStamp ??= app(\DigitalLabs\Category\Repositories\CategoryRepository::class)->getCategoryTreeStamp();
 
     // Store look (Admin > Configuration > General > Design > Store Look): colours, fonts and
-    // corners only, via data-look and the tokens in app.css, plus the look's Google font.
+    // corners only, via data-look and the tokens in app.css, plus the look's fonts (layouts/fonts).
     $storeLook = \DigitalLabs\Shop\Enums\StoreLookEnum::current();
-
-    $fontsUrl = $storeLook->fontsUrl();
 @endphp
 
 <!DOCTYPE html>
@@ -63,27 +61,7 @@
 
         @qubixVite(['src/Resources/assets/css/app.css', 'src/Resources/assets/js/app.js'])
 
-        <link
-            rel="preconnect"
-            href="https://fonts.googleapis.com"
-            crossorigin
-        />
-
-        <link
-            rel="preconnect"
-            href="https://fonts.gstatic.com"
-            crossorigin
-        />
-
-        <link
-            rel="preload" as="style"
-            href="{{ $fontsUrl }}"
-        />
-
-        <link
-            rel="stylesheet"
-            href="{{ $fontsUrl }}"
-        />
+        @include('shop::components.layouts.fonts', ['look' => $storeLook])
 
         @stack('styles')
 
@@ -160,8 +138,6 @@
         {{-- No chatbot on the checkout page: nothing should float over the address and payment
              steps, and the page loads lighter without the widget. --}}
         @unless (request()->routeIs('shop.checkout.onepage.index'))
-        <script src="https://cdn.zanderio.ai/widget/loader.js" data-id="wdg_bDmt03WxuJCWokGT6wmHrX1O" defer></script>
-
         {{-- The chat button floats above everything (max z-index), so it covered the cart's subtotal
              and Checkout button. Drawers and modals lock scrolling with body.style.overflow = 'hidden';
              hide the button while one is open. The widget pins display/visibility/opacity on its host
@@ -174,7 +150,13 @@
             }
         </style>
 
-        {{-- Shoppers can drag the chat button out of the way (thumb or mouse). On release it snaps to
+        {{-- The chat widget's script (about 190 KB, and half a second of a phone's main thread) loads
+             once the app is up: on the shopper's first touch or key press, or about 4 s after the app
+             has mounted, whichever comes first. Scrolling alone doesn't count, so the script's half
+             second of work never lands in the middle of a scroll. A prerendered page waits until it
+             is shown.
+
+             Shoppers can drag the chat button out of the way (thumb or mouse). On release it snaps to
              the nearest side edge and the spot is remembered on this device (localStorage), on every
              page. A press that moves under 8px is still a normal tap that opens the chat. The button
              lives in the widget's open shadow root; it is moved with the CSS translate property, which
@@ -358,23 +340,60 @@
                     window.addEventListener('resize', restore);
                 }
 
-                var existing = document.getElementById('zanderio-widget-host');
+                var LOAD_TRIGGERS = ['pointerdown', 'touchstart', 'keydown'];
+                var IDLE_DELAY = 4000;
+                var requested = false;
 
-                if (existing) {
-                    attach(existing);
-                    return;
+                // The widget's script adds its host (with an open shadow root) to <body> as it runs.
+                function loadWidget() {
+                    if (requested) {
+                        return;
+                    }
+
+                    requested = true;
+
+                    LOAD_TRIGGERS.forEach(function (type) {
+                        window.removeEventListener(type, loadWidget, true);
+                    });
+
+                    var script = document.createElement('script');
+
+                    script.src = 'https://cdn.zanderio.ai/widget/loader.js';
+                    script.dataset.id = 'wdg_bDmt03WxuJCWokGT6wmHrX1O';
+                    script.onload = function () {
+                        var widgetHost = document.getElementById('zanderio-widget-host');
+
+                        if (widgetHost) {
+                            attach(widgetHost);
+                        }
+                    };
+
+                    document.body.appendChild(script);
                 }
 
-                var watcher = new MutationObserver(function () {
-                    var h = document.getElementById('zanderio-widget-host');
-
-                    if (h && h.shadowRoot) {
-                        watcher.disconnect();
-                        attach(h);
+                function whenIdle() {
+                    if ('requestIdleCallback' in window) {
+                        requestIdleCallback(loadWidget, { timeout: 2000 });
+                    } else {
+                        loadWidget();
                     }
-                });
+                }
 
-                watcher.observe(document.documentElement, { childList: true, subtree: true });
+                function scheduleWidget() {
+                    LOAD_TRIGGERS.forEach(function (type) {
+                        window.addEventListener(type, loadWidget, { capture: true, passive: true });
+                    });
+
+                    setTimeout(whenIdle, IDLE_DELAY);
+                }
+
+                document.addEventListener('qubix:app-mounted', function () {
+                    if (document.prerendering) {
+                        document.addEventListener('prerenderingchange', scheduleWidget, { once: true });
+                    } else {
+                        scheduleWidget();
+                    }
+                }, { once: true });
             })();
         </script>
         @endunless
@@ -382,13 +401,18 @@
         {!! view_render_event('qubix.shop.layout.vue-app-mount.before') !!}
         <script>
             /**
-             * Load event, the purpose of using the event is to mount the application
-             * after all of our `Vue` components which is present in blade file have
-             * been registered in the app. No matter what `app.mount()` should be
-             * called in the last.
+             * Mounts the app once every component has registered. The components' <script type="module">
+             * blocks, like app.js, are deferred and run in document order before DOMContentLoaded, so
+             * this is the earliest safe moment. (Not window load, which also waits for every image and
+             * third-party script.) Scripts that act on the mounted app listen for qubix:app-mounted.
              */
-            window.addEventListener("load", function (event) {
-                app.mount("#app");
+            document.addEventListener('DOMContentLoaded', function () {
+                try {
+                    app.mount('#app');
+                } finally {
+                    // Even if mounting threw: what waits for the app (the chat widget) still loads.
+                    document.dispatchEvent(new Event('qubix:app-mounted'));
+                }
             });
         </script>
 

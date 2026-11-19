@@ -255,7 +255,10 @@
                                             {!! view_render_event('qubix.shop.checkout.cart.formatted_total.before') !!}
 
                                             <div class="md:hidden">
-                                                <p class="text-lg font-semibold max-md:text-sm">
+                                                <p
+                                                    class="text-lg font-semibold transition-opacity max-md:text-sm"
+                                                    :class="{ 'opacity-60': isSaving }"
+                                                >
                                                     <template v-if="displayTax.prices == 'including_tax'">
                                                             @{{ item.formatted_total_incl_tax }}
                                                     </template>
@@ -276,7 +279,7 @@
                                                 </p>
 
                                                 <span
-                                                    class="cursor-pointer text-base text-navyBlue max-md:hidden"
+                                                    class="tap-target cursor-pointer text-base text-navyBlue max-md:hidden"
                                                     role="button"
                                                     tabindex="0"
                                                     @click="removeItem(item.id)"
@@ -295,12 +298,12 @@
                                                     class="flex max-w-max items-center gap-x-2.5 rounded-[54px] border border-navyBlue px-3.5 py-1.5 max-md:gap-x-1.5 max-md:px-1 max-md:py-0.5"
                                                     name="quantity"
                                                     ::value="item?.quantity"
-                                                    @change="setItemQuantity(item.id, $event)"
+                                                    @change="setItemQuantity(item, $event)"
                                                 />
 
                                                 <!-- For Mobile view Remove Button -->
                                                 <span
-                                                    class="hidden cursor-pointer text-sm text-navyBlue max-md:block"
+                                                    class="tap-target hidden cursor-pointer text-sm text-navyBlue max-md:block"
                                                     role="button"
                                                     tabindex="0"
                                                     @click="removeItem(item.id)"
@@ -313,7 +316,10 @@
                                         </div>
                                     </div>
 
-                                    <div class="max-md:hidden ltr:text-right rtl:text-left">
+                                    <div
+                                        class="transition-opacity max-md:hidden ltr:text-right rtl:text-left"
+                                        :class="{ 'opacity-60': isSaving }"
+                                    >
                                         {!! view_render_event('qubix.shop.checkout.cart.total.before') !!}
 
                                         <template v-if="displayTax.prices == 'including_tax'">
@@ -346,7 +352,7 @@
 
                                         <!-- Cart Item Remove Button -->
                                         <span
-                                            class="cursor-pointer text-base text-navyBlue"
+                                            class="tap-target cursor-pointer text-base text-navyBlue"
                                             role="button"
                                             tabindex="0"
                                             @click="removeItem(item.id)"
@@ -376,15 +382,8 @@
 
                                 {!! view_render_event('qubix.shop.checkout.cart.continue_shopping.after') !!}
 
+                                {{-- Quantities save themselves (see setItemQuantity()): there is no Update Cart button. --}}
                                 {!! view_render_event('qubix.shop.checkout.cart.update_cart.before') !!}
-
-                                <x-shop::button
-                                    class="secondary-button max-h-14 rounded-2xl max-md:rounded-lg max-md:px-6 max-md:py-3 max-md:text-sm max-sm:py-2"
-                                    :title="trans('shop::app.checkout.cart.index.update-cart')"
-                                    ::loading="isStoring"
-                                    ::disabled="isStoring"
-                                    @click="update()"
-                                />
 
                                 {!! view_render_event('qubix.shop.checkout.cart.update_cart.after') !!}
                             </div>
@@ -434,6 +433,9 @@
 
                         allSelected: false,
 
+                        /*
+                         * Quantities changed (by item id) that have not been sent yet.
+                         */
                         applied: {
                             quantity: {},
                         },
@@ -448,17 +450,46 @@
 
                         isLoading: true,
 
-                        isStoring: false,
+                        /*
+                         * A quantity change is on its way to the cart.
+                         */
+                        isSending: false,
                     }
+                },
+
+                created() {
+                    /*
+                     * Saves go out one at a time; each waits for the one before.
+                     */
+                    this.saves = Promise.resolve(true);
                 },
 
                 mounted() {
                     this.getCart();
+
+                    window.addEventListener('pagehide', this.saveBeforeLeaving);
+
+                    window.addEventListener('pageshow', this.refreshAfterBack);
+                },
+
+                beforeUnmount() {
+                    clearTimeout(this.saveTimer);
+
+                    window.removeEventListener('pagehide', this.saveBeforeLeaving);
+
+                    window.removeEventListener('pageshow', this.refreshAfterBack);
                 },
 
                 computed: {
                     selectedItemsCount() {
                         return this.cart.items.filter(item => item.selected).length;
+                    },
+
+                    /**
+                     * The totals are out of date: a quantity change waits to be sent, or is on its way.
+                     */
+                    isSaving() {
+                        return this.isSending || Object.keys(this.applied.quantity).length > 0;
                     },
                 },
 
@@ -466,7 +497,7 @@
                     getCart() {
                         this.$axios.get('{{ route('shop.api.checkout.cart.index') }}')
                             .then(response => {
-                                this.cart = response.data.data;
+                                this.showCart(response.data.data);
 
                                 this.isLoading = false;
 
@@ -481,6 +512,30 @@
                         this.cart = cart;
                     },
 
+                    /**
+                     * Show a cart the server sent. Quantities changed since stay as the shopper set them
+                     * (they are still to be saved), and so do the ticked items and the opened details.
+                     */
+                    showCart(cart) {
+                        const shown = new Map((this.cart?.items ?? []).map(item => [item.id, item]));
+
+                        (cart?.items ?? []).forEach(item => {
+                            item.selected = shown.get(item.id)?.selected ?? false;
+
+                            item.option_show = shown.get(item.id)?.option_show ?? false;
+
+                            if (this.applied.quantity[item.id] !== undefined) {
+                                item.quantity = this.applied.quantity[item.id];
+                            }
+                        });
+
+                        this.cart = cart;
+
+                        if (this.cart?.items?.length) {
+                            this.updateAllSelected();
+                        }
+                    },
+
                     selectAll() {
                         for (let item of this.cart.items) {
                             item.selected = this.allSelected;
@@ -491,29 +546,133 @@
                         this.allSelected = this.cart.items.every(item => item.selected);
                     },
 
-                    update() {
-                        this.isStoring = true;
+                    /**
+                     * − or + on an item: the new quantity shows at once and is saved (with the totals coming
+                     * back) half a second after the last click, so quick clicks cost one request.
+                     */
+                    setItemQuantity(item, quantity) {
+                        item.quantity = quantity;
 
-                        this.$axios.put('{{ route('shop.api.checkout.cart.update') }}', { qty: this.applied.quantity })
-                            .then(response => {
-                                if (response.data.message) {
-                                    this.cart = response.data.data;
+                        this.applied.quantity[item.id] = quantity;
 
-                                    this.$emitter.emit('add-flash', { type: 'success', message: response.data.message });
-                                } else {
-                                    this.$emitter.emit('add-flash', { type: 'warning', message: response.data.data.message });
-                                }
+                        clearTimeout(this.saveTimer);
 
-                                this.isStoring = false;
-
-                            })
-                            .catch(error => {
-                                this.isStoring = false;
-                            });
+                        this.saveTimer = setTimeout(() => this.save(), 500);
                     },
 
-                    setItemQuantity(itemId, quantity) {
-                        this.applied.quantity[itemId] = quantity;
+                    /**
+                     * Send the changed quantities now. Resolves true once the cart holds them, false when it
+                     * refused them: its reason shows, and the quantities go back to what the cart holds.
+                     */
+                    save() {
+                        clearTimeout(this.saveTimer);
+
+                        this.saves = this.saves.then(() => this.sendQuantities());
+
+                        return this.saves;
+                    },
+
+                    async sendQuantities() {
+                        const qty = this.applied.quantity;
+
+                        if (! Object.keys(qty).length) {
+                            return true;
+                        }
+
+                        this.applied.quantity = {};
+
+                        this.isSending = true;
+
+                        try {
+                            const response = await this.$axios.put('{{ route('shop.api.checkout.cart.update') }}', { qty });
+
+                            if (response.data.message) {
+                                this.showCart(response.data.data);
+
+                                this.$emitter.emit('update-mini-cart', response.data.data);
+
+                                this.$emitter.emit('add-flash', { type: 'success', message: response.data.message });
+
+                                return true;
+                            }
+
+                            this.$emitter.emit('add-flash', { type: 'warning', message: response.data.data.message });
+                        } catch (error) {
+                            this.$emitter.emit('add-flash', { type: 'error', message: error.response?.data?.message });
+                        } finally {
+                            this.isSending = false;
+                        }
+
+                        // The cart can have taken part of the change (one item of several), so read it again.
+                        await this.$axios.get('{{ route('shop.api.checkout.cart.index') }}')
+                            .then(response => {
+                                this.showCart(response.data.data);
+
+                                this.$emitter.emit('update-mini-cart', response.data.data);
+                            })
+                            .catch(error => {});
+
+                        return false;
+                    },
+
+                    /**
+                     * Leaving the page (a link, back, closing the tab) inside the half-second wait would drop
+                     * the change, so send it as a keepalive request, which the browser finishes after the
+                     * page has gone. Axios can't do that, hence fetch with the same XSRF cookie it uses.
+                     */
+                    saveBeforeLeaving() {
+                        const qty = this.applied.quantity;
+
+                        if (! Object.keys(qty).length) {
+                            return;
+                        }
+
+                        clearTimeout(this.saveTimer);
+
+                        this.applied.quantity = {};
+
+                        const xsrfToken = document.cookie.match(/(?:^|; )XSRF-TOKEN=([^;]*)/)?.[1];
+
+                        fetch('{{ route('shop.api.checkout.cart.update') }}', {
+                            method: 'PUT',
+                            keepalive: true,
+                            credentials: 'same-origin',
+                            headers: {
+                                'Accept': 'application/json',
+                                'Content-Type': 'application/json',
+                                'X-Requested-With': 'XMLHttpRequest',
+                                'X-XSRF-TOKEN': xsrfToken ? decodeURIComponent(xsrfToken) : '',
+                            },
+                            body: JSON.stringify({ qty }),
+                        });
+                    },
+
+                    /**
+                     * Back to this page from the browser's back/forward cache: the cart may have changed since
+                     * (including the save sent on leaving), so show it as it is now.
+                     */
+                    refreshAfterBack(event) {
+                        if (event.persisted) {
+                            this.getCart();
+                        }
+                    },
+
+                    /**
+                     * Proceed To Checkout waits for quantities still to be saved, so checkout shows them.
+                     * A refused change keeps the shopper here, with its reason.
+                     */
+                    async proceedToCheckout(event) {
+                        if (! this.isSaving) {
+                            return;
+                        }
+
+                        event.preventDefault();
+
+                        const url = event.currentTarget.href;
+
+                        if (await this.save()) {
+                            window.location.href = url;
+                        }
                     },
 
                     removeItem(itemId) {
@@ -524,7 +683,11 @@
                                         'cart_item_id': itemId,
                                     })
                                     .then(response => {
-                                        this.cart = response.data.data;
+                                        delete this.applied.quantity[itemId];
+
+                                        this.showCart(response.data.data);
+
+                                        this.$emitter.emit('update-mini-cart', response.data.data);
 
                                         this.$emitter.emit('add-flash', { type: 'success', message: response.data.message });
 

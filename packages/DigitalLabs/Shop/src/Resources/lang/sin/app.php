@@ -970,6 +970,7 @@ return [
         ],
 
         'cart' => [
+            'add-failed' => 'The item could not be added to the cart. Please try again.',
             'continue-to-checkout' => 'පරියේෂයට කිරීමට සහාය',
             'illegal' => 'අයිතමයක් එක් අඩංගු වේ නැත.',
             'inactive' => 'අයිතමය අක්‍රීය වී ඇත්තේ, එවිට සාර්ථකව ඉවත් කරන ලදි.',

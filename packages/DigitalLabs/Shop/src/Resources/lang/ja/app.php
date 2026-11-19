@@ -970,6 +970,7 @@ return [
         ],
 
         'cart' => [
+            'add-failed' => 'The item could not be added to the cart. Please try again.',
             'continue-to-checkout' => 'チェックアウトに進む',
             'illegal' => '数量は1未満にできません。',
             'inactive' => 'アイテムは無効になり、カートから削除されました。',

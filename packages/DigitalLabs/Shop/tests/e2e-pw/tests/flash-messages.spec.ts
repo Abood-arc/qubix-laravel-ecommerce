@@ -65,3 +65,32 @@ test("a message with a link stays until the shopper closes it", async ({ page })
 
     await expect(message).toBeHidden();
 });
+
+test("the same success again takes the place of the one showing, with a fresh second", async ({ page }) => {
+    await openStorefront(page);
+
+    await flash(page, { type: "success", message: "Flash test: added" });
+    await page.waitForTimeout(600);
+    await flash(page, { type: "success", message: "Flash test: added" });
+    await flash(page, { type: "success", message: "Flash test: added" });
+
+    await expect(visibleText(page, "Flash test: added")).toHaveCount(1);
+
+    // The first one's second is up, but the latest one has its own.
+    await page.waitForTimeout(600);
+    await expect(visibleText(page, "Flash test: added")).toBeVisible();
+    await expect(visibleText(page, "Flash test: added")).toBeHidden({ timeout: 2000 });
+});
+
+test("different messages, and the same warning again, still each show", async ({ page }) => {
+    await openStorefront(page);
+
+    await flash(page, { type: "success", message: "Flash test: one" });
+    await flash(page, { type: "success", message: "Flash test: two" });
+    await flash(page, { type: "warning", message: "Flash test: careful" });
+    await flash(page, { type: "warning", message: "Flash test: careful" });
+
+    await expect(visibleText(page, "Flash test: one")).toBeVisible();
+    await expect(visibleText(page, "Flash test: two")).toBeVisible();
+    await expect(visibleText(page, "Flash test: careful")).toHaveCount(2);
+});

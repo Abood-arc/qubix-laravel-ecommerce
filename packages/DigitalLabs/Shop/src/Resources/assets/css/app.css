@@ -651,23 +651,37 @@ img.lazy {
         }
     }
 
+    /*
+     * Loading placeholder: a grey block with a slightly darker band sweeping across it. The band is
+     * an overlay moved with transform, which the compositor animates without repainting the page
+     * (a page can show over a hundred of these while it loads). The grey is a background image, as
+     * the old gradient was, so it still covers a bg-* colour set on the same element.
+     */
     .shimmer {
-        animation-duration: 2.2s;
-        animation-fill-mode: forwards;
-        animation-iteration-count: infinite;
-        animation-name: skeleton;
-        animation-timing-function: linear;
-        background: linear-gradient(to right, #F6F6F6 8%, #F0F0F0 18%, #F6F6F6 33%);
-        background-size: 1250px 100%;
+        position: relative;
+        overflow: hidden;
+        background-image: linear-gradient(#F6F6F6, #F6F6F6);
+    }
+
+    .shimmer::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        background: linear-gradient(to right, rgb(0 0 0 / 0) 0%, rgb(0 0 0 / 0.025) 50%, rgb(0 0 0 / 0) 100%);
+        transform: translateX(-100%);
+        animation: skeleton 2.2s linear infinite;
     }
 
     @keyframes skeleton {
-        0% {
-            background-position: -1250px 0;
+        to {
+            transform: translateX(100%);
         }
+    }
 
-        100% {
-            background-position: 1250px 0;
+    @media (prefers-reduced-motion: reduce) {
+        .shimmer::after {
+            content: none;
         }
     }
 

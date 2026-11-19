@@ -83,5 +83,10 @@ class ShopServiceProvider extends ServiceProvider
             dirname(__DIR__).'/Config/compare.php',
             'shop.compare'
         );
+
+        $this->mergeConfigFrom(
+            dirname(__DIR__).'/Config/fonts.php',
+            'shop.fonts'
+        );
     }
 }

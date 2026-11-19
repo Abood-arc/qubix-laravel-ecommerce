@@ -19,10 +19,12 @@ jjbags.in {
 	encode gzip zstd
 	reverse_proxy app:80
 
-	# Optional: uncomment to send Caddy access logs to stdout (docker logs)
-	# log {
-	# 	output stdout
-	# }
+	# One JSON line per request, with its duration, in `docker logs qubix-caddy-1`.
+	# Caddy redacts cookies and auth headers by default.
+	log {
+		output stdout
+		format json
+	}
 }
 
 # Saudi Arabia storefront — separate deployment (/opt/qubix-sa), proxied to the
@@ -36,4 +38,11 @@ www.jj-bags.com {
 jj-bags.com {
 	encode gzip zstd
 	reverse_proxy app-sa:80
+
+	# One JSON line per request, with its duration, in `docker logs qubix-caddy-1`.
+	# Caddy redacts cookies and auth headers by default.
+	log {
+		output stdout
+		format json
+	}
 }

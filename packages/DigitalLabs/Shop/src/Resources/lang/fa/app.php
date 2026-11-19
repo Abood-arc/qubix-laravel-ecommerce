@@ -970,6 +970,7 @@ return [
         ],
 
         'cart' => [
+            'add-failed' => 'The item could not be added to the cart. Please try again.',
             'continue-to-checkout' => 'ادامه به تسویه حساب',
             'illegal' => 'تعداد نمی‌تواند کمتر از یک باشد.',
             'inactive' => 'این مورد غیرفعال شده و بعداً از سبد خرید حذف می‌شود.',

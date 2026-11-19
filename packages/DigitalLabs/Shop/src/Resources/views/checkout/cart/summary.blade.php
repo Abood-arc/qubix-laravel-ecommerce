@@ -11,8 +11,12 @@
 
     {!! view_render_event('qubix.shop.checkout.cart.summary.title.after') !!}
 
-    <!-- Cart Totals -->
-    <div class="mt-6 grid gap-4 max-md:mt-2 max-md:gap-2.5">
+    <!-- Cart Totals (faded while a quantity change is being saved: cart/index) -->
+    <div
+        class="mt-6 grid gap-4 transition-opacity max-md:mt-2 max-md:gap-2.5"
+        :class="{ 'opacity-60': isSaving }"
+        :aria-busy="isSaving ? 'true' : 'false'"
+    >
         <!-- Estimate Tax and Shipping -->
         @if (core()->getConfigData('sales.checkout.shopping_cart.estimate_shipping'))
             <template v-if="cart.have_stockable_items">
@@ -225,6 +229,7 @@
 
         <a
             href="{{ route('shop.checkout.onepage.index') }}"
+            @click="proceedToCheckout"
             class="primary-button mt-4 place-self-end rounded-2xl px-11 py-3 max-md:my-4 max-md:max-w-full max-md:rounded-lg max-md:py-3 max-md:text-sm max-sm:w-full max-sm:py-2"
         >
             @lang('shop::app.checkout.cart.summary.proceed-to-checkout')

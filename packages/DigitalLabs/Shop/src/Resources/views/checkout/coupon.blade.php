@@ -33,7 +33,7 @@
                             <!-- Modal Toggler -->
                             <x-slot:toggle>
                                 <span 
-                                    class="cursor-pointer text-base text-navyBlue max-sm:text-sm"
+                                    class="tap-target cursor-pointer text-base text-navyBlue max-sm:text-sm"
                                     role="button"
                                     tabindex="0"
                                     v-if="! cart.coupon_code"

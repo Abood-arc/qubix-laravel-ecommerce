@@ -246,8 +246,8 @@
             /* Passive scroll listener instead of per-frame polling, which kept the CPU busy on phones. */
             window.addEventListener('scroll', applyScrollState, { passive: true });
 
-            /* After Vue app.mount (#app on window.load), sync once post-paint */
-            window.addEventListener('load', function () {
+            /* After Vue app.mount (layouts/index), sync once post-paint */
+            document.addEventListener('qubix:app-mounted', function () {
                 requestAnimationFrame(function () {
                     requestAnimationFrame(applyScrollState);
                 });

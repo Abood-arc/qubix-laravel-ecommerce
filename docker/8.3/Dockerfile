@@ -38,6 +38,8 @@ RUN userdel -r ubuntu 2>/dev/null || true \
     && useradd -ms /bin/bash --no-user-group -g ${WWWGROUP} -u 1337 sail \
     && git config --global --add safe.directory /var/www/html \
     && mkdir -p /var/www/html/storage/app/public \
+    && mkdir -p /var/cache/nginx/imagecache \
+    && chown -R sail:${WWWGROUP} /var/cache/nginx \
     && chown -R sail:sail /var/www/html/storage
 
 COPY vendor/laravel/sail/runtimes/8.3/start-container /usr/local/bin/start-container

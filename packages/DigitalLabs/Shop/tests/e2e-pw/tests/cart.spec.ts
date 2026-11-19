@@ -183,8 +183,8 @@ test("should add different product to cart and update quantity from cart view pa
         .getByLabel("Increase Quantity")
         .first()
         .waitFor({ state: "visible" });
+    // The cart page saves the change by itself (there is no Update Cart button).
     await page.getByLabel("Increase Quantity").first().click();
-    await page.getByRole("button", { name: "Update Cart" }).click();
 
     await expect(
         page.getByText("Quantity updated successfully").first(),
@@ -221,9 +221,8 @@ test("should add product to cart and decrement the quantity of product from the 
         .getByLabel("Decrease Quantity")
         .first()
         .waitFor({ state: "visible" });
+    // The cart page saves the change by itself (there is no Update Cart button).
     await page.getByLabel("Decrease Quantity").first().click();
-
-    await page.getByRole("button", { name: "Update Cart" }).click();
 
     await expect(
         page.getByText("Quantity updated successfully").first(),

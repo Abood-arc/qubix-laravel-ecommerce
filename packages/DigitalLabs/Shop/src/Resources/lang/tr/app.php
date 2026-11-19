@@ -970,6 +970,7 @@ return [
         ],
 
         'cart' => [
+            'add-failed' => 'The item could not be added to the cart. Please try again.',
             'continue-to-checkout' => 'Ödemeye Geç',
             'illegal' => 'Geçersiz miktar.',
             'inactive' => 'Ürün satışta değil.',

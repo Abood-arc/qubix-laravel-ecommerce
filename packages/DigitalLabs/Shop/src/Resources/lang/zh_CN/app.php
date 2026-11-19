@@ -970,6 +970,7 @@ return [
         ],
 
         'cart' => [
+            'add-failed' => 'The item could not be added to the cart. Please try again.',
             'continue-to-checkout' => '继续结帐',
             'illegal' => '数量不能少于一。',
             'inactive' => '该项目已停用，随后从购物车中移除。',

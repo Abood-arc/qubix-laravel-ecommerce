@@ -34,13 +34,17 @@ class CoreServiceProvider extends ServiceProvider
 
         $this->loadViewsFrom(__DIR__.'/../Resources/views', 'core');
 
-        Event::listen('qubix.shop.layout.body.after', static function (ViewRenderEventManager $viewRenderEventManager) {
-            $viewRenderEventManager->addTemplate('core::blade.tracer.style');
-        });
+        // The Blade tracer (outlines and labels every view) is a debugging aid: only ship its
+        // styles and script when it is switched on, not to every shopper.
+        if (config('view.tracer')) {
+            Event::listen('qubix.shop.layout.body.after', static function (ViewRenderEventManager $viewRenderEventManager) {
+                $viewRenderEventManager->addTemplate('core::blade.tracer.style');
+            });
 
-        Event::listen('qubix.admin.layout.head', static function (ViewRenderEventManager $viewRenderEventManager) {
-            $viewRenderEventManager->addTemplate('core::blade.tracer.style');
-        });
+            Event::listen('qubix.admin.layout.head', static function (ViewRenderEventManager $viewRenderEventManager) {
+                $viewRenderEventManager->addTemplate('core::blade.tracer.style');
+            });
+        }
 
         // The queue worker is one long-lived process: re-read settings for every job, so a
         // change saved in admin reaches queued mails and imports without a worker restart.
@@ -87,6 +91,9 @@ class CoreServiceProvider extends ServiceProvider
             \Illuminate\Foundation\Console\DownCommand::class,
             fn () => new \DigitalLabs\Core\Console\Commands\DownCommand
         );
+
+        // A request that only reads the session doesn't save it back (see Session\SkipUnchangedWrites).
+        $this->app->singleton('session', fn ($app) => new \DigitalLabs\Core\Session\SessionManager($app));
 
         $this->app->bind(
             \Illuminate\Contracts\Debug\ExceptionHandler::class,

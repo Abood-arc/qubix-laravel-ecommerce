@@ -264,7 +264,7 @@
 			<p class="mt-5 font-medium text-zinc-500 max-sm:text-center max-sm:text-sm">
                 @lang('shop::app.customers.signup-form.account-exists')
 
-                <a class="text-navyBlue"
+                <a class="tap-target text-navyBlue"
                     href="{{ route('shop.customer.session.index') }}"
                 >
                     @lang('shop::app.customers.signup-form.sign-in-button')

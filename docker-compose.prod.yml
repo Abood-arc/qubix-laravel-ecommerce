@@ -134,6 +134,9 @@ services:
     ports:
       - '80:80'
       - '443:443'
+      # HTTP/3 (QUIC) runs over UDP. Caddy already advertises it (alt-svc), so
+      # without this port phones try it, fail, and fall back to TCP.
+      - '443:443/udp'
     volumes:
       # Mount the directory, not the single file. A single-file bind mount pins
       # to that file's inode at container-creation time; `git pull` replaces

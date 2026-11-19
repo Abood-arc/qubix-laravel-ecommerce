@@ -96,6 +96,11 @@ export async function currentStoreLook(page: Page): Promise<StoreLookCode> {
 }
 
 /**
+ * A listed product that a card adds straight to the cart: simple (nothing to choose) and saleable.
+ */
+const isSaleableSimple = (item: any): boolean => item.type === "simple" && item.is_saleable && !!item.prices?.final;
+
+/**
  * A saleable simple product (it has a final price) with at least two photos, from the listing API.
  * Passing a locale switches the session's locale too.
  */
@@ -106,7 +111,7 @@ export async function findMultiPhotoProduct(request: APIRequestContext, locale =
 
     const { data } = await response.json();
 
-    const product = data.find((item: any) => item.images.length >= 2 && item.is_saleable && item.prices?.final);
+    const product = data.find((item: any) => item.images.length >= 2 && isSaleableSimple(item));
 
     expect(product, `No saleable simple product with 2+ photos in "${locale}"; add photos to one in the admin`).toBeTruthy();
 
@@ -123,7 +128,7 @@ export async function findSaleableProducts(request: APIRequestContext, count: nu
 
     const { data } = await response.json();
 
-    const products = data.filter((item: any) => item.is_saleable && item.prices?.final).slice(0, count);
+    const products = data.filter(isSaleableSimple).slice(0, count);
 
     expect(products.length, `Need ${count} saleable simple products in "${locale}"`).toBe(count);
 

@@ -970,6 +970,7 @@ return [
         ],
 
         'cart' => [
+            'add-failed' => 'The item could not be added to the cart. Please try again.',
             'continue-to-checkout' => 'המשך לתשלום',
             'illegal' => 'הכמות לא יכולה להיות פחות מאחד.',
             'inactive' => 'הפריט הושבת ונמחק מהעגלה.',

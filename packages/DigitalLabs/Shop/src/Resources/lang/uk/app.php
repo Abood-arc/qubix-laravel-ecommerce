@@ -970,6 +970,7 @@ return [
         ],
 
         'cart' => [
+            'add-failed' => 'The item could not be added to the cart. Please try again.',
             'continue-to-checkout' => 'Продовжити оформлення замовлення',
             'illegal' => 'Кількість не може бути менше одного.',
             'inactive' => 'Товар був деактивований та видалений з кошика.',

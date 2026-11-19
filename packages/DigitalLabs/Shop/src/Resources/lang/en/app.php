@@ -970,6 +970,7 @@ return [
         ],
 
         'cart' => [
+            'add-failed' => 'The item could not be added to the cart. Please try again.',
             'continue-to-checkout' => 'Continue to Checkout',
             'illegal' => 'Quantity cannot be lesser than one.',
             'inactive' => 'The item has been deactivated and subsequently removed from the cart.',
