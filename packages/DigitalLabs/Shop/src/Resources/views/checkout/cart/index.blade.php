@@ -466,10 +466,14 @@
 
                 mounted() {
                     this.getCart();
+
+                    window.addEventListener('pagehide', this.saveBeforeLeaving);
                 },
 
                 beforeUnmount() {
                     clearTimeout(this.saveTimer);
+
+                    window.removeEventListener('pagehide', this.saveBeforeLeaving);
                 },
 
                 computed: {
@@ -605,6 +609,38 @@
                             .catch(error => {});
 
                         return false;
+                    },
+
+                    /**
+                     * Leaving the page (a link, back, closing the tab) inside the half-second wait would drop
+                     * the change, so send it as a keepalive request, which the browser finishes after the
+                     * page has gone. Axios can't do that, hence fetch with the same XSRF cookie it uses.
+                     */
+                    saveBeforeLeaving() {
+                        const qty = this.applied.quantity;
+
+                        if (! Object.keys(qty).length) {
+                            return;
+                        }
+
+                        clearTimeout(this.saveTimer);
+
+                        this.applied.quantity = {};
+
+                        const xsrfToken = document.cookie.match(/(?:^|; )XSRF-TOKEN=([^;]*)/)?.[1];
+
+                        fetch('{{ route('shop.api.checkout.cart.update') }}', {
+                            method: 'PUT',
+                            keepalive: true,
+                            credentials: 'same-origin',
+                            headers: {
+                                'Accept': 'application/json',
+                                'Content-Type': 'application/json',
+                                'X-Requested-With': 'XMLHttpRequest',
+                                'X-XSRF-TOKEN': xsrfToken ? decodeURIComponent(xsrfToken) : '',
+                            },
+                            body: JSON.stringify({ qty }),
+                        });
                     },
 
                     /**

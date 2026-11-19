@@ -133,3 +133,14 @@ test("Proceed To Checkout waits for a change that is still to be saved", async (
     expect(saves[0].end).toBeDefined();
     expect(await cartQuantity(page)).toBe(2);
 });
+
+test("leaving the page right after a change still saves it", async ({ page }) => {
+    await openCartWithOneItem(page);
+
+    await increase(page).click();
+
+    // Well inside the half-second wait: only the keepalive save on leaving can carry the change.
+    await page.goto("");
+
+    await expect.poll(() => cartQuantity(page)).toBe(2);
+});

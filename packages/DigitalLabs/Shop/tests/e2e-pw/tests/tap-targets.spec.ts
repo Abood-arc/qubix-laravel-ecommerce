@@ -81,7 +81,7 @@ test("the cart page: − and +, Remove and Apply Coupon", async ({ page }) => {
     });
 });
 
-test("the cart drawer: − and +, and Remove", async ({ page }) => {
+test("the cart drawer: − and +, Remove and View Cart", async ({ page }) => {
     await aCartWithOneItem(page);
 
     await page.goto("");
@@ -92,6 +92,7 @@ test("the cart drawer: − and +, and Remove", async ({ page }) => {
         "−": visible(page.getByRole("button", { name: "Decrease Quantity" })),
         "+": visible(page.getByRole("button", { name: "Increase Quantity" })),
         Remove: visible(page.getByRole("button", { name: "Remove", exact: true })),
+        "View Cart": visible(page.getByRole("link", { name: "View Cart" })),
     });
 });
 
