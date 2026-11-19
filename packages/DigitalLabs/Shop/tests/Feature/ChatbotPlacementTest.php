@@ -32,3 +32,10 @@ it('still loads the chatbot on the cart and home pages', function (string $route
         ->assertSee('cdn.zanderio.ai/widget/loader.js', false)
         ->assertSee('qubix.chatLauncher', false);
 })->with(['shop.home.index', 'shop.checkout.cart.index']);
+
+it('loads the chatbot from script once the app is up, not with a script tag in the page', function () {
+    get(route('shop.home.index'))
+        ->assertOk()
+        ->assertDontSee('<script src="https://cdn.zanderio.ai', false)
+        ->assertSee("document.addEventListener('qubix:app-mounted'", false);
+});

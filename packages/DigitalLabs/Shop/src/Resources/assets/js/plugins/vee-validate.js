@@ -38,7 +38,7 @@ export default {
         app.component("VField", Field);
         app.component("VErrorMessage", ErrorMessage);
 
-        window.addEventListener("load", () => setLocale(document.documentElement.attributes.lang.value));
+        setLocale(document.documentElement.lang);
 
         /**
          * Registration of all global validators.
