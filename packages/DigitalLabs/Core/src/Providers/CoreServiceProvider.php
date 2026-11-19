@@ -92,6 +92,9 @@ class CoreServiceProvider extends ServiceProvider
             fn () => new \DigitalLabs\Core\Console\Commands\DownCommand
         );
 
+        // A request that only reads the session doesn't save it back (see Session\SkipUnchangedWrites).
+        $this->app->singleton('session', fn ($app) => new \DigitalLabs\Core\Session\SessionManager($app));
+
         $this->app->bind(
             \Illuminate\Contracts\Debug\ExceptionHandler::class,
             \DigitalLabs\Core\Exceptions\Handler::class
