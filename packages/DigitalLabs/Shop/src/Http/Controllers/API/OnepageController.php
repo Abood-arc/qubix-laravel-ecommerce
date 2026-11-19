@@ -2,9 +2,6 @@
 
 namespace DigitalLabs\Shop\Http\Controllers\API;
 
-use Illuminate\Http\Resources\Json\JsonResource;
-use Illuminate\Http\Response;
-use Illuminate\Validation\ValidationException;
 use DigitalLabs\Checkout\Facades\Cart;
 use DigitalLabs\Customer\Repositories\CustomerRepository;
 use DigitalLabs\Payment\Facades\Payment;
@@ -14,6 +11,10 @@ use DigitalLabs\Shipping\Contracts\DeliveryCheck;
 use DigitalLabs\Shipping\Facades\Shipping;
 use DigitalLabs\Shop\Http\Requests\CartAddressRequest;
 use DigitalLabs\Shop\Http\Resources\CartResource;
+use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Event;
+use Illuminate\Validation\ValidationException;
 
 class OnepageController extends APIController
 {
@@ -140,6 +141,9 @@ class OnepageController extends APIController
                 'redirect_url' => route('shop.checkout.cart.index'),
             ], Response::HTTP_FORBIDDEN);
         }
+
+        // A shipping price can depend on how the customer pays (a cash on delivery fee).
+        Event::dispatch('checkout.cart.payment.save.after', Cart::getCart());
 
         Cart::collectTotals();
 

@@ -39,13 +39,27 @@ it('is never bound in production, and says so once at boot', function () {
     }
 });
 
-it('decides serviceability from the delivery pin', function (string $pin, array $expected) {
-    expect(app(ShiprocketApi::class)->checkServiceability('400001', $pin, 0.5, true))->toBe($expected);
+it('decides the couriers from the delivery pin', function (string $pin, array $prepaid, array $cod) {
+    $prices = fn (bool $withCod) => array_map(
+        fn ($courier) => [$courier->id, $courier->name, $courier->rate, $courier->days],
+        app(ShiprocketApi::class)->couriers('400001', $pin, 0.5, $withCod)
+    );
+
+    expect($prices(false))->toBe($prepaid)
+        ->and($prices(true))->toBe($cod);
 })->with([
-    'starts with 9: not deliverable' => ['900001', ['deliverable' => false, 'cod' => false]],
-    'ends with 0: no cash on delivery' => ['560010', ['deliverable' => true, 'cod' => false]],
-    'anything else: both' => ['560001', ['deliverable' => true, 'cod' => true]],
+    'starts with 9: not deliverable' => ['900001', [], []],
+    'ends with 0: no cash on delivery' => ['560010', [[1, 'Fake Surface', 90.0, 5], [2, 'Fake Air', 150.0, 2]], []],
+    'anything else: both, cash on delivery ₹50 more' => ['560001',
+        [[1, 'Fake Surface', 90.0, 5], [2, 'Fake Air', 150.0, 2]],
+        [[1, 'Fake Surface', 140.0, 5], [2, 'Fake Air', 200.0, 2]],
+    ],
 ]);
+
+it('books the asked courier by name', function () {
+    expect(app(ShiprocketApi::class)->assignAwb(200001, 2)['courier_name'])->toBe('Fake Air')
+        ->and(app(ShiprocketApi::class)->assignAwb(200001)['courier_name'])->toBe('Fake Express');
+});
 
 it('creates orders with new ids and finds them by store order number', function () {
     $api = app(ShiprocketApi::class);

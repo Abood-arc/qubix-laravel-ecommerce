@@ -82,6 +82,12 @@
                     </div>
                 @endif
 
+                @if ($shiprocket?->requested_courier_id && filled($shiprocket->courier_name))
+                    <p class="text-red-600">
+                        {{ trans('shiprocket::app.admin.courier-swapped', ['courier' => $shiprocket->courier_name]) }}
+                    </p>
+                @endif
+
                 @if (filled($shiprocket?->awb_code))
                     <div>
                         <p class="break-all font-semibold text-gray-800 dark:text-white">

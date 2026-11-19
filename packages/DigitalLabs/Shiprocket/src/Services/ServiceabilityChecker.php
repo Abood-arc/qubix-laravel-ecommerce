@@ -6,17 +6,19 @@ use DigitalLabs\Checkout\Contracts\Cart;
 use DigitalLabs\Checkout\Contracts\CartAddress;
 use DigitalLabs\Shiprocket\Contracts\ShiprocketApi;
 use DigitalLabs\Shiprocket\Exceptions\ShiprocketException;
+use DigitalLabs\Shiprocket\Support\Courier;
 use DigitalLabs\Shiprocket\Support\Settings;
 use DigitalLabs\Shiprocket\Support\WeightUnit;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 
 /**
- * Can Shiprocket deliver to a PIN code, and with Cash on Delivery?
+ * Which couriers deliver to a PIN code, at what price, and can any of them collect cash?
  *
- * Two questions, each answered from a 6-hour cache keyed by pickup PIN, delivery PIN,
- * 0.5 kg weight slab and the COD flag. Asked with COD, Shiprocket may list only couriers
- * that collect cash, so "deliverable" is always asked without it. When Shiprocket fails
+ * Two courier lists (prepaid, and Cash on Delivery with its fee), each answered from a 6-hour
+ * cache keyed by pickup PIN, delivery PIN, 0.5 kg weight slab and the COD flag. Asked with
+ * COD, Shiprocket lists only couriers that collect cash, so "deliverable" is always asked
+ * without it. When Shiprocket fails
  * (no answer within ShiprocketClient's 3 s, or an unclear one), checkout goes ahead
  * (deliverable, COD allowed); that answer is logged and cached for only 2 minutes, so the
  * customer's next checkout steps do not wait for a Shiprocket that is down.
@@ -33,6 +35,11 @@ class ServiceabilityChecker
     protected const FAILED = 'failed';
 
     protected const WEIGHT_SLAB_KG = 0.5;
+
+    /**
+     * Cubic centimetres per volumetric kilogram, as Indian couriers bill.
+     */
+    protected const VOLUMETRIC_DIVISOR = 5000;
 
     protected const FAIL_OPEN = ['deliverable' => true, 'cod' => true];
 
@@ -56,58 +63,50 @@ class ServiceabilityChecker
      */
     public function check(string $deliveryPin, float $weightKg): array
     {
+        $deliverable = $this->couriers($deliveryPin, $weightKg, cod: false);
+
+        if ($deliverable === null) {
+            return self::FAIL_OPEN;
+        }
+
+        if ($deliverable === []) {
+            return ['deliverable' => false, 'cod' => false];
+        }
+
+        $cod = $this->couriers($deliveryPin, $weightKg, cod: true);
+
+        return ['deliverable' => true, 'cod' => $cod === null || $cod !== []];
+    }
+
+    /**
+     * The couriers for this parcel (only those that collect cash, priced with their fee, when
+     * $cod). Null when Shiprocket failed, now or in the last 2 minutes.
+     *
+     * @return list<Courier>|null
+     */
+    public function couriers(string $deliveryPin, float $weightKg, bool $cod): ?array
+    {
         $pickupPin = Settings::pickupPin();
 
         $deliveryPin = preg_replace('/\s+/', '', $deliveryPin);
 
         $slab = max(1, (int) ceil(round($weightKg / self::WEIGHT_SLAB_KG, 6)));
 
-        $deliverable = $this->ask($pickupPin, $deliveryPin, $slab, cod: false);
-
-        if ($deliverable === null) {
-            return self::FAIL_OPEN;
-        }
-
-        if (! $deliverable) {
-            return ['deliverable' => false, 'cod' => false];
-        }
-
-        return [
-            'deliverable' => true,
-            'cod' => $this->ask($pickupPin, $deliveryPin, $slab, cod: true) ?? true,
-        ];
-    }
-
-    /**
-     * The cart's weight in kg: every top-level item's weight × quantity, in the store weight unit.
-     */
-    public function cartWeightKg(Cart $cart): float
-    {
-        $weight = $cart->items->sum(fn ($item) => (float) $item->weight * (float) $item->quantity);
-
-        return round($weight * WeightUnit::kgPerUnit(), 3);
-    }
-
-    /**
-     * One cached question: is there a courier (that collects cash, when $cod)? Null when
-     * Shiprocket failed, now or in the last 2 minutes.
-     */
-    protected function ask(string $pickupPin, string $deliveryPin, int $slab, bool $cod): ?bool
-    {
         $key = sprintf('shiprocket:svc:%s:%s:%d:%d', $pickupPin, $deliveryPin, $slab, $cod);
 
         $cached = Cache::get($key);
-
-        if (is_bool($cached)) {
-            return $cached;
-        }
 
         if ($cached === self::FAILED) {
             return null;
         }
 
+        // Anything else that is not a list (a yes/no cached before prices existed) is asked again.
+        if (is_array($cached)) {
+            return array_map(fn (array $courier) => Courier::fromArray($courier), $cached);
+        }
+
         try {
-            $answer = $this->api->checkServiceability($pickupPin, $deliveryPin, $slab * self::WEIGHT_SLAB_KG, $cod);
+            $couriers = $this->api->couriers($pickupPin, $deliveryPin, $slab * self::WEIGHT_SLAB_KG, $cod);
         } catch (ShiprocketException $e) {
             Log::error('Shiprocket serviceability check failed; checkout continues without it.', [
                 'pickup_pin' => $pickupPin,
@@ -121,10 +120,31 @@ class ServiceabilityChecker
             return null;
         }
 
-        $result = $cod ? (bool) $answer['cod'] : (bool) $answer['deliverable'];
+        Cache::put($key, array_map(fn (Courier $courier) => $courier->toArray(), $couriers), self::CACHE_SECONDS);
 
-        Cache::put($key, $result, self::CACHE_SECONDS);
+        return $couriers;
+    }
 
-        return $result;
+    /**
+     * The cart's weight in kg: every top-level item's weight × quantity, in the store weight unit.
+     */
+    public function cartWeightKg(Cart $cart): float
+    {
+        $weight = $cart->items->sum(fn ($item) => (float) $item->weight * (float) $item->quantity);
+
+        return round($weight * WeightUnit::kgPerUnit(), 3);
+    }
+
+    /**
+     * The weight couriers charge for: the cart's weight, or the packed parcel's volumetric
+     * weight (L × B × H cm / 5000) when that is more.
+     */
+    public function billedWeightKg(Cart $cart): float
+    {
+        $size = Settings::dimensions();
+
+        $volumetric = $size['length'] * $size['breadth'] * $size['height'] / self::VOLUMETRIC_DIVISOR;
+
+        return round(max($this->cartWeightKg($cart), $volumetric), 3);
     }
 }

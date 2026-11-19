@@ -5,6 +5,7 @@ namespace DigitalLabs\Shiprocket\Services;
 use DigitalLabs\Shiprocket\Contracts\ShiprocketApi;
 use DigitalLabs\Shiprocket\Exceptions\ShiprocketException;
 use DigitalLabs\Shiprocket\Exceptions\ShiprocketUnknownOutcomeException;
+use DigitalLabs\Shiprocket\Support\Courier;
 use DigitalLabs\Shiprocket\Support\Settings;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\Response;
@@ -102,7 +103,7 @@ class ShiprocketClient implements ShiprocketApi
         $this->token();
     }
 
-    public function checkServiceability(string $pickupPin, string $deliveryPin, float $weightKg, bool $cod): array
+    public function couriers(string $pickupPin, string $deliveryPin, float $weightKg, bool $cod): array
     {
         $response = $this->call('GET', self::PATH_SERVICEABILITY, [
             'pickup_postcode' => $pickupPin,
@@ -123,16 +124,19 @@ class ShiprocketClient implements ShiprocketApi
             };
 
             if ($noCourier && preg_match($noCourier, (string) $this->message($response))) {
-                return ['deliverable' => false, 'cod' => false];
+                return [];
             }
 
             throw $this->refusal($response);
         }
 
-        return [
-            'deliverable' => $companies !== [],
-            'cod' => collect($companies)->contains(fn ($company) => (int) ($company['cod'] ?? 0) === 1),
-        ];
+        return collect($companies)
+            ->filter(fn ($company) => is_array($company))
+            // Asked with COD, the list can still hold couriers that do not collect cash.
+            ->when($cod, fn ($list) => $list->filter(fn ($company) => (int) ($company['cod'] ?? 0) === 1))
+            ->map(fn ($company) => Courier::fromApi($company))
+            ->values()
+            ->all();
     }
 
     public function createOrder(array $payload): array
@@ -177,9 +181,12 @@ class ShiprocketClient implements ShiprocketApi
         return null;
     }
 
-    public function assignAwb(int $shipmentId): array
+    public function assignAwb(int $shipmentId, ?int $courierId = null): array
     {
-        $response = $this->call('POST', self::PATH_ASSIGN_AWB, ['shipment_id' => $shipmentId]);
+        $response = $this->call('POST', self::PATH_ASSIGN_AWB, array_filter([
+            'shipment_id' => $shipmentId,
+            'courier_id' => $courierId,
+        ], fn ($value) => $value !== null));
 
         $error = $response->json('response.data.awb_assign_error');
         $error = is_string($error) && trim($error) !== '' ? trim($error) : null;

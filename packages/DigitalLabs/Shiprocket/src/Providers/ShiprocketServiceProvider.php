@@ -22,6 +22,8 @@ class ShiprocketServiceProvider extends ServiceProvider
 
         $this->mergeConfigFrom(dirname(__DIR__).'/Config/shiprocket.php', 'shiprocket');
 
+        $this->mergeConfigFrom(dirname(__DIR__).'/Config/carriers.php', 'carriers');
+
         $this->app->bind(ShiprocketApi::class, fn ($app) => $app->make(
             $this->usesFake() ? FakeShiprocketClient::class : ShiprocketClient::class
         ));

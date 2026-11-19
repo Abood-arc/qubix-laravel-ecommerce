@@ -19,11 +19,11 @@ class CheckoutPinTestApi extends FakeShiprocketClient
 {
     public int $calls = 0;
 
-    public function checkServiceability(string $pickupPin, string $deliveryPin, float $weightKg, bool $cod): array
+    public function couriers(string $pickupPin, string $deliveryPin, float $weightKg, bool $cod): array
     {
         $this->calls++;
 
-        return parent::checkServiceability($pickupPin, $deliveryPin, $weightKg, $cod);
+        return parent::couriers($pickupPin, $deliveryPin, $weightKg, $cod);
     }
 }
 

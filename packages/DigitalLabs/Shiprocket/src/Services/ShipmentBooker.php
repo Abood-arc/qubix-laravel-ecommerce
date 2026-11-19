@@ -13,6 +13,7 @@ use DigitalLabs\Shiprocket\Exceptions\ShiprocketException;
 use DigitalLabs\Shiprocket\Exceptions\ShiprocketUnknownOutcomeException;
 use DigitalLabs\Shiprocket\Mail\AdminAlert;
 use DigitalLabs\Shiprocket\Models\ShiprocketShipment;
+use DigitalLabs\Shiprocket\Support\RateCode;
 use DigitalLabs\Shiprocket\Support\Settings;
 use DigitalLabs\Shop\Listeners\Shipment as ShipmentEmail;
 use Illuminate\Contracts\Cache\Lock;
@@ -456,11 +457,37 @@ class ShipmentBooker
 
         $this->ensureShippableNow($orderId, $storeShipment);
 
-        $awb = $this->api->assignAwb($row->shipment_id);
+        $paidFor = RateCode::parse(OrderProxy::modelClass()::whereKey($orderId)->value('shipping_method'))['courier_id'] ?? null;
+
+        $swapped = false;
+
+        try {
+            $awb = $this->api->assignAwb($row->shipment_id, $paidFor);
+        } catch (ShiprocketUnknownOutcomeException $exception) {
+            // Maybe booked: the retry asks for the same courier again.
+            throw $exception;
+        } catch (ShiprocketException $exception) {
+            if ($paidFor === null) {
+                throw $exception;
+            }
+
+            // The courier stopped taking this parcel since checkout: ship it anyway, with the
+            // courier Shiprocket picks, and keep a note for the admin.
+            Log::warning('Shiprocket refused the courier the customer paid for; booking its own choice instead.', [
+                'order_id' => $orderId,
+                'courier_id' => $paidFor,
+                'reason' => $exception->getMessage(),
+            ]);
+
+            $awb = $this->api->assignAwb($row->shipment_id);
+
+            $swapped = true;
+        }
 
         $row->update([
             'awb_code' => $awb['awb_code'],
             'courier_name' => $awb['courier_name'],
+            'requested_courier_id' => $swapped ? $paidFor : null,
             'status' => ShiprocketShipment::STATUS_BOOKED,
         ]);
     }

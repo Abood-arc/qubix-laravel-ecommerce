@@ -9,6 +9,8 @@ use DigitalLabs\Shiprocket\Exceptions\ShiprocketUnknownOutcomeException;
 use DigitalLabs\Shiprocket\Payment\CashOnDelivery;
 use DigitalLabs\Shiprocket\Services\DeliveryCheck;
 use DigitalLabs\Shiprocket\Services\ServiceabilityChecker;
+use DigitalLabs\Shiprocket\Support\Courier;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 
 /**
@@ -48,7 +50,7 @@ function bindShiprocketServiceabilityApi(): object
 
         public ?bool $failOnCod = null;
 
-        public function checkServiceability(string $pickupPin, string $deliveryPin, float $weightKg, bool $cod): array
+        public function couriers(string $pickupPin, string $deliveryPin, float $weightKg, bool $cod): array
         {
             $this->calls[] = ['pickup' => $pickupPin, 'pin' => $deliveryPin, 'weight' => $weightKg, 'cod' => $cod];
 
@@ -56,9 +58,11 @@ function bindShiprocketServiceabilityApi(): object
                 throw $this->failure;
             }
 
-            $couriers = ! str_starts_with($deliveryPin, '9') && ! ($cod && str_ends_with($deliveryPin, '0'));
+            if (str_starts_with($deliveryPin, '9') || ($cod && str_ends_with($deliveryPin, '0'))) {
+                return [];
+            }
 
-            return ['deliverable' => $couriers, 'cod' => $couriers && ! str_ends_with($deliveryPin, '0')];
+            return [new Courier(58, 'Shadowfax Surface', $cod ? 143.72 : 93.72, 6, 'Nov 25, 2026')];
         }
 
         public function createOrder(array $payload): array
@@ -71,7 +75,7 @@ function bindShiprocketServiceabilityApi(): object
             throw new LogicException('Not used');
         }
 
-        public function assignAwb(int $shipmentId): array
+        public function assignAwb(int $shipmentId, ?int $courierId = null): array
         {
             throw new LogicException('Not used');
         }
@@ -261,6 +265,55 @@ it('weighs the cart in kilograms from the store weight unit', function (?string 
     'kilograms' => ['kgs', 0.25, 0.75],
     'pounds' => ['lbs', 1, 1.361],
     'unknown unit counts as kg' => ['stone', 0.25, 0.75],
+]);
+
+it('returns the couriers with their prices, cached, cash on delivery separately', function () {
+    $checker = shiprocketServiceabilityChecker();
+
+    $prepaid = $checker->couriers('560001', 0.7, cod: false);
+    $cod = $checker->couriers('560001', 0.7, cod: true);
+
+    expect(array_map(fn (Courier $courier) => $courier->toArray(), $prepaid))
+        ->toBe([['id' => 58, 'name' => 'Shadowfax Surface', 'rate' => 93.72, 'days' => 6, 'etd' => 'Nov 25, 2026']])
+        ->and($cod[0]->rate)->toBe(143.72);
+
+    // Answered from the cache, as equal couriers.
+    expect($checker->couriers('560001', 0.6, cod: false))->toEqual($prepaid)
+        ->and($checker->couriers('560001', 0.6, cod: true))->toEqual($cod)
+        ->and($this->api->calls)->toHaveCount(2);
+});
+
+it('returns null while Shiprocket is failing, and an empty list where nothing delivers', function () {
+    expect(shiprocketServiceabilityChecker()->couriers('999999', 1.0, cod: false))->toBe([]);
+
+    $this->api->failure = new ShiprocketUnknownOutcomeException('Shiprocket did not answer');
+
+    Log::spy();
+
+    expect(shiprocketServiceabilityChecker()->couriers('560001', 1.0, cod: false))->toBeNull();
+});
+
+it('asks again over a yes or no cached before prices existed', function () {
+    Cache::put('shiprocket:svc:411001:560001:2:0', true, 3600);
+
+    expect(shiprocketServiceabilityChecker()->couriers('560001', 1.0, cod: false))->toHaveCount(1)
+        ->and($this->api->calls)->toHaveCount(1);
+});
+
+it('charges the parcel size when it outweighs the cart', function (float $grams, float $kg) {
+    setShiprocketServiceabilityConfig('general.general.locale_options.weight_unit', 'g');
+    setShiprocketServiceabilityConfig('sales.shipping.shiprocket.length', '30');
+    setShiprocketServiceabilityConfig('sales.shipping.shiprocket.breadth', '24');
+    setShiprocketServiceabilityConfig('sales.shipping.shiprocket.height', '5');
+
+    $cart = $this->createRazorpayCart();
+
+    CartItem::where('cart_id', $cart->id)->update(['weight' => $grams, 'quantity' => 1]);
+
+    expect(shiprocketServiceabilityChecker()->billedWeightKg($cart->refresh()))->toBe($kg);
+})->with([
+    'light bag: the 30×24×5 cm parcel (0.72 kg)' => [150, 0.72],
+    'heavy bag: its own weight' => [1200, 1.2],
 ]);
 
 /**

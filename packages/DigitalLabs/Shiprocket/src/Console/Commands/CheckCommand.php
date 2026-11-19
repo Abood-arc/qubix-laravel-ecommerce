@@ -10,6 +10,8 @@ use DigitalLabs\Shiprocket\Exceptions\ShiprocketUnknownOutcomeException;
 use DigitalLabs\Shiprocket\Services\AddressNormalizer;
 use DigitalLabs\Shiprocket\Services\FakeShiprocketClient;
 use DigitalLabs\Shiprocket\Services\ParcelBuilder;
+use DigitalLabs\Shiprocket\Support\CourierOptions;
+use DigitalLabs\Shiprocket\Support\RateCode;
 use DigitalLabs\Shiprocket\Support\Settings;
 use Illuminate\Console\Command;
 use Illuminate\Support\Arr;
@@ -213,7 +215,9 @@ class CheckCommand extends Command
     {
         $from = Settings::pickupPin() ?: (string) ($location['pin_code'] ?? '');
 
-        $this->heading('3. Serviceability from '.($from ?: '?').' ('.self::WEIGHT_KG.' kg)');
+        $weight = $this->parcelWeightKg();
+
+        $this->heading('3. Serviceability and prices from '.($from ?: '?').' ('.$weight.' kg)');
 
         if (! AddressNormalizer::isValidPin($from)) {
             $this->problem('No valid pickup PIN to check from: set it in the Shiprocket settings.');
@@ -227,24 +231,58 @@ class CheckCommand extends Command
             $pin = trim((string) $pin);
 
             if (! AddressNormalizer::isValidPin($pin)) {
-                $rows[] = [$pin, 'not a 6-digit PIN', ''];
+                $rows[] = [$pin, 'not a 6-digit PIN', '', '', ''];
 
                 continue;
             }
 
             try {
-                $prepaid = $api->checkServiceability($from, $pin, self::WEIGHT_KG, false);
-                $cod = $api->checkServiceability($from, $pin, self::WEIGHT_KG, true);
+                $prepaid = new CourierOptions($api->couriers($from, $pin, $weight, false));
+                $cod = new CourierOptions($api->couriers($from, $pin, $weight, true));
 
-                $rows[] = [$pin, $this->yesNo($prepaid['deliverable']), $this->yesNo($cod['cod'])];
+                $rows[] = [
+                    $pin,
+                    $this->yesNo($prepaid->standard() !== null),
+                    $this->yesNo($cod->standard() !== null),
+                    $this->prices($prepaid, $cod, RateCode::STANDARD),
+                    $this->prices($prepaid, $cod, RateCode::EXPRESS),
+                ];
             } catch (ShiprocketException $exception) {
                 $this->passed = false;
 
-                $rows[] = [$pin, 'error: '.$exception->getMessage(), ''];
+                $rows[] = [$pin, 'error: '.$exception->getMessage(), '', '', ''];
             }
         }
 
-        $this->table(['PIN', 'Deliverable', 'COD available'], $rows);
+        $this->table(['PIN', 'Deliverable', 'COD available', 'Standard (prepaid / COD)', 'Express (prepaid / COD)'], $rows);
+    }
+
+    /**
+     * One light item in the default packed parcel: the weight a typical order is priced at.
+     */
+    protected function parcelWeightKg(): float
+    {
+        $size = Settings::dimensions();
+
+        return round(max(self::WEIGHT_KG, $size['length'] * $size['breadth'] * $size['height'] / 5000), 3);
+    }
+
+    /**
+     * "Shadowfax Surface ₹94 / ₹144": what checkout charges for one tier, prepaid and with cash.
+     */
+    protected function prices(CourierOptions $prepaid, CourierOptions $cod, string $tier): string
+    {
+        $addGst = (bool) core()->getConfigData('sales.carriers.'.RateCode::CARRIER.'.add_gst');
+
+        $price = fn ($courier) => $courier ? '₹'.RateCode::price($courier->rate, $addGst) : '-';
+
+        $courier = $prepaid->get($tier);
+
+        if (! $courier) {
+            return '-';
+        }
+
+        return $courier->name.' '.$price($courier).' / '.$price($cod->get($tier) ?? $cod->standard());
     }
 
     /**
