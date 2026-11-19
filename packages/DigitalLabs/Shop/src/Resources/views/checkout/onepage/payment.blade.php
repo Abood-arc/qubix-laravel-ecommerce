@@ -83,7 +83,8 @@
 
                                     {!! view_render_event('qubix.shop.checkout.onepage.payment-method.image.after') !!}
 
-                                    <div>
+                                    {{-- On phones the text sits beside the image; it stops short of the radio. --}}
+                                    <div class="max-md:ltr:pr-8 max-md:rtl:pl-8">
                                         {!! view_render_event('qubix.shop.checkout.onepage.payment-method.title.before') !!}
 
                                         <p class="mt-1.5 text-sm font-semibold max-md:mt-1 max-sm:mt-0">
