@@ -1068,6 +1068,7 @@ return [
                 'company-name' => 'Название компании',
                 'confirm' => 'Подтвердить',
                 'country' => 'Страна',
+                'deliver-only-within' => 'We deliver only within :country.',
                 'email' => 'Электронная почта',
                 'first-name' => 'Имя',
                 'last-name' => 'Фамилия',

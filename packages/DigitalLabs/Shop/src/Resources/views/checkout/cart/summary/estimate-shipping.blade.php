@@ -37,25 +37,38 @@
                         @lang('shop::app.checkout.cart.summary.estimate-shipping.country')
                     </x-shop::form.control-group.label>
 
-                    <x-shop::form.control-group.control
-                        type="select"
-                        name="country"
-                        v-model="selectedCountry"
-                        rules="{{ core()->isCountryRequired() ? 'required' : '' }}"
-                        :label="trans('shop::app.checkout.cart.summary.estimate-shipping.country')"
-                        :placeholder="trans('shop::app.checkout.cart.summary.estimate-shipping.country')"
-                    >
-                        <option value="">
-                            @lang('shop::app.checkout.cart.summary.estimate-shipping.select-country')
-                        </option>
+                    @if ($onlyCountry = \DigitalLabs\Shop\DeliveryCountry::only())
+                        <x-shop::form.control-group.control
+                            type="hidden"
+                            name="country"
+                            v-model="selectedCountry"
+                        />
 
-                        <option
-                            v-for="country in countries"
-                            :value="country.code"
-                            v-text="country.name"
+                        <x-shop::form.fixed-country
+                            :code="$onlyCountry"
+                            :aria-label="trans('shop::app.checkout.cart.summary.estimate-shipping.country')"
+                        />
+                    @else
+                        <x-shop::form.control-group.control
+                            type="select"
+                            name="country"
+                            v-model="selectedCountry"
+                            rules="{{ core()->isCountryRequired() ? 'required' : '' }}"
+                            :label="trans('shop::app.checkout.cart.summary.estimate-shipping.country')"
+                            :placeholder="trans('shop::app.checkout.cart.summary.estimate-shipping.country')"
                         >
-                        </option>
-                    </x-shop::form.control-group.control>
+                            <option value="">
+                                @lang('shop::app.checkout.cart.summary.estimate-shipping.select-country')
+                            </option>
+
+                            <option
+                                v-for="country in countries"
+                                :value="country.code"
+                                v-text="country.name"
+                            >
+                            </option>
+                        </x-shop::form.control-group.control>
+                    @endif
 
                     <x-shop::form.control-group.error name="country" />
                 </x-shop::form.control-group>
@@ -173,7 +186,7 @@
 
             data() {
                 return {
-                    selectedCountry: '',
+                    selectedCountry: @json(\DigitalLabs\Shop\DeliveryCountry::only() ?? ''),
 
                     countries: [],
 

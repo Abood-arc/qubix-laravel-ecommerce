@@ -4396,6 +4396,8 @@ return [
                         'city' => 'Kota',
                         'contact-number' => 'Nomor Kontak',
                         'country' => 'Negara',
+                        'deliver-only-here' => 'Deliver only to this country',
+                        'deliver-only-here-info' => 'Customers can only enter an address in the country above: address forms show it fixed, and other countries are refused.',
                         'state' => 'Provinsi',
                         'store-name' => 'Nama Toko',
                         'street-address' => 'Alamat Jalan',

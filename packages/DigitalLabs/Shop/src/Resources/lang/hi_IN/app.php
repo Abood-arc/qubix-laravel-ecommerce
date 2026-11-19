@@ -1068,6 +1068,7 @@ return [
                 'company-name' => 'कंपनी का नाम',
                 'confirm' => 'पुष्टि करें',
                 'country' => 'देश',
+                'deliver-only-within' => 'We deliver only within :country.',
                 'email' => 'ईमेल',
                 'first-name' => 'पहला नाम',
                 'last-name' => 'आख़िरी नाम',

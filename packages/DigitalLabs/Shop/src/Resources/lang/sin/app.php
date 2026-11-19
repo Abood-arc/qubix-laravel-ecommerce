@@ -1068,6 +1068,7 @@ return [
                 'company-name' => 'ව්‍යාපාරයේ නම',
                 'confirm' => 'තහවුරු කරන්න',
                 'country' => 'රාජ්‍යය',
+                'deliver-only-within' => 'We deliver only within :country.',
                 'email' => 'ඊ-මේල්',
                 'first-name' => 'මුල් නම',
                 'last-name' => 'අවසාන නම',

@@ -175,22 +175,35 @@
                             @lang('shop::app.customers.account.addresses.create.country')
                         </x-shop::form.control-group.label>
             
-                        <x-shop::form.control-group.control
-                            type="select"
-                            name="country"
-                            rules="{{ core()->isCountryRequired() ? 'required' : '' }}"
-                            v-model="country"
-                            :aria-label="trans('shop::app.customers.account.addresses.create.country')"
-                            :label="trans('shop::app.customers.account.addresses.create.country')"
-                        >
-                            <option value="">
-                                @lang('shop::app.customers.account.addresses.create.select-country')
-                            </option>
+                        @if ($onlyCountry = \DigitalLabs\Shop\DeliveryCountry::only())
+                            <x-shop::form.control-group.control
+                                type="hidden"
+                                name="country"
+                                v-model="country"
+                            />
+
+                            <x-shop::form.fixed-country
+                                :code="$onlyCountry"
+                                :aria-label="trans('shop::app.customers.account.addresses.create.country')"
+                            />
+                        @else
+                            <x-shop::form.control-group.control
+                                type="select"
+                                name="country"
+                                rules="{{ core()->isCountryRequired() ? 'required' : '' }}"
+                                v-model="country"
+                                :aria-label="trans('shop::app.customers.account.addresses.create.country')"
+                                :label="trans('shop::app.customers.account.addresses.create.country')"
+                            >
+                                <option value="">
+                                    @lang('shop::app.customers.account.addresses.create.select-country')
+                                </option>
             
-                            @foreach (core()->countries() as $country)
-                                <option value="{{ $country->code }}">{{ $country->name }}</option>
-                            @endforeach
-                        </x-shop::form.control-group.control>
+                                @foreach (core()->countries() as $country)
+                                    <option value="{{ $country->code }}">{{ $country->name }}</option>
+                                @endforeach
+                            </x-shop::form.control-group.control>
+                        @endif
             
                         <x-shop::form.control-group.error control-name="country" />
                     </x-shop::form.control-group>
@@ -339,7 +352,7 @@
     
                 data() {
                     return {
-                        country: "{{ old('country') }}",
+                        country: @json(\DigitalLabs\Shop\DeliveryCountry::only() ?? old('country') ?? ''),
 
                         state: "{{ old('state') }}",
 

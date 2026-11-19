@@ -4396,6 +4396,8 @@ return [
                         'city' => 'Stad',
                         'contact-number' => 'Contactnummer',
                         'country' => 'Land',
+                        'deliver-only-here' => 'Deliver only to this country',
+                        'deliver-only-here-info' => 'Customers can only enter an address in the country above: address forms show it fixed, and other countries are refused.',
                         'state' => 'Staat',
                         'store-name' => 'Winkelnaam',
                         'street-address' => 'Straatnaam',

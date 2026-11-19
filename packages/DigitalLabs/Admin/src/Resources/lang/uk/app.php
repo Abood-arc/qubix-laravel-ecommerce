@@ -4396,6 +4396,8 @@ return [
                         'city' => 'Місто',
                         'contact-number' => 'Контактний номер',
                         'country' => 'Країна',
+                        'deliver-only-here' => 'Deliver only to this country',
+                        'deliver-only-here-info' => 'Customers can only enter an address in the country above: address forms show it fixed, and other countries are refused.',
                         'state' => 'Штат',
                         'store-name' => 'Назва магазину',
                         'street-address' => 'Вулиця та номер будинку',

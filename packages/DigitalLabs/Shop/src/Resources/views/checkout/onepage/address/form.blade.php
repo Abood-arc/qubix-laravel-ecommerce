@@ -125,27 +125,40 @@
                         @lang('shop::app.checkout.onepage.address.country')
                     </x-shop::form.control-group.label>
 
-                    <x-shop::form.control-group.control
-                        type="select"
-                        ::name="controlName + '.country'"
-                        ::value="address.country || defaultCountry"
-                        v-model="selectedCountry"
-                        autocomplete="country"
-                        rules="{{ core()->isCountryRequired() ? 'required' : '' }}"
-                        :label="trans('shop::app.checkout.onepage.address.country')"
-                        :placeholder="trans('shop::app.checkout.onepage.address.country')"
-                    >
-                        <option value="">
-                            @lang('shop::app.checkout.onepage.address.select-country')
-                        </option>
+                    @if ($onlyCountry = \DigitalLabs\Shop\DeliveryCountry::only())
+                        <x-shop::form.control-group.control
+                            type="hidden"
+                            ::name="controlName + '.country'"
+                            v-model="selectedCountry"
+                        />
 
-                        <option
-                            v-for="country in countries"
-                            :value="country.code"
+                        <x-shop::form.fixed-country
+                            :code="$onlyCountry"
+                            :aria-label="trans('shop::app.checkout.onepage.address.country')"
+                        />
+                    @else
+                        <x-shop::form.control-group.control
+                            type="select"
+                            ::name="controlName + '.country'"
+                            ::value="address.country || defaultCountry"
+                            v-model="selectedCountry"
+                            autocomplete="country"
+                            rules="{{ core()->isCountryRequired() ? 'required' : '' }}"
+                            :label="trans('shop::app.checkout.onepage.address.country')"
+                            :placeholder="trans('shop::app.checkout.onepage.address.country')"
                         >
-                            @{{ country.name }}
-                        </option>
-                    </x-shop::form.control-group.control>
+                            <option value="">
+                                @lang('shop::app.checkout.onepage.address.select-country')
+                            </option>
+
+                            <option
+                                v-for="country in countries"
+                                :value="country.code"
+                            >
+                                @{{ country.name }}
+                            </option>
+                        </x-shop::form.control-group.control>
+                    @endif
 
                     <x-shop::form.control-group.error ::name="controlName + '.country'" />
                 </x-shop::form.control-group>
@@ -318,10 +331,13 @@
                 {{-- The store's own country (admin: Sales > Shipping > Origin) preselects an empty address. --}}
                 const defaultCountry = @json(core()->getConfigData('sales.shipping.origin.country') ?? '');
 
+                {{-- A store that delivers to one country only fixes it, whatever the address had. --}}
+                const onlyCountry = @json(\DigitalLabs\Shop\DeliveryCountry::only());
+
                 return {
                     defaultCountry,
 
-                    selectedCountry: this.address.country || defaultCountry,
+                    selectedCountry: onlyCountry || this.address.country || defaultCountry,
 
                     countries: [],
 

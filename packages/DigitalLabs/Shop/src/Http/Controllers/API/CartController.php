@@ -8,6 +8,7 @@ use DigitalLabs\Checkout\Models\CartAddress;
 use DigitalLabs\Product\Exceptions\InsufficientProductInventoryException;
 use DigitalLabs\Product\Repositories\ProductRepository;
 use DigitalLabs\Shipping\Facades\Shipping;
+use DigitalLabs\Shop\DeliveryCountry;
 use DigitalLabs\Shop\Http\Resources\CartResource;
 use DigitalLabs\Shop\Http\Resources\ProductResource;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -169,7 +170,7 @@ class CartController extends APIController
     public function estimateShippingMethods(): JsonResource
     {
         $this->validate(request(), [
-            'country' => 'required',
+            'country' => ['required', ...DeliveryCountry::rules()],
             'state' => 'required',
             'postcode' => 'required',
             'shipping_method' => 'sometimes|required',

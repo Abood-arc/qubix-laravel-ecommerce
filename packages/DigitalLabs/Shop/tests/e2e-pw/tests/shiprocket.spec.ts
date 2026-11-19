@@ -63,7 +63,13 @@ async function submitIndianAddress(page: Page, pin: string) {
     await page.locator('input[name="billing.last_name"]').fill("Guest");
     await page.locator('input[name="billing.email"]').fill(`asha.${pin}@example.test`);
     await page.locator('input[name="billing.address.[0]"]').first().fill("12 Janpath Road");
-    await page.locator('select[name="billing.country"]').selectOption("IN");
+    // A store that delivers only within India shows the country fixed, with no list to choose from.
+    const countries = page.locator('select[name="billing.country"]');
+
+    if (await countries.count()) {
+        await countries.selectOption("IN");
+    }
+
     await page.locator('select[name="billing.state"]').selectOption("DL");
     await page.locator('input[name="billing.city"]').fill("New Delhi");
     await page.locator('input[name="billing.postcode"]').fill(pin);
@@ -261,3 +267,55 @@ async function openAdminOrder(adminPage: Page, orderNumber: string) {
 
     await adminPage.waitForURL(/\/admin\/sales\/orders\/view\/\d+/);
 }
+
+/**
+ * Sales > Shipping > Origin: the store's country, and whether it delivers only there.
+ */
+async function setDeliverOnlyToIndia(page: Page, on: boolean) {
+    await page.goto("admin/configuration/sales/shipping");
+    await page.waitForLoadState("networkidle");
+
+    await page.locator('select[name$="[origin][country]"]').selectOption("IN");
+    await page.locator('select[name$="[origin][state]"]').selectOption("TN");
+    await page.locator('input[name$="[origin][city]"]').fill("Chennai");
+    await page.locator('input[name$="[origin][address]"]').fill("1 Mount Road");
+    await page.locator('input[name$="[origin][zipcode]"]').fill("600131");
+    await page.locator('input[type="checkbox"][name$="[origin][deliver_only_here]"]').setChecked(on, { force: true });
+
+    const saved = page.waitForResponse(
+        (response) =>
+            response.url().endsWith("admin/configuration/sales/shipping") && response.request().method() === "POST",
+        ROUND_TRIP
+    );
+
+    await page.getByRole("button", { name: "Save Configuration" }).click();
+
+    expect((await saved).status()).toBe(302);
+
+    await page.waitForLoadState("networkidle");
+
+    await expect(page.locator('input[type="checkbox"][name$="[origin][deliver_only_here]"]')).toBeChecked({ checked: on });
+}
+
+test.describe.serial("A store that delivers only within India", () => {
+    test("admin switches it on", async ({ adminPage }) => {
+        await setDeliverOnlyToIndia(adminPage, true);
+    });
+
+    test("checkout shows India fixed and takes the address", async ({ shopPage }) => {
+        await startGuestCheckout(shopPage);
+
+        const country = shopPage.locator("#steps-container input[readonly][aria-label='Country']").first();
+
+        await expect(country).toHaveValue("India", ROUND_TRIP);
+        await expect(shopPage.locator('select[name="billing.country"]')).toHaveCount(0);
+        await expect(shopPage.getByText("We deliver only within India.").first()).toBeVisible();
+
+        await submitIndianAddress(shopPage, "110001");
+        await chooseFreeShipping(shopPage);
+    });
+
+    test("admin switches it off again", async ({ adminPage }) => {
+        await setDeliverOnlyToIndia(adminPage, false);
+    });
+});

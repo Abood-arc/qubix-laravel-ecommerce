@@ -4396,6 +4396,8 @@ return [
                         'city' => '市',
                         'contact-number' => '連絡先番号',
                         'country' => '国',
+                        'deliver-only-here' => 'Deliver only to this country',
+                        'deliver-only-here-info' => 'Customers can only enter an address in the country above: address forms show it fixed, and other countries are refused.',
                         'state' => '州',
                         'store-name' => '店舗名',
                         'street-address' => '住所',

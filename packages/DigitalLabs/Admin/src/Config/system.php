@@ -1789,6 +1789,13 @@ return [
                 'channel_based' => true,
                 'locale_based' => true,
             ], [
+                'name' => 'deliver_only_here',
+                'title' => 'admin::app.configuration.index.sales.shipping-setting.origin.deliver-only-here',
+                'info' => 'admin::app.configuration.index.sales.shipping-setting.origin.deliver-only-here-info',
+                'type' => 'boolean',
+                'channel_based' => true,
+                'locale_based' => false,
+            ], [
                 'name' => 'state',
                 'title' => 'admin::app.configuration.index.sales.shipping-setting.origin.state',
                 'type' => 'state',

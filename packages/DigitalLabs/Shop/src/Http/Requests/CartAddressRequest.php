@@ -6,6 +6,7 @@ use Illuminate\Foundation\Http\FormRequest;
 use DigitalLabs\Core\Rules\PhoneNumber;
 use DigitalLabs\Core\Rules\PostCode;
 use DigitalLabs\Customer\Rules\VatIdRule;
+use DigitalLabs\Shop\DeliveryCountry;
 
 class CartAddressRequest extends FormRequest
 {
@@ -52,7 +53,7 @@ class CartAddressRequest extends FormRequest
             "{$addressType}.email" => ['required'],
             "{$addressType}.address" => ['required', 'array', 'min:1'],
             "{$addressType}.city" => ['required'],
-            "{$addressType}.country" => core()->isCountryRequired() ? ['required'] : ['nullable'],
+            "{$addressType}.country" => [...(core()->isCountryRequired() ? ['required'] : ['nullable']), ...DeliveryCountry::rules()],
             "{$addressType}.state" => core()->isStateRequired() ? ['required'] : ['nullable'],
             "{$addressType}.postcode" => core()->isPostCodeRequired() ? ['required', new PostCode] : [new PostCode],
             "{$addressType}.phone" => ['required', new PhoneNumber],

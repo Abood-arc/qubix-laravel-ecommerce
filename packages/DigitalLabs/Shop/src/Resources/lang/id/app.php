@@ -1068,6 +1068,7 @@ return [
                 'company-name' => 'Nama Perusahaan',
                 'confirm' => 'Konfirmasi',
                 'country' => 'Negara',
+                'deliver-only-within' => 'We deliver only within :country.',
                 'email' => 'Email',
                 'first-name' => 'Nama Depan',
                 'last-name' => 'Nama Belakang',

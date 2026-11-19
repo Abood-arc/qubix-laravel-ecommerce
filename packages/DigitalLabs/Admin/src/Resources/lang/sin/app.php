@@ -4396,6 +4396,8 @@ return [
                         'city' => 'නගරය',
                         'contact-number' => 'සම්බන්ධ කරුනු අංකය',
                         'country' => 'රට',
+                        'deliver-only-here' => 'Deliver only to this country',
+                        'deliver-only-here-info' => 'Customers can only enter an address in the country above: address forms show it fixed, and other countries are refused.',
                         'state' => 'පළාත',
                         'store-name' => 'ගඩොල් නාමය',
                         'street-address' => 'වීදි ලිපිනය',

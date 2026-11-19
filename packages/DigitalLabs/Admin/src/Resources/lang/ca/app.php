@@ -4396,6 +4396,8 @@ return [
                         'city' => 'Ciutat',
                         'contact-number' => 'Número de contacte',
                         'country' => 'País',
+                        'deliver-only-here' => 'Deliver only to this country',
+                        'deliver-only-here-info' => 'Customers can only enter an address in the country above: address forms show it fixed, and other countries are refused.',
                         'state' => 'Estat',
                         'store-name' => 'Nom de la botiga',
                         'street-address' => 'Adreça',

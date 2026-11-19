@@ -4396,6 +4396,8 @@ return [
                         'city' => 'עיר',
                         'contact-number' => 'מספר טלפון',
                         'country' => 'מדינה',
+                        'deliver-only-here' => 'Deliver only to this country',
+                        'deliver-only-here-info' => 'Customers can only enter an address in the country above: address forms show it fixed, and other countries are refused.',
                         'state' => 'מדינה',
                         'store-name' => 'שם חנות',
                         'street-address' => 'כתובת רחוב',

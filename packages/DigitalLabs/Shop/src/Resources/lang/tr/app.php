@@ -1068,6 +1068,7 @@ return [
                 'company-name' => 'Şirket Adı',
                 'confirm' => 'Onayla',
                 'country' => 'Ülke',
+                'deliver-only-within' => 'We deliver only within :country.',
                 'email' => 'E-posta',
                 'first-name' => 'Ad',
                 'last-name' => 'Soyad',

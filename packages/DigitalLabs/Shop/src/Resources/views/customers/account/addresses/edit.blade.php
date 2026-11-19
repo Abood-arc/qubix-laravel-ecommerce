@@ -189,23 +189,36 @@
                         @lang('shop::app.customers.account.addresses.edit.country')
                     </x-shop::form.control-group.label>
 
-                    <x-shop::form.control-group.control
-                        type="select"
-                        name="country"
-                        rules="{{ core()->isStateRequired() ? 'required' : '' }}"
-                        v-model="addressData.country"
-                        :aria-label="trans('shop::app.customers.account.addresses.edit.country')"
-                        :label="trans('shop::app.customers.account.addresses.edit.country')"
-                    >
-                        @foreach (core()->countries() as $country)
-                            <option 
-                                {{ $country->code === config('app.default_country') ? 'selected' : '' }}  
-                                value="{{ $country->code }}"
-                            >
-                                {{ $country->name }}
-                            </option>
-                        @endforeach
-                    </x-shop::form.control-group.control>
+                    @if ($onlyCountry = \DigitalLabs\Shop\DeliveryCountry::only())
+                        <x-shop::form.control-group.control
+                            type="hidden"
+                            name="country"
+                            v-model="addressData.country"
+                        />
+
+                        <x-shop::form.fixed-country
+                            :code="$onlyCountry"
+                            :aria-label="trans('shop::app.customers.account.addresses.edit.country')"
+                        />
+                    @else
+                        <x-shop::form.control-group.control
+                            type="select"
+                            name="country"
+                            rules="{{ core()->isStateRequired() ? 'required' : '' }}"
+                            v-model="addressData.country"
+                            :aria-label="trans('shop::app.customers.account.addresses.edit.country')"
+                            :label="trans('shop::app.customers.account.addresses.edit.country')"
+                        >
+                            @foreach (core()->countries() as $country)
+                                <option 
+                                    {{ $country->code === config('app.default_country') ? 'selected' : '' }}  
+                                    value="{{ $country->code }}"
+                                >
+                                    {{ $country->name }}
+                                </option>
+                            @endforeach
+                        </x-shop::form.control-group.control>
+                    @endif
 
                     <x-shop::form.control-group.error control-name="country" />
                 </x-shop::form.control-group>
@@ -328,7 +341,7 @@
                 data() {
                     return {
                         addressData: {
-                            country: "{{ old('country') ?? $address->country }}",
+                            country: @json(\DigitalLabs\Shop\DeliveryCountry::only() ?? old('country') ?? $address->country),
 
                             state: "{{ old('state') ?? $address->state }}",
                         },

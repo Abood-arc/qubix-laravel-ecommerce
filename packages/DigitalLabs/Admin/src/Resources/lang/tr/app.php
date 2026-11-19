@@ -4396,6 +4396,8 @@ return [
                         'city' => 'Şehir',
                         'contact-number' => 'İletişim Numarası',
                         'country' => 'Ülke',
+                        'deliver-only-here' => 'Deliver only to this country',
+                        'deliver-only-here-info' => 'Customers can only enter an address in the country above: address forms show it fixed, and other countries are refused.',
                         'state' => 'Eyalet',
                         'store-name' => 'Mağaza Adı',
                         'street-address' => 'Sokak Adresi',

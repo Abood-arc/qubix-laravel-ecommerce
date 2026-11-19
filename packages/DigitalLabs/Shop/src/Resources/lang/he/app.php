@@ -1068,6 +1068,7 @@ return [
                 'company-name' => 'שם החברה',
                 'confirm' => 'אישור',
                 'country' => 'מדינה',
+                'deliver-only-within' => 'We deliver only within :country.',
                 'email' => 'אימייל',
                 'first-name' => 'שם פרטי',
                 'last-name' => 'שם משפחה',

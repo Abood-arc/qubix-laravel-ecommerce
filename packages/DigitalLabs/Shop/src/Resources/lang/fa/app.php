@@ -1068,6 +1068,7 @@ return [
                 'company-name' => 'نام شرکت',
                 'confirm' => 'تایید',
                 'country' => 'کشور',
+                'deliver-only-within' => 'We deliver only within :country.',
                 'email' => 'ایمیل',
                 'first-name' => 'نام',
                 'last-name' => 'نام خانوادگی',

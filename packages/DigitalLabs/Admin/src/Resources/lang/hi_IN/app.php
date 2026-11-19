@@ -4396,6 +4396,8 @@ return [
                         'city' => 'शहर',
                         'contact-number' => 'संपर्क नंबर',
                         'country' => 'देश',
+                        'deliver-only-here' => 'Deliver only to this country',
+                        'deliver-only-here-info' => 'Customers can only enter an address in the country above: address forms show it fixed, and other countries are refused.',
                         'state' => 'राज्य',
                         'store-name' => 'स्टोर का नाम',
                         'street-address' => 'सड़क पता',

@@ -1068,6 +1068,7 @@ return [
                 'company-name' => '会社名',
                 'confirm' => '確認',
                 'country' => '国',
+                'deliver-only-within' => 'We deliver only within :country.',
                 'email' => 'メールアドレス',
                 'first-name' => '名',
                 'last-name' => '姓',

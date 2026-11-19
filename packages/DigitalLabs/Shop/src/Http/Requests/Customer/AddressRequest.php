@@ -6,6 +6,7 @@ use Illuminate\Foundation\Http\FormRequest;
 use DigitalLabs\Core\Rules\PhoneNumber;
 use DigitalLabs\Core\Rules\PostCode;
 use DigitalLabs\Customer\Rules\VatIdRule;
+use DigitalLabs\Shop\DeliveryCountry;
 
 class AddressRequest extends FormRequest
 {
@@ -31,7 +32,7 @@ class AddressRequest extends FormRequest
             'first_name' => ['required'],
             'last_name' => ['required'],
             'address' => ['required', 'array', 'min:1'],
-            'country' => core()->isCountryRequired() ? ['required'] : ['nullable'],
+            'country' => [...(core()->isCountryRequired() ? ['required'] : ['nullable']), ...DeliveryCountry::rules()],
             'state' => core()->isStateRequired() ? ['required'] : ['nullable'],
             'city' => ['required', 'string'],
             'postcode' => core()->isPostCodeRequired() ? ['required', new PostCode] : [new PostCode],

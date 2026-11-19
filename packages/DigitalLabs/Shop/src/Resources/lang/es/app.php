@@ -1068,6 +1068,7 @@ return [
                 'company-name' => 'Nombre de la empresa',
                 'confirm' => 'Confirmar',
                 'country' => 'País',
+                'deliver-only-within' => 'We deliver only within :country.',
                 'email' => 'Correo electrónico',
                 'first-name' => 'Nombre',
                 'last-name' => 'Apellido',
