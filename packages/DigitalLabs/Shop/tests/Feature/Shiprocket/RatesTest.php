@@ -414,3 +414,33 @@ it('refuses the order when another request holds the re-pricing too long', funct
 
     expect(app(RateRefresher::class)->refresh($cart->refresh()))->toBe(['changed' => false, 'price' => 90.0]);
 });
+
+it('sends a customer whose cart is gone back to the cart page', function () {
+    ratesCart($this);
+
+    cart()->resetCart();
+
+    postJson(route('shop.checkout.onepage.shipping_methods.store'), ['shipping_method' => 'shiprocket_standard_c1_p90'])
+        ->assertForbidden()
+        ->assertJsonPath('redirect_url', route('shop.checkout.cart.index'));
+});
+
+it('asks to check delivery again when the price could not be checked', function () {
+    Sleep::fake(syncWithCarbon: true);
+
+    $cart = ratesCart($this);
+
+    chooseDelivery('shiprocket_standard_c1_p90');
+
+    $held = Cache::lock('shiprocket:reprice:cart:'.$cart->id, 60);
+
+    $held->get();
+
+    try {
+        postJson(route('shop.checkout.onepage.orders.store'))
+            ->assertStatus(500)
+            ->assertJsonPath('message', trans('shiprocket::app.checkout.recheck-delivery'));
+    } finally {
+        $held->release();
+    }
+});

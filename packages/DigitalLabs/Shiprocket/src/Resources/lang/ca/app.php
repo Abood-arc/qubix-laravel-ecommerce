@@ -36,6 +36,7 @@ return [
         'tracked' => 'Tracked courier delivery',
         'cod-fee' => 'A cash on delivery fee of :fee is added to delivery.',
         'price-changed' => 'The delivery price changed to :price. Please check your order and place it again.',
+        'recheck-delivery' => 'We couldn\'t confirm your delivery price just now. Please choose your delivery option again and place the order.',
     ],
 
     'admin' => [

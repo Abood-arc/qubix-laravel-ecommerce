@@ -50,11 +50,13 @@ class RateRefresher
      */
     public function currentCode(string $code): ?string
     {
-        if (! RateCode::parse($code)) {
+        $cart = Cart::getCart();
+
+        if (! $cart || ! RateCode::parse($code)) {
             return null;
         }
 
-        return $this->locked(Cart::getCart()->id, fn () => $this->offeredCode($code), null);
+        return $this->locked($cart->id, fn () => $this->offeredCode($code), null);
     }
 
     protected function reprice(CartContract $cart): array

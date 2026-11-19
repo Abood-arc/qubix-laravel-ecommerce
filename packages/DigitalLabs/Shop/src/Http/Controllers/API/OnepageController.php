@@ -106,20 +106,24 @@ class OnepageController extends APIController
             'shipping_method' => 'required',
         ]);
 
-        // A carrier whose codes change with its prices maps an option shown earlier to its
-        // current code, instead of the customer being sent back to the cart.
-        $shippingMethod = $validatedData['shipping_method']
-            ? (Event::until('checkout.cart.shipping_method.resolve', [$validatedData['shipping_method']]) ?? $validatedData['shipping_method'])
-            : null;
+        $forbidden = fn () => response()->json([
+            'redirect_url' => route('shop.checkout.cart.index'),
+        ], Response::HTTP_FORBIDDEN);
 
         if (
             Cart::hasError()
-            || ! $shippingMethod
-            || ! Cart::saveShippingMethod($shippingMethod)
+            || ! $validatedData['shipping_method']
         ) {
-            return response()->json([
-                'redirect_url' => route('shop.checkout.cart.index'),
-            ], Response::HTTP_FORBIDDEN);
+            return $forbidden();
+        }
+
+        // A carrier whose codes change with its prices maps an option shown earlier to its
+        // current code, instead of the customer being sent back to the cart.
+        $shippingMethod = Event::until('checkout.cart.shipping_method.resolve', [$validatedData['shipping_method']])
+            ?? $validatedData['shipping_method'];
+
+        if (! Cart::saveShippingMethod($shippingMethod)) {
+            return $forbidden();
         }
 
         Cart::collectTotals();

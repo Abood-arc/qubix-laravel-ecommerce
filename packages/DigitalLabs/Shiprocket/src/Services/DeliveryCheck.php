@@ -53,8 +53,9 @@ class DeliveryCheck implements DeliveryCheckContract
             return null;
         }
 
+        // No current Shiprocket option, or the price could not be checked just now.
         if ($refreshed['price'] === null) {
-            return trans('shop::app.checkout.cart.specify-shipping-method');
+            return trans('shiprocket::app.checkout.recheck-delivery');
         }
 
         return trans('shiprocket::app.checkout.price-changed', ['price' => core()->currency($refreshed['price'])]);
