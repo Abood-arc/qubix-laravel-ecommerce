@@ -82,7 +82,10 @@ test("quick − and + clicks save once, half a second after the last, and bring 
     await expect(totals(page)).toHaveAttribute("aria-busy", "false");
     await expect(grandTotal(page)).not.toHaveText(before);
     await expect(quantityShown(page)).toHaveText("3");
-    await expect.poll(() => headerCartCount(page)).toBe("3");
+    // The header counts products or units, as the store is set (Checkout > My Cart summary): either way it follows the cart.
+    const { data: cart } = await (await page.request.get("api/checkout/cart")).json();
+
+    await expect.poll(() => headerCartCount(page)).toMatch(new RegExp(`^(${cart.items_qty}|${cart.items_count})$`));
 
     expect(await cartQuantity(page)).toBe(3);
 });

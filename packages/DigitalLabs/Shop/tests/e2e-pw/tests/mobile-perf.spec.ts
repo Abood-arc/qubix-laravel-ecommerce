@@ -118,7 +118,8 @@ test.describe("the app and the chat widget", () => {
         await page.waitForTimeout(2500);
         expect(chatRequests).toEqual([]);
 
-        await page.touchscreen.tap(195, 600);
+        // A first touch that lands on nothing clickable: tapping a fixed spot can hit a link and leave the page.
+        await page.evaluate(() => document.body.dispatchEvent(new PointerEvent("pointerdown", { bubbles: true, pointerType: "touch" })));
 
         await expect.poll(() => chatRequests).toEqual([CHAT_SCRIPT]);
 
