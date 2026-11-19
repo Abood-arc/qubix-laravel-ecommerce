@@ -13,8 +13,10 @@
 </div>
 
 <!-- Mobile Filters Navigation (body bottom padding for it: .category-mobile-bar in app.css) -->
+{{-- pr-[88px]: room for the chat button (layouts/index), as on the product page's buy bar. The widget
+     puts it bottom right in Arabic too, so the room is on the right in both directions. --}}
 <div
-    class="category-mobile-bar fixed bottom-0 z-10 grid w-full max-w-full grid-cols-[1fr_auto_1fr] items-center justify-items-center border-t border-zinc-200 bg-white px-5 pb-[env(safe-area-inset-bottom)] ltr:left-0 rtl:right-0"
+    class="category-mobile-bar fixed bottom-0 z-10 grid w-full max-w-full grid-cols-[1fr_auto_1fr] items-center justify-items-center border-t border-zinc-200 bg-white px-5 pb-[env(safe-area-inset-bottom)] pr-[88px] ltr:left-0 rtl:right-0"
     v-if="isMobile"
 >
     <!-- Filter Drawer -->

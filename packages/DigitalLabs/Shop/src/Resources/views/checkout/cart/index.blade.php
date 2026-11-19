@@ -279,7 +279,7 @@
                                                 </p>
 
                                                 <span
-                                                    class="cursor-pointer text-base text-navyBlue max-md:hidden"
+                                                    class="tap-target cursor-pointer text-base text-navyBlue max-md:hidden"
                                                     role="button"
                                                     tabindex="0"
                                                     @click="removeItem(item.id)"
@@ -303,7 +303,7 @@
 
                                                 <!-- For Mobile view Remove Button -->
                                                 <span
-                                                    class="hidden cursor-pointer text-sm text-navyBlue max-md:block"
+                                                    class="tap-target hidden cursor-pointer text-sm text-navyBlue max-md:block"
                                                     role="button"
                                                     tabindex="0"
                                                     @click="removeItem(item.id)"
@@ -352,7 +352,7 @@
 
                                         <!-- Cart Item Remove Button -->
                                         <span
-                                            class="cursor-pointer text-base text-navyBlue"
+                                            class="tap-target cursor-pointer text-base text-navyBlue"
                                             role="button"
                                             tabindex="0"
                                             @click="removeItem(item.id)"

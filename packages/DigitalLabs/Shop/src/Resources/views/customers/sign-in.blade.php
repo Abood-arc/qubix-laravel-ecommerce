@@ -121,7 +121,7 @@
                         <div class="block">
                             <a
                                 href="{{ route('shop.customers.forgot_password.create') }}"
-                                class="cursor-pointer text-base text-black max-sm:text-sm"
+                                class="tap-target cursor-pointer text-base text-black max-sm:text-sm"
                             >
                                 <span>
                                     @lang('shop::app.customers.login-form.forgot-pass')
@@ -159,7 +159,7 @@
                 @lang('shop::app.customers.login-form.new-customer')
 
                 <a
-                    class="text-navyBlue"
+                    class="tap-target text-navyBlue"
                     href="{{ route('shop.customers.register.index') }}"
                 >
                     @lang('shop::app.customers.login-form.create-your-account')

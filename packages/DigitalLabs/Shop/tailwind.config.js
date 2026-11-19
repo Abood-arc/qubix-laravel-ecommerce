@@ -1,3 +1,5 @@
+const plugin = require("tailwindcss/plugin");
+
 /** @type {import('tailwindcss').Config} */
 module.exports = {
     content: ["./src/Resources/**/*.blade.php", "./src/Resources/**/*.js"],
@@ -73,7 +75,30 @@ module.exports = {
         }
     },
 
-    plugins: [],
+    plugins: [
+        /*
+         * tap-target: a finger can hit the control anywhere in at least 44 × 44 px around its centre
+         * (WCAG 2.5.5), while it looks exactly the same: a transparent ::after, centred on it, takes the
+         * taps. Physical left/top with a translate centre it in both reading directions.
+         */
+        plugin(({ addUtilities }) => {
+            addUtilities({
+                ".tap-target": {
+                    position: "relative",
+                },
+
+                ".tap-target::after": {
+                    content: '""',
+                    position: "absolute",
+                    left: "50%",
+                    top: "50%",
+                    width: "max(100%, 44px)",
+                    height: "max(100%, 44px)",
+                    transform: "translate(-50%, -50%)",
+                },
+            });
+        }),
+    ],
 
     safelist: [
         {
