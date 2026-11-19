@@ -154,14 +154,14 @@ it('offers nothing while it cannot be used', function (string $how) {
         'method off' => setRatesConfig('sales.carriers.shiprocket.active', '0'),
         'shiprocket off' => setRatesConfig('sales.shipping.shiprocket.active', '0'),
         'no API user' => config(['shiprocket.password' => null]),
-        'no backup price' => setRatesConfig('sales.carriers.shiprocket.backup_price', null),
+        'blank backup price' => setRatesConfig('sales.carriers.shiprocket.backup_price', ''),
     };
 
     ratesCart($this);
 
     expect(shiprocketRates())->toBe([])
         ->and(Shipping::collectRates()['shippingMethods'])->toHaveKey('free');
-})->with(['method off', 'shiprocket off', 'no API user', 'no backup price']);
+})->with(['method off', 'shiprocket off', 'no API user', 'blank backup price']);
 
 it('offers nothing outside india', function () {
     $cart = ratesCart($this);

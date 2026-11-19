@@ -99,7 +99,10 @@ return [
                 'title' => 'shiprocket::app.system.carrier.backup-price',
                 'info' => 'shiprocket::app.system.carrier.backup-price-info',
                 'type' => 'text',
-                'validation' => 'required_if:active,1|nullable|numeric|min:0',
+                // Filled in, as Flat Rate's price is: the browser asks for it even with Shiprocket
+                // off, and "nullable" is not a rule the browser knows (Save would do nothing).
+                'default' => '150',
+                'validation' => 'required_if:active,1|numeric|min:0',
                 'channel_based' => true,
                 'locale_based' => false,
             ],
