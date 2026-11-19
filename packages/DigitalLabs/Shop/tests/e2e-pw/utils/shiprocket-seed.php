@@ -6,8 +6,8 @@
  *   php artisan tinker --execute="require 'packages/DigitalLabs/Shop/tests/e2e-pw/utils/shiprocket-seed.php';"
  *
  * Idempotent. Makes the store look like the Indian store (INR, grams), turns Shiprocket on with
- * its PIN check (no automatic booking), keeps Cash on Delivery, Money Transfer and Free Shipping
- * active, and creates one in-stock simple product (url key `shiprocket-e2e-bag`, 500 g).
+ * its PIN check (no automatic booking) and its live-price shipping method, keeps Cash on
+ * Delivery, Money Transfer and Free Shipping active, and creates one in-stock simple product (url key `shiprocket-e2e-bag`, 500 g).
  * Run it with the same CACHE_STORE as the app under test (see the fake AWB counter below).
  */
 
@@ -66,6 +66,9 @@ $channelSettings = [
     'sales.payment_methods.cashondelivery.active' => '1',
     'sales.payment_methods.moneytransfer.active' => '1',
     'sales.carriers.free.active' => '1',
+    // Shiprocket's live prices next to Free Shipping (the fake: ₹90 Standard, ₹150 Express, ₹50 COD fee).
+    'sales.carriers.shiprocket.active' => '1',
+    'sales.carriers.shiprocket.backup_price' => '120',
 ];
 
 foreach ($channelSettings as $code => $value) {
