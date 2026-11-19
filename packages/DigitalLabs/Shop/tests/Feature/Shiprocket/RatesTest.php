@@ -3,6 +3,7 @@
 use DigitalLabs\CartRule\Models\CartRule;
 use DigitalLabs\Checkout\Models\CartAddress;
 use DigitalLabs\Core\Models\CoreConfig;
+use DigitalLabs\Customer\Models\CustomerAddress;
 use DigitalLabs\Razorpay\Models\RazorpayPayment;
 use DigitalLabs\Sales\Models\Order;
 use DigitalLabs\Shipping\Facades\Shipping;
@@ -11,6 +12,7 @@ use DigitalLabs\Shiprocket\Exceptions\ShiprocketUnknownOutcomeException;
 use DigitalLabs\Shiprocket\Services\FakeShiprocketClient;
 use DigitalLabs\Shiprocket\Services\RateRefresher;
 use DigitalLabs\Shiprocket\Support\Courier;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
@@ -241,9 +243,11 @@ it('says nothing about a fee for other delivery methods', function () {
 });
 
 it('refuses to place an order at a delivery price shiprocket no longer charges', function () {
-    $cart = ratesCart($this, 'cashondelivery');
+    $cart = ratesCart($this);
 
-    chooseDelivery('shiprocket_standard_c1_p140');
+    chooseDelivery('shiprocket_standard_c1_p90');
+
+    choosePayment('cashondelivery');
 
     $this->api->raise = 10;
 
@@ -272,6 +276,8 @@ it('does not open the payment popup at a stale delivery price', function () {
     $cart = ratesCart($this);
 
     chooseDelivery('shiprocket_standard_c1_p90');
+
+    choosePayment('razorpay');
 
     $this->api->raise = 10;
 
@@ -311,9 +317,11 @@ it('does not take a free-shipping cart rule for a changed price', function () {
         'ends_till' => null,
     ]);
 
-    ratesCart($this, 'cashondelivery');
+    ratesCart($this);
 
-    chooseDelivery('shiprocket_standard_c1_p140');
+    chooseDelivery('shiprocket_standard_c1_p90');
+
+    choosePayment('cashondelivery');
 
     $orders = Order::count();
 
@@ -328,16 +336,41 @@ it('does not take a free-shipping cart rule for a changed price', function () {
         ->and((float) $order->shipping_amount)->toBe(0.0);
 });
 
-it('takes an option shown before the customer chose cash on delivery', function () {
+it('prices the delivery options for no payment method, as the page shows none chosen', function () {
+    // Cash on delivery was chosen on an earlier visit; the page asks for the payment again.
+    $cart = ratesCart($this, 'cashondelivery');
+
+    $rates = postJson(route('shop.checkout.onepage.addresses.store'), [
+        'billing' => [
+            ...Arr::except(CustomerAddress::factory()->make()->toArray(), ['address_type']),
+            'address' => [fake()->streetAddress()],
+            'country' => 'IN',
+            'state' => 'MH',
+            'postcode' => '560001',
+            'use_for_shipping' => 1,
+        ],
+    ])->assertOk()->json('data.shippingMethods.shiprocket.rates');
+
+    expect(collect($rates)->pluck('method_title', 'method')->all())->toBe([
+        'shiprocket_standard_c1_p90' => 'Standard delivery',
+        'shiprocket_express_c2_p150' => 'Express delivery',
+    ])->and($cart->refresh()->payment)->toBeNull();
+});
+
+it('asks for the payment again when the customer changes the delivery option', function () {
     $cart = ratesCart($this);
 
     chooseDelivery('shiprocket_standard_c1_p90');
 
     choosePayment('cashondelivery');
 
-    // The page still shows the prepaid options; picking one gives its cash on delivery price.
-    postJson(route('shop.checkout.onepage.shipping_methods.store'), ['shipping_method' => 'shiprocket_express_c2_p150'])
-        ->assertOk();
+    chooseDelivery('shiprocket_express_c2_p150');
+
+    expect($cart->refresh()->payment)->toBeNull()
+        ->and($cart->shipping_method)->toBe('shiprocket_express_c2_p150')
+        ->and((float) $cart->shipping_amount)->toBe(150.0);
+
+    choosePayment('cashondelivery');
 
     expect($cart->refresh()->shipping_method)->toBe('shiprocket_express_c2_p200')
         ->and((float) $cart->shipping_amount)->toBe(200.0);

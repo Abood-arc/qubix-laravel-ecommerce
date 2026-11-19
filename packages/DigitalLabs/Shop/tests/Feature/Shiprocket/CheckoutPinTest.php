@@ -222,7 +222,7 @@ it('checks nothing while Shiprocket is off: undeliverable PINs and cash on deliv
 
     expect($methods->firstWhere('method', 'cashondelivery'))->toMatchArray(['disabled' => false]);
 
-    checkoutPinCartTo($cart, '999990', 'cashondelivery');
+    postJson(route('shop.checkout.onepage.payment_methods.store'), ['payment' => ['method' => 'cashondelivery']])->assertOk();
 
     postJson(route('shop.checkout.onepage.orders.store'))
         ->assertOk()

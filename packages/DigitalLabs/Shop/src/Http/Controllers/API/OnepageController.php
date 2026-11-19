@@ -64,6 +64,8 @@ class OnepageController extends APIController
 
         Cart::saveAddresses($params);
 
+        $this->forgetPaymentMethod();
+
         $cart = Cart::getCart();
 
         Cart::collectTotals();
@@ -117,6 +119,8 @@ class OnepageController extends APIController
             return $forbidden();
         }
 
+        $this->forgetPaymentMethod();
+
         // A carrier whose codes change with its prices maps an option shown earlier to its
         // current code, instead of the customer being sent back to the cart.
         $shippingMethod = Event::until('checkout.cart.shipping_method.resolve', [$validatedData['shipping_method']])
@@ -129,6 +133,25 @@ class OnepageController extends APIController
         Cart::collectTotals();
 
         return response()->json(Payment::getSupportedPaymentMethods(includeDisabled: true));
+    }
+
+    /**
+     * After the address or the delivery option is saved, the page asks for the payment method
+     * again and shows none chosen; the cart forgets the earlier choice too. Otherwise delivery
+     * priced by payment method (Shiprocket's cash on delivery fee) would follow a choice the
+     * customer no longer sees.
+     */
+    protected function forgetPaymentMethod(): void
+    {
+        $cart = Cart::getCart();
+
+        if (! $cart?->payment) {
+            return;
+        }
+
+        $cart->payment->delete();
+
+        Cart::setCart($cart->refresh());
     }
 
     /**
