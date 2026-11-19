@@ -126,7 +126,8 @@ it('shows the country fixed in the address forms', function () {
     foreach ([route('shop.checkout.onepage.index'), route('shop.customers.account.addresses.create'), route('shop.checkout.cart.index')] as $page) {
         get($page)
             ->assertOk()
-            ->assertSee('value="India"', false)
+            ->assertSee('aria-readonly="true"', false)
+            ->assertSee('>India</div>', false)
             ->assertSee(deliverOnlyWithinIndia())
             ->assertDontSee(trans('shop::app.checkout.onepage.address.select-country'));
     }

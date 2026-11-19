@@ -305,9 +305,13 @@ test.describe.serial("A store that delivers only within India", () => {
     test("checkout shows India fixed and takes the address", async ({ shopPage }) => {
         await startGuestCheckout(shopPage);
 
-        const country = shopPage.locator("#steps-container input[readonly][aria-label='Country']").first();
+        const country = shopPage.locator("#steps-container [aria-readonly='true'][aria-label='Country']").first();
 
-        await expect(country).toHaveValue("India", ROUND_TRIP);
+        await expect(country).toHaveText("India", ROUND_TRIP);
+
+        // Text, not an input: a tap gives it no focus and no text cursor.
+        await country.click();
+        await expect(country).not.toBeFocused();
         await expect(shopPage.locator('select[name="billing.country"]')).toHaveCount(0);
         await expect(shopPage.getByText("We deliver only within India.").first()).toBeVisible();
 
