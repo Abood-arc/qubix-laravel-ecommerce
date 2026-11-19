@@ -118,6 +118,21 @@
                         return;
                     }
 
+                    /*
+                     * Quick adds each say "Item Added Successfully". The same success again takes the place
+                     * of the one showing, with a fresh close timer, so they never pile up over the page.
+                     */
+                    const showing = flash.type === 'success' && ! flash.link
+                        && this.flashes.find(item => item.type === 'success' && ! item.link && item.message === flash.message);
+
+                    if (showing) {
+                        clearTimeout(this.timers.get(showing.uid));
+
+                        this.scheduleClose(showing);
+
+                        return;
+                    }
+
                     flash.uid = this.uid++;
 
                     this.flashes.push(flash);
