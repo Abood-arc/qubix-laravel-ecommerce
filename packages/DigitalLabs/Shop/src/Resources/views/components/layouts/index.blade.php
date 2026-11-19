@@ -151,8 +151,10 @@
         </style>
 
         {{-- The chat widget's script (about 190 KB, and half a second of a phone's main thread) loads
-             once the app is up: on the shopper's first touch, scroll or key press, or about 4 s after
-             the app has mounted, whichever comes first. A prerendered page waits until it is shown.
+             once the app is up: on the shopper's first touch or key press, or about 4 s after the app
+             has mounted, whichever comes first. Scrolling alone doesn't count, so the script's half
+             second of work never lands in the middle of a scroll. A prerendered page waits until it
+             is shown.
 
              Shoppers can drag the chat button out of the way (thumb or mouse). On release it snaps to
              the nearest side edge and the spot is remembered on this device (localStorage), on every
@@ -338,7 +340,7 @@
                     window.addEventListener('resize', restore);
                 }
 
-                var LOAD_TRIGGERS = ['pointerdown', 'touchstart', 'keydown', 'scroll'];
+                var LOAD_TRIGGERS = ['pointerdown', 'touchstart', 'keydown'];
                 var IDLE_DELAY = 4000;
                 var requested = false;
 
