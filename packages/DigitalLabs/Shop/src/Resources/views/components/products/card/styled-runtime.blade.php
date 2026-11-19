@@ -286,7 +286,9 @@
          * quick clicks cost one or two requests. A refused change shows the cart's message and goes back
          * to what the cart really holds.
          */
-        const cartWrites = app.config.globalProperties.$cartWrites;
+        // Looked up at each use, not when this script runs: card/cart-writes' script can come later on
+        // the page (both are pushed once, from whichever card view renders first).
+        const cartWrites = () => app.config.globalProperties.$cartWrites;
 
         const cardCart = {
             lines: {},
@@ -300,7 +302,7 @@
              * waits for it.
              */
             load() {
-                this.loading ??= cartWrites.read();
+                this.loading ??= cartWrites().read();
 
                 return this.loading;
             },
@@ -343,7 +345,7 @@
              * (that write follows this one and settles it).
              */
             async add(product) {
-                const instant = cartWrites.isInstant(product);
+                const instant = cartWrites().isInstant(product);
 
                 const asked = this.quantity(product.id) + 1;
 
@@ -353,7 +355,7 @@
                     this.changed();
                 }
 
-                const result = await cartWrites.add(product);
+                const result = await cartWrites().add(product);
 
                 if (instant && (! result.added || this.wanted[product.id] === asked)) {
                     delete this.wanted[product.id];
@@ -380,7 +382,7 @@
 
                 this.changed();
 
-                return cartWrites.run(productId, () => this.write(productId));
+                return cartWrites().run(productId, () => this.write(productId));
             },
 
             remove(productId) {
@@ -417,7 +419,7 @@
 
                     this.changed();
 
-                    await cartWrites.read();
+                    await cartWrites().read();
 
                     return { outcome: 'refused', message: refusal.message };
                 }
